@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/app_provider.dart';
 import '../../services/study_data.dart';
+import '../../widgets/lesson_view.dart';
 
 /// 문제풀이 화면: 실전(examMode)/연습 모드, 문제 내 암기법·이론 연동, 채점
 class QuizPlayScreen extends StatefulWidget {
@@ -44,9 +45,9 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
             style: const TextStyle(fontSize: 15), overflow: TextOverflow.ellipsis),
         actions: [
           IconButton(
-            tooltip: '관련 암기법',
-            icon: const Icon(Icons.lightbulb_outline),
-            onPressed: _showMnemonics,
+            tooltip: '이 토픽 1:1 강의',
+            icon: const Icon(Icons.school_outlined),
+            onPressed: _openLesson,
           ),
           Center(
             child: Padding(
@@ -119,15 +120,32 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('정답: ${_q.answer}번',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: scheme.onPrimaryContainer)),
-          const SizedBox(height: 6),
-          TextButton.icon(
-            onPressed: _showMnemonics,
-            icon: const Icon(Icons.lightbulb, size: 18),
-            label: const Text('이 토픽 암기법·핵심이론 보기'),
+          Row(
+            children: [
+              Icon(Icons.check_circle,
+                  size: 20, color: Colors.green[700]),
+              const SizedBox(width: 6),
+              Text('정답: ${_q.answer}번',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: scheme.onPrimaryContainer)),
+            ],
+          ),
+          const SizedBox(height: 10),
+          // 큰 터치 영역의 강의 버튼 — 전체 폭 차지, 확실히 눌림
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              onPressed: _openLesson,
+              icon: const Icon(Icons.school, size: 20),
+              label: const Text('이 토픽 1:1 강의 보기 (이론·공식·암기법·함정)',
+                  style: TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.bold)),
+            ),
           ),
         ],
       ),
@@ -232,53 +250,9 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     );
   }
 
-  Future<void> _showMnemonics() async {
-    final list =
-        await StudyData.instance.mnemonicsFor(_q.subject, _q.topic);
-    if (!mounted) return;
-    showModalBottomSheet(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (_) => DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: 0.6,
-        builder: (_, controller) => ListView(
-          controller: controller,
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-          children: [
-            Text('${_q.subject} · ${_q.topic} 관련 암기법',
-                style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            if (list.isEmpty) const Text('등록된 암기법이 없습니다.'),
-            for (final m in list.take(8))
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(m.title,
-                          style:
-                              const TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 6),
-                      Text(m.body, style: const TextStyle(height: 1.5)),
-                      if (m.tip.isNotEmpty) ...[
-                        const SizedBox(height: 6),
-                        Text('TIP: ${m.tip}',
-                            style: TextStyle(
-                                fontSize: 12,
-                                color:
-                                    Theme.of(context).colorScheme.primary)),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
+  /// 정답 아래 버튼 → 해당 토픽의 완전한 1:1 강의 시트 (이론+공식+암기법+함정+전략)
+  void _openLesson() {
+    showLessonSheet(context, _q.subject, _q.topic);
   }
 
   void _finish() {

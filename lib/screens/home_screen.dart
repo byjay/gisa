@@ -91,6 +91,43 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+            // 전기기사 문제은행 바로가기 (학습 탭)
+            Card(
+              color: theme.colorScheme.primaryContainer,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () => onNavigate(1),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Icon(Icons.school,
+                          size: 36, color: theme.colorScheme.primary),
+                      const SizedBox(width: 14),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('전기기사 문제은행',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold)),
+                            SizedBox(height: 4),
+                            Text(
+                              '기출 2,897문항 · 1:1 강의 46토픽 · 반복기출 암기 347제\n'
+                              '이론-문제-암기법 완전 연동 학습',
+                              style: TextStyle(fontSize: 12, height: 1.4),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             // Today goal progress
             Card(
               child: Padding(

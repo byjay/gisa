@@ -7,6 +7,8 @@ import 'quiz_play_screen.dart';
 import 'theory_screen.dart';
 import 'mnemonics_screen.dart';
 import 'videos_screen.dart';
+import 'lesson_screen.dart';
+import 'speed_memorize_screen.dart';
 
 /// 학습 허브: CBT 문제풀이 / 빈출순 풀기 / 이론서 / 암기법 / 강의 / 학습이력
 class StudyScreen extends StatefulWidget {
@@ -39,9 +41,18 @@ class _StudyScreenState extends State<StudyScreen> {
       body: exams == null
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.symmetric(
+                horizontal: MediaQuery.of(context).size.width > 900
+                    ? (MediaQuery.of(context).size.width - 800) / 2
+                    : 16,
+                vertical: 16,
+              ),
               children: [
+                _heroCards(context),
+                const SizedBox(height: 12),
                 _menuGrid(context),
+                const SizedBox(height: 12),
+                _cbtTrendCard(context),
                 const SizedBox(height: 20),
                 Text('빈출순 문제풀기 (출제 빈도 높은 토픽부터)',
                     style: Theme.of(context).textTheme.titleMedium),
@@ -91,6 +102,100 @@ class _StudyScreenState extends State<StudyScreen> {
                 _historySection(context),
               ],
             ),
+    );
+  }
+
+  /// 핵심 2대 학습 모드 — 1:1 이론강의 + 문제-답 암기
+  Widget _heroCards(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Row(
+      children: [
+        Expanded(
+          child: Card(
+            color: scheme.primaryContainer,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => const LessonCurriculumScreen())),
+              child: const Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.school, size: 30),
+                    SizedBox(height: 8),
+                    Text('1:1 이론 강의',
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 2),
+                    Text('46토픽 완전 강의\n공식·암기법·함정',
+                        style: TextStyle(fontSize: 11.5, height: 1.4)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Card(
+            color: scheme.tertiaryContainer,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => const SpeedMemorizeScreen())),
+              child: const Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.bolt, size: 30),
+                    SizedBox(height: 8),
+                    Text('문제-답 암기',
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 2),
+                    Text('반복기출 347제\n빈도순 플래시카드',
+                        style: TextStyle(fontSize: 11.5, height: 1.4)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// CBT 출제경향 + 2개월 로드맵
+  Widget _cbtTrendCard(BuildContext context) {
+    return Card(
+      child: ExpansionTile(
+        leading:
+            const Icon(Icons.insights, color: Colors.deepOrange),
+        title: const Text('CBT 출제경향 · 2개월 합격 로드맵',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+        children: const [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '📌 CBT 문제은행 핵심 사실 (2022년부터 CBT 전환)\n'
+              '• CBT 출제문제의 약 50%는 기존 필기 기출의 재출제입니다.\n'
+              '• 나머지도 기출 소재의 숫자·조건 변형이 대부분입니다.\n'
+              '→ 반복기출 347제 암기 = 실전 50점 확보 전략\n\n'
+              '🗓 2개월 합격 로드맵\n'
+              '1주차: 1:1 강의로 과목별 빈출 토픽 1~3위 학습\n'
+              '2~3주차: 빈출순 문제풀이 + 틀린 문제는 강의 복습\n'
+              '4~5주차: 문제-답 암기 347제 3회독\n'
+              '6~7주차: 회차별 모의고사 실전 (60점 목표)\n'
+              '8주차: 오답 복습 + 암기카드 최종 회독\n\n'
+              '합격 기준: 과목별 40점 이상 + 평균 60점 이상',
+              style: TextStyle(fontSize: 12.5, height: 1.6),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

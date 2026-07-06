@@ -111,6 +111,141 @@ class Mnemonic {
       );
 }
 
+/// 1:1 강의 노트 (토픽별 완전 강의)
+class LessonSection {
+  final String title;
+  final String body;
+  LessonSection({required this.title, required this.body});
+  factory LessonSection.fromJson(Map<String, dynamic> j) => LessonSection(
+        title: (j['title'] as String?) ?? '',
+        body: (j['body'] as String?) ?? '',
+      );
+}
+
+class LessonFormula {
+  final String name;
+  final String expr;
+  final String note;
+  LessonFormula({required this.name, required this.expr, required this.note});
+  factory LessonFormula.fromJson(Map<String, dynamic> j) => LessonFormula(
+        name: (j['name'] as String?) ?? '',
+        expr: (j['expr'] as String?) ?? '',
+        note: (j['note'] as String?) ?? '',
+      );
+}
+
+class Lesson {
+  final String subject;
+  final String topic;
+  final int freq;
+  final int importance; // 1~5
+  final String intro;
+  final List<LessonSection> sections;
+  final List<LessonFormula> formulas;
+  final List<String> mnemonics;
+  final String strategy;
+  final List<String> traps;
+
+  Lesson({
+    required this.subject,
+    required this.topic,
+    required this.freq,
+    required this.importance,
+    required this.intro,
+    required this.sections,
+    required this.formulas,
+    required this.mnemonics,
+    required this.strategy,
+    required this.traps,
+  });
+
+  factory Lesson.fromJson(Map<String, dynamic> j) => Lesson(
+        subject: (j['subject'] as String?) ?? '',
+        topic: (j['topic'] as String?) ?? '',
+        freq: (j['freq'] as int?) ?? 0,
+        importance: (j['importance'] as int?) ?? 3,
+        intro: (j['intro'] as String?) ?? '',
+        sections: ((j['sections'] as List?) ?? const [])
+            .map((e) => LessonSection.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        formulas: ((j['formulas'] as List?) ?? const [])
+            .map((e) => LessonFormula.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        mnemonics: ((j['mnemonics'] as List?) ?? const [])
+            .map((e) => e.toString())
+            .toList(),
+        strategy: (j['strategy'] as String?) ?? '',
+        traps: ((j['traps'] as List?) ?? const [])
+            .map((e) => e.toString())
+            .toList(),
+      );
+}
+
+/// 반복 출제 문제 클러스터 (문제-답 암기용)
+class RepeatVariation {
+  final String exam;
+  final String question;
+  final int answer;
+  final String answerText;
+  RepeatVariation({
+    required this.exam,
+    required this.question,
+    required this.answer,
+    required this.answerText,
+  });
+  factory RepeatVariation.fromJson(Map<String, dynamic> j) => RepeatVariation(
+        exam: (j['exam'] as String?) ?? '',
+        question: (j['question'] as String?) ?? '',
+        answer: (j['answer'] as int?) ?? 0,
+        answerText: (j['answer_text'] as String?) ?? '',
+      );
+}
+
+class RepeatCluster {
+  final String subject;
+  final String topic;
+  final int count;
+  final List<String> exams;
+  final String question;
+  final List<String> options;
+  final int answer; // 1-based
+  final String answerText;
+  final bool isVariation;
+  final List<RepeatVariation> variations;
+
+  RepeatCluster({
+    required this.subject,
+    required this.topic,
+    required this.count,
+    required this.exams,
+    required this.question,
+    required this.options,
+    required this.answer,
+    required this.answerText,
+    required this.isVariation,
+    required this.variations,
+  });
+
+  factory RepeatCluster.fromJson(Map<String, dynamic> j) => RepeatCluster(
+        subject: (j['subject'] as String?) ?? '',
+        topic: (j['topic'] as String?) ?? '',
+        count: (j['count'] as int?) ?? 0,
+        exams: ((j['exams'] as List?) ?? const [])
+            .map((e) => e.toString())
+            .toList(),
+        question: (j['question'] as String?) ?? '',
+        options: ((j['options'] as List?) ?? const [])
+            .map((e) => e.toString())
+            .toList(),
+        answer: (j['answer'] as int?) ?? 0,
+        answerText: (j['answer_text'] as String?) ?? '',
+        isVariation: (j['is_variation'] as bool?) ?? false,
+        variations: ((j['variations'] as List?) ?? const [])
+            .map((e) => RepeatVariation.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
 class VideoLink {
   final String subject;
   final String title;
@@ -143,6 +278,8 @@ class StudyData {
   List<ExamPaper>? _exams;
   List<Mnemonic>? _mnemonics;
   List<VideoLink>? _videos;
+  List<Lesson>? _lessons;
+  List<RepeatCluster>? _repeats;
   Map<String, List<TopicFreq>>? _topicFreq;
   final Map<String, String> _theoryCache = {};
 
@@ -229,6 +366,56 @@ class StudyData {
       return ra.compareTo(rb);
     });
     return qs;
+  }
+
+  /// 1:1 강의 노트 로드
+  Future<List<Lesson>> loadLessons() async {
+    if (_lessons != null) return _lessons!;
+    final raw = await rootBundle.loadString('assets/data/lessons.json');
+    final list = jsonDecode(raw) as List;
+    _lessons = list
+        .map((e) => Lesson.fromJson(e as Map<String, dynamic>))
+        .toList();
+    return _lessons!;
+  }
+
+  /// 과목+토픽에 정확히 매칭되는 강의 (전수조사로 100% 커버 보장)
+  Future<Lesson?> lessonFor(String subject, String topic) async {
+    final all = await loadLessons();
+    for (final l in all) {
+      if (l.subject == subject && l.topic == topic) return l;
+    }
+    // 폴백: 같은 과목의 '기타' 강의
+    for (final l in all) {
+      if (l.subject == subject && l.topic == '기타') return l;
+    }
+    return null;
+  }
+
+  /// 과목별 강의 목록 (빈출순)
+  Future<List<Lesson>> lessonsBySubject(String subject) async {
+    final all = await loadLessons();
+    final out = all.where((l) => l.subject == subject).toList()
+      ..sort((a, b) => b.freq.compareTo(a.freq));
+    return out;
+  }
+
+  /// 반복 출제 클러스터 로드 (빈도순 정렬 완료 상태)
+  Future<List<RepeatCluster>> loadRepeats() async {
+    if (_repeats != null) return _repeats!;
+    final raw = await rootBundle.loadString('assets/data/repeat_questions.json');
+    final list = jsonDecode(raw) as List;
+    _repeats = list
+        .map((e) => RepeatCluster.fromJson(e as Map<String, dynamic>))
+        .toList();
+    return _repeats!;
+  }
+
+  /// 과목별 반복 문제 (빈도순)
+  Future<List<RepeatCluster>> repeatsBySubject(String? subject) async {
+    final all = await loadRepeats();
+    if (subject == null) return all;
+    return all.where((r) => r.subject == subject).toList();
   }
 
   /// 과목+토픽 관련 암기법 찾기
