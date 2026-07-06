@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
 import 'package:flutter/services.dart' show rootBundle;
 
 /// 과목 정의 (순서 고정)
@@ -283,13 +284,27 @@ class StudyData {
   Map<String, List<TopicFreq>>? _topicFreq;
   final Map<String, String> _theoryCache = {};
 
+  /// 안전 JSON 리스트 로더 — 파일 하나가 깨져도 앱이 죽지 않게 방어
+  Future<List<T>> _safeLoadList<T>(
+      String path, T Function(Map<String, dynamic>) fromJson) async {
+    try {
+      final raw = await rootBundle.loadString(path);
+      final list = jsonDecode(raw) as List;
+      return list
+          .map((e) => fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('$path 로드 실패: $e');
+      }
+      return <T>[];
+    }
+  }
+
   Future<List<ExamPaper>> loadExams() async {
     if (_exams != null) return _exams!;
-    final raw = await rootBundle.loadString('assets/data/exams.json');
-    final list = jsonDecode(raw) as List;
-    _exams = list
-        .map((e) => ExamPaper.fromJson(e as Map<String, dynamic>))
-        .toList()
+    _exams = await _safeLoadList(
+        'assets/data/exams.json', ExamPaper.fromJson)
       ..sort((a, b) {
         final c = b.year.compareTo(a.year);
         return c != 0 ? c : b.session.compareTo(a.session);
@@ -299,33 +314,31 @@ class StudyData {
 
   Future<List<Mnemonic>> loadMnemonics() async {
     if (_mnemonics != null) return _mnemonics!;
-    final raw = await rootBundle.loadString('assets/data/mnemonics.json');
-    final list = jsonDecode(raw) as List;
-    _mnemonics = list
-        .map((e) => Mnemonic.fromJson(e as Map<String, dynamic>))
-        .toList();
+    _mnemonics = await _safeLoadList(
+        'assets/data/mnemonics.json', Mnemonic.fromJson);
     return _mnemonics!;
   }
 
   Future<List<VideoLink>> loadVideos() async {
     if (_videos != null) return _videos!;
-    final raw = await rootBundle.loadString('assets/data/videos.json');
-    final list = jsonDecode(raw) as List;
-    _videos = list
-        .map((e) => VideoLink.fromJson(e as Map<String, dynamic>))
-        .toList();
+    _videos = await _safeLoadList(
+        'assets/data/videos.json', VideoLink.fromJson);
     return _videos!;
   }
 
   Future<Map<String, List<TopicFreq>>> loadTopicFreq() async {
     if (_topicFreq != null) return _topicFreq!;
-    final raw = await rootBundle.loadString('assets/data/topic_freq.json');
-    final map = jsonDecode(raw) as Map<String, dynamic>;
-    _topicFreq = map.map((k, v) => MapEntry(
-        k,
-        (v as List)
-            .map((e) => TopicFreq.fromJson(e as Map<String, dynamic>))
-            .toList()));
+    try {
+      final raw = await rootBundle.loadString('assets/data/topic_freq.json');
+      final map = jsonDecode(raw) as Map<String, dynamic>;
+      _topicFreq = map.map((k, v) => MapEntry(
+          k,
+          (v as List)
+              .map((e) => TopicFreq.fromJson(e as Map<String, dynamic>))
+              .toList()));
+    } catch (_) {
+      _topicFreq = {};
+    }
     return _topicFreq!;
   }
 
@@ -333,9 +346,13 @@ class StudyData {
     if (_theoryCache.containsKey(subject)) return _theoryCache[subject]!;
     final path = kTheoryFiles[subject];
     if (path == null) return '# 자료 없음';
-    final raw = await rootBundle.loadString(path);
-    _theoryCache[subject] = raw;
-    return raw;
+    try {
+      final raw = await rootBundle.loadString(path);
+      _theoryCache[subject] = raw;
+      return raw;
+    } catch (_) {
+      return '# 자료를 불러올 수 없습니다';
+    }
   }
 
   /// 과목별 문제 추출 (전 회차 통합, 회차 라벨 부여)
@@ -371,11 +388,8 @@ class StudyData {
   /// 1:1 강의 노트 로드
   Future<List<Lesson>> loadLessons() async {
     if (_lessons != null) return _lessons!;
-    final raw = await rootBundle.loadString('assets/data/lessons.json');
-    final list = jsonDecode(raw) as List;
-    _lessons = list
-        .map((e) => Lesson.fromJson(e as Map<String, dynamic>))
-        .toList();
+    _lessons = await _safeLoadList(
+        'assets/data/lessons.json', Lesson.fromJson);
     return _lessons!;
   }
 
@@ -403,11 +417,8 @@ class StudyData {
   /// 반복 출제 클러스터 로드 (빈도순 정렬 완료 상태)
   Future<List<RepeatCluster>> loadRepeats() async {
     if (_repeats != null) return _repeats!;
-    final raw = await rootBundle.loadString('assets/data/repeat_questions.json');
-    final list = jsonDecode(raw) as List;
-    _repeats = list
-        .map((e) => RepeatCluster.fromJson(e as Map<String, dynamic>))
-        .toList();
+    _repeats = await _safeLoadList(
+        'assets/data/repeat_questions.json', RepeatCluster.fromJson);
     return _repeats!;
   }
 
