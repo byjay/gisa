@@ -8,10 +8,12 @@ class AppProvider extends ChangeNotifier {
   late Box _sessionBox;
   late Box _noteBox;
   late Box _settingsBox;
+  late Box _quizBox;
 
   List<Exam> exams = [];
   List<StudySession> sessions = [];
   List<WrongNote> notes = [];
+  List<Map<String, dynamic>> quizResults = [];
 
   // Goal settings
   int dailyGoalMinutes = 120;
@@ -30,6 +32,7 @@ class AppProvider extends ChangeNotifier {
     _sessionBox = await Hive.openBox('sessions');
     _noteBox = await Hive.openBox('wrongNotes');
     _settingsBox = await Hive.openBox('settings');
+    _quizBox = await Hive.openBox('quizResults');
     _load();
   }
 
@@ -46,6 +49,11 @@ class AppProvider extends ChangeNotifier {
         .map((e) => WrongNote.fromMap(Map<dynamic, dynamic>.from(e)))
         .toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    quizResults = _quizBox.values
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList()
+      ..sort((a, b) =>
+          (b['date'] as String).compareTo(a['date'] as String));
     dailyGoalMinutes = (_settingsBox.get('dailyGoal') as int?) ?? 120;
     weeklyGoalMinutes = (_settingsBox.get('weeklyGoal') as int?) ?? 600;
     notifyListeners();
@@ -109,6 +117,43 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> deleteNote(String id) async {
     await _noteBox.delete(id);
+    _load();
+  }
+
+  // ===== Quiz Results (CBT 학습이력) =====
+  Future<void> addQuizResult({
+    required String title,
+    required int total,
+    required int correct,
+    List<String> wrongQuestions = const [],
+  }) async {
+    final now = DateTime.now();
+    final id = now.microsecondsSinceEpoch.toString();
+    await _quizBox.put(id, {
+      'id': id,
+      'title': title,
+      'total': total,
+      'correct': correct,
+      'date': now.toIso8601String(),
+    });
+    // 오답은 오답노트에 자동 등록 (최대 20개)
+    for (var i = 0; i < wrongQuestions.length && i < 20; i++) {
+      final nid = '${id}_w$i';
+      await _noteBox.put(nid, {
+        'id': nid,
+        'examId': '',
+        'question': wrongQuestions[i],
+        'answer': '',
+        'memo': 'CBT 자동등록: $title',
+        'mastered': false,
+        'createdAt': now.toIso8601String(),
+      });
+    }
+    _load();
+  }
+
+  Future<void> deleteQuizResult(String id) async {
+    await _quizBox.delete(id);
     _load();
   }
 

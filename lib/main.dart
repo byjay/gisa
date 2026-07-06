@@ -7,6 +7,7 @@ import 'screens/home_screen.dart';
 import 'screens/notes_screen.dart';
 import 'screens/records_screen.dart';
 import 'screens/stats_screen.dart';
+import 'screens/study/study_screen.dart';
 import 'screens/timer_screen.dart';
 
 Future<void> main() async {
@@ -65,6 +66,7 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     final screens = [
       HomeScreen(onNavigate: _navigate),
+      const StudyScreen(),
       const ExamsScreen(),
       const TimerScreen(),
       const RecordsScreen(),
@@ -80,6 +82,7 @@ class _MainShellState extends State<MainShell> {
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: '홈'),
+          NavigationDestination(icon: Icon(Icons.school_outlined), selectedIcon: Icon(Icons.school), label: '학습'),
           NavigationDestination(icon: Icon(Icons.event_outlined), selectedIcon: Icon(Icons.event), label: '시험'),
           NavigationDestination(icon: Icon(Icons.timer_outlined), selectedIcon: Icon(Icons.timer), label: '타이머'),
           NavigationDestination(icon: Icon(Icons.history_edu_outlined), selectedIcon: Icon(Icons.history_edu), label: '기록'),

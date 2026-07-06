@@ -1,0 +1,100 @@
+[
+  {
+    "subject": "공통",
+    "title": "전병칠 원장 - 전기기사 무료강의 채널 (전기자격증의모든것)",
+    "channel": "전병칠",
+    "url": "https://www.youtube.com/@elec7",
+    "desc": "전기기사 수험생 필수 구독 채널. 5과목 전체 무료 이론강의 + 기출풀이. 입문자에게 가장 추천."
+  },
+  {
+    "subject": "공통",
+    "title": "전기뿌수기 - 전기기사 스피드 특강 채널",
+    "channel": "전기뿌수기",
+    "url": "https://www.youtube.com/@electric_crusher",
+    "desc": "시험 직전 단기 요약용. 과목별 스피드 특강으로 빈출 포인트만 압축 정리."
+  },
+  {
+    "subject": "공통",
+    "title": "다산에듀 - 전기기사 공개강의",
+    "channel": "다산에듀",
+    "url": "https://www.youtube.com/@dasan_edu",
+    "desc": "체계적 커리큘럼의 공개 강의. 기초수학부터 실기까지 커버."
+  },
+  {
+    "subject": "전자기학",
+    "title": "전자기학 핵심이론 몰아보기",
+    "channel": "전병칠",
+    "url": "https://www.youtube.com/results?search_query=%EC%A0%84%EB%B3%91%EC%B9%A0+%EC%A0%84%EC%9E%90%EA%B8%B0%ED%95%99",
+    "desc": "벡터해석→정전계→정자계→전자유도 순서로 개념 정리. 앱의 이론서 01과 함께 보면 효과적."
+  },
+  {
+    "subject": "전자기학",
+    "title": "전자기학 스피드 특강 (빈출공식 압축)",
+    "channel": "전기뿌수기",
+    "url": "https://www.youtube.com/results?search_query=%EC%A0%84%EA%B8%B0%EB%BF%8C%EC%88%98%EA%B8%B0+%EC%A0%84%EC%9E%90%EA%B8%B0%ED%95%99+%EC%8A%A4%ED%94%BC%EB%93%9C",
+    "desc": "시험 2주 전 복습용. 콘덴서/인덕턴스/경계조건 공식 암기 중심."
+  },
+  {
+    "subject": "전력공학",
+    "title": "전력공학 핵심이론 강의",
+    "channel": "전병칠",
+    "url": "https://www.youtube.com/results?search_query=%EC%A0%84%EB%B3%91%EC%B9%A0+%EC%A0%84%EB%A0%A5%EA%B3%B5%ED%95%99",
+    "desc": "송배전 계통 흐름을 그림으로 설명. 암기과목화 되기 쉬운 전력공학을 이해 중심으로."
+  },
+  {
+    "subject": "전력공학",
+    "title": "전력공학 스피드 특강 (보호계전/안정도 빈출)",
+    "channel": "전기뿌수기",
+    "url": "https://www.youtube.com/results?search_query=%EC%A0%84%EA%B8%B0%EB%BF%8C%EC%88%98%EA%B8%B0+%EC%A0%84%EB%A0%A5%EA%B3%B5%ED%95%99",
+    "desc": "피뢰기·차단기·계전기 등 최빈출 파트 압축 강의."
+  },
+  {
+    "subject": "전기기기",
+    "title": "전기기기 핵심이론 강의 (직류기~유도기)",
+    "channel": "전병칠",
+    "url": "https://www.youtube.com/results?search_query=%EC%A0%84%EB%B3%91%EC%B9%A0+%EC%A0%84%EA%B8%B0%EA%B8%B0%EA%B8%B0",
+    "desc": "4대 기기(직류기/동기기/변압기/유도기) 원리를 순서대로. 과락 방지 필수 과목."
+  },
+  {
+    "subject": "전기기기",
+    "title": "전기기기 스피드 특강 (공식+결선 암기)",
+    "channel": "전기뿌수기",
+    "url": "https://www.youtube.com/results?search_query=%EC%A0%84%EA%B8%B0%EB%BF%8C%EC%88%98%EA%B8%B0+%EC%A0%84%EA%B8%B0%EA%B8%B0%EA%B8%B0",
+    "desc": "변압기 결선/전압변동률/유도기 슬립 등 계산문제 패턴 정리."
+  },
+  {
+    "subject": "회로이론 및 제어공학",
+    "title": "회로이론 6시간 완성 몰아보기",
+    "channel": "전병칠",
+    "url": "https://www.youtube.com/watch?v=pYksQi35t6U",
+    "desc": "회로이론 전체를 6시간에 압축한 몰아보기 강의. 단기 완성에 최적."
+  },
+  {
+    "subject": "회로이론 및 제어공학",
+    "title": "제어공학 핵심 (블록선도/라플라스/안정도)",
+    "channel": "전병칠",
+    "url": "https://www.youtube.com/results?search_query=%EC%A0%84%EB%B3%91%EC%B9%A0+%EC%A0%9C%EC%96%B4%EA%B3%B5%ED%95%99",
+    "desc": "전달함수→블록선도→안정도 판별→상태방정식 순. 앱 이론서 04 후반부와 병행."
+  },
+  {
+    "subject": "전기설비기술기준",
+    "title": "KEC 치트키 특강 (한방정리)",
+    "channel": "전기뿌수기",
+    "url": "https://www.youtube.com/watch?v=8rXjMMHiQl4",
+    "desc": "2021 개정 KEC 빈출 수치를 치트키식으로 정리. 암기법과 함께 보면 최강."
+  },
+  {
+    "subject": "전기설비기술기준",
+    "title": "KEC 접지/가공전선 빈출 정리",
+    "channel": "전병칠",
+    "url": "https://www.youtube.com/results?search_query=%EC%A0%84%EB%B3%91%EC%B9%A0+KEC+%EC%A0%91%EC%A7%80",
+    "desc": "접지시스템·가공전선 시설기준 등 최다 출제 영역 집중 강의."
+  },
+  {
+    "subject": "공통",
+    "title": "전기기사 필기 합격 공부법/전략 영상",
+    "channel": "다수",
+    "url": "https://www.youtube.com/results?search_query=%EC%A0%84%EA%B8%B0%EA%B8%B0%EC%82%AC+%ED%95%84%EA%B8%B0+%EA%B3%B5%EB%B6%80%EB%B2%95",
+    "desc": "합격자들의 과목별 전략: 회로이론→전자기학→전기기기→전력공학→KEC 순 추천이 다수."
+  }
+]

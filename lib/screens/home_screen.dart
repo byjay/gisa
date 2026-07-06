@@ -32,7 +32,7 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 12),
             // D-Day hero card
             GestureDetector(
-              onTap: () => onNavigate(1),
+              onTap: () => onNavigate(2),
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -137,15 +137,15 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Expanded(
                     child: _quickStat(context, Icons.local_fire_department,
-                        '${app.streak}일', '연속 학습', Colors.orange, () => onNavigate(4))),
+                        '${app.streak}일', '연속 학습', Colors.orange, () => onNavigate(5))),
                 const SizedBox(width: 10),
                 Expanded(
                     child: _quickStat(context, Icons.timer, '${app.weekMinutes}분',
-                        '이번 주', Colors.teal, () => onNavigate(4))),
+                        '이번 주', Colors.teal, () => onNavigate(5))),
                 const SizedBox(width: 10),
                 Expanded(
                     child: _quickStat(context, Icons.quiz, '$pendingNotes개',
-                        '복습할 오답', Colors.redAccent, () => onNavigate(5))),
+                        '복습할 오답', Colors.redAccent, () => onNavigate(6))),
               ],
             ),
             const SizedBox(height: 16),
@@ -157,12 +157,12 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: _actionButton(context, Icons.play_circle_fill,
-                      '타이머 시작', theme.colorScheme.primary, () => onNavigate(2)),
+                      '타이머 시작', theme.colorScheme.primary, () => onNavigate(3)),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: _actionButton(context, Icons.edit_note, '기록 추가',
-                      Colors.teal, () => onNavigate(3)),
+                      Colors.teal, () => onNavigate(4)),
                 ),
               ],
             ),
@@ -185,7 +185,7 @@ class HomeScreen extends StatelessWidget {
                       trailing: Text('D-${e.dDay}',
                           style: TextStyle(
                               color: e.color, fontWeight: FontWeight.bold)),
-                      onTap: () => onNavigate(1),
+                      onTap: () => onNavigate(2),
                     ),
                   )),
             ],

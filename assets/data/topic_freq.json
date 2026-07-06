@@ -1,0 +1,242 @@
+{
+ "전자기학": [
+  {
+   "topic": "자계·자기력",
+   "count": 197,
+   "rank": 1
+  },
+  {
+   "topic": "정전용량·콘덴서",
+   "count": 125,
+   "rank": 2
+  },
+  {
+   "topic": "전계·전위",
+   "count": 116,
+   "rank": 3
+  },
+  {
+   "topic": "전류·저항",
+   "count": 23,
+   "rank": 4
+  },
+  {
+   "topic": "인덕턴스",
+   "count": 15,
+   "rank": 5
+  },
+  {
+   "topic": "전자유도·전자파",
+   "count": 13,
+   "rank": 6
+  },
+  {
+   "topic": "벡터해석",
+   "count": 6,
+   "rank": 7
+  },
+  {
+   "topic": "경계조건·영상법",
+   "count": 3,
+   "rank": 8
+  },
+  {
+   "topic": "기타",
+   "count": 82,
+   "rank": 9
+  }
+ ],
+ "전력공학": [
+  {
+   "topic": "보호계전·차단기",
+   "count": 123,
+   "rank": 1
+  },
+  {
+   "topic": "고장계산",
+   "count": 62,
+   "rank": 2
+  },
+  {
+   "topic": "배전",
+   "count": 60,
+   "rank": 3
+  },
+  {
+   "topic": "선로정수·코로나",
+   "count": 58,
+   "rank": 4
+  },
+  {
+   "topic": "전선·지지물",
+   "count": 54,
+   "rank": 5
+  },
+  {
+   "topic": "송전특성·안정도",
+   "count": 48,
+   "rank": 6
+  },
+  {
+   "topic": "수력·화력·원자력",
+   "count": 44,
+   "rank": 7
+  },
+  {
+   "topic": "피뢰·이상전압",
+   "count": 23,
+   "rank": 8
+  },
+  {
+   "topic": "중성점접지·유도장해",
+   "count": 14,
+   "rank": 9
+  },
+  {
+   "topic": "기타",
+   "count": 93,
+   "rank": 10
+  }
+ ],
+ "전기기기": [
+  {
+   "topic": "변압기",
+   "count": 165,
+   "rank": 1
+  },
+  {
+   "topic": "동기기",
+   "count": 145,
+   "rank": 2
+  },
+  {
+   "topic": "유도전동기",
+   "count": 127,
+   "rank": 3
+  },
+  {
+   "topic": "직류기",
+   "count": 84,
+   "rank": 4
+  },
+  {
+   "topic": "정류기·전력변환",
+   "count": 29,
+   "rank": 5
+  },
+  {
+   "topic": "특수기기",
+   "count": 5,
+   "rank": 6
+  },
+  {
+   "topic": "기타",
+   "count": 24,
+   "rank": 7
+  }
+ ],
+ "회로이론 및 제어공학": [
+  {
+   "topic": "라플라스·전달함수",
+   "count": 116,
+   "rank": 1
+  },
+  {
+   "topic": "교류회로",
+   "count": 101,
+   "rank": 2
+  },
+  {
+   "topic": "블록선도·안정도",
+   "count": 48,
+   "rank": 3
+  },
+  {
+   "topic": "3상회로",
+   "count": 33,
+   "rank": 4
+  },
+  {
+   "topic": "과도현상",
+   "count": 24,
+   "rank": 5
+  },
+  {
+   "topic": "시퀀스·논리",
+   "count": 21,
+   "rank": 6
+  },
+  {
+   "topic": "4단자·분포정수",
+   "count": 21,
+   "rank": 7
+  },
+  {
+   "topic": "상태방정식·이산제어",
+   "count": 19,
+   "rank": 8
+  },
+  {
+   "topic": "제어계 응답",
+   "count": 12,
+   "rank": 9
+  },
+  {
+   "topic": "비정현파·왜형파",
+   "count": 9,
+   "rank": 10
+  },
+  {
+   "topic": "기타",
+   "count": 176,
+   "rank": 11
+  }
+ ],
+ "전기설비기술기준": [
+  {
+   "topic": "가공전선로",
+   "count": 149,
+   "rank": 1
+  },
+  {
+   "topic": "저압·고압 시설",
+   "count": 125,
+   "rank": 2
+  },
+  {
+   "topic": "접지시스템",
+   "count": 97,
+   "rank": 3
+  },
+  {
+   "topic": "변전소·개폐소",
+   "count": 44,
+   "rank": 4
+  },
+  {
+   "topic": "전선로 일반",
+   "count": 24,
+   "rank": 5
+  },
+  {
+   "topic": "발전기 보호",
+   "count": 15,
+   "rank": 6
+  },
+  {
+   "topic": "전기철도·특수설비",
+   "count": 14,
+   "rank": 7
+  },
+  {
+   "topic": "지선·지지물",
+   "count": 7,
+   "rank": 8
+  },
+  {
+   "topic": "기타",
+   "count": 104,
+   "rank": 9
+  }
+ ]
+}

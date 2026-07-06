@@ -1,0 +1,231 @@
+import 'package:flutter/material.dart';
+import '../../services/study_data.dart';
+
+/// 핵심이론서: 과목 선택 → 마크다운 이론서 열람 (간이 렌더러)
+class TheoryScreen extends StatelessWidget {
+  const TheoryScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('핵심이론서 (빈출도 반영)')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          const Text('10년치 기출 2,897문제 빈출 분석을 반영한 과목별 핵심이론서입니다. '
+              '실기(전기설비 설계·시공) 연계 포인트도 함께 정리했습니다.'),
+          const SizedBox(height: 12),
+          for (var i = 0; i < kSubjects.length; i++)
+            Card(
+              child: ListTile(
+                leading: CircleAvatar(child: Text('${i + 1}')),
+                title: Text(kSubjects[i]),
+                subtitle: const Text('빈출 토픽 순위 · 공식 · 암기법 · 강의링크 포함'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => TheoryViewer(subject: kSubjects[i]),
+                )),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class TheoryViewer extends StatefulWidget {
+  final String subject;
+  const TheoryViewer({super.key, required this.subject});
+
+  @override
+  State<TheoryViewer> createState() => _TheoryViewerState();
+}
+
+class _TheoryViewerState extends State<TheoryViewer> {
+  String? _content;
+
+  @override
+  void initState() {
+    super.initState();
+    StudyData.instance.loadTheory(widget.subject).then((v) {
+      if (mounted) setState(() => _content = v);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.subject)),
+      body: _content == null
+          ? const Center(child: CircularProgressIndicator())
+          : Scrollbar(
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: _renderMarkdown(context, _content!),
+              ),
+            ),
+    );
+  }
+
+  /// 초경량 마크다운 렌더러 (외부 패키지 불필요)
+  List<Widget> _renderMarkdown(BuildContext context, String md) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final widgets = <Widget>[];
+    final lines = md.split('\n');
+    var inCode = false;
+    final codeBuf = StringBuffer();
+    List<String>? tableBuf;
+
+    void flushTable() {
+      if (tableBuf == null || tableBuf!.isEmpty) return;
+      final rows = tableBuf!
+          .where((l) => !RegExp(r'^\s*\|[\s\-:|]+\|\s*$').hasMatch(l))
+          .map((l) => l
+              .trim()
+              .replaceAll(RegExp(r'^\||\|$'), '')
+              .split('|')
+              .map((c) => c.trim().replaceAll('**', ''))
+              .toList())
+          .toList();
+      if (rows.isEmpty) {
+        tableBuf = null;
+        return;
+      }
+      final colCount =
+          rows.map((r) => r.length).reduce((a, b) => a > b ? a : b);
+      widgets.add(Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Table(
+            defaultColumnWidth: const IntrinsicColumnWidth(),
+            border: TableBorder.all(
+                color: scheme.outlineVariant, width: 0.7),
+            children: [
+              for (var r = 0; r < rows.length; r++)
+                TableRow(
+                  decoration: BoxDecoration(
+                    color: r == 0 ? scheme.surfaceContainerHighest : null,
+                  ),
+                  children: [
+                    for (var c = 0; c < colCount; c++)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 6),
+                        child: Text(
+                          c < rows[r].length ? rows[r][c] : '',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight:
+                                r == 0 ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ));
+      tableBuf = null;
+    }
+
+    for (final raw in lines) {
+      final line = raw.trimRight();
+
+      if (line.startsWith('```')) {
+        if (inCode) {
+          widgets.add(Container(
+            width: double.infinity,
+            margin: const EdgeInsets.symmetric(vertical: 6),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(codeBuf.toString().trimRight(),
+                style: const TextStyle(
+                    fontFamily: 'monospace', fontSize: 13, height: 1.5)),
+          ));
+          codeBuf.clear();
+        }
+        inCode = !inCode;
+        continue;
+      }
+      if (inCode) {
+        codeBuf.writeln(raw);
+        continue;
+      }
+
+      if (line.trimLeft().startsWith('|')) {
+        tableBuf ??= [];
+        tableBuf!.add(line);
+        continue;
+      } else {
+        flushTable();
+      }
+
+      if (line.isEmpty) {
+        widgets.add(const SizedBox(height: 6));
+      } else if (line.startsWith('# ')) {
+        widgets.add(Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 6),
+          child: Text(_strip(line.substring(2)),
+              style: theme.textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold)),
+        ));
+      } else if (line.startsWith('## ')) {
+        widgets.add(Padding(
+          padding: const EdgeInsets.only(top: 14, bottom: 4),
+          child: Text(_strip(line.substring(3)),
+              style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold, color: scheme.primary)),
+        ));
+      } else if (line.startsWith('### ')) {
+        widgets.add(Padding(
+          padding: const EdgeInsets.only(top: 10, bottom: 3),
+          child: Text(_strip(line.substring(4)),
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold)),
+        ));
+      } else if (line.startsWith('> ')) {
+        widgets.add(Container(
+          width: double.infinity,
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: scheme.primaryContainer.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(8),
+            border: Border(
+                left: BorderSide(color: scheme.primary, width: 3)),
+          ),
+          child: Text(_strip(line.substring(2)),
+              style: const TextStyle(height: 1.5, fontSize: 14)),
+        ));
+      } else if (line.startsWith('- ') || line.startsWith('* ')) {
+        widgets.add(Padding(
+          padding: const EdgeInsets.only(left: 8, bottom: 2),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('•  '),
+              Expanded(
+                  child: Text(_strip(line.substring(2)),
+                      style: const TextStyle(height: 1.5))),
+            ],
+          ),
+        ));
+      } else if (line == '---') {
+        widgets.add(const Divider(height: 20));
+      } else {
+        widgets.add(Text(_strip(line), style: const TextStyle(height: 1.6)));
+      }
+    }
+    flushTable();
+    widgets.add(const SizedBox(height: 32));
+    return widgets;
+  }
+
+  String _strip(String s) => s.replaceAll('**', '').replaceAll('`', '');
+}
