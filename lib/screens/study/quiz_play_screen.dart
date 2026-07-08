@@ -132,6 +132,44 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                       color: scheme.onPrimaryContainer)),
             ],
           ),
+          if (_q.explanation.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: scheme.surface,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                    color: scheme.outlineVariant.withValues(alpha: 0.6)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.menu_book,
+                          size: 16, color: scheme.primary),
+                      const SizedBox(width: 5),
+                      Text('해설',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: scheme.primary)),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _q.explanation,
+                    style: TextStyle(
+                        fontSize: 13.5,
+                        height: 1.55,
+                        color: scheme.onSurface),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 10),
           // 큰 터치 영역의 강의 버튼 — 전체 폭 차지, 확실히 눌림
           SizedBox(

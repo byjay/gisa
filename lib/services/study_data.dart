@@ -27,6 +27,7 @@ class Question {
   final List<String> options;
   final int answer; // 1-based
   final bool hasImage;
+  final String explanation; // 문제별 해설
   String examLabel; // 출제 회차 라벨
 
   Question({
@@ -37,6 +38,7 @@ class Question {
     required this.options,
     required this.answer,
     required this.hasImage,
+    this.explanation = '',
     this.examLabel = '',
   });
 
@@ -50,6 +52,7 @@ class Question {
             .toList(),
         answer: (j['answer'] as int?) ?? 0,
         hasImage: (j['has_image'] as bool?) ?? false,
+        explanation: (j['explanation'] as String?) ?? '',
       );
 }
 
