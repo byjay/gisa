@@ -9,6 +9,11 @@ import 'mnemonics_screen.dart';
 import 'videos_screen.dart';
 import 'lesson_screen.dart';
 import 'speed_memorize_screen.dart';
+import 'slides_screen.dart';
+import 'silgi_screen.dart';
+import 'search_screen.dart';
+import 'repeat_analysis_screen.dart';
+import '../../widgets/tutor_avatar.dart';
 
 /// 학습 허브: CBT 문제풀이 / 빈출순 풀기 / 이론서 / 암기법 / 강의 / 학습이력
 class StudyScreen extends StatefulWidget {
@@ -48,8 +53,17 @@ class _StudyScreenState extends State<StudyScreen> {
                 vertical: 16,
               ),
               children: [
-                _heroCards(context),
+                TutorBanner(
+                  mood: TutorMood.cheer,
+                  message: '30일 슬라이드로 이론 끝내고, 빈출 유형변형 분석으로 실전 대비! 오늘도 함께 달려요 🔥',
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const SlidesHomeScreen())),
+                ),
                 const SizedBox(height: 12),
+                _heroCards(context),
+                const SizedBox(height: 8),
+                _newFeatureCards(context),
+                const SizedBox(height: 8),
                 _menuGrid(context),
                 const SizedBox(height: 12),
                 _cbtTrendCard(context),
@@ -196,6 +210,46 @@ class _StudyScreenState extends State<StudyScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  /// 신규 핵심 기능 — 30일 슬라이드 / 빈출 유형변형 / 실기 / 검색
+  Widget _newFeatureCards(BuildContext context) {
+    final items = [
+      ('30일 슬라이드', Icons.style_rounded, Colors.indigo,
+          const SlidesHomeScreen() as Widget),
+      ('유형변형 분석', Icons.track_changes_rounded, Colors.deepOrange,
+          const RepeatAnalysisScreen() as Widget),
+      ('실기 대비', Icons.edit_document, Colors.purple,
+          const SilgiScreen() as Widget),
+      ('이론 검색·AI', Icons.manage_search_rounded, Colors.teal,
+          const TheorySearchScreen() as Widget),
+    ];
+    return Row(
+      children: [
+        for (final (label, icon, color, screen) in items)
+          Expanded(
+            child: Card(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () => Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (_) => screen)),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Column(
+                    children: [
+                      Icon(icon, size: 26, color: color),
+                      const SizedBox(height: 5),
+                      Text(label,
+                          style: const TextStyle(
+                              fontSize: 11, fontWeight: FontWeight.w700)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 

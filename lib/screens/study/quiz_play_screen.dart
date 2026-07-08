@@ -74,6 +74,8 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                         _chip(_q.subject),
                         if (_q.topic != '기타') _chip('빈출: ${_q.topic}'),
                         if (_q.examLabel.isNotEmpty) _chip(_q.examLabel),
+                        _difficultyChip(),
+                        if (_q.freqScore >= 50) _freqChip(),
                         if (_q.hasImage) _chip('그림문제·원본PDF 참고'),
                       ],
                     ),
@@ -107,6 +109,38 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
         visualDensity: VisualDensity.compact,
         padding: EdgeInsets.zero,
       );
+
+  /// 난이도 배지 — 하(초록)/중(주황)/상(빨강)
+  Widget _difficultyChip() {
+    final color = _q.difficulty == 1
+        ? Colors.green
+        : (_q.difficulty == 3 ? Colors.red : Colors.orange);
+    return Chip(
+      label: Text('난이도 ${_q.difficultyLabel}',
+          style: TextStyle(
+              fontSize: 11, fontWeight: FontWeight.w700, color: color)),
+      side: BorderSide(color: color.withValues(alpha: 0.5)),
+      backgroundColor: color.withValues(alpha: 0.08),
+      visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
+    );
+  }
+
+  /// 빈출 배지 — freq_score 50 이상이면 반복출제 가능성 높음
+  Widget _freqChip() {
+    final hot = _q.freqScore >= 70;
+    final color = hot ? Colors.red.shade700 : Colors.deepOrange;
+    return Chip(
+      avatar: Icon(Icons.local_fire_department, size: 14, color: color),
+      label: Text(hot ? '초빈출' : '빈출문제',
+          style: TextStyle(
+              fontSize: 11, fontWeight: FontWeight.w700, color: color)),
+      side: BorderSide(color: color.withValues(alpha: 0.5)),
+      backgroundColor: color.withValues(alpha: 0.08),
+      visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
+    );
+  }
 
   Widget _answerBox(ColorScheme scheme) {
     return Container(

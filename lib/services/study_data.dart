@@ -28,6 +28,8 @@ class Question {
   final int answer; // 1-based
   final bool hasImage;
   final String explanation; // 문제별 해설
+  final int difficulty; // 1=하, 2=중, 3=상
+  final double freqScore; // 0~100 출제빈도 점수
   String examLabel; // 출제 회차 라벨
 
   Question({
@@ -39,8 +41,13 @@ class Question {
     required this.answer,
     required this.hasImage,
     this.explanation = '',
+    this.difficulty = 2,
+    this.freqScore = 0,
     this.examLabel = '',
   });
+
+  String get difficultyLabel =>
+      difficulty == 1 ? '하' : (difficulty == 3 ? '상' : '중');
 
   factory Question.fromJson(Map<String, dynamic> j) => Question(
         no: j['no'] as int,
@@ -53,6 +60,8 @@ class Question {
         answer: (j['answer'] as int?) ?? 0,
         hasImage: (j['has_image'] as bool?) ?? false,
         explanation: (j['explanation'] as String?) ?? '',
+        difficulty: (j['difficulty'] as int?) ?? 2,
+        freqScore: ((j['freq_score'] as num?) ?? 0).toDouble(),
       );
 }
 
@@ -274,6 +283,171 @@ class VideoLink {
       );
 }
 
+/// 30일 학습 플랜
+class PlanDay {
+  final int day;
+  final int week;
+  final String phase;
+  final String subject;
+  final String title;
+  final List<String> topics;
+  final int goalQuestions;
+  final List<String> tasks;
+
+  PlanDay({
+    required this.day,
+    required this.week,
+    required this.phase,
+    required this.subject,
+    required this.title,
+    required this.topics,
+    required this.goalQuestions,
+    required this.tasks,
+  });
+
+  factory PlanDay.fromJson(Map<String, dynamic> j) => PlanDay(
+        day: (j['day'] as int?) ?? 0,
+        week: (j['week'] as int?) ?? 0,
+        phase: (j['phase'] as String?) ?? '',
+        subject: (j['subject'] as String?) ?? '',
+        title: (j['title'] as String?) ?? '',
+        topics:
+            ((j['topics'] as List?) ?? const []).map((e) => e.toString()).toList(),
+        goalQuestions: (j['goal_questions'] as int?) ?? 0,
+        tasks:
+            ((j['tasks'] as List?) ?? const []).map((e) => e.toString()).toList(),
+      );
+}
+
+class StudyPlan {
+  final String title;
+  final String description;
+  final List<String> strategy;
+  final List<PlanDay> days;
+
+  StudyPlan({
+    required this.title,
+    required this.description,
+    required this.strategy,
+    required this.days,
+  });
+
+  factory StudyPlan.fromJson(Map<String, dynamic> j) => StudyPlan(
+        title: (j['title'] as String?) ?? '',
+        description: (j['description'] as String?) ?? '',
+        strategy: ((j['strategy'] as List?) ?? const [])
+            .map((e) => e.toString())
+            .toList(),
+        days: ((j['days'] as List?) ?? const [])
+            .map((e) => PlanDay.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
+/// 슬라이드 카드 (30일 이론 덱)
+class SlideCard {
+  final String type; // mission/concept/core/formula/mnemonic/trap/strategy/recap
+  final String topic;
+  final String title;
+  final String body;
+
+  SlideCard({
+    required this.type,
+    required this.topic,
+    required this.title,
+    required this.body,
+  });
+
+  factory SlideCard.fromJson(Map<String, dynamic> j) => SlideCard(
+        type: (j['type'] as String?) ?? 'core',
+        topic: (j['topic'] as String?) ?? '',
+        title: (j['title'] as String?) ?? '',
+        body: (j['body'] as String?) ?? '',
+      );
+}
+
+class SlideDeck {
+  final int day;
+  final String subject;
+  final String title;
+  final String phase;
+  final List<SlideCard> cards;
+
+  SlideDeck({
+    required this.day,
+    required this.subject,
+    required this.title,
+    required this.phase,
+    required this.cards,
+  });
+
+  factory SlideDeck.fromJson(Map<String, dynamic> j) => SlideDeck(
+        day: (j['day'] as int?) ?? 0,
+        subject: (j['subject'] as String?) ?? '',
+        title: (j['title'] as String?) ?? '',
+        phase: (j['phase'] as String?) ?? '',
+        cards: ((j['cards'] as List?) ?? const [])
+            .map((e) => SlideCard.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
+/// 실기 대비 카드
+class SilgiItem {
+  final String category;
+  final String title;
+  final String linkSubject; // 필기 과목 연동
+  final int importance;
+  final String question;
+  final String answer;
+  final String memo;
+
+  SilgiItem({
+    required this.category,
+    required this.title,
+    required this.linkSubject,
+    required this.importance,
+    required this.question,
+    required this.answer,
+    required this.memo,
+  });
+
+  factory SilgiItem.fromJson(Map<String, dynamic> j) => SilgiItem(
+        category: (j['category'] as String?) ?? '',
+        title: (j['title'] as String?) ?? '',
+        linkSubject: (j['link_subject'] as String?) ?? '',
+        importance: (j['importance'] as int?) ?? 3,
+        question: (j['question'] as String?) ?? '',
+        answer: (j['answer'] as String?) ?? '',
+        memo: (j['memo'] as String?) ?? '',
+      );
+}
+
+class SilgiData {
+  final String title;
+  final String overview;
+  final List<String> strategy;
+  final List<SilgiItem> items;
+
+  SilgiData({
+    required this.title,
+    required this.overview,
+    required this.strategy,
+    required this.items,
+  });
+
+  factory SilgiData.fromJson(Map<String, dynamic> j) => SilgiData(
+        title: (j['title'] as String?) ?? '',
+        overview: (j['overview'] as String?) ?? '',
+        strategy: ((j['strategy'] as List?) ?? const [])
+            .map((e) => e.toString())
+            .toList(),
+        items: ((j['items'] as List?) ?? const [])
+            .map((e) => SilgiItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
 /// 학습 데이터 로더 (싱글턴 캐시)
 class StudyData {
   StudyData._();
@@ -285,7 +459,42 @@ class StudyData {
   List<Lesson>? _lessons;
   List<RepeatCluster>? _repeats;
   Map<String, List<TopicFreq>>? _topicFreq;
+  StudyPlan? _plan;
+  List<SlideDeck>? _slideDecks;
+  SilgiData? _silgi;
   final Map<String, String> _theoryCache = {};
+
+  /// 30일 학습 플랜 로드
+  Future<StudyPlan?> loadPlan() async {
+    if (_plan != null) return _plan;
+    try {
+      final raw = await rootBundle.loadString('assets/data/study_plan.json');
+      _plan = StudyPlan.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (e) {
+      if (kDebugMode) debugPrint('study_plan.json 로드 실패: $e');
+    }
+    return _plan;
+  }
+
+  /// 30일 슬라이드 덱 로드
+  Future<List<SlideDeck>> loadSlideDecks() async {
+    if (_slideDecks != null) return _slideDecks!;
+    _slideDecks = await _safeLoadList(
+        'assets/data/theory_slides.json', SlideDeck.fromJson);
+    return _slideDecks!;
+  }
+
+  /// 실기 데이터 로드
+  Future<SilgiData?> loadSilgi() async {
+    if (_silgi != null) return _silgi;
+    try {
+      final raw = await rootBundle.loadString('assets/data/silgi.json');
+      _silgi = SilgiData.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (e) {
+      if (kDebugMode) debugPrint('silgi.json 로드 실패: $e');
+    }
+    return _silgi;
+  }
 
   /// 안전 JSON 리스트 로더 — 파일 하나가 깨져도 앱이 죽지 않게 방어
   Future<List<T>> _safeLoadList<T>(
@@ -373,17 +582,22 @@ class StudyData {
     return out;
   }
 
-  /// 빈출도 순 정렬: 출제 빈도가 높은 토픽의 문제부터 (최신 회차 우선)
+  /// 빈출도 순 정렬: 문항별 freq_score 높은 순 (반복출제 + 토픽빈도)
   Future<List<Question>> questionsByFrequency(String subject) async {
     final qs = await questionsBySubject(subject);
-    final freq = await loadTopicFreq();
-    final rankMap = <String, int>{
-      for (final t in freq[subject] ?? <TopicFreq>[]) t.topic: t.rank
-    };
+    qs.sort((a, b) => b.freqScore.compareTo(a.freqScore));
+    return qs;
+  }
+
+  /// 난이도 순 정렬: 쉬운 문제부터 (단계별 학습용)
+  Future<List<Question>> questionsByDifficulty(String subject,
+      {bool easyFirst = true}) async {
+    final qs = await questionsBySubject(subject);
     qs.sort((a, b) {
-      final ra = rankMap[a.topic] ?? 999;
-      final rb = rankMap[b.topic] ?? 999;
-      return ra.compareTo(rb);
+      final c = easyFirst
+          ? a.difficulty.compareTo(b.difficulty)
+          : b.difficulty.compareTo(a.difficulty);
+      return c != 0 ? c : b.freqScore.compareTo(a.freqScore);
     });
     return qs;
   }
