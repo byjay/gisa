@@ -31,6 +31,50 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
 
   Question get _q => widget.questions[_idx];
 
+  /// KEC 개정 위험도: 2 = 폐지·변경된 규정을 직접 다루는 문제(강한 경고),
+  /// 1 = 설비 과목 일반 주의, 0 = 해당 없음
+  static final RegExp _kecHighRisk = RegExp(
+      r'(제\s?[123]종\s?접지|특별\s?제?3종|CD관.{0,40}(굴곡|반경)|굴곡.{0,20}4\s?배|'
+      r'(비상|유도등).{0,60}30\s?분|판단기준|개정\s?전)');
+
+  int get _kecRiskLevel {
+    if (!_q.subject.contains('설비')) return 0;
+    final text = '${_q.question} ${_q.options.join(' ')}';
+    return _kecHighRisk.hasMatch(text) ? 2 : 1;
+  }
+
+  Widget _kecWarningBanner() {
+    final high = _kecRiskLevel == 2;
+    final color = high ? Colors.red : Colors.orange;
+    final msg = high
+        ? '⚠ 이 문제는 폐지·개정된 구규정(종별 접지 등)을 다룹니다. 풀이 원리만 취하고, 현행 KEC 기준은 시험정보 센터 "KEC 2026 개정" 탭에서 반드시 확인하세요.'
+        : 'KEC 2026 개정 주의: 구기출 수치(CD관 4배, 비상조명 30분 등)는 현행 규정과 다를 수 있음 → "KEC 2026 개정" 탭 확인';
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.shade50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.shade200),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(high ? Icons.gpp_bad : Icons.warning_amber,
+                size: 14, color: color.shade700),
+            const SizedBox(width: 5),
+            Expanded(
+              child: Text(msg,
+                  style: TextStyle(
+                      fontSize: 11, height: 1.4, color: color.shade800)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -112,36 +156,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                         if (_q.hasImage) _chip('그림문제·원본PDF 참고'),
                       ],
                     ),
-                    if (_q.subject.contains('설비'))
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.red.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.red.shade200),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(Icons.warning_amber,
-                                  size: 14, color: Colors.red.shade700),
-                              const SizedBox(width: 5),
-                              Expanded(
-                                child: Text(
-                                  'KEC 2026 개정 주의: 구기출 수치(CD관 4배, 비상조명 30분 등)는 현행 규정과 다를 수 있음 → 시험정보 센터 "KEC 2026 개정" 탭 확인',
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      height: 1.4,
-                                      color: Colors.red.shade800),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    if (_kecRiskLevel > 0) _kecWarningBanner(),
                     const SizedBox(height: 12),
                     Text(
                       '${_q.no}. ${_q.question}',
