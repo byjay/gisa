@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/app_provider.dart';
 import '../../services/study_data.dart';
+import '../../theme/app_theme.dart';
 import 'quiz_play_screen.dart';
 import 'theory_screen.dart';
 import 'mnemonics_screen.dart';
 import 'videos_screen.dart';
 import 'lesson_screen.dart';
-import 'speed_memorize_screen.dart';
 import 'slides_screen.dart';
 import 'silgi_screen.dart';
 import 'search_screen.dart';
@@ -30,6 +30,14 @@ class _StudyScreenState extends State<StudyScreen> {
   List<ExamPaper>? _exams;
   Map<String, List<TopicFreq>>? _freq;
 
+  static const _subjectColors = [
+    Color(0xFF4F46E5),
+    Color(0xFF0891B2),
+    Color(0xFF7C3AED),
+    Color(0xFFD97706),
+    Color(0xFF059669),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -45,7 +53,15 @@ class _StudyScreenState extends State<StudyScreen> {
   Widget build(BuildContext context) {
     final exams = _exams;
     return Scaffold(
-      appBar: AppBar(title: const Text('전기기사 학습')),
+      appBar: AppBar(
+        title: const Row(
+          children: [
+            Icon(Icons.bolt_rounded, color: AppTheme.accent, size: 24),
+            SizedBox(width: 6),
+            Text('전기기사 학습'),
+          ],
+        ),
+      ),
       body: exams == null
           ? const Center(child: CircularProgressIndicator())
           : ListView(
@@ -53,184 +69,322 @@ class _StudyScreenState extends State<StudyScreen> {
                 horizontal: MediaQuery.of(context).size.width > 900
                     ? (MediaQuery.of(context).size.width - 800) / 2
                     : 16,
-                vertical: 16,
+                vertical: 8,
               ),
               children: [
                 TutorBanner(
                   mood: TutorMood.cheer,
-                  message: '30일 슬라이드로 이론 끝내고, 빈출 유형변형 분석으로 실전 대비! 오늘도 함께 달려요 🔥',
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => const SlidesHomeScreen())),
+                  message: '지금은 기초를 단단히 할 때예요. 이론을 짧게 보고 쉬운 문제로 바로 확인해 보세요.',
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const SlidesHomeScreen()),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 _heroCards(context),
-                const SizedBox(height: 8),
-                _newFeatureCards(context),
-                const SizedBox(height: 8),
-                _menuGrid(context),
+                const SectionHeader(emoji: '✨', title: '핵심 기능'),
+                _featureGrid(context),
                 const SizedBox(height: 8),
                 _beginnerCard(context),
-                const SizedBox(height: 8),
                 _examInfoCard(context),
-                const SizedBox(height: 12),
                 _cbtTrendCard(context),
-                const SizedBox(height: 20),
-                Text('빈출순 문제풀기 (출제 빈도 높은 토픽부터)',
-                    style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 4),
-                Text('10년치 2,897문제를 빈출 토픽 순서로 정렬해 풀어보세요.',
-                    style: Theme.of(context).textTheme.bodySmall),
-                const SizedBox(height: 8),
-                for (final s in kSubjects) _freqCard(context, s),
-                const SizedBox(height: 20),
-                Text('쉬운 문제부터 풀기 (초보자 추천)',
-                    style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 4),
-                Text('난이도 하→중→상 순서로 자신감을 쌓으며 학습하세요.',
-                    style: Theme.of(context).textTheme.bodySmall),
-                const SizedBox(height: 8),
+                const SectionHeader(
+                  emoji: '🔥',
+                  title: '빈출순 문제풀기',
+                  subtitle: '10년치 2,897문제를 출제 빈도 높은 토픽 순서로',
+                ),
+                for (var i = 0; i < kSubjects.length; i++)
+                  _freqCard(context, kSubjects[i], _subjectColors[i]),
+                const SectionHeader(
+                  emoji: '🌱',
+                  title: '쉬운 문제부터 풀기',
+                  subtitle: '난이도 하→중→상 순서로 자신감을 쌓으세요 (초보자 추천)',
+                ),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
                     for (final s in kSubjects)
                       ActionChip(
-                        avatar: const Icon(Icons.stairs_rounded,
-                            size: 18, color: Colors.green),
-                        label: Text(s, style: const TextStyle(fontSize: 13)),
+                        avatar: const Icon(
+                          Icons.stairs_rounded,
+                          size: 17,
+                          color: AppTheme.success,
+                        ),
+                        label: Text(s, style: const TextStyle(fontSize: 12.5)),
                         onPressed: () => _startEasyFirst(s),
                       ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                Text('과목별 랜덤 연습 (20문제)',
-                    style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 8),
+                const SectionHeader(
+                  emoji: '🎲',
+                  title: '과목별 랜덤 연습',
+                  subtitle: '무작위 20문제로 실력 점검',
+                ),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
                     for (final s in kSubjects)
                       ActionChip(
-                        avatar: const Icon(Icons.shuffle, size: 18),
-                        label: Text(s, style: const TextStyle(fontSize: 13)),
+                        avatar: const Icon(Icons.shuffle_rounded,
+                            size: 17, color: AppTheme.electric),
+                        label: Text(s, style: const TextStyle(fontSize: 12.5)),
                         onPressed: () => _startRandom(s),
                       ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                Text('회차별 실전 모의고사 (100문항)',
-                    style: Theme.of(context).textTheme.titleMedium),
+                const SectionHeader(
+                  emoji: '📝',
+                  title: '회차별 실전 모의고사',
+                  subtitle: '실제 시험과 동일한 100문항 · 합격 기준 60점',
+                ),
+                for (final e in exams) _examCard(context, e),
                 const SizedBox(height: 8),
-                for (final e in exams)
-                  Card(
-                    child: ListTile(
-                      dense: true,
-                      leading: CircleAvatar(
-                        radius: 16,
-                        child: Text('${e.year % 100}',
-                            style: const TextStyle(fontSize: 12)),
-                      ),
-                      title: Text('전기기사 ${e.label}',
-                          style: const TextStyle(fontSize: 14)),
-                      subtitle: Text('${e.questions.length}문항 · 정답포함',
-                          style: const TextStyle(fontSize: 12)),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => _startExam(e),
-                    ),
-                  ),
-                const SizedBox(height: 20),
                 _historySection(context),
+                const SizedBox(height: 24),
               ],
             ),
     );
   }
 
-  /// 핵심 2대 학습 모드 — 1:1 이론강의 + 문제-답 암기
+  Widget _examCard(BuildContext context, ExamPaper e) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return PremiumCard(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      onTap: () => _startExam(e),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              gradient: AppTheme.heroGradient,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            alignment: Alignment.center,
+            child: Text("'${e.year % 100}",
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 13)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('전기기사 ${e.label}',
+                    style: const TextStyle(
+                        fontSize: 13.5, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 2),
+                Text('${e.questions.length}문항 · 정답 포함',
+                    style: TextStyle(
+                        fontSize: 11,
+                        color: dark ? Colors.white54 : AppTheme.textMuted)),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right_rounded,
+              color: dark ? Colors.white38 : AppTheme.textMuted),
+        ],
+      ),
+    );
+  }
+
+  /// 기초 학습 루프 — 이론을 읽고 쉬운 문제로 바로 확인한다.
   Widget _heroCards(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
-          child: Card(
-            color: scheme.primaryContainer,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => const LessonCurriculumScreen())),
-              child: const Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(Icons.school, size: 30),
-                    SizedBox(height: 8),
-                    Text('1:1 이론 강의',
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 2),
-                    Text('46토픽 완전 강의\n공식·암기법·함정',
-                        style: TextStyle(fontSize: 11.5, height: 1.4)),
-                  ],
-                ),
+          child: _heroCard(
+            context,
+            gradient: AppTheme.heroGradient,
+            icon: Icons.school_rounded,
+            title: '1:1 이론 강의',
+            sub: '46토픽 완전 강의\n공식·암기법·함정',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const LessonCurriculumScreen(),
               ),
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 10),
         Expanded(
-          child: Card(
-            color: scheme.tertiaryContainer,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => const SpeedMemorizeScreen())),
-              child: const Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(Icons.bolt, size: 30),
-                    SizedBox(height: 8),
-                    Text('문제-답 암기',
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 2),
-                    Text('반복기출 347제\n빈도순 플래시카드',
-                        style: TextStyle(fontSize: 11.5, height: 1.4)),
-                  ],
-                ),
-              ),
-            ),
+          child: _heroCard(
+            context,
+            gradient: AppTheme.electricGradient,
+            icon: Icons.quiz_rounded,
+            title: '기초 문제 확인',
+            sub: '과목 선택 후\n쉬운 문제 10개',
+            onTap: () => _showFoundationSubjects(context),
           ),
         ),
       ],
     );
   }
 
-  /// CBT 출제경향 + 2개월 로드맵
-  /// 2026 시험 정보 센터 진입 카드 (일정 D-Day · 출제기준 개정 · 전략)
-  Widget _examInfoCard(BuildContext context) {
-    return Card(
-      color: Colors.indigo.shade50,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.indigo.shade200),
+  Widget _heroCard(BuildContext context,
+      {required Gradient gradient,
+      required IconData icon,
+      required String title,
+      required String sub,
+      required VoidCallback onTap}) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(AppTheme.rLg),
+        boxShadow:
+            AppTheme.glowShadow((gradient as LinearGradient).colors.first),
       ),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.indigo.shade100,
-          child: const Icon(Icons.event_note, color: Colors.indigo),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppTheme.rLg),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppTheme.rLg),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, size: 22, color: Colors.white),
+                ),
+                const SizedBox(height: 12),
+                Text(title,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800)),
+                const SizedBox(height: 3),
+                Text(sub,
+                    style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        fontSize: 11,
+                        height: 1.4)),
+              ],
+            ),
+          ),
         ),
-        title: const Text('2026 시험 정보 센터',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-        subtitle: const Text(
-          '3회차 일정 D-Day · 출제기준 개정(NCS·SQL·SMT) · 합격률 통계 · 과목별 점수 전략',
-          style: TextStyle(fontSize: 11.5),
+      ),
+    );
+  }
+
+  void _showFoundationSubjects(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '어느 과목부터 확인할까요?',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                '쉬운 문제 10개를 풀고, 막히면 해설에서 기초이론으로 돌아갈 수 있어요.',
+                style: TextStyle(fontSize: 12.5),
+              ),
+              const SizedBox(height: 12),
+              for (var i = 0; i < kSubjects.length; i++)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: IconBadge(
+                    icon: Icons.stairs_rounded,
+                    color: _subjectColors[i],
+                    size: 38,
+                    iconSize: 19,
+                  ),
+                  title: Text(kSubjects[i],
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.w600)),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    _startBasicCheck(kSubjects[i]);
+                  },
+                ),
+            ],
+          ),
         ),
-        trailing: const Icon(Icons.chevron_right, color: Colors.indigo),
-        onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const ExamInfoScreen())),
+      ),
+    );
+  }
+
+  Future<void> _startBasicCheck(String subject) async {
+    final questions = await StudyData.instance.questionsByDifficulty(
+      subject,
+      easyFirst: true,
+    );
+    if (!mounted) return;
+    if (questions.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('연결된 기초 문제가 없습니다.')));
+      return;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => QuizPlayScreen(
+          title: '$subject 기초 확인 10문제',
+          questions: questions.take(10).toList(),
+          examMode: false,
+        ),
+      ),
+    );
+  }
+
+  /// 2026 시험 정보 센터 진입 카드
+  Widget _examInfoCard(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return PremiumCard(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+      onTap: () => Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const ExamInfoScreen())),
+      child: Row(
+        children: [
+          const IconBadge(
+              icon: Icons.event_note_rounded, color: AppTheme.primary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Text('2026 시험 정보 센터',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w800, fontSize: 13.5)),
+                    SizedBox(width: 6),
+                    PillBadge(text: 'NEW', color: AppTheme.danger),
+                  ],
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  '3회차 일정 D-Day · 출제기준 개정 · 합격률 통계 · 점수 전략',
+                  style: TextStyle(
+                      fontSize: 11,
+                      color: dark ? Colors.white54 : AppTheme.textMuted),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right_rounded,
+              color: dark ? Colors.white38 : AppTheme.textMuted),
+        ],
       ),
     );
   }
@@ -238,10 +392,16 @@ class _StudyScreenState extends State<StudyScreen> {
   Widget _cbtTrendCard(BuildContext context) {
     return Card(
       child: ExpansionTile(
-        leading:
-            const Icon(Icons.insights, color: Colors.deepOrange),
-        title: const Text('CBT 출제경향 · 2개월 합격 로드맵',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        leading: const IconBadge(
+            icon: Icons.insights_rounded,
+            color: Color(0xFFF97316),
+            size: 38,
+            iconSize: 20),
+        title: const Text(
+          'CBT 출제경향 · 2개월 합격 로드맵',
+          style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
+        ),
+        shape: const RoundedRectangleBorder(side: BorderSide.none),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
         children: const [
           Align(
@@ -266,156 +426,208 @@ class _StudyScreenState extends State<StudyScreen> {
     );
   }
 
-  /// 신규 핵심 기능 — 30일 슬라이드 / 빈출 유형변형 / 실기 / 검색
-  Widget _newFeatureCards(BuildContext context) {
-    final items = [
-      ('30일 슬라이드', Icons.style_rounded, Colors.indigo,
-          const SlidesHomeScreen() as Widget),
-      ('유형변형 분석', Icons.track_changes_rounded, Colors.deepOrange,
-          const RepeatAnalysisScreen() as Widget),
-      ('실기 대비', Icons.edit_document, Colors.purple,
-          const SilgiScreen() as Widget),
-      ('이론 검색·AI', Icons.manage_search_rounded, Colors.teal,
-          const TheorySearchScreen() as Widget),
-      ('스마트 복습', Icons.auto_awesome, Colors.pink,
-          const SmartReviewScreen() as Widget),
-      ('공식 마스터', Icons.functions, Colors.green,
-          const FormulaGuideScreen() as Widget),
+  /// 핵심 기능 그리드 (3x3)
+  Widget _featureGrid(BuildContext context) {
+    final items = <(String, IconData, Color, Widget)>[
+      ('30일 슬라이드', Icons.style_rounded, AppTheme.primary,
+          const SlidesHomeScreen()),
+      ('유형변형 분석', Icons.track_changes_rounded, const Color(0xFFF97316),
+          const RepeatAnalysisScreen()),
+      ('실기 대비', Icons.edit_document, AppTheme.accent, const SilgiScreen()),
+      ('이론 검색·AI', Icons.manage_search_rounded, AppTheme.electric,
+          const TheorySearchScreen()),
+      ('스마트 복습', Icons.auto_awesome_rounded, const Color(0xFFEC4899),
+          const SmartReviewScreen()),
+      ('공식 마스터', Icons.functions_rounded, AppTheme.success,
+          const FormulaGuideScreen()),
+      ('핵심이론서', Icons.menu_book_rounded, const Color(0xFF0EA5E9),
+          const TheoryScreen()),
+      ('암기법 사전', Icons.lightbulb_rounded, const Color(0xFFEAB308),
+          const MnemonicsScreen()),
+      ('추천 강의', Icons.play_circle_rounded, const Color(0xFFEF4444),
+          const VideosScreen()),
     ];
-    Widget cell((String, IconData, MaterialColor, Widget) item) {
+
+    Widget cell((String, IconData, Color, Widget) item) {
       final (label, icon, color, screen) = item;
       return Expanded(
-        child: Card(
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: () => Navigator.of(context)
-                .push(MaterialPageRoute(builder: (_) => screen)),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Column(
-                children: [
-                  Icon(icon, size: 26, color: color),
-                  const SizedBox(height: 5),
-                  Text(label,
-                      style: const TextStyle(
-                          fontSize: 11, fontWeight: FontWeight.w700)),
-                ],
+        child: PremiumCard(
+          padding: const EdgeInsets.symmetric(vertical: 13),
+          radius: AppTheme.rMd,
+          onTap: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => screen)),
+          child: Column(
+            children: [
+              IconBadge(icon: icon, color: color, size: 40, iconSize: 21),
+              const SizedBox(height: 7),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
+            ],
           ),
         ),
       );
     }
 
+    Widget row(List<(String, IconData, Color, Widget)> rowItems) {
+      return Row(
+        children: [
+          for (var i = 0; i < rowItems.length; i++) ...[
+            if (i > 0) const SizedBox(width: 8),
+            cell(rowItems[i]),
+          ],
+        ],
+      );
+    }
+
     return Column(
       children: [
-        Row(children: [for (final it in items.take(3)) cell(it)]),
-        Row(children: [for (final it in items.skip(3)) cell(it)]),
+        row(items.sublist(0, 3)),
+        const SizedBox(height: 8),
+        row(items.sublist(3, 6)),
+        const SizedBox(height: 8),
+        row(items.sublist(6, 9)),
       ],
     );
   }
 
-  Widget _menuGrid(BuildContext context) {
-    final items = [
-      ('핵심이론서', Icons.menu_book, const TheoryScreen()),
-      ('암기법 사전', Icons.lightbulb, const MnemonicsScreen()),
-      ('추천 강의', Icons.play_circle, const VideosScreen()),
-    ];
-    return Row(
-      children: [
-        for (final (label, icon, screen) in items)
+  Widget _freqCard(BuildContext context, String subject, Color color) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final top = _freq?[subject]?.take(3).toList() ?? [];
+    return PremiumCard(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      onTap: () => _startFrequency(subject),
+      child: Row(
+        children: [
+          IconBadge(
+              icon: Icons.local_fire_department_rounded,
+              color: color,
+              size: 40,
+              iconSize: 20),
+          const SizedBox(width: 12),
           Expanded(
-            child: Card(
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => screen)),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Column(
-                    children: [
-                      Icon(icon,
-                          size: 28,
-                          color: Theme.of(context).colorScheme.primary),
-                      const SizedBox(height: 6),
-                      Text(label, style: const TextStyle(fontSize: 12)),
-                    ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(subject,
+                    style: const TextStyle(
+                        fontSize: 13.5, fontWeight: FontWeight.w700)),
+                if (top.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    top.map((t) => '${t.topic}(${t.count})').join(' · '),
+                    style: TextStyle(
+                        fontSize: 10.5,
+                        color: dark ? Colors.white54 : AppTheme.textMuted),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ),
+                ],
+              ],
             ),
           ),
-      ],
-    );
-  }
-
-  Widget _freqCard(BuildContext context, String subject) {
-    final top = _freq?[subject]?.take(3).toList() ?? [];
-    return Card(
-      child: ListTile(
-        dense: true,
-        leading: const Icon(Icons.local_fire_department, color: Colors.deepOrange),
-        title: Text(subject, style: const TextStyle(fontSize: 14)),
-        subtitle: top.isEmpty
-            ? null
-            : Text(
-                top.map((t) => '${t.topic}(${t.count})').join(' · '),
-                style: const TextStyle(fontSize: 11),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () => _startFrequency(subject),
+          Icon(Icons.chevron_right_rounded,
+              color: dark ? Colors.white38 : AppTheme.textMuted),
+        ],
       ),
     );
   }
 
   Widget _historySection(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Consumer<AppProvider>(
       builder: (_, p, __) {
         final results = p.quizResults.take(10).toList();
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('학습 이력 (최근 채점 결과)',
-                style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
+            const SectionHeader(
+              emoji: '📊',
+              title: '학습 이력',
+              subtitle: '최근 채점 결과',
+            ),
             if (results.isEmpty)
-              const Card(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text('아직 채점 기록이 없습니다. 문제를 풀어보세요!'),
+              const PremiumCard(
+                child: Row(
+                  children: [
+                    Icon(Icons.history_rounded, color: AppTheme.textMuted),
+                    SizedBox(width: 10),
+                    Text('아직 채점 기록이 없습니다. 문제를 풀어보세요!',
+                        style: TextStyle(fontSize: 13)),
+                  ],
                 ),
               ),
             for (final r in results)
-              Card(
-                child: ListTile(
-                  dense: true,
-                  leading: Icon(
-                    (r['correct'] as int) * 100 >= (r['total'] as int) * 60
-                        ? Icons.check_circle
-                        : Icons.cancel,
-                    color: (r['correct'] as int) * 100 >=
-                            (r['total'] as int) * 60
-                        ? Colors.green
-                        : Colors.orange,
+              Builder(builder: (context) {
+                final passed =
+                    (r['correct'] as int) * 100 >= (r['total'] as int) * 60;
+                final score = ((r['correct'] as int) * 100 /
+                        (r['total'] as int))
+                    .round();
+                return PremiumCard(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: (passed ? AppTheme.success : AppTheme.warning)
+                              .withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(11),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text('$score',
+                            style: TextStyle(
+                                color: passed
+                                    ? AppTheme.success
+                                    : AppTheme.warning,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 13)),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              r['title'] as String,
+                              style: const TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${r['correct']}/${r['total']} 정답 · '
+                              '${(r['date'] as String).substring(0, 16).replaceAll('T', ' ')}',
+                              style: TextStyle(
+                                  fontSize: 10.5,
+                                  color: dark
+                                      ? Colors.white54
+                                      : AppTheme.textMuted),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline_rounded,
+                            size: 18),
+                        color: dark ? Colors.white38 : AppTheme.textMuted,
+                        onPressed: () =>
+                            p.deleteQuizResult(r['id'] as String),
+                      ),
+                    ],
                   ),
-                  title: Text(r['title'] as String,
-                      style: const TextStyle(fontSize: 13),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
-                  subtitle: Text(
-                    '${r['correct']}/${r['total']} '
-                    '(${((r['correct'] as int) * 100 / (r['total'] as int)).round()}점) · '
-                    '${(r['date'] as String).substring(0, 16).replaceAll('T', ' ')}',
-                    style: const TextStyle(fontSize: 11),
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete_outline, size: 18),
-                    onPressed: () => p.deleteQuizResult(r['id'] as String),
-                  ),
-                ),
-              ),
+                );
+              }),
           ],
         );
       },
@@ -429,94 +641,105 @@ class _StudyScreenState extends State<StudyScreen> {
     for (final q in qs) {
       q.examLabel = e.label;
     }
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => QuizPlayScreen(
-        title: '전기기사 ${e.label}',
-        questions: qs,
-        examMode: true,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => QuizPlayScreen(
+          title: '전기기사 ${e.label}',
+          questions: qs,
+          examMode: true,
+        ),
       ),
-    ));
+    );
   }
 
   /// 초보자 배너 — 공식 마스터 진입
   Widget _beginnerCard(BuildContext context) {
-    return Card(
-      color: Colors.green.withValues(alpha: 0.08),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const FormulaGuideScreen())),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.functions_rounded,
-                    color: Colors.green, size: 26),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return PremiumCard(
+      padding: const EdgeInsets.all(14),
+      onTap: () => Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const FormulaGuideScreen())),
+      child: Row(
+        children: [
+          const IconBadge(
+              icon: Icons.functions_rounded,
+              color: AppTheme.success,
+              size: 44,
+              iconSize: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
                   children: [
                     Text('공식 마스터 · 왕초보 기초사전',
                         style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 2),
-                    Text('공식 읽는법·기호뜻·비유이해·암기법 5단계\nV·A·Ω부터 시작하는 초보자 필수 코스',
-                        style: TextStyle(fontSize: 11.5, height: 1.4)),
+                            fontSize: 13.5, fontWeight: FontWeight.w800)),
                   ],
                 ),
-              ),
-              const Icon(Icons.chevron_right, color: Colors.green),
-            ],
+                const SizedBox(height: 3),
+                Text(
+                  '공식 읽는법·기호뜻·비유이해·암기법 5단계 — V·A·Ω부터',
+                  style: TextStyle(
+                      fontSize: 11,
+                      height: 1.4,
+                      color: dark ? Colors.white54 : AppTheme.textMuted),
+                ),
+              ],
+            ),
           ),
-        ),
+          const Icon(Icons.chevron_right_rounded, color: AppTheme.success),
+        ],
       ),
     );
   }
 
   /// 초보자용: 쉬운 문제부터 (난이도 하→중→상)
   Future<void> _startEasyFirst(String subject) async {
-    final qs = await StudyData.instance
-        .questionsByDifficulty(subject, easyFirst: true);
+    final qs = await StudyData.instance.questionsByDifficulty(
+      subject,
+      easyFirst: true,
+    );
     if (!mounted) return;
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => QuizPlayScreen(
-        title: '$subject 쉬운순 (${qs.length}문제)',
-        questions: qs,
-        examMode: false,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => QuizPlayScreen(
+          title: '$subject 쉬운순 (${qs.length}문제)',
+          questions: qs,
+          examMode: false,
+        ),
       ),
-    ));
+    );
   }
 
   Future<void> _startRandom(String subject) async {
     final all = await StudyData.instance.questionsBySubject(subject);
     all.shuffle(Random());
     if (!mounted) return;
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => QuizPlayScreen(
-        title: '$subject 랜덤 20문제',
-        questions: all.take(20).toList(),
-        examMode: false,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => QuizPlayScreen(
+          title: '$subject 랜덤 20문제',
+          questions: all.take(20).toList(),
+          examMode: false,
+        ),
       ),
-    ));
+    );
   }
 
   Future<void> _startFrequency(String subject) async {
     final qs = await StudyData.instance.questionsByFrequency(subject);
     if (!mounted) return;
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => QuizPlayScreen(
-        title: '$subject 빈출순 전체 (${qs.length}문제)',
-        questions: qs,
-        examMode: false,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => QuizPlayScreen(
+          title: '$subject 빈출순 전체 (${qs.length}문제)',
+          questions: qs,
+          examMode: false,
+        ),
       ),
-    ));
+    );
   }
 }

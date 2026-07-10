@@ -19,6 +19,7 @@ class SmartReviewScreen extends StatefulWidget {
 class _SmartReviewScreenState extends State<SmartReviewScreen> {
   ({int solved, int correct, int attempts, int wrong, int bookmarks})? _sum;
   List<(String, String, int, int)> _weak = [];
+  int _dueCount = 0;
   bool _loading = true;
 
   @override
@@ -30,10 +31,12 @@ class _SmartReviewScreenState extends State<SmartReviewScreen> {
   Future<void> _load() async {
     final sum = await ProgressService.instance.summary();
     final weak = await ProgressService.instance.weakTopics();
+    final due = await ProgressService.instance.dueReviewCount();
     if (!mounted) return;
     setState(() {
       _sum = sum;
       _weak = weak;
+      _dueCount = due;
       _loading = false;
     });
   }
@@ -51,6 +54,16 @@ class _SmartReviewScreenState extends State<SmartReviewScreen> {
                 children: [
                   _summaryCard(),
                   const SizedBox(height: 14),
+                  // 🔁 간격반복(SRS) 오늘의 복습 — 맞힌 건 간격을 늦리고, 틀린 건 다시 모을 늘리는 구조
+                  if (_dueCount > 0)
+                    _actionCard(
+                      icon: Icons.event_repeat,
+                      color: Colors.deepPurple,
+                      title: '오늘의 복습 카드 ($_dueCount개)',
+                      subtitle: '간격반복 스케줄 — 지금 안 보면 기억이 사라져요! 최적의 복습 타이밍입니다',
+                      onTap: _startDueReview,
+                    ),
+                  if (_dueCount > 0) const SizedBox(height: 10),
                   _actionCard(
                     icon: Icons.close_rounded,
                     color: Colors.red,
@@ -231,6 +244,18 @@ class _SmartReviewScreenState extends State<SmartReviewScreen> {
         onTap: () => _startTopicDrill(subject, topic),
       ),
     );
+  }
+
+  Future<void> _startDueReview() async {
+    final qids = await ProgressService.instance.dueReviewQids();
+    final qs = await ProgressService.instance.resolveQuestions(qids);
+    if (!mounted) return;
+    if (qs.isEmpty) {
+      _toast('오늘 복습할 카드가 없어요. 완벽합니다 👏');
+      return;
+    }
+    qs.shuffle();
+    await _push('오늘의 복습 카드 (${qs.length}문항)', qs);
   }
 
   Future<void> _startWrongReview() async {

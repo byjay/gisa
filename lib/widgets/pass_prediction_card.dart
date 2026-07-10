@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/pass_prediction.dart';
+import '../theme/app_theme.dart';
 import '../services/study_data.dart';
 import '../screens/study/quiz_play_screen.dart';
 
@@ -47,12 +48,9 @@ class _PassPredictionCardState extends State<PassPredictionCard> {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF3949AB), Color(0xFF5C6BC0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
+        gradient: AppTheme.heroGradient,
+        borderRadius: BorderRadius.circular(AppTheme.rLg),
+        boxShadow: AppTheme.glowShadow(AppTheme.primary),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,7 +81,7 @@ class _PassPredictionCardState extends State<PassPredictionCard> {
             child: FilledButton(
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.white,
-                foregroundColor: const Color(0xFF3949AB),
+                foregroundColor: AppTheme.primaryDark,
                 padding: const EdgeInsets.symmetric(vertical: 13),
               ),
               onPressed: () => _startDiagnosis(context),
@@ -116,18 +114,15 @@ class _PassPredictionCardState extends State<PassPredictionCard> {
   Widget _predictionCard(BuildContext context, PassPrediction p) {
     final pass = p.pass;
     final gwarakList = p.subjects.where((s) => s.gwarak).toList();
-    final color = pass
-        ? const Color(0xFF2E7D32)
-        : (p.overall >= 50 ? const Color(0xFFEF6C00) : const Color(0xFFC62828));
+    final gradient = pass
+        ? AppTheme.successGradient
+        : (p.overall >= 50 ? AppTheme.warningGradient : AppTheme.dangerGradient);
 
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [color, color.withValues(alpha: 0.8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(AppTheme.rLg),
+        boxShadow: AppTheme.glowShadow(gradient.colors.first),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,8 +248,8 @@ class _PassPredictionCardState extends State<PassPredictionCard> {
             padding: const EdgeInsets.fromLTRB(18, 12, 18, 14),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
-              borderRadius:
-                  const BorderRadius.vertical(bottom: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(AppTheme.rLg)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

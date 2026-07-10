@@ -25,7 +25,12 @@ class ProgressService {
     return Map<String, dynamic>.from(raw);
   }
 
-  /// 풀이 결과 기록
+  /// 간격반복(Leitner) 박스별 다음 복습 간격(일) — box 0~4
+  static const List<int> _srsIntervalDays = [0, 1, 3, 7, 16];
+
+  /// 풀이 결과 기록 + 간격반복 스케줄링
+  /// - 맞히면 박스 +1(간격 늘어남), 틀리면 박스 0으로 초기화(내일 다시 만남)
+  /// - "봤던 문제 또 보면 바로 정답" 훈련의 핵심: 틀린 문제는 반드시 며칠 안에 재등장
   Future<void> record(Question q, bool correct) async {
     await _ensure();
     final r = _rec(q.qid);
@@ -37,9 +42,53 @@ class ProgressService {
     r['last'] = correct ? 'o' : 'x';
     r['subject'] = q.subject;
     r['topic'] = q.topic;
+    final box = correct
+        ? ((r['box'] as int? ?? 0) + 1).clamp(0, _srsIntervalDays.length - 1)
+        : 0;
+    r['box'] = box;
+    r['nextDue'] = DateTime.now()
+        .add(Duration(days: _srsIntervalDays[box]))
+        .toIso8601String();
     r['updatedAt'] = DateTime.now().toIso8601String();
     await _box!.put(q.qid, r);
   }
+
+  /// 이 문제를 이전에 만난 적 있는지 조회 (문제풀이 화면 상단 "N번째 만남" 배너용)
+  /// null이면 첫 만남
+  Future<({int seenCount, String? lastResult, int box})?> historyFor(
+      String qid) async {
+    await _ensure();
+    final raw = _box!.get(qid);
+    if (raw == null) return null;
+    final r = Map<String, dynamic>.from(raw);
+    final seen = (r['correct'] as int? ?? 0) + (r['wrong'] as int? ?? 0);
+    if (seen == 0) return null;
+    return (
+      seenCount: seen,
+      lastResult: r['last'] as String?,
+      box: r['box'] as int? ?? 0,
+    );
+  }
+
+  /// 오늘 복습이 필요한 문제(간격반복 due) qid 집합 — box 4(장기기억 완성) 제외
+  Future<Set<String>> dueReviewQids() async {
+    await _ensure();
+    final now = DateTime.now();
+    final out = <String>{};
+    for (final key in _box!.keys) {
+      final r = _rec(key as String);
+      final due = r['nextDue'] as String?;
+      if (due == null) continue;
+      final box = r['box'] as int? ?? 0;
+      if (box >= _srsIntervalDays.length - 1) continue; // 완전 마스터는 급하지 않음
+      final dueDate = DateTime.tryParse(due);
+      if (dueDate == null) continue;
+      if (!dueDate.isAfter(now)) out.add(key);
+    }
+    return out;
+  }
+
+  Future<int> dueReviewCount() async => (await dueReviewQids()).length;
 
   /// 북마크 토글 — 반환값: 토글 후 상태
   Future<bool> toggleBookmark(Question q) async {

@@ -1,0 +1,434 @@
+import 'package:flutter/material.dart';
+
+/// 🎨 상업화 수준 프리미엄 디자인 시스템
+/// - 브랜드 컬러: 딥 인디고 + 일렉트릭 바이올렛 (전기기사 아이덴티티)
+/// - 세련된 그라디언트, 부드러운 그림자, 일관된 라운딩
+class AppTheme {
+  AppTheme._();
+
+  // ── Brand Colors ────────────────────────────────
+  static const Color primary = Color(0xFF4F46E5); // Indigo 600
+  static const Color primaryDark = Color(0xFF3730A3); // Indigo 800
+  static const Color accent = Color(0xFF7C3AED); // Violet 600
+  static const Color electric = Color(0xFF06B6D4); // Cyan 500 (전기 포인트)
+
+  static const Color success = Color(0xFF059669); // Emerald 600
+  static const Color warning = Color(0xFFD97706); // Amber 600
+  static const Color danger = Color(0xFFDC2626); // Red 600
+
+  // ── Surfaces ────────────────────────────────────
+  static const Color bgLight = Color(0xFFF6F7FB);
+  static const Color cardLight = Colors.white;
+  static const Color bgDark = Color(0xFF0F1117);
+  static const Color cardDark = Color(0xFF1A1D27);
+
+  // ── Text ────────────────────────────────────────
+  static const Color textStrong = Color(0xFF111827);
+  static const Color textBody = Color(0xFF374151);
+  static const Color textMuted = Color(0xFF6B7280);
+
+  // ── Gradients ───────────────────────────────────
+  static const LinearGradient heroGradient = LinearGradient(
+    colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient electricGradient = LinearGradient(
+    colors: [Color(0xFF0891B2), Color(0xFF06B6D4)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient successGradient = LinearGradient(
+    colors: [Color(0xFF047857), Color(0xFF10B981)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient dangerGradient = LinearGradient(
+    colors: [Color(0xFFB91C1C), Color(0xFFEF4444)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient warningGradient = LinearGradient(
+    colors: [Color(0xFFB45309), Color(0xFFF59E0B)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  // ── Shadows ─────────────────────────────────────
+  static List<BoxShadow> softShadow(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    if (dark) return const [];
+    return [
+      BoxShadow(
+        color: const Color(0xFF4F46E5).withValues(alpha: 0.06),
+        blurRadius: 16,
+        offset: const Offset(0, 4),
+      ),
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.04),
+        blurRadius: 6,
+        offset: const Offset(0, 2),
+      ),
+    ];
+  }
+
+  static List<BoxShadow> glowShadow(Color color) => [
+        BoxShadow(
+          color: color.withValues(alpha: 0.35),
+          blurRadius: 20,
+          offset: const Offset(0, 8),
+        ),
+      ];
+
+  // ── Radius ──────────────────────────────────────
+  static const double rSm = 12;
+  static const double rMd = 16;
+  static const double rLg = 20;
+  static const double rXl = 28;
+
+  // ── ThemeData ───────────────────────────────────
+  static ThemeData light() {
+    final scheme = ColorScheme.fromSeed(seedColor: primary).copyWith(
+      primary: primary,
+      secondary: accent,
+      tertiary: electric,
+      surface: cardLight,
+    );
+    return _base(scheme, Brightness.light).copyWith(
+      scaffoldBackgroundColor: bgLight,
+    );
+  }
+
+  static ThemeData dark() {
+    final scheme = ColorScheme.fromSeed(
+      seedColor: primary,
+      brightness: Brightness.dark,
+    ).copyWith(
+      primary: const Color(0xFF818CF8),
+      secondary: const Color(0xFFA78BFA),
+      tertiary: const Color(0xFF22D3EE),
+      surface: cardDark,
+    );
+    return _base(scheme, Brightness.dark).copyWith(
+      scaffoldBackgroundColor: bgDark,
+    );
+  }
+
+  static ThemeData _base(ColorScheme scheme, Brightness brightness) {
+    final dark = brightness == Brightness.dark;
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: scheme,
+      brightness: brightness,
+      fontFamilyFallback: const ['Noto Sans KR', 'Apple SD Gothic Neo'],
+      splashFactory: InkSparkle.splashFactory,
+      cardTheme: CardThemeData(
+        elevation: 0,
+        color: dark ? cardDark : cardLight,
+        surfaceTintColor: Colors.transparent,
+        margin: const EdgeInsets.symmetric(vertical: 5),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(rMd),
+          side: BorderSide(
+            color: dark
+                ? Colors.white.withValues(alpha: 0.06)
+                : const Color(0xFFE8EAF2),
+          ),
+        ),
+      ),
+      appBarTheme: AppBarTheme(
+        centerTitle: false,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: dark ? bgDark : bgLight,
+        titleTextStyle: TextStyle(
+          fontSize: 19,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.4,
+          color: dark ? Colors.white : textStrong,
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        height: 66,
+        elevation: 0,
+        backgroundColor: dark ? cardDark : Colors.white,
+        surfaceTintColor: Colors.transparent,
+        indicatorColor: scheme.primary.withValues(alpha: dark ? 0.22 : 0.1),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return TextStyle(
+            fontSize: 10.5,
+            fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+            color: selected
+                ? scheme.primary
+                : (dark ? Colors.white54 : textMuted),
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return IconThemeData(
+            size: 23,
+            color: selected
+                ? scheme.primary
+                : (dark ? Colors.white54 : textMuted),
+          );
+        }),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(rSm + 2),
+          ),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(
+            color: dark
+                ? Colors.white.withValues(alpha: 0.1)
+                : const Color(0xFFE8EAF2),
+          ),
+        ),
+        backgroundColor: dark ? cardDark : Colors.white,
+        labelStyle: const TextStyle(fontWeight: FontWeight.w600),
+      ),
+      listTileTheme: const ListTileThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(rSm)),
+        ),
+      ),
+      dividerTheme: DividerThemeData(
+        color: dark
+            ? Colors.white.withValues(alpha: 0.07)
+            : const Color(0xFFEDEFF5),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(rSm),
+        ),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(rXl)),
+        ),
+      ),
+    );
+  }
+}
+
+/// ── 재사용 프리미엄 위젯들 ──────────────────────────
+
+/// 섹션 헤더 (타이틀 + 서브타이틀 + 액션)
+class SectionHeader extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final String? emoji;
+
+  const SectionHeader({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.actionLabel,
+    this.onAction,
+    this.emoji,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 22, 4, 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    if (emoji != null) ...[
+                      Text(emoji!, style: const TextStyle(fontSize: 17)),
+                      const SizedBox(width: 6),
+                    ],
+                    Flexible(
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 16.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.3,
+                          color: dark ? Colors.white : AppTheme.textStrong,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle!,
+                    style: TextStyle(
+                      fontSize: 12,
+                      height: 1.35,
+                      color: dark ? Colors.white54 : AppTheme.textMuted,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (actionLabel != null)
+            TextButton(
+              onPressed: onAction,
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                actionLabel!,
+                style: const TextStyle(
+                    fontSize: 12.5, fontWeight: FontWeight.w700),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 프리미엄 카드 컨테이너 (부드러운 그림자 + 보더)
+class PremiumCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final VoidCallback? onTap;
+  final Gradient? gradient;
+  final Color? color;
+  final double radius;
+
+  const PremiumCard({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+    this.onTap,
+    this.gradient,
+    this.color,
+    this.radius = AppTheme.rMd,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final body = Container(
+      decoration: BoxDecoration(
+        gradient: gradient,
+        color: gradient == null
+            ? (color ?? (dark ? AppTheme.cardDark : Colors.white))
+            : null,
+        borderRadius: BorderRadius.circular(radius),
+        border: gradient == null
+            ? Border.all(
+                color: dark
+                    ? Colors.white.withValues(alpha: 0.06)
+                    : const Color(0xFFE8EAF2),
+              )
+            : null,
+        boxShadow: gradient != null
+            ? AppTheme.glowShadow(
+                (gradient as LinearGradient).colors.first)
+            : AppTheme.softShadow(context),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(radius),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(radius),
+          child: Padding(padding: padding, child: child),
+        ),
+      ),
+    );
+    return body;
+  }
+}
+
+/// 아이콘 뱃지 (컬러 배경의 둥근 아이콘)
+class IconBadge extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final double size;
+  final double iconSize;
+
+  const IconBadge({
+    super.key,
+    required this.icon,
+    required this.color,
+    this.size = 42,
+    this.iconSize = 22,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            color.withValues(alpha: 0.16),
+            color.withValues(alpha: 0.08)
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(size * 0.32),
+      ),
+      child: Icon(icon, color: color, size: iconSize),
+    );
+  }
+}
+
+/// 작은 라벨 필 (뱃지)
+class PillBadge extends StatelessWidget {
+  final String text;
+  final Color color;
+  final bool filled;
+
+  const PillBadge({
+    super.key,
+    required this.text,
+    required this.color,
+    this.filled = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+      decoration: BoxDecoration(
+        color: filled ? color : color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 10.5,
+          fontWeight: FontWeight.w800,
+          color: filled ? Colors.white : color,
+        ),
+      ),
+    );
+  }
+}

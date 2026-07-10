@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
+import '../theme/app_theme.dart';
 import '../widgets/pass_prediction_card.dart';
 import '../widgets/dday_plan_card.dart';
+import '../widgets/due_review_card.dart';
+import '../widgets/due_flashcard_card.dart';
 
 class HomeScreen extends StatelessWidget {
   final void Function(int) onNavigate;
@@ -12,7 +15,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final app = context.watch<AppProvider>();
-    final theme = Theme.of(context);
+    final dark = Theme.of(context).brightness == Brightness.dark;
     final upcoming = app.exams.where((e) => e.dDay >= 0).toList();
     final nearest = upcoming.isNotEmpty ? upcoming.first : null;
     final dailyRatio = app.dailyGoalMinutes > 0
@@ -21,280 +24,525 @@ class HomeScreen extends StatelessWidget {
     final pendingNotes = app.notes.where((n) => !n.mastered).length;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('자격증 스터디 트래커'),
-        centerTitle: false,
-        actions: [
-          IconButton(
-            tooltip: app.darkMode ? '라이트 모드' : '다크 모드 (야간 학습)',
-            icon: Icon(
-                app.darkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
-            onPressed: () => context.read<AppProvider>().toggleDarkMode(),
-          ),
-        ],
-      ),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Text(DateFormat('yyyy년 M월 d일 (E)', 'ko').format(DateTime.now()),
-                style: TextStyle(color: Colors.grey.shade600)),
-            const SizedBox(height: 12),
-            // 🎯 합격 예측 — 앱의 심장 (매일 열어보게 만드는 후킹)
-            const PassPredictionCard(),
-            const SizedBox(height: 12),
-            // 📈 성장 그랤프 + 🗓 D-Day 역산 플랜 (돈 낼 만한 이유: 계획과 증거)
-            DDayPlanCard(dDay: nearest?.dDay ?? 0),
-            const SizedBox(height: 16),
-            // D-Day hero card
-            GestureDetector(
-              onTap: () => onNavigate(2),
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: nearest != null
-                        ? [nearest.color, nearest.color.withValues(alpha: 0.7)]
-                        : [
-                            theme.colorScheme.primary,
-                            theme.colorScheme.primary.withValues(alpha: 0.7)
-                          ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+        child: CustomScrollView(
+          slivers: [
+            // ── 프리미엄 헤더 ──
+            SliverToBoxAdapter(child: _header(context, app, nearest)),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  // 오늘 학습 진행 스트립
+                  _todayStrip(context, app, dailyRatio, pendingNotes),
+                  const SizedBox(height: 14),
+                  // 복습 카드들
+                  const DueReviewCard(),
+                  const DueFlashcardCard(),
+                  // 🎯 합격 예측
+                  const PassPredictionCard(),
+                  const SizedBox(height: 12),
+                  DDayPlanCard(dDay: nearest?.dDay ?? 0),
+                  // 문제은행 배너
+                  const SectionHeader(
+                    emoji: '⚡',
+                    title: '전기기사 문제은행',
+                    subtitle: '이론-문제-암기법 완전 연동 학습 시스템',
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: nearest != null
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(nearest.name,
-                                    style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold),
-                                    overflow: TextOverflow.ellipsis),
-                                const SizedBox(height: 4),
-                                Text(
-                                    DateFormat('yyyy.MM.dd')
-                                        .format(nearest.examDate),
-                                    style: const TextStyle(
-                                        color: Colors.white70)),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            nearest.dDay == 0 ? 'D-Day' : 'D-${nearest.dDay}',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      )
-                    : const Row(
-                        children: [
-                          Icon(Icons.add_circle_outline, color: Colors.white),
-                          SizedBox(width: 12),
-                          Text('시험을 등록하고 D-Day를 관리하세요!',
-                              style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            // 전기기사 문제은행 바로가기 (학습 탭)
-            Card(
-              color: theme.colorScheme.primaryContainer,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () => onNavigate(1),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
+                  _bankBanner(context),
+                  // 빠른 실행
+                  const SectionHeader(emoji: '🚀', title: '빠른 실행'),
+                  Row(
                     children: [
-                      Icon(Icons.school,
-                          size: 36, color: theme.colorScheme.primary),
-                      const SizedBox(width: 14),
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      Expanded(
+                        child: _actionTile(
+                          context,
+                          icon: Icons.play_circle_fill_rounded,
+                          label: '타이머 시작',
+                          sub: '집중 학습 기록',
+                          gradient: AppTheme.heroGradient,
+                          onTap: () => onNavigate(3),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _actionTile(
+                          context,
+                          icon: Icons.school_rounded,
+                          label: '오늘의 학습',
+                          sub: '문제·강의·암기',
+                          gradient: AppTheme.electricGradient,
+                          onTap: () => onNavigate(1),
+                        ),
+                      ),
+                    ],
+                  ),
+                  // 다가오는 시험
+                  if (upcoming.length > 1) ...[
+                    SectionHeader(
+                      emoji: '🗓',
+                      title: '다가오는 시험',
+                      actionLabel: '전체 보기',
+                      onAction: () => onNavigate(2),
+                    ),
+                    for (final e in upcoming.skip(1).take(3))
+                      PremiumCard(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 12),
+                        onTap: () => onNavigate(2),
+                        child: Row(
                           children: [
-                            Text('전기기사 문제은행',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold)),
-                            SizedBox(height: 4),
-                            Text(
-                              '기출 2,897문항 · 1:1 강의 46토픽 · 반복기출 암기 347제\n'
-                              '이론-문제-암기법 완전 연동 학습',
-                              style: TextStyle(fontSize: 12, height: 1.4),
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: e.color.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(e.name[0],
+                                  style: TextStyle(
+                                      color: e.color,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 16)),
                             ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(e.name,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 14),
+                                      overflow: TextOverflow.ellipsis),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                      DateFormat('yyyy.MM.dd (E)', 'ko')
+                                          .format(e.examDate),
+                                      style: TextStyle(
+                                          fontSize: 11.5,
+                                          color: dark
+                                              ? Colors.white54
+                                              : AppTheme.textMuted)),
+                                ],
+                              ),
+                            ),
+                            PillBadge(
+                                text: 'D-${e.dDay}', color: e.color),
                           ],
                         ),
                       ),
-                      const Icon(Icons.chevron_right),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Today goal progress
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('오늘의 학습 목표',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        Text(
-                            '${app.todayMinutes} / ${app.dailyGoalMinutes}분',
-                            style: TextStyle(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: LinearProgressIndicator(
-                        value: dailyRatio,
-                        minHeight: 10,
-                        backgroundColor: Colors.grey.shade200,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      dailyRatio >= 1.0
-                          ? '오늘 목표 달성! 🎉'
-                          : '목표까지 ${app.dailyGoalMinutes - app.todayMinutes}분 남았어요',
-                      style: TextStyle(
-                          fontSize: 12, color: Colors.grey.shade600),
-                    ),
+                    const SizedBox(height: 4),
                   ],
-                ),
+                ]),
               ),
             ),
-            const SizedBox(height: 16),
-            // Quick stats
-            Row(
-              children: [
-                Expanded(
-                    child: _quickStat(context, Icons.local_fire_department,
-                        '${app.streak}일', '연속 학습', Colors.orange, () => onNavigate(4))),
-                const SizedBox(width: 10),
-                Expanded(
-                    child: _quickStat(context, Icons.timer, '${app.weekMinutes}분',
-                        '이번 주', Colors.teal, () => onNavigate(4))),
-                const SizedBox(width: 10),
-                Expanded(
-                    child: _quickStat(context, Icons.quiz, '$pendingNotes개',
-                        '복습할 오답', Colors.redAccent, () => onNavigate(5))),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // Quick actions
-            const Text('빠른 실행',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: _actionButton(context, Icons.play_circle_fill,
-                      '타이머 시작', theme.colorScheme.primary, () => onNavigate(3)),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _actionButton(context, Icons.school, '오늘의 학습',
-                      Colors.teal, () => onNavigate(1)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // Upcoming exams list
-            if (upcoming.length > 1) ...[
-              const Text('다가오는 시험',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              const SizedBox(height: 8),
-              ...upcoming.skip(1).take(3).map((e) => Card(
-                    child: ListTile(
-                      dense: true,
-                      leading: CircleAvatar(
-                        radius: 16,
-                        backgroundColor: e.color.withValues(alpha: 0.15),
-                        child: Text(e.name[0],
-                            style: TextStyle(color: e.color, fontSize: 14)),
-                      ),
-                      title: Text(e.name),
-                      trailing: Text('D-${e.dDay}',
-                          style: TextStyle(
-                              color: e.color, fontWeight: FontWeight.bold)),
-                      onTap: () => onNavigate(2),
-                    ),
-                  )),
-            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _quickStat(BuildContext context, IconData icon, String value,
-      String label, Color color, VoidCallback onTap) {
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          child: Column(
+  // ── 그라디언트 헤더: 인사 + D-Day 히어로 ──────────────
+  Widget _header(BuildContext context, AppProvider app, dynamic nearest) {
+    final now = DateTime.now();
+    final greeting = now.hour < 6
+        ? '새벽 공부, 대단해요 🌙'
+        : now.hour < 12
+            ? '좋은 아침이에요 ☀️'
+            : now.hour < 18
+                ? '오늘도 화이팅! 💪'
+                : '저녁 학습 시간이에요 🌆';
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+      decoration: BoxDecoration(
+        gradient: AppTheme.heroGradient,
+        borderRadius: BorderRadius.circular(AppTheme.rXl - 4),
+        boxShadow: AppTheme.glowShadow(AppTheme.primary),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Icon(icon, color: color, size: 24),
-              const SizedBox(height: 6),
-              Text(value,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 15)),
-              Text(label,
-                  style:
-                      TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      DateFormat('M월 d일 EEEE', 'ko').format(now),
+                      style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.75),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(greeting,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.4)),
+                  ],
+                ),
+              ),
+              // 다크모드 토글
+              _glassIconButton(
+                context,
+                icon: app.darkMode
+                    ? Icons.light_mode_rounded
+                    : Icons.dark_mode_rounded,
+                onTap: () => context.read<AppProvider>().toggleDarkMode(),
+              ),
             ],
           ),
-        ),
+          const SizedBox(height: 16),
+          // D-Day 히어로 영역
+          GestureDetector(
+            onTap: () => onNavigate(2),
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.13),
+                borderRadius: BorderRadius.circular(AppTheme.rMd),
+                border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.18)),
+              ),
+              child: nearest != null
+                  ? Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(nearest.name,
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w800),
+                                  overflow: TextOverflow.ellipsis),
+                              const SizedBox(height: 3),
+                              Text(
+                                DateFormat('yyyy.MM.dd (E)', 'ko')
+                                    .format(nearest.examDate),
+                                style: TextStyle(
+                                    color:
+                                        Colors.white.withValues(alpha: 0.7),
+                                    fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            nearest.dDay == 0
+                                ? 'D-Day'
+                                : 'D-${nearest.dDay}',
+                            style: const TextStyle(
+                                color: AppTheme.primaryDark,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.5),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        const Icon(Icons.add_circle_outline_rounded,
+                            color: Colors.white),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text('시험을 등록하고 D-Day를 관리하세요',
+                              style: TextStyle(
+                                  color:
+                                      Colors.white.withValues(alpha: 0.9),
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w600)),
+                        ),
+                        const Icon(Icons.chevron_right_rounded,
+                            color: Colors.white70),
+                      ],
+                    ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _actionButton(BuildContext context, IconData icon, String label,
-      Color color, VoidCallback onTap) {
+  Widget _glassIconButton(BuildContext context,
+      {required IconData icon, required VoidCallback onTap}) {
     return Material(
-      color: color.withValues(alpha: 0.1),
+      color: Colors.white.withValues(alpha: 0.15),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          padding: const EdgeInsets.all(9),
+          child: Icon(icon, color: Colors.white, size: 20),
+        ),
+      ),
+    );
+  }
+
+  // ── 오늘 학습 스트립: 목표 진행 + 스탯 3종 ─────────────
+  Widget _todayStrip(BuildContext context, AppProvider app,
+      double dailyRatio, int pendingNotes) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return PremiumCard(
+      padding: const EdgeInsets.fromLTRB(16, 15, 16, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Icon(icon, color: color),
-              const SizedBox(width: 8),
-              Text(label,
-                  style:
-                      TextStyle(color: color, fontWeight: FontWeight.bold)),
+              const Text('오늘의 학습 목표',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800, fontSize: 13.5)),
+              const Spacer(),
+              Text('${app.todayMinutes}',
+                  style: const TextStyle(
+                      color: AppTheme.primary,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 16)),
+              Text(' / ${app.dailyGoalMinutes}분',
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: dark ? Colors.white54 : AppTheme.textMuted)),
             ],
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: dailyRatio),
+              duration: const Duration(milliseconds: 900),
+              curve: Curves.easeOutCubic,
+              builder: (_, v, __) => LinearProgressIndicator(
+                value: v,
+                minHeight: 9,
+                backgroundColor: dark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : const Color(0xFFEEF0F7),
+                valueColor: AlwaysStoppedAnimation(
+                  dailyRatio >= 1.0 ? AppTheme.success : AppTheme.primary,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            dailyRatio >= 1.0
+                ? '오늘 목표 달성! 🎉 내일도 이 기세로!'
+                : '목표까지 ${app.dailyGoalMinutes - app.todayMinutes}분 — 조금만 더!',
+            style: TextStyle(
+                fontSize: 11.5,
+                color: dark ? Colors.white54 : AppTheme.textMuted),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            height: 1,
+            color: dark
+                ? Colors.white.withValues(alpha: 0.06)
+                : const Color(0xFFEEF0F7),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _miniStat(context, Icons.local_fire_department_rounded,
+                  '${app.streak}일', '연속 학습', const Color(0xFFF97316),
+                  () => onNavigate(4)),
+              _vDivider(context),
+              _miniStat(context, Icons.schedule_rounded,
+                  '${app.weekMinutes}분', '이번 주', AppTheme.electric,
+                  () => onNavigate(4)),
+              _vDivider(context),
+              _miniStat(context, Icons.quiz_rounded, '$pendingNotes개',
+                  '복습할 오답', AppTheme.danger, () => onNavigate(5)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _vDivider(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      width: 1,
+      height: 34,
+      color: dark
+          ? Colors.white.withValues(alpha: 0.06)
+          : const Color(0xFFEEF0F7),
+    );
+  }
+
+  Widget _miniStat(BuildContext context, IconData icon, String value,
+      String label, Color color, VoidCallback onTap) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: color, size: 16),
+                const SizedBox(width: 4),
+                Text(value,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w900, fontSize: 14.5)),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(label,
+                style: TextStyle(
+                    fontSize: 10.5,
+                    color: dark ? Colors.white54 : AppTheme.textMuted)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── 문제은행 배너 ────────────────────────────────
+  Widget _bankBanner(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return PremiumCard(
+      onTap: () => onNavigate(1),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              const IconBadge(
+                  icon: Icons.bolt_rounded,
+                  color: AppTheme.accent,
+                  size: 46,
+                  iconSize: 26),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('10년치 기출 완전 정복',
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w800)),
+                    const SizedBox(height: 3),
+                    Text('CBT 출제의 50%는 기출 재출제 — 여기서 다 잡아요',
+                        style: TextStyle(
+                            fontSize: 11.5,
+                            color: dark
+                                ? Colors.white54
+                                : AppTheme.textMuted)),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded,
+                  color: dark ? Colors.white38 : AppTheme.textMuted),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              _bankStat(context, '2,897', '기출 문항'),
+              _bankStat(context, '46', '1:1 강의 토픽'),
+              _bankStat(context, '347', '반복기출 암기'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _bankStat(BuildContext context, String num, String label) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 3),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: dark
+              ? Colors.white.withValues(alpha: 0.05)
+              : const Color(0xFFF6F7FB),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Text(num,
+                style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    color: AppTheme.primary,
+                    letterSpacing: -0.3)),
+            const SizedBox(height: 1),
+            Text(label,
+                style: TextStyle(
+                    fontSize: 10.5,
+                    color: dark ? Colors.white54 : AppTheme.textMuted)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── 빠른 실행 그라디언트 타일 ─────────────────────
+  Widget _actionTile(BuildContext context,
+      {required IconData icon,
+      required String label,
+      required String sub,
+      required Gradient gradient,
+      required VoidCallback onTap}) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(AppTheme.rMd),
+        boxShadow: AppTheme.glowShadow(
+            (gradient as LinearGradient).colors.first),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppTheme.rMd),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppTheme.rMd),
+          child: Padding(
+            padding: const EdgeInsets.all(15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(icon, color: Colors.white, size: 26),
+                const SizedBox(height: 10),
+                Text(label,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14.5)),
+                const SizedBox(height: 2),
+                Text(sub,
+                    style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.75),
+                        fontSize: 11)),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
+
