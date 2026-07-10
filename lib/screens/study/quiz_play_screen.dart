@@ -4,6 +4,8 @@ import '../../providers/app_provider.dart';
 import '../../services/study_data.dart';
 import '../../services/progress_service.dart';
 import '../../widgets/lesson_view.dart';
+import '../../widgets/rich_slide_body.dart';
+import '../../widgets/teacher_recipe_box.dart';
 
 /// 문제풀이 화면: 실전(examMode)/연습 모드, 문제 내 암기법·이론 연동, 채점
 class QuizPlayScreen extends StatefulWidget {
@@ -271,17 +273,14 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Text(
-                    _q.explanation,
-                    style: TextStyle(
-                        fontSize: 13.5,
-                        height: 1.55,
-                        color: scheme.onSurface),
-                  ),
+                  RichSlideBody(
+                      body: _q.explanation, accent: scheme.primary),
                 ],
               ),
             ),
           ],
+          // 🧑‍🏫 만능 선생님: 풀이 순서 + 공식 적용법 + 관련 암기법 (이론·암기 공존)
+          TeacherRecipeBox(topic: _q.topic, subject: _q.subject),
           const SizedBox(height: 10),
           // 큰 터치 영역의 강의 버튼 — 전체 폭 차지, 확실히 눌림
           SizedBox(

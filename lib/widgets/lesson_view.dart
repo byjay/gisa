@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/study_data.dart';
+import 'teacher_recipe_box.dart';
 
 /// 1:1 강의 노트 렌더러 — intro/sections/formulas/mnemonics/traps/strategy 전체 표시
 /// **볼드** 마크다운, | 표 | 마크다운 지원
@@ -384,8 +385,14 @@ Future<void> showLessonSheet(
             else
               const Padding(
                 padding: EdgeInsets.all(24),
-                child: Text('이 토픽의 강의 자료를 준비 중입니다.'),
+                child: Text('이 토픽의 강의 자료를 준비 중입니다. 아래 풀이 레시피로 공략하세요!'),
               ),
+            // 🧑‍🏫 풀이 레시피 — 공식 적용법 + 풀이 순서 (모든 강의에 공통 탑재)
+            TeacherRecipeBox(
+                topic: topic,
+                subject: subject,
+                initiallyExpanded: lesson == null,
+                showMnemonics: false),
             // 추가 암기법 (mnemonics.json 연동 — 강의에 없는 보조 자료)
             if (mnemonics.isNotEmpty) ...[
               const SizedBox(height: 20),

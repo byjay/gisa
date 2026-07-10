@@ -5,6 +5,7 @@ import '../../services/study_data.dart';
 import '../../services/slide_progress.dart';
 import '../../widgets/tutor_avatar.dart';
 import '../../widgets/rich_slide_body.dart';
+import '../../widgets/teacher_recipe_box.dart';
 import 'quiz_play_screen.dart';
 
 /// 30일 슬라이드 학습 — 덱 목록 화면
@@ -771,6 +772,15 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
                           height: 1.3)),
                   const SizedBox(height: 12),
                   RichSlideBody(body: _bodyForLevel(c), accent: s.color),
+                  // 🧑‍🏫 풀이 레시피 — 공식·풀이순서를 이론 옆에 나란히 (암기·이론 공존)
+                  if (c.topic.isNotEmpty &&
+                      c.topic != '전과목' &&
+                      (c.type == 'formula' || c.type == 'core'))
+                    TeacherRecipeBox(
+                        topic: c.topic,
+                        subject: widget.deck.subject,
+                        initiallyExpanded: false,
+                        showMnemonics: false),
                   if (showQuiz) ...[
                     const SizedBox(height: 14),
                     SizedBox(

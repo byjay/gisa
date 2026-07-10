@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/study_data.dart';
 import '../../widgets/lesson_view.dart';
+import '../../widgets/teacher_recipe_box.dart';
 import 'quiz_play_screen.dart';
 
 /// 1:1 강의 커리큘럼 — 과목 선택 → 빈출순 토픽 강의 목록 → 강의 뷰어
@@ -145,6 +146,11 @@ class LessonViewerScreen extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(hPad, 16, hPad, 32),
           children: [
             LessonView(lesson: lesson),
+            // 🧑‍🏫 풀이 레시피 — 공식 적용 순서까지 완성 (암기·이론 공존)
+            TeacherRecipeBox(
+                topic: lesson.topic,
+                subject: lesson.subject,
+                initiallyExpanded: false),
             const SizedBox(height: 24),
             // 강의 → 바로 문제풀이 연결 (이론-문제 완전 연동)
             FilledButton.icon(

@@ -127,6 +127,40 @@ class Mnemonic {
       );
 }
 
+/// 풀이 레시피 — 토픽별 문제 풀이 순서 + 공식 적용법 (만능 선생님)
+class RecipeFormula {
+  final String expr; // 공식
+  final String how; // 적용 방법
+  RecipeFormula({required this.expr, required this.how});
+  factory RecipeFormula.fromJson(Map<String, dynamic> j) => RecipeFormula(
+        expr: (j['expr'] as String?) ?? '',
+        how: (j['how'] as String?) ?? '',
+      );
+}
+
+class SolutionRecipe {
+  final String topic;
+  final String check; // 문제 유형 판별 체크포인트
+  final List<String> steps; // 풀이 순서 1→N
+  final List<RecipeFormula> formulas; // 공식 + 적용법
+  SolutionRecipe({
+    required this.topic,
+    required this.check,
+    required this.steps,
+    required this.formulas,
+  });
+  factory SolutionRecipe.fromJson(Map<String, dynamic> j) => SolutionRecipe(
+        topic: (j['topic'] as String?) ?? '',
+        check: (j['check'] as String?) ?? '',
+        steps: ((j['steps'] as List?) ?? const [])
+            .map((e) => e.toString())
+            .toList(),
+        formulas: ((j['formulas'] as List?) ?? const [])
+            .map((e) => RecipeFormula.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
 /// 1:1 강의 노트 (토픽별 완전 강의)
 class LessonSection {
   final String title;
@@ -655,6 +689,21 @@ class StudyData {
       });
     return _exams!;
   }
+
+  List<SolutionRecipe>? _recipes;
+  Map<String, SolutionRecipe>? _recipeByTopic;
+
+  /// 풀이 레시피 로드 (42개 토픽 — 풀이 순서 + 공식 적용법)
+  Future<List<SolutionRecipe>> loadRecipes() async {
+    if (_recipes != null) return _recipes!;
+    _recipes = await _safeLoadList(
+        'assets/data/solution_recipes.json', SolutionRecipe.fromJson);
+    _recipeByTopic = {for (final r in _recipes!) r.topic: r};
+    return _recipes!;
+  }
+
+  /// 토픽으로 레시피 즉시 조회 (loadRecipes 후 사용)
+  SolutionRecipe? recipeForTopic(String topic) => _recipeByTopic?[topic];
 
   Future<List<Mnemonic>> loadMnemonics() async {
     if (_mnemonics != null) return _mnemonics!;

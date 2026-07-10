@@ -22,6 +22,14 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('자격증 스터디 트래커'),
         centerTitle: false,
+        actions: [
+          IconButton(
+            tooltip: app.darkMode ? '라이트 모드' : '다크 모드 (야간 학습)',
+            icon: Icon(
+                app.darkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
+            onPressed: () => context.read<AppProvider>().toggleDarkMode(),
+          ),
+        ],
       ),
       body: SafeArea(
         child: ListView(

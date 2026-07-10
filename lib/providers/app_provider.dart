@@ -17,6 +17,7 @@ class AppProvider extends ChangeNotifier {
 
   // Goal settings
   int dailyGoalMinutes = 120;
+  bool darkMode = false;
   int weeklyGoalMinutes = 600;
 
   // Timer state
@@ -56,6 +57,7 @@ class AppProvider extends ChangeNotifier {
           (b['date'] as String).compareTo(a['date'] as String));
     dailyGoalMinutes = (_settingsBox.get('dailyGoal') as int?) ?? 120;
     weeklyGoalMinutes = (_settingsBox.get('weeklyGoal') as int?) ?? 600;
+    darkMode = (_settingsBox.get('darkMode') as bool?) ?? false;
     notifyListeners();
   }
 
@@ -155,6 +157,13 @@ class AppProvider extends ChangeNotifier {
   Future<void> deleteQuizResult(String id) async {
     await _quizBox.delete(id);
     _load();
+  }
+
+  // ===== Theme =====
+  Future<void> toggleDarkMode() async {
+    darkMode = !darkMode;
+    await _settingsBox.put('darkMode', darkMode);
+    notifyListeners();
   }
 
   // ===== Goals =====
