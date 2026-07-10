@@ -714,6 +714,23 @@ class StudyData {
     return out;
   }
 
+  /// 토픽별 문제 추출 (슬라이드→기출 즉시 연결용)
+  Future<List<Question>> questionsByTopic(String topic) async {
+    final exams = await loadExams();
+    final out = <Question>[];
+    for (final e in exams) {
+      for (final q in e.questions) {
+        if (q.topic == topic && q.options.length == 4 && q.answer >= 1) {
+          q.examLabel = e.label;
+          out.add(q);
+        }
+      }
+    }
+    // 빈출 우선 정렬
+    out.sort((a, b) => b.freqScore.compareTo(a.freqScore));
+    return out;
+  }
+
   /// 빈출도 순 정렬: 문항별 freq_score 높은 순 (반복출제 + 토픽빈도)
   Future<List<Question>> questionsByFrequency(String subject) async {
     final qs = await questionsBySubject(subject);

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../services/study_data.dart';
+import '../../services/slide_progress.dart';
 import '../../widgets/tutor_avatar.dart';
 import '../../widgets/rich_slide_body.dart';
+import 'quiz_play_screen.dart';
 
 /// 30일 슬라이드 학습 — 덱 목록 화면
 class SlidesHomeScreen extends StatefulWidget {
@@ -20,6 +22,9 @@ class _SlidesHomeScreenState extends State<SlidesHomeScreen> {
   @override
   void initState() {
     super.initState();
+    SlideProgress.instance.ensureReady().then((_) {
+      if (mounted) setState(() {});
+    });
     StudyData.instance.loadSlideDecks().then((v) {
       if (mounted) setState(() => _decks = v);
     });
@@ -28,10 +33,104 @@ class _SlidesHomeScreenState extends State<SlidesHomeScreen> {
     });
   }
 
+  void _openDeck(SlideDeck d) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => SlideDeckScreen(deck: d)),
+    ).then((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   Color _phaseColor(String phase) {
     if (phase.contains('모의고사')) return Colors.deepOrange;
     if (phase.contains('총정리')) return Colors.purple;
     return Colors.indigo;
+  }
+
+  /// 전체 진도 요약 바
+  Widget _overallProgress(List<SlideDeck> decks) {
+    int seenCards = 0, totalCards = 0, doneDecks = 0;
+    for (final d in decks) {
+      final s = SlideProgress.instance.seen(d.day).clamp(0, d.cards.length);
+      seenCards += s;
+      totalCards += d.cards.length;
+      if (d.cards.isNotEmpty && s >= d.cards.length) doneDecks++;
+    }
+    final pct = totalCards == 0 ? 0.0 : seenCards / totalCards;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.trending_up_rounded,
+                    color: Colors.indigo, size: 20),
+                const SizedBox(width: 8),
+                const Text('이론 정복 진도',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w800, fontSize: 14)),
+                const Spacer(),
+                Text('$doneDecks/${decks.length}일 완료 · ${(pct * 100).toStringAsFixed(0)}%',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        color: Colors.indigo)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: pct,
+                minHeight: 10,
+                color: Colors.indigo,
+                backgroundColor: Colors.indigo.withValues(alpha: 0.12),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 이어서 학습 카드
+  Widget _continueCard(List<SlideDeck> decks) {
+    // 마지막 본 덱 또는 첫 미완료 덱
+    SlideDeck? target;
+    final last = SlideProgress.instance.lastDay;
+    if (last != null) {
+      for (final d in decks) {
+        if (d.day == last &&
+            SlideProgress.instance.seen(d.day) < d.cards.length) {
+          target = d;
+          break;
+        }
+      }
+    }
+    target ??= decks
+        .where((d) => SlideProgress.instance.seen(d.day) < d.cards.length)
+        .firstOrNull;
+    if (target == null) return const SizedBox.shrink();
+    final t = target;
+    final seen = SlideProgress.instance.seen(t.day);
+    return Card(
+      color: Colors.indigo.withValues(alpha: 0.06),
+      child: ListTile(
+        leading: const Icon(Icons.play_circle_fill,
+            color: Colors.indigo, size: 36),
+        title: Text(
+            seen > 0 ? '이어서 학습: Day ${t.day}' : '오늘의 학습: Day ${t.day}',
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+        subtitle: Text(
+            seen > 0 ? '${t.title} · ${seen + 1}장부터 계속' : t.title,
+            style: const TextStyle(fontSize: 12.5)),
+        trailing: const Icon(Icons.arrow_forward_rounded, color: Colors.indigo),
+        onTap: () => _openDeck(t),
+      ),
+    );
   }
 
   @override
@@ -84,43 +183,61 @@ class _SlidesHomeScreenState extends State<SlidesHomeScreen> {
                         .toList(),
                   ),
                 const SizedBox(height: 8),
+                _overallProgress(decks),
+                const SizedBox(height: 8),
+                _continueCard(decks),
+                const SizedBox(height: 4),
                 ...List.generate(decks.length, (i) {
                   final d = decks[i];
                   final pc = _phaseColor(d.phase);
+                  final seen = SlideProgress.instance.seen(d.day);
+                  final total = d.cards.length;
+                  final done = seen >= total && total > 0;
+                  final pct = total == 0 ? 0.0 : (seen / total).clamp(0.0, 1.0);
                   return Card(
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
-                      leading: Container(
-                        width: 46,
-                        height: 46,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [pc, pc.withValues(alpha: 0.65)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
+                      leading: SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            SizedBox(
+                              width: 46,
+                              height: 46,
+                              child: CircularProgressIndicator(
+                                value: pct,
+                                strokeWidth: 3.5,
+                                color: done ? Colors.green : pc,
+                                backgroundColor: pc.withValues(alpha: 0.15),
+                              ),
+                            ),
+                            done
+                                ? const Icon(Icons.check_rounded,
+                                    color: Colors.green, size: 22)
+                                : Text('D${d.day}',
+                                    style: TextStyle(
+                                        color: pc,
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 13)),
+                          ],
                         ),
-                        alignment: Alignment.center,
-                        child: Text('D${d.day}',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 14)),
                       ),
                       title: Text(d.title,
                           style: const TextStyle(
                               fontWeight: FontWeight.w600, fontSize: 14)),
                       subtitle: Text(
-                        '${d.phase} · ${d.cards.length}장 카드',
-                        style: TextStyle(fontSize: 12, color: pc),
+                        done
+                            ? '✅ 완료 · ${d.cards.length}장'
+                            : seen > 0
+                                ? '${d.phase} · $seen/$total장 진행 중'
+                                : '${d.phase} · ${d.cards.length}장 카드',
+                        style: TextStyle(
+                            fontSize: 12, color: done ? Colors.green : pc),
                       ),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => SlideDeckScreen(deck: d)),
-                      ),
+                      onTap: () => _openDeck(d),
                     ),
                   );
                 }),
@@ -184,7 +301,22 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
   @override
   void initState() {
     super.initState();
-    _pc = PageController();
+    // 이어서 학습: 마지막 본 페이지부터
+    final seen = SlideProgress.instance.seen(widget.deck.day);
+    final start = (seen > 0 && seen < widget.deck.cards.length) ? seen : 0;
+    _page = start;
+    _pc = PageController(initialPage: start);
+    // 전역 난이도 복원
+    switch (SlideProgress.instance.level) {
+      case 'baby':
+        _level = StudyLevel.baby;
+      case 'fast':
+        _level = StudyLevel.fast;
+      default:
+        _level = StudyLevel.standard;
+    }
+    SlideProgress.instance
+        .markSeen(widget.deck.day, start, widget.deck.cards.length);
     StudyData.instance.loadMnemonics().then((all) {
       if (!mounted) return;
       setState(() {
@@ -364,8 +496,14 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
                         tooltip: '숙달자용 — 패턴 보면 답 바로 나오게 체계 암기'),
                   ],
                   selected: {_level},
-                  onSelectionChanged: (s) =>
-                      setState(() => _level = s.first),
+                  onSelectionChanged: (s) {
+                    setState(() => _level = s.first);
+                    SlideProgress.instance.setLevel(switch (s.first) {
+                      StudyLevel.baby => 'baby',
+                      StudyLevel.fast => 'fast',
+                      StudyLevel.standard => 'standard',
+                    });
+                  },
                 ),
               ),
             ),
@@ -399,7 +537,11 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
               child: PageView.builder(
                 controller: _pc,
                 itemCount: total,
-                onPageChanged: (p) => setState(() => _page = p),
+                onPageChanged: (p) {
+                  setState(() => _page = p);
+                  SlideProgress.instance
+                      .markSeen(widget.deck.day, p, total);
+                },
                 itemBuilder: (context, i) {
                   final c = cards[i];
                   final s = _cardStyles[c.type] ?? _cardStyles['core']!;
@@ -521,11 +663,39 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
     }
   }
 
+  /// 이 단원 기출문제 바로 풀기 (빈출 순 최대 15문제)
+  Future<void> _openTopicQuiz(String topic) async {
+    final qs = await StudyData.instance.questionsByTopic(topic);
+    if (!mounted) return;
+    if (qs.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('‘$topic’ 태그된 기출이 아직 없어요.')));
+      return;
+    }
+    final take = qs.take(15).toList();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => QuizPlayScreen(
+          title: '$topic 기출 (빈출순)',
+          questions: take,
+          examMode: false,
+        ),
+      ),
+    );
+  }
+
   Widget _slideCard(BuildContext context, SlideCard c, _CardStyle s) {
     final showYoutube =
         c.topic.isNotEmpty && (c.type == 'concept' || c.type == 'core');
     final showMnemonicMore =
         c.type == 'mnemonic' && _subjectMnemonics.isNotEmpty;
+    final showQuiz = c.topic.isNotEmpty &&
+        c.topic != '전과목' &&
+        (c.type == 'concept' ||
+            c.type == 'core' ||
+            c.type == 'formula' ||
+            c.type == 'trap');
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -601,8 +771,25 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
                           height: 1.3)),
                   const SizedBox(height: 12),
                   RichSlideBody(body: _bodyForLevel(c), accent: s.color),
+                  if (showQuiz) ...[
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: s.color,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        icon: const Icon(Icons.quiz_rounded, size: 18),
+                        label: Text('이 단원 기출 바로 풀기 (빈출순 15문제)',
+                            style: const TextStyle(
+                                fontSize: 13.5, fontWeight: FontWeight.w700)),
+                        onPressed: () => _openTopicQuiz(c.topic),
+                      ),
+                    ),
+                  ],
                   if (showYoutube) ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     _youtubeRow(c.topic),
                   ],
                   if (showMnemonicMore) ...[
