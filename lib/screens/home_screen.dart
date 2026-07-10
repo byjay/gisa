@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
+import '../widgets/pass_prediction_card.dart';
 
 class HomeScreen extends StatelessWidget {
   final void Function(int) onNavigate;
@@ -38,6 +39,9 @@ class HomeScreen extends StatelessWidget {
             Text(DateFormat('yyyy년 M월 d일 (E)', 'ko').format(DateTime.now()),
                 style: TextStyle(color: Colors.grey.shade600)),
             const SizedBox(height: 12),
+            // 🎯 합격 예측 — 앱의 심장 (매일 열어보게 만드는 후킹)
+            const PassPredictionCard(),
+            const SizedBox(height: 16),
             // D-Day hero card
             GestureDetector(
               onTap: () => onNavigate(2),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/app_provider.dart';
 import '../../services/study_data.dart';
 import '../../services/progress_service.dart';
+import '../../services/pass_prediction.dart';
 import '../../widgets/lesson_view.dart';
 import '../../widgets/rich_slide_body.dart';
 import '../../widgets/teacher_recipe_box.dart';
@@ -412,7 +413,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     showLessonSheet(context, _q.subject, _q.topic);
   }
 
-  void _finish() {
+  Future<void> _finish() async {
     var correct = 0;
     final subjectTotal = <String, int>{};
     final subjectCorrect = <String, int>{};
@@ -443,6 +444,13 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
           );
     } catch (_) {}
 
+    // 🎯 풀 때마다 합격 예측 점수 갱신 — "내 점수가 움직인다"는 중독 루프
+    PassPrediction? pred;
+    try {
+      pred = await PassPredictionEngine.instance.predict();
+    } catch (_) {}
+    if (!mounted) return;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -469,6 +477,28 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
               const SizedBox(height: 4),
               const Text('오답은 자동으로 학습이력에 저장되었습니다.',
                   style: TextStyle(fontSize: 12)),
+              if (pred != null && !pred.needsDiagnosis) ...[
+                const SizedBox(height: 10),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: (pred.pass ? Colors.green : Colors.orange)
+                        .withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '🎯 합격 예측 점수 갱신: ${pred.overall.round()}점 '
+                    '${pred.pass ? "(합격권 유지!)" : "(홈 화면에서 처방전 확인)"}',
+                    style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: pred.pass
+                            ? Colors.green.shade800
+                            : Colors.orange.shade900),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
