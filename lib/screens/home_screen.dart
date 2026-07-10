@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../widgets/pass_prediction_card.dart';
+import '../widgets/dday_plan_card.dart';
 
 class HomeScreen extends StatelessWidget {
   final void Function(int) onNavigate;
@@ -41,6 +42,9 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 12),
             // 🎯 합격 예측 — 앱의 심장 (매일 열어보게 만드는 후킹)
             const PassPredictionCard(),
+            const SizedBox(height: 12),
+            // 📈 성장 그랤프 + 🗓 D-Day 역산 플랜 (돈 낼 만한 이유: 계획과 증거)
+            DDayPlanCard(dDay: nearest?.dDay ?? 0),
             const SizedBox(height: 16),
             // D-Day hero card
             GestureDetector(

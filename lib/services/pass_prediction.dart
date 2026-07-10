@@ -1,5 +1,6 @@
 import 'study_data.dart';
 import 'progress_service.dart';
+import 'score_history.dart';
 
 /// 🎯 합격 예측 엔진 — 유료 결제를 부르는 핵심 후킹
 /// "지금 시험 보면 몇 점인가"를 기출 빈출 가중치 + 실제 풀이 정답률로 계산.
@@ -129,6 +130,13 @@ class PassPredictionEngine {
       });
     }
     rx.sort((a, b) => b.expectedGain.compareTo(a.expectedGain));
+
+    // 5) 오늘자 점수 스냅샷 기록 (트렌드 그래프용) — 시도 이력이 있을 때만
+    if (totalAttempts > 0) {
+      try {
+        await ScoreHistory.instance.record(overall, totalAttempts);
+      } catch (_) {}
+    }
 
     return PassPrediction(
       overall: overall,

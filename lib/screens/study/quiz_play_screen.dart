@@ -8,6 +8,7 @@ import '../../services/pass_prediction.dart';
 import '../../widgets/lesson_view.dart';
 import '../../widgets/rich_slide_body.dart';
 import '../../widgets/teacher_recipe_box.dart';
+import 'result_certificate_screen.dart';
 
 /// 문제풀이 화면: 실전(examMode)/연습 모드, 문제 내 암기법·이론 연동, 채점
 class QuizPlayScreen extends StatefulWidget {
@@ -522,6 +523,22 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
       pred = await PassPredictionEngine.instance.predict();
     } catch (_) {}
     if (!mounted) return;
+
+    // 🏆 100문항 실전 단위(examMode) — 공유하고 싶은 합격 성적표로 진입
+    if (widget.examMode && total >= 90) {
+      await Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => ResultCertificateScreen(
+          examLabel: widget.title.replaceFirst('전기기사 ', ''),
+          correct: correct,
+          total: total,
+          subjectTotal: subjectTotal,
+          subjectCorrect: subjectCorrect,
+          prediction: pred,
+        ),
+      ));
+      if (mounted) Navigator.of(context).pop();
+      return;
+    }
 
     showDialog(
       context: context,
