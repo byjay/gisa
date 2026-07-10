@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/app_provider.dart';
@@ -31,6 +32,12 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   final Set<int> _recorded = {}; // 진첩 중복기록 방지
   bool _showAnswer = false;
   bool _bookmarked = false;
+
+  // ⏱ 실전 타이머 (examMode 전용) — 실제 시험 페이스: 문제당 90초
+  Timer? _timer;
+  int _remainSec = 0;
+  int _totalSec = 0;
+  bool _timeOver = false;
 
   Question get _q => widget.questions[_idx];
 
@@ -82,6 +89,33 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   void initState() {
     super.initState();
     _syncBookmark();
+    if (widget.examMode && widget.questions.isNotEmpty) {
+      _totalSec = widget.questions.length * 90; // 실전 페이스 1문당 1분 30초
+      _remainSec = _totalSec;
+      _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+        if (!mounted) return;
+        setState(() {
+          _remainSec--;
+          if (_remainSec <= 0) {
+            _timeOver = true;
+            t.cancel();
+          }
+        });
+        if (_timeOver) _finish(); // 시간 종료 → 자동 채점 (실전과 동일)
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  String get _timeLabel {
+    final m = _remainSec ~/ 60;
+    final s = _remainSec % 60;
+    return '$m:${s.toString().padLeft(2, '0')}';
   }
 
   Future<void> _syncBookmark() async {
@@ -129,6 +163,39 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
             icon: const Icon(Icons.school_outlined),
             onPressed: _openLesson,
           ),
+          if (widget.examMode && _totalSec > 0)
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(right: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: (_remainSec < _totalSec * 0.2
+                          ? Colors.red
+                          : Colors.teal)
+                      .withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.timer,
+                        size: 15,
+                        color: _remainSec < _totalSec * 0.2
+                            ? Colors.red
+                            : Colors.teal),
+                    const SizedBox(width: 4),
+                    Text(_timeLabel,
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                            color: _remainSec < _totalSec * 0.2
+                                ? Colors.red
+                                : Colors.teal)),
+                  ],
+                ),
+              ),
+            ),
           Center(
             child: Padding(
               padding: const EdgeInsets.only(right: 12),
@@ -413,7 +480,12 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     showLessonSheet(context, _q.subject, _q.topic);
   }
 
+  bool _finished = false; // 타이마 자동채점·수동채점 중복 방지
+
   Future<void> _finish() async {
+    if (_finished) return;
+    _finished = true;
+    _timer?.cancel();
     var correct = 0;
     final subjectTotal = <String, int>{};
     final subjectCorrect = <String, int>{};
@@ -454,7 +526,9 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('결과: $correct/$total ($pct점)'),
+        title: Text(_timeOver
+            ? '⏰ 시간 종료! 결과: $correct/$total ($pct점)'
+            : '결과: $correct/$total ($pct점)'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -511,7 +585,10 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
             child: const Text('종료'),
           ),
           FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(),
+            onPressed: () {
+              _finished = false; // 계속 보기 후 재채점 허용
+              Navigator.of(ctx).pop();
+            },
             child: const Text('계속 보기'),
           ),
         ],
