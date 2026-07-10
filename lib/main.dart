@@ -4,9 +4,8 @@ import 'package:provider/provider.dart';
 import 'providers/app_provider.dart';
 import 'screens/exams_screen.dart';
 import 'screens/home_screen.dart';
-import 'screens/notes_screen.dart';
-import 'screens/records_screen.dart';
 import 'screens/stats_screen.dart';
+import 'screens/study/smart_review_screen.dart';
 import 'screens/study/study_screen.dart';
 import 'screens/timer_screen.dart';
 
@@ -69,9 +68,8 @@ class _MainShellState extends State<MainShell> {
       const StudyScreen(),
       const ExamsScreen(),
       const TimerScreen(),
-      const RecordsScreen(),
       const StatsScreen(),
-      const NotesScreen(),
+      const SmartReviewScreen(),
     ];
 
     return Scaffold(
@@ -85,9 +83,8 @@ class _MainShellState extends State<MainShell> {
           NavigationDestination(icon: Icon(Icons.school_outlined), selectedIcon: Icon(Icons.school), label: '학습'),
           NavigationDestination(icon: Icon(Icons.event_outlined), selectedIcon: Icon(Icons.event), label: '시험'),
           NavigationDestination(icon: Icon(Icons.timer_outlined), selectedIcon: Icon(Icons.timer), label: '타이머'),
-          NavigationDestination(icon: Icon(Icons.history_edu_outlined), selectedIcon: Icon(Icons.history_edu), label: '기록'),
           NavigationDestination(icon: Icon(Icons.bar_chart_outlined), selectedIcon: Icon(Icons.bar_chart), label: '통계'),
-          NavigationDestination(icon: Icon(Icons.quiz_outlined), selectedIcon: Icon(Icons.quiz), label: '오답'),
+          NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), selectedIcon: Icon(Icons.auto_awesome), label: '복습'),
         ],
       ),
     );

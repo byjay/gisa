@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../services/study_data.dart';
 import '../../widgets/tutor_avatar.dart';
+import '../../widgets/rich_slide_body.dart';
 
 /// 30일 슬라이드 학습 — 덱 목록 화면
 class SlidesHomeScreen extends StatefulWidget {
@@ -51,7 +54,7 @@ class _SlidesHomeScreenState extends State<SlidesHomeScreen> {
                   mood: TutorMood.teaching,
                   message: _plan?.description.isNotEmpty == true
                       ? _plan!.description
-                      : '하루 한 덱! 비유→핵심→공식→암기법→함정 순서로 스와이프하면 30일 만에 이론이 끝나요.',
+                      : '하루 한 덱! 개념→핵심→공식→암기법→함정 순서로 스와이프하면 30일 만에 이론이 끝나요.',
                 ),
                 const SizedBox(height: 8),
                 if (_plan != null && _plan!.strategy.isNotEmpty)
@@ -69,7 +72,8 @@ class _SlidesHomeScreenState extends State<SlidesHomeScreen> {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('⚡ ', style: TextStyle(fontSize: 13)),
+                                  const Text('⚡ ',
+                                      style: TextStyle(fontSize: 13)),
                                   Expanded(
                                       child: Text(s,
                                           style: const TextStyle(
@@ -136,14 +140,28 @@ class _CardStyle {
 
 const Map<String, _CardStyle> _cardStyles = {
   'mission': _CardStyle(Color(0xFF1565C0), Icons.flag_rounded, '오늘의 미션'),
-  'concept': _CardStyle(Color(0xFF00897B), Icons.lightbulb_rounded, '비유로 이해'),
+  'concept': _CardStyle(Color(0xFF00897B), Icons.lightbulb_rounded, '개념 이해'),
   'core': _CardStyle(Color(0xFF3949AB), Icons.menu_book_rounded, '핵심 이론'),
   'formula': _CardStyle(Color(0xFF6A1B9A), Icons.functions_rounded, '공식'),
   'mnemonic': _CardStyle(Color(0xFFE65100), Icons.psychology_rounded, '암기법'),
   'trap': _CardStyle(Color(0xFFC62828), Icons.warning_amber_rounded, '함정 주의'),
-  'strategy': _CardStyle(Color(0xFF2E7D32), Icons.military_tech_rounded, '출제 전략'),
+  'strategy':
+      _CardStyle(Color(0xFF2E7D32), Icons.military_tech_rounded, '출제 전략'),
   'recap': _CardStyle(Color(0xFF00695C), Icons.check_circle_rounded, '오늘 정리'),
 };
+
+/// 유튜브 딥링크: "전기기사 <토픽>" 검색 — 단원별 강의가 매우 많음
+String topicYoutubeUrl(String topic) {
+  final q = Uri.encodeComponent('전기기사 ${topic.replaceAll('·', ' ')}');
+  return 'https://www.youtube.com/results?search_query=$q';
+}
+
+/// 검증된 무료 전기기사 강의 채널 (직접 링크)
+const List<(String, String)> kYoutubeChannels = [
+  ('전기자격증의모든것 (전병칠)', 'https://www.youtube.com/@elec7'),
+  ('전기뿌수기', 'https://www.youtube.com/@electric_crusher'),
+  ('다산에듀', 'https://www.youtube.com/@dasan_edu'),
+];
 
 /// 슬라이드 카드 뷰어 — PageView 스와이프
 class SlideDeckScreen extends StatefulWidget {
@@ -157,11 +175,21 @@ class SlideDeckScreen extends StatefulWidget {
 class _SlideDeckScreenState extends State<SlideDeckScreen> {
   late final PageController _pc;
   int _page = 0;
+  List<Mnemonic> _subjectMnemonics = [];
 
   @override
   void initState() {
     super.initState();
     _pc = PageController();
+    StudyData.instance.loadMnemonics().then((all) {
+      if (!mounted) return;
+      setState(() {
+        _subjectMnemonics = all
+            .where(
+                (m) => m.subject == widget.deck.subject || m.subject == '공통')
+            .toList();
+      });
+    });
   }
 
   @override
@@ -190,6 +218,95 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
     }
   }
 
+  Future<void> _openUrl(String url) async {
+    try {
+      final ok = await launchUrl(Uri.parse(url),
+          mode: LaunchMode.externalApplication);
+      if (!ok) throw Exception('launch failed');
+    } catch (_) {
+      await Clipboard.setData(ClipboardData(text: url));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('링크를 클립보드에 복사했어요. 브라우저에 붙여넣기 하세요.')),
+        );
+      }
+    }
+  }
+
+  /// 과목 암기법 노트 바텀시트 (mnemonics.json 연동)
+  void _showMnemonicSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.75,
+        maxChildSize: 0.95,
+        builder: (ctx, sc) => Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.psychology_rounded,
+                      color: Color(0xFFE65100)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '${widget.deck.subject} 암기법 노트 (${_subjectMnemonics.length}개)',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w800, fontSize: 16),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                controller: sc,
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                itemCount: _subjectMnemonics.length,
+                itemBuilder: (ctx, i) {
+                  final m = _subjectMnemonics[i];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    color: const Color(0xFFE65100).withValues(alpha: 0.05),
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(m.title,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 14,
+                                  color: Color(0xFFBF360C))),
+                          const SizedBox(height: 6),
+                          Text(m.body,
+                              style: const TextStyle(
+                                  fontSize: 13.5, height: 1.5)),
+                          if (m.tip.isNotEmpty) ...[
+                            const SizedBox(height: 6),
+                            Text('💡 ${m.tip}',
+                                style: TextStyle(
+                                    fontSize: 12.5,
+                                    color: Colors.grey.shade700,
+                                    height: 1.4)),
+                          ],
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cards = widget.deck.cards;
@@ -201,6 +318,18 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
       appBar: AppBar(
         title: Text('Day ${widget.deck.day} · ${widget.deck.subject}',
             style: const TextStyle(fontSize: 16)),
+        actions: [
+          IconButton(
+            tooltip: '이 과목 유튜브 강의 검색',
+            icon: const Icon(Icons.ondemand_video_rounded, color: Colors.red),
+            onPressed: () => _openUrl(topicYoutubeUrl(widget.deck.subject)),
+          ),
+          IconButton(
+            tooltip: '과목 암기법 노트',
+            icon: const Icon(Icons.psychology_rounded, color: Color(0xFFE65100)),
+            onPressed: _subjectMnemonics.isEmpty ? null : _showMnemonicSheet,
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -300,13 +429,13 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
       case 'mission':
         return '오늘 목표부터 확인! 스와이프로 넘겨보세요.';
       case 'concept':
-        return '비유로 큰 그림 먼저! 이해가 암기를 이깁니다.';
+        return '정의→핵심 원리→시험 포인트 순서로 읽으면 완벽 이해!';
       case 'core':
         return '핵심만 압축했어요. 소리내어 읽으면 2배 기억!';
       case 'formula':
         return '공식은 손으로 3번 써보세요. 몸이 기억해요.';
       case 'mnemonic':
-        return '두문자 암기법! 시험장에서 바로 튀어나옵니다.';
+        return '두문자 암기법! 상단 🧠 버튼에 과목 암기법이 더 있어요.';
       case 'trap':
         return '여기서 다 틀려요. 함정 포인트 꼭 체크!';
       case 'strategy':
@@ -319,6 +448,10 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
   }
 
   Widget _slideCard(BuildContext context, SlideCard c, _CardStyle s) {
+    final showYoutube =
+        c.topic.isNotEmpty && (c.type == 'concept' || c.type == 'core');
+    final showMnemonicMore =
+        c.type == 'mnemonic' && _subjectMnemonics.isNotEmpty;
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -363,16 +496,23 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
                 const Spacer(),
                 if (c.topic.isNotEmpty)
                   Flexible(
-                    child: Text(c.topic,
-                        style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.85),
-                            fontSize: 11.5),
-                        overflow: TextOverflow.ellipsis),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(c.topic,
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 11.5),
+                          overflow: TextOverflow.ellipsis),
+                    ),
                   ),
               ],
             ),
           ),
-          // 본문
+          // 본문 — 리치 렌더링
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(18),
@@ -386,15 +526,85 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
                           color: s.color,
                           height: 1.3)),
                   const SizedBox(height: 12),
-                  SelectableText(
-                    c.body,
-                    style: const TextStyle(fontSize: 14.5, height: 1.65),
-                  ),
+                  RichSlideBody(body: c.body, accent: s.color),
+                  if (showYoutube) ...[
+                    const SizedBox(height: 16),
+                    _youtubeRow(c.topic),
+                  ],
+                  if (showMnemonicMore) ...[
+                    const SizedBox(height: 16),
+                    _mnemonicMoreButton(),
+                  ],
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// 단원별 유튜브 보강 링크 (검색 + 채널 직접링크)
+  Widget _youtubeRow(String topic) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.red.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.ondemand_video_rounded, color: Colors.red, size: 18),
+              SizedBox(width: 6),
+              Text('이 단원 유튜브로 보강하기',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                      color: Colors.red)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              ActionChip(
+                avatar: const Icon(Icons.search, size: 16, color: Colors.red),
+                label: Text('전기기사 ${topic.replaceAll('·', ' ')} 검색',
+                    style: const TextStyle(fontSize: 12)),
+                onPressed: () => _openUrl(topicYoutubeUrl(topic)),
+              ),
+              ...kYoutubeChannels.map((ch) => ActionChip(
+                    avatar: const Icon(Icons.play_circle_fill,
+                        size: 16, color: Colors.red),
+                    label: Text(ch.$1, style: const TextStyle(fontSize: 12)),
+                    onPressed: () => _openUrl(ch.$2),
+                  )),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _mnemonicMoreButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFFE65100),
+          side: const BorderSide(color: Color(0xFFE65100)),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+        icon: const Icon(Icons.psychology_rounded),
+        label: Text(
+            '${widget.deck.subject} 암기법 ${_subjectMnemonics.length}개 전부 보기'),
+        onPressed: _showMnemonicSheet,
       ),
     );
   }

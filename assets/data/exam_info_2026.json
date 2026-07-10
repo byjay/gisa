@@ -43,6 +43,59 @@
    "examStartIso": "2026-08-07"
   }
  ],
+ "qnetLinks": {
+  "apply": {
+   "label": "Q-net 원서접수 바로가기",
+   "url": "https://www.q-net.or.kr/rcv001.do?id=rcv00103"
+  },
+  "applyStatus": {
+   "label": "실시간 접수현황 (시험장 자리 확인)",
+   "url": "https://www.q-net.or.kr/rcv003.do?id=rcv00301"
+  },
+  "jeongi": {
+   "label": "전기기사 종목 상세 (Q-net 공식)",
+   "url": "https://www.q-net.or.kr/crf005.do?id=crf00503&jmCd=1150"
+  },
+  "main": {
+   "label": "Q-net 메인",
+   "url": "https://www.q-net.or.kr/"
+  }
+ },
+ "relatedCerts": {
+  "note": "2026 정기 기사 1~3회 원서접수·필기시험 기간은 아래 종목 모두 전기기사와 공통입니다 (Q-net 확인). 전기기사와 과목이 겹쳐 동시 취득을 많이 노립니다.",
+  "certs": [
+   {
+    "name": "전기산업기사",
+    "tip": "전기기사와 5과목 동일 계열 · 난도 한 단계 아래, 같은 회차 병행 응시 전략 가능",
+    "url": "https://www.q-net.or.kr/crf005.do?id=crf00503&jmCd=2140"
+   },
+   {
+    "name": "전기공사기사",
+    "tip": "전기기사와 4과목 유사 · '전기응용 및 공사재료'만 추가 대비하면 동시 취득 최단 루트",
+    "url": "https://www.q-net.or.kr/crf005.do?id=crf00503&jmCd=1160"
+   },
+   {
+    "name": "소방설비기사(전기분야)",
+    "tip": "전기기사 취득자 일부 과목 면제 · 시설관리 취업 시 쌍기사 조합 1순위",
+    "url": "https://www.q-net.or.kr/crf005.do?id=crf00503&jmCd=1910"
+   },
+   {
+    "name": "산업안전기사",
+    "tip": "안전관리자 선임 자격 · 전기+안전 쌍기사는 채용시장 수요 최상위",
+    "url": "https://www.q-net.or.kr/crf005.do?id=crf00503&jmCd=1431"
+   },
+   {
+    "name": "소방설비산업기사(전기분야)",
+    "tip": "소방기사 응시자격이 안 될 때의 우회 루트",
+    "url": "https://www.q-net.or.kr/crf005.do?id=crf00503&jmCd=2910"
+   },
+   {
+    "name": "전기기능사",
+    "tip": "응시자격 제한 없음 · 실무 기초와 경력 연결용",
+    "url": "https://www.q-net.or.kr/crf005.do?id=crf00503&jmCd=7780"
+   }
+  ]
+ },
  "scheduleNotes": [
   "원서접수는 첫날 10:00 ~ 마지막날 18:00 (Q-net). 인기 시험장은 수강신청처럼 빨리 마감되므로 첫날 접수 권장",
   "CBT 방식: 접수 시 약 한 달의 시험 기간 중 원하는 날짜·시간·시험장을 직접 선택",

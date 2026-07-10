@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../services/study_data.dart';
 import '../../widgets/tutor_avatar.dart';
 
@@ -74,6 +76,20 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
   }
 
   // ── Tab 1: 시험일정 ──────────────────────────────────────────
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.parse(url);
+    try {
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!ok) throw Exception('launch failed');
+    } catch (_) {
+      await Clipboard.setData(ClipboardData(text: url));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('브라우저를 열 수 없어 링크를 복사했습니다. 주소창에 붙여넣으세요.'),
+      ));
+    }
+  }
+
   Widget _scheduleTab() {
     final schedule = (_info!['schedule'] as List).cast<Map<String, dynamic>>();
     final notes = (_info!['scheduleNotes'] as List).cast<String>();
@@ -84,15 +100,108 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
       padding: const EdgeInsets.all(16),
       children: [
         _dDayCard(target),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
+        _qnetButtons(),
+        const SizedBox(height: 12),
         ...schedule.map(_roundCard),
         const SizedBox(height: 8),
         _noteCard('일정 유의사항', notes, Icons.info_outline, Colors.blueGrey),
-        const SizedBox(height: 8),
+        const SizedBox(height: 14),
+        _relatedCertsSection(),
+        const SizedBox(height: 10),
         Text(
           '출처: ${(_info!['sources'] as List).join(' · ')}',
           style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
         ),
+      ],
+    );
+  }
+
+  Widget _qnetButtons() {
+    final links = _info!['qnetLinks'] as Map<String, dynamic>;
+    final apply = links['apply'] as Map<String, dynamic>;
+    final status = links['applyStatus'] as Map<String, dynamic>;
+    final detail = links['jeongi'] as Map<String, dynamic>;
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.indigo,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+            onPressed: () => _openUrl(apply['url'] as String),
+            icon: const Icon(Icons.open_in_new, size: 18),
+            label: Text(apply['label'] as String,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 15)),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _openUrl(status['url'] as String),
+                icon: const Icon(Icons.event_seat, size: 16),
+                label: const Text('접수현황 조회',
+                    style: TextStyle(fontSize: 12.5)),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _openUrl(detail['url'] as String),
+                icon: const Icon(Icons.description, size: 16),
+                label: const Text('종목 상세정보',
+                    style: TextStyle(fontSize: 12.5)),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _relatedCertsSection() {
+    final rel = _info!['relatedCerts'] as Map<String, dynamic>;
+    final certs = (rel['certs'] as List).cast<Map<String, dynamic>>();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('함께 노릴 수 있는 자격증 (2026 접수·필기 일정 공유)',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+        const SizedBox(height: 6),
+        Text(rel['note'] as String,
+            style: TextStyle(
+                fontSize: 12, height: 1.5, color: Colors.grey.shade700)),
+        const SizedBox(height: 8),
+        ...certs.map((c) => Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              child: ListTile(
+                dense: true,
+                leading: CircleAvatar(
+                  radius: 16,
+                  backgroundColor: Colors.teal.shade50,
+                  child: Text((c['name'] as String)[0],
+                      style: TextStyle(
+                          color: Colors.teal.shade700,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13)),
+                ),
+                title: Text(c['name'] as String,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 13.5)),
+                subtitle: Text(c['tip'] as String,
+                    style: const TextStyle(fontSize: 11.5, height: 1.4)),
+                trailing: const Icon(Icons.open_in_new,
+                    size: 16, color: Colors.teal),
+                onTap: () => _openUrl(c['url'] as String),
+              ),
+            )),
       ],
     );
   }

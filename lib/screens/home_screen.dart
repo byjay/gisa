@@ -174,15 +174,15 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Expanded(
                     child: _quickStat(context, Icons.local_fire_department,
-                        '${app.streak}일', '연속 학습', Colors.orange, () => onNavigate(5))),
+                        '${app.streak}일', '연속 학습', Colors.orange, () => onNavigate(4))),
                 const SizedBox(width: 10),
                 Expanded(
                     child: _quickStat(context, Icons.timer, '${app.weekMinutes}분',
-                        '이번 주', Colors.teal, () => onNavigate(5))),
+                        '이번 주', Colors.teal, () => onNavigate(4))),
                 const SizedBox(width: 10),
                 Expanded(
                     child: _quickStat(context, Icons.quiz, '$pendingNotes개',
-                        '복습할 오답', Colors.redAccent, () => onNavigate(6))),
+                        '복습할 오답', Colors.redAccent, () => onNavigate(5))),
               ],
             ),
             const SizedBox(height: 16),
@@ -198,8 +198,8 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: _actionButton(context, Icons.edit_note, '기록 추가',
-                      Colors.teal, () => onNavigate(4)),
+                  child: _actionButton(context, Icons.school, '오늘의 학습',
+                      Colors.teal, () => onNavigate(1)),
                 ),
               ],
             ),
