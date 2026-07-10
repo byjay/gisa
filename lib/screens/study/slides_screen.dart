@@ -172,10 +172,14 @@ class SlideDeckScreen extends StatefulWidget {
   State<SlideDeckScreen> createState() => _SlideDeckScreenState();
 }
 
+/// 학습 난이도 모드
+enum StudyLevel { baby, standard, fast }
+
 class _SlideDeckScreenState extends State<SlideDeckScreen> {
   late final PageController _pc;
   int _page = 0;
   List<Mnemonic> _subjectMnemonics = [];
+  StudyLevel _level = StudyLevel.standard;
 
   @override
   void initState() {
@@ -334,6 +338,37 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            // 난이도 선택
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: SizedBox(
+                width: double.infinity,
+                child: SegmentedButton<StudyLevel>(
+                  style: SegmentedButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    textStyle: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.w700),
+                  ),
+                  segments: const [
+                    ButtonSegment(
+                        value: StudyLevel.baby,
+                        label: Text('🐣 왕초보'),
+                        tooltip: '기초체력 0부터 시작 — 비유 + 오늘 딱 1개 미션'),
+                    ButtonSegment(
+                        value: StudyLevel.standard,
+                        label: Text('📘 표준'),
+                        tooltip: '정의→핵심 원리→시험 포인트 전체 학습'),
+                    ButtonSegment(
+                        value: StudyLevel.fast,
+                        label: Text('⚡ 속성 즉답'),
+                        tooltip: '숙달자용 — 패턴 보면 답 바로 나오게 체계 암기'),
+                  ],
+                  selected: {_level},
+                  onSelectionChanged: (s) =>
+                      setState(() => _level = s.first),
+                ),
+              ),
+            ),
             // 진행 바
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
@@ -447,6 +482,45 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
     }
   }
 
+  /// 난이도별 본문 필터링 (■ 섹션 단위)
+  String _bodyForLevel(SlideCard c) {
+    if (c.type != 'concept') return c.body;
+    final parts = c.body.split(RegExp(r'\n\n(?=■ )'));
+    final intro = parts.isNotEmpty && !parts.first.startsWith('■')
+        ? parts.first
+        : '';
+    String? sec(String key) {
+      for (final p in parts) {
+        if (p.startsWith('■') && p.contains(key)) return p;
+      }
+      return null;
+    }
+
+    switch (_level) {
+      case StudyLevel.baby:
+        final baby = sec('🐣');
+        final def = sec('정의');
+        return [
+          if (intro.isNotEmpty) intro,
+          if (baby != null) baby,
+          if (def != null) def,
+          '→ 이해되면 📘 표준 모드로 올려보세요!',
+        ].join('\n\n');
+      case StudyLevel.fast:
+        final fast = sec('⚡');
+        final point = sec('시험 포인트');
+        return [
+          if (fast != null) fast else c.body,
+          if (point != null) point,
+        ].join('\n\n');
+      case StudyLevel.standard:
+        // 표준: 🐣/⚡ 섹션 제외한 전체
+        return parts
+            .where((p) => !p.contains('🐣') && !p.contains('⚡ 속성'))
+            .join('\n\n');
+    }
+  }
+
   Widget _slideCard(BuildContext context, SlideCard c, _CardStyle s) {
     final showYoutube =
         c.topic.isNotEmpty && (c.type == 'concept' || c.type == 'core');
@@ -526,7 +600,7 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
                           color: s.color,
                           height: 1.3)),
                   const SizedBox(height: 12),
-                  RichSlideBody(body: c.body, accent: s.color),
+                  RichSlideBody(body: _bodyForLevel(c), accent: s.color),
                   if (showYoutube) ...[
                     const SizedBox(height: 16),
                     _youtubeRow(c.topic),
