@@ -20,7 +20,7 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
   @override
   void initState() {
     super.initState();
-    _tab = TabController(length: 4, vsync: this);
+    _tab = TabController(length: 5, vsync: this);
     _load();
   }
 
@@ -50,6 +50,7 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
           tabs: const [
             Tab(text: '시험일정'),
             Tab(text: '출제기준 개정'),
+            Tab(text: 'KEC 2026 개정'),
             Tab(text: '과목별 전략'),
             Tab(text: 'CBT 실전'),
           ],
@@ -64,6 +65,7 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
                   children: [
                     _scheduleTab(),
                     _criteriaTab(),
+                    _kecTab(),
                     _strategyTab(),
                     _cbtTab(),
                   ],
@@ -334,7 +336,333 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
         ),
         const SizedBox(height: 8),
         _noteCard('통계가 말해주는 것', insights, Icons.insights, Colors.indigo),
+        const SizedBox(height: 16),
+        _passRates2025Card(),
+        const SizedBox(height: 16),
+        _latestTrendsCard(),
       ],
+    );
+  }
+
+  Widget _passRates2025Card() {
+    final p25 = _info!['passRates2025'] as Map<String, dynamic>;
+    final rounds = (p25['rounds'] as List).cast<Map<String, dynamic>>();
+    final insights = (p25['insights'] as List).cast<String>();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text('NEW',
+                  style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red.shade700)),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(p25['title'] as String,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 15)),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Card(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              children: rounds.map((r) {
+                final rate = (r['rate'] as num).toDouble();
+                final isPractical = (r['round'] as String).contains('실기');
+                final applicants = r['applicants'] as int?;
+                final passed = r['passed'] as int?;
+                final danger = rate < 15;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 118,
+                        child: Text(r['round'] as String,
+                            style: const TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600)),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: rate / 100,
+                                minHeight: 8,
+                                backgroundColor: Colors.grey.shade200,
+                                valueColor: AlwaysStoppedAnimation(danger
+                                    ? Colors.red
+                                    : isPractical
+                                        ? Colors.teal
+                                        : Colors.indigo),
+                              ),
+                            ),
+                            if (applicants != null && passed != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Text(
+                                    '응시 $applicants명 · 합격 $passed명',
+                                    style: TextStyle(
+                                        fontSize: 10.5,
+                                        color: Colors.grey.shade600)),
+                              ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        width: 52,
+                        child: Text(' $rate%',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: danger
+                                    ? Colors.red.shade700
+                                    : Colors.indigo)),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        _noteCard('2025 데이터가 주는 신호', insights, Icons.trending_up, Colors.red),
+      ],
+    );
+  }
+
+  Widget _latestTrendsCard() {
+    final trends = _info!['latestTrends'] as Map<String, dynamic>;
+    final items = (trends['items'] as List).cast<Map<String, dynamic>>();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(trends['title'] as String,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+        const SizedBox(height: 8),
+        ...items.map((it) => Card(
+              margin: const EdgeInsets.only(bottom: 10),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              child: ExpansionTile(
+                leading:
+                    const Icon(Icons.trending_up, color: Colors.purple),
+                title: Text(it['title'] as String,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 14)),
+                childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                children: [
+                  Text(it['detail'] as String,
+                      style: const TextStyle(fontSize: 13.5, height: 1.6)),
+                ],
+              ),
+            )),
+      ],
+    );
+  }
+
+  // ── Tab 3: KEC 2026 개정 ─────────────────────────────────────
+  Widget _kecTab() {
+    final kec = _info!['kecChanges2026'] as Map<String, dynamic>;
+    final areas = (kec['areas'] as List).cast<Map<String, dynamic>>();
+    final mnemonics = (kec['mnemonics'] as List).cast<String>();
+    final traps = (kec['trapPoints'] as List).cast<String>();
+    final coverage = _info!['dataCoverage'] as Map<String, dynamic>;
+    final howTo = (coverage['howToCover'] as List).cast<String>();
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.red.shade700, Colors.deepOrange.shade400],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.warning_amber, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(kec['title'] as String,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(kec['warning'] as String,
+                  style: const TextStyle(
+                      color: Colors.white, fontSize: 13, height: 1.5)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        ...areas.map(_kecAreaCard),
+        const SizedBox(height: 8),
+        _noteCard('암기법 3종 세트', mnemonics, Icons.psychology, Colors.purple),
+        const SizedBox(height: 10),
+        _noteCard('시험장 함정 5포인트 (구규정 = 오답)', traps,
+            Icons.dangerous, Colors.red),
+        const SizedBox(height: 14),
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.blueGrey.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.blueGrey.shade200),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.fact_check,
+                      size: 18, color: Colors.blueGrey.shade700),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(coverage['title'] as String,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13.5,
+                            color: Colors.blueGrey.shade800)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(coverage['detail'] as String,
+                  style: const TextStyle(fontSize: 12.5, height: 1.55)),
+              const SizedBox(height: 8),
+              ...howTo.map((t) => Padding(
+                    padding: const EdgeInsets.only(bottom: 5),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.check_circle,
+                            size: 14, color: Colors.blueGrey.shade600),
+                        const SizedBox(width: 6),
+                        Expanded(
+                            child: Text(t,
+                                style: const TextStyle(
+                                    fontSize: 12.5, height: 1.5))),
+                      ],
+                    ),
+                  )),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _kecAreaCard(Map<String, dynamic> area) {
+    final changes = (area['changes'] as List).cast<Map<String, dynamic>>();
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(area['area'] as String,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.deepOrange.shade800)),
+            const SizedBox(height: 10),
+            ...changes.map((c) {
+              final before = c['before'] as String;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(c['item'] as String,
+                        style: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        if (before != '—') ...[
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(before,
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      decoration:
+                                          TextDecoration.lineThrough,
+                                      color: Colors.grey.shade600)),
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 6),
+                            child: Icon(Icons.arrow_forward,
+                                size: 16, color: Colors.deepOrange),
+                          ),
+                        ],
+                        Expanded(
+                          flex: before == '—' ? 2 : 1,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                              border:
+                                  Border.all(color: Colors.green.shade200),
+                            ),
+                            child: Text(c['after'] as String,
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green.shade800)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
     );
   }
 

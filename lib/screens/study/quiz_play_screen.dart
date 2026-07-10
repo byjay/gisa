@@ -112,6 +112,36 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                         if (_q.hasImage) _chip('그림문제·원본PDF 참고'),
                       ],
                     ),
+                    if (_q.subject.contains('설비'))
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.red.shade200),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.warning_amber,
+                                  size: 14, color: Colors.red.shade700),
+                              const SizedBox(width: 5),
+                              Expanded(
+                                child: Text(
+                                  'KEC 2026 개정 주의: 구기출 수치(CD관 4배, 비상조명 30분 등)는 현행 규정과 다를 수 있음 → 시험정보 센터 "KEC 2026 개정" 탭 확인',
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      height: 1.4,
+                                      color: Colors.red.shade800),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     const SizedBox(height: 12),
                     Text(
                       '${_q.no}. ${_q.question}',
