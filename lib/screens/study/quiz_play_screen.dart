@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/app_provider.dart';
 import '../../services/study_data.dart';
+import '../../services/progress_service.dart';
 import '../../widgets/lesson_view.dart';
 
 /// 문제풀이 화면: 실전(examMode)/연습 모드, 문제 내 암기법·이론 연동, 채점
@@ -24,9 +25,33 @@ class QuizPlayScreen extends StatefulWidget {
 class _QuizPlayScreenState extends State<QuizPlayScreen> {
   int _idx = 0;
   final Map<int, int> _picked = {};
+  final Set<int> _recorded = {}; // 진첩 중복기록 방지
   bool _showAnswer = false;
+  bool _bookmarked = false;
 
   Question get _q => widget.questions[_idx];
+
+  @override
+  void initState() {
+    super.initState();
+    _syncBookmark();
+  }
+
+  Future<void> _syncBookmark() async {
+    if (widget.questions.isEmpty) return;
+    final b = await ProgressService.instance.isBookmarked(_q.qid);
+    if (mounted) setState(() => _bookmarked = b);
+  }
+
+  Future<void> _toggleBookmark() async {
+    final now = await ProgressService.instance.toggleBookmark(_q);
+    if (!mounted) return;
+    setState(() => _bookmarked = now);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(now ? '북마크 추가 — 스마트 복습에서 모아 풀 수 있어요' : '북마크 해제'),
+      duration: const Duration(seconds: 1),
+    ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +69,14 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
         title: Text(widget.title,
             style: const TextStyle(fontSize: 15), overflow: TextOverflow.ellipsis),
         actions: [
+          IconButton(
+            tooltip: _bookmarked ? '북마크 해제' : '북마크 (헷갈리는 문제 표시)',
+            icon: Icon(
+              _bookmarked ? Icons.bookmark : Icons.bookmark_border,
+              color: _bookmarked ? Colors.amber : null,
+            ),
+            onPressed: _toggleBookmark,
+          ),
           IconButton(
             tooltip: '이 토픽 1:1 강의',
             icon: const Icon(Icons.school_outlined),
@@ -254,6 +287,10 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
             _picked[_idx] = n;
             if (!widget.examMode) _showAnswer = true;
           });
+          // 문제별 진첩 기록 (첨 선택만 기록해 재클릭 왜곡 방지)
+          if (_recorded.add(_idx)) {
+            ProgressService.instance.record(_q, n == _q.answer);
+          }
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -288,10 +325,13 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
         children: [
           OutlinedButton.icon(
             onPressed: _idx > 0
-                ? () => setState(() {
+                ? () {
+                    setState(() {
                       _idx--;
                       _showAnswer = false;
-                    })
+                    });
+                    _syncBookmark();
+                  }
                 : null,
             icon: const Icon(Icons.chevron_left),
             label: const Text('이전'),
@@ -312,6 +352,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                   _idx++;
                   _showAnswer = false;
                 });
+                _syncBookmark();
               }
             },
             icon: Icon(isLast ? Icons.flag : Icons.chevron_right),

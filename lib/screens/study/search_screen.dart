@@ -94,8 +94,45 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
     final mnemonics = await data.loadMnemonics();
     final decks = await data.loadSlideDecks();
     final silgi = await data.loadSilgi();
+    final formulaGuide = await data.loadFormulaGuide();
 
     final hits = <_SearchHit>[];
+
+    if (formulaGuide != null) {
+      for (final f in formulaGuide.formulas) {
+        final s = _scoreText(f.name, kws, weight: 6) +
+            _scoreText(f.expr, kws, weight: 3) +
+            _scoreText(f.understand, kws, weight: 2) +
+            _scoreText(f.mnemonic, kws, weight: 2) +
+            _scoreText(f.symbols.map((x) => x.meaning).join(' '), kws,
+                weight: 1);
+        if (s > 0) {
+          hits.add(_SearchHit(
+            kind: '공식',
+            title: '${f.name} — ${f.expr}',
+            snippet: _makeSnippet('${f.understand} ${f.mnemonic}', kws),
+            subject: f.subject,
+            payload: f,
+            score: s,
+          ));
+        }
+      }
+      for (final b in formulaGuide.basics) {
+        final s = _scoreText(b.term, kws, weight: 6) +
+            _scoreText(b.easy, kws, weight: 2) +
+            _scoreText(b.detail, kws, weight: 1);
+        if (s > 0) {
+          hits.add(_SearchHit(
+            kind: '기초',
+            title: b.term,
+            snippet: _makeSnippet('${b.easy} ${b.detail}', kws),
+            subject: b.category,
+            payload: b,
+            score: s,
+          ));
+        }
+      }
+    }
 
     for (final l in lessons) {
       var s = _scoreText(l.topic, kws, weight: 6) +
@@ -277,6 +314,10 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
         return Colors.teal;
       case '실기':
         return Colors.purple;
+      case '공식':
+        return Colors.green.shade700;
+      case '기초':
+        return Colors.blue.shade700;
       default:
         return Colors.blueGrey;
     }
@@ -294,6 +335,16 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
     } else if (p is SilgiItem) {
       _showDetailSheet(
           h.title, 'Q. ${p.question}\n\nA. ${p.answer}\n\n💡 ${p.memo}');
+    } else if (p is FormulaGuide) {
+      _showDetailSheet(
+          '${p.name}\n${p.expr}',
+          '🗣 읽기: ${p.read}\n\n'
+          '🔤 기호:\n${p.symbols.map((s) => '• ${s.sym} = ${s.meaning}').join('\n')}\n\n'
+          '💡 이해: ${p.understand}\n\n'
+          '🧠 암기법: ${p.mnemonic}\n\n'
+          '✏️ 예제: ${p.example}');
+    } else if (p is BasicTerm) {
+      _showDetailSheet(p.term, '${p.easy}\n\n${p.detail}');
     }
   }
 

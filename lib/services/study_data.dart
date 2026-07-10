@@ -49,6 +49,9 @@ class Question {
   String get difficultyLabel =>
       difficulty == 1 ? '하' : (difficulty == 3 ? '상' : '중');
 
+  /// 문제 고유 ID (오답노트·북마크 추적용)
+  String get qid => '$examLabel|$subject|$no';
+
   factory Question.fromJson(Map<String, dynamic> j) => Question(
         no: j['no'] as int,
         subject: (j['subject'] as String?) ?? '',
@@ -448,6 +451,105 @@ class SilgiData {
       );
 }
 
+/// 공식 마스터 가이드 — 읽는법·기호뜻·이해법·암기법·예제
+class FormulaSymbol {
+  final String sym;
+  final String meaning;
+  FormulaSymbol({required this.sym, required this.meaning});
+  factory FormulaSymbol.fromJson(Map<String, dynamic> j) => FormulaSymbol(
+        sym: (j['sym'] as String?) ?? '',
+        meaning: (j['meaning'] as String?) ?? '',
+      );
+}
+
+class FormulaGuide {
+  final String subject;
+  final String topic;
+  final int importance;
+  final String name;
+  final String expr;
+  final String read; // 소리내어 읽는 법
+  final List<FormulaSymbol> symbols;
+  final String understand; // 비유 이해법
+  final String mnemonic; // 암기법
+  final String example; // 기출 예제
+
+  FormulaGuide({
+    required this.subject,
+    required this.topic,
+    required this.importance,
+    required this.name,
+    required this.expr,
+    required this.read,
+    required this.symbols,
+    required this.understand,
+    required this.mnemonic,
+    required this.example,
+  });
+
+  factory FormulaGuide.fromJson(Map<String, dynamic> j) => FormulaGuide(
+        subject: (j['subject'] as String?) ?? '',
+        topic: (j['topic'] as String?) ?? '',
+        importance: (j['importance'] as int?) ?? 3,
+        name: (j['name'] as String?) ?? '',
+        expr: (j['expr'] as String?) ?? '',
+        read: (j['read'] as String?) ?? '',
+        symbols: ((j['symbols'] as List?) ?? const [])
+            .map((e) => FormulaSymbol.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        understand: (j['understand'] as String?) ?? '',
+        mnemonic: (j['mnemonic'] as String?) ?? '',
+        example: (j['example'] as String?) ?? '',
+      );
+}
+
+/// 초보자 기초 사전 (단위·기호·핵심 개념)
+class BasicTerm {
+  final String category;
+  final String term;
+  final String easy; // 쉬운 한 줄 설명
+  final String detail; // 상세 설명
+
+  BasicTerm({
+    required this.category,
+    required this.term,
+    required this.easy,
+    required this.detail,
+  });
+
+  factory BasicTerm.fromJson(Map<String, dynamic> j) => BasicTerm(
+        category: (j['category'] as String?) ?? '',
+        term: (j['term'] as String?) ?? '',
+        easy: (j['easy'] as String?) ?? '',
+        detail: (j['detail'] as String?) ?? '',
+      );
+}
+
+class FormulaGuideData {
+  final String title;
+  final String intro;
+  final List<FormulaGuide> formulas;
+  final List<BasicTerm> basics;
+
+  FormulaGuideData({
+    required this.title,
+    required this.intro,
+    required this.formulas,
+    required this.basics,
+  });
+
+  factory FormulaGuideData.fromJson(Map<String, dynamic> j) => FormulaGuideData(
+        title: (j['title'] as String?) ?? '',
+        intro: (j['intro'] as String?) ?? '',
+        formulas: ((j['formulas'] as List?) ?? const [])
+            .map((e) => FormulaGuide.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        basics: ((j['basics'] as List?) ?? const [])
+            .map((e) => BasicTerm.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
 /// 학습 데이터 로더 (싱글턴 캐시)
 class StudyData {
   StudyData._();
@@ -482,6 +584,36 @@ class StudyData {
     _slideDecks = await _safeLoadList(
         'assets/data/theory_slides.json', SlideDeck.fromJson);
     return _slideDecks!;
+  }
+
+  FormulaGuideData? _formulaGuide;
+  Map<String, dynamic>? _examInfo;
+
+  /// 2026 시험정보 (일정·출제기준·전략) 로드 — raw JSON map
+  Future<Map<String, dynamic>?> loadExamInfo() async {
+    if (_examInfo != null) return _examInfo;
+    try {
+      final raw =
+          await rootBundle.loadString('assets/data/exam_info_2026.json');
+      _examInfo = jsonDecode(raw) as Map<String, dynamic>;
+    } catch (e) {
+      if (kDebugMode) debugPrint('exam_info_2026.json 로드 실패: $e');
+    }
+    return _examInfo;
+  }
+
+  /// 공식 마스터 가이드 로드
+  Future<FormulaGuideData?> loadFormulaGuide() async {
+    if (_formulaGuide != null) return _formulaGuide;
+    try {
+      final raw =
+          await rootBundle.loadString('assets/data/formula_guide.json');
+      _formulaGuide =
+          FormulaGuideData.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (e) {
+      if (kDebugMode) debugPrint('formula_guide.json 로드 실패: $e');
+    }
+    return _formulaGuide;
   }
 
   /// 실기 데이터 로드

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../services/study_data.dart';
 
 /// 추천 강의: 유튜브 링크 (웹에서는 새탭, 앱에서는 링크 복사)
@@ -93,9 +94,14 @@ class _VideosScreenState extends State<VideosScreen> {
     );
   }
 
-  void _open(String url) {
-    // 웹 빌드에서는 브라우저 새 탭으로 열림 (url_launcher 없이 처리)
-    _copy(url);
+  Future<void> _open(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri != null && await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      // 열 수 없으면 클립보드 복사로 폴백
+      await _copy(url);
+    }
   }
 
   Future<void> _copy(String url) async {

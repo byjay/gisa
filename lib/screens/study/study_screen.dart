@@ -13,6 +13,9 @@ import 'slides_screen.dart';
 import 'silgi_screen.dart';
 import 'search_screen.dart';
 import 'repeat_analysis_screen.dart';
+import 'formula_guide_screen.dart';
+import 'exam_info_screen.dart';
+import 'smart_review_screen.dart';
 import '../../widgets/tutor_avatar.dart';
 
 /// 학습 허브: CBT 문제풀이 / 빈출순 풀기 / 이론서 / 암기법 / 강의 / 학습이력
@@ -65,6 +68,10 @@ class _StudyScreenState extends State<StudyScreen> {
                 _newFeatureCards(context),
                 const SizedBox(height: 8),
                 _menuGrid(context),
+                const SizedBox(height: 8),
+                _beginnerCard(context),
+                const SizedBox(height: 8),
+                _examInfoCard(context),
                 const SizedBox(height: 12),
                 _cbtTrendCard(context),
                 const SizedBox(height: 20),
@@ -75,6 +82,26 @@ class _StudyScreenState extends State<StudyScreen> {
                     style: Theme.of(context).textTheme.bodySmall),
                 const SizedBox(height: 8),
                 for (final s in kSubjects) _freqCard(context, s),
+                const SizedBox(height: 20),
+                Text('쉬운 문제부터 풀기 (초보자 추천)',
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 4),
+                Text('난이도 하→중→상 순서로 자신감을 쌓으며 학습하세요.',
+                    style: Theme.of(context).textTheme.bodySmall),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final s in kSubjects)
+                      ActionChip(
+                        avatar: const Icon(Icons.stairs_rounded,
+                            size: 18, color: Colors.green),
+                        label: Text(s, style: const TextStyle(fontSize: 13)),
+                        onPressed: () => _startEasyFirst(s),
+                      ),
+                  ],
+                ),
                 const SizedBox(height: 20),
                 Text('과목별 랜덤 연습 (20문제)',
                     style: Theme.of(context).textTheme.titleMedium),
@@ -182,6 +209,32 @@ class _StudyScreenState extends State<StudyScreen> {
   }
 
   /// CBT 출제경향 + 2개월 로드맵
+  /// 2026 시험 정보 센터 진입 카드 (일정 D-Day · 출제기준 개정 · 전략)
+  Widget _examInfoCard(BuildContext context) {
+    return Card(
+      color: Colors.indigo.shade50,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.indigo.shade200),
+      ),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Colors.indigo.shade100,
+          child: const Icon(Icons.event_note, color: Colors.indigo),
+        ),
+        title: const Text('2026 시험 정보 센터',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        subtitle: const Text(
+          '3회차 일정 D-Day · 출제기준 개정(NCS·SQL·SMT) · 합격률 통계 · 과목별 점수 전략',
+          style: TextStyle(fontSize: 11.5),
+        ),
+        trailing: const Icon(Icons.chevron_right, color: Colors.indigo),
+        onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const ExamInfoScreen())),
+      ),
+    );
+  }
+
   Widget _cbtTrendCard(BuildContext context) {
     return Card(
       child: ExpansionTile(
@@ -224,31 +277,40 @@ class _StudyScreenState extends State<StudyScreen> {
           const SilgiScreen() as Widget),
       ('이론 검색·AI', Icons.manage_search_rounded, Colors.teal,
           const TheorySearchScreen() as Widget),
+      ('스마트 복습', Icons.auto_awesome, Colors.pink,
+          const SmartReviewScreen() as Widget),
+      ('공식 마스터', Icons.functions, Colors.green,
+          const FormulaGuideScreen() as Widget),
     ];
-    return Row(
-      children: [
-        for (final (label, icon, color, screen) in items)
-          Expanded(
-            child: Card(
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () => Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (_) => screen)),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  child: Column(
-                    children: [
-                      Icon(icon, size: 26, color: color),
-                      const SizedBox(height: 5),
-                      Text(label,
-                          style: const TextStyle(
-                              fontSize: 11, fontWeight: FontWeight.w700)),
-                    ],
-                  ),
-                ),
+    Widget cell((String, IconData, MaterialColor, Widget) item) {
+      final (label, icon, color, screen) = item;
+      return Expanded(
+        child: Card(
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => screen)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Column(
+                children: [
+                  Icon(icon, size: 26, color: color),
+                  const SizedBox(height: 5),
+                  Text(label,
+                      style: const TextStyle(
+                          fontSize: 11, fontWeight: FontWeight.w700)),
+                ],
               ),
             ),
           ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Row(children: [for (final it in items.take(3)) cell(it)]),
+        Row(children: [for (final it in items.skip(3)) cell(it)]),
       ],
     );
   }
@@ -372,6 +434,63 @@ class _StudyScreenState extends State<StudyScreen> {
         title: '전기기사 ${e.label}',
         questions: qs,
         examMode: true,
+      ),
+    ));
+  }
+
+  /// 초보자 배너 — 공식 마스터 진입
+  Widget _beginnerCard(BuildContext context) {
+    return Card(
+      color: Colors.green.withValues(alpha: 0.08),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const FormulaGuideScreen())),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.functions_rounded,
+                    color: Colors.green, size: 26),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('공식 마스터 · 왕초보 기초사전',
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 2),
+                    Text('공식 읽는법·기호뜻·비유이해·암기법 5단계\nV·A·Ω부터 시작하는 초보자 필수 코스',
+                        style: TextStyle(fontSize: 11.5, height: 1.4)),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: Colors.green),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 초보자용: 쉬운 문제부터 (난이도 하→중→상)
+  Future<void> _startEasyFirst(String subject) async {
+    final qs = await StudyData.instance
+        .questionsByDifficulty(subject, easyFirst: true);
+    if (!mounted) return;
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => QuizPlayScreen(
+        title: '$subject 쉬운순 (${qs.length}문제)',
+        questions: qs,
+        examMode: false,
       ),
     ));
   }
