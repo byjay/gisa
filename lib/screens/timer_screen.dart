@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/level_up_dialog.dart';
 
 class TimerScreen extends StatefulWidget {
   const TimerScreen({super.key});
@@ -175,8 +176,13 @@ class _TimerScreenState extends State<TimerScreen> {
                       flex: 3,
                       child: FilledButton.icon(
                         onPressed: () async {
+                          final levelBefore = app.level;
                           final sec = await app.stopTimer();
                           final min = (sec / 60).ceil();
+                          if (context.mounted) {
+                            await LevelUpDialog.showIfLevelUp(context,
+                                levelBefore, app.level, app.levelTitle);
+                          }
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(

@@ -8,6 +8,7 @@ import '../../services/pass_prediction.dart';
 import '../../widgets/lesson_view.dart';
 import '../../widgets/rich_slide_body.dart';
 import '../../widgets/teacher_recipe_box.dart';
+import '../../widgets/level_up_dialog.dart';
 import 'result_certificate_screen.dart';
 
 /// 문제풀이 화면: 실전(examMode)/연습 모드, 문제 내 암기법·이론 연동, 채점
@@ -624,8 +625,10 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     final pct = total == 0 ? 0 : (correct * 100 / total).round();
 
     // 학습 이력 저장 (AppProvider)
+    final appProv = context.read<AppProvider>();
+    final levelBefore = appProv.level;
     try {
-      context.read<AppProvider>().addQuizResult(
+      appProv.addQuizResult(
         title: widget.title,
         total: total,
         correct: correct,
@@ -637,6 +640,13 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
             .toList(),
       );
     } catch (_) {}
+
+    // 🎉 레벨업 시 축하 팝업
+    if (mounted) {
+      await LevelUpDialog.showIfLevelUp(
+          context, levelBefore, appProv.level, appProv.levelTitle);
+    }
+    if (!mounted) return;
 
     // 🎯 풀 때마다 합격 예측 점수 갱신 — "내 점수가 움직인다"는 중독 루프
     PassPrediction? pred;
