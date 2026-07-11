@@ -8,7 +8,7 @@
 
 - 프로젝트: **Cert Study Tracker** (전기기사 자격증 학습 앱)
 - 패키지: `com.certstudytracker.study` / 경로: `/home/user/flutter_app/`
-- 문서 버전: v1.0 (2026-02 재구상판) — 갱신 시 §9 변경이력에 기록
+- 문서 버전: **v2.0** (2026-02 자기검증 증보판 — v1.0 갭분석 오류 3건 정정) — 갱신 시 §9 변경이력에 기록
 
 ---
 
@@ -106,6 +106,15 @@
 - 스트릭 도입으로 익일 리텐션 **12% → 55%**, 14일차 리텐션 +14%p.
 - 시사점: 스트릭 시각화·상실 방지(streak freeze류)·일일 미션이 리텐션의 핵심 레버.
 
+### 4.4 복습 알고리즘 (SM-2 / FSRS / Leitner — 2차 리서치)
+- Anki계 SM-2: 초기 간격 1일→6일, easiness factor로 간격 증가. FSRS는 동일 기억률에서 복습량 20~30% 절감(GeekNews).
+- 본 앱은 Leitner 6박스(0/1/2/4/8/16일)를 `flashcard_srs.dart`에 **이미 구현** — 충분하며 FSRS 전환은 비용 대비 효익 낮음(보류).
+
+### 4.5 전기기사 시험 구조 (2차 리서치 — 나무위키/에듀윅/inup)
+- 필기 5과목×20문항=100문항, 4지선다. **합격: 평균 60점 ∧ 과목별 40점(과락)**.
+- 권장 학습 순서: 회로이론→제어공학→전력공학→KEC법규→전자기학→전기기기 (에듀윅). 비전공자는 전력공학 먼저(맞추다 블로그).
+- → 본 앱의 과락 경보(`pass_prediction.dart` gwarak)는 이미 이 규칙을 반영. CBT 모드는 문항당 90초 페이스 유지.
+
 ---
 
 ## §5. 현재 아키텍처 맵 (2026-02 전수점검 기준, 46 dart 파일)
@@ -140,52 +149,56 @@ assets/data/ (12 JSON)           # exams.json(29회차·2,897문항: id/label/ye
 
 ---
 
-## §6. 갭 분석 (경쟁사 5대 기준 대비 채점표)
+## §6. 갭 분석 v2.0 (자기검증 재채점 — v1.0 오류 정정)
 
-| 기준 (§4.2) | 현재 상태 | 판정 | 대응 태스크 |
+> **Inspector 감사 결과**: v1.0의 ✗/△ 판정 3건이 실제 코드와 불일치했음. 근거 파일을 명기하여 재채점.
+
+| 기준 | 실제 현재 상태 (근거) | 판정 | 대응 |
 |---|---|---|---|
-| 1. 회차별·과목별 풀이 | 회차별 O (29회차), **과목별 필터 미흡** | △ | T-1 |
-| 2. 자동채점→해설 자연 연결 | 채점 O, 해설은 Cerebras 의존·문항 내 즉시 해설 흐름 약함 | △ | T-2 |
-| 3. 오답노트 자동 축적 | ProgressService에 오답 기록 O, SmartReview O | ○ | T-2 보강 |
-| 4. **북마크**·단원별 복습·약점 확인 | **북마크 없음(치명 갭)**, 약점 분석 부분적 | ✗ | T-1, T-3 |
-| 5. 무료/광고 체감 | 완전 무료·광고 없음 | ◎ (우위) | 유지 |
-| +. 스트릭 보호 (Duolingo §4.3) | 스트릭 표시만 있고 상실 방지 장치 없음 | △ | T-4 |
-| +. CBT 환경 재현 (맞추다) | 일반 퀴즈 UI, 실제 CBT 레이아웃 미재현 | △ | T-5 |
+| 1. 회차별·과목별 풀이 | 회차 29개 + 과목별 빈출순/난이도순 카드 (study_screen `_freqCard`, kSubjects 5과목 균등 ~580문항) | ○ | 유지 |
+| 2. 채점→해설 연결 | **해설 2,897/2,897 (100%) 로컬 보유**, 문항 내 RichSlideBody 해설 + 재회독 배너 | ○ | 유지 |
+| 3. 오답노트 자동 축적 | ProgressService record + Leitner SRS(dueReviewQids) + SmartReview | ◎ | 유지 |
+| 4. 북마크·약점 확인 | **북마크 이미 구현**(toggleBookmark + 퀴즈 AppBar 별 토글 + SmartReview 연동), 약점은 weakTopics/처방전 | ○ | 유지 |
+| 5. 무료/광고 체감 | 완전 무료·무광고·오프라인 | ◎ (우위) | 유지 |
+| 6. **스트릭 보호** (Duolingo) | 스트릭 계산만 있고(`streak` getter) 상실 방지 장치 없음 | ✗ **진짜 갭** | **T-4 (이번 턴)** |
+| 7. **CBT 문항 그리드 네비게이터** (맞추다) | examMode에 타이머는 있으나 문항 점프 그리드 없음 | ✗ **진짜 갭** | **T-5 (이번 턴)** |
+| 8. 온보딩 30분 루틴 (오르조) | 온보딩 전무 | ✗ | T-6 |
 
 ---
 
-## §7. 로드맵 + 태스크별 초세밀 구현 스펙
+## §7. 로드맵 v2.0 + 태스크별 초세밀 구현 스펙
 
 > 각 태스크는 §1.3 프로토콜(A0→A5)을 완주해야 완료다. 순서 변경은 사용자 지시로만 가능.
+> ~~T-1(북마크·과목필터), T-2(해설루프), T-3(약점분석)~~ → **Inspector 감사 결과 기구현 확인, 폐기.**
 
-### T-1. 문항 북마크 + 과목별 필터 (우선순위 ★★★ — 치명 갭)
-- **A1 Researcher**: 완료(§4.2 기준 4). 추가 조사 불필요.
-- **A2 Architect 스펙**:
-  - 신규 `lib/services/bookmark_service.dart`: shared_preferences 키 `bookmarks_v1`(문항 id Set). API: `Future<Set<String>> load()`, `Future<void> toggle(String qid)`, `bool isBookmarked(String qid)`.
-  - `quiz_play_screen.dart`: AppBar actions에 북마크 토글 IconButton(별 아이콘, 채움/비움).
-  - `study_screen.dart` 문제풀이 탭: "북마크 모아풀기" 진입 카드 추가 → 북마크된 문항만으로 QuizPlayScreen 구동.
-  - 과목 필터: exams.json 문항의 과목 메타(문항 순번 기반 20문항 단위 과목 매핑) → 과목 선택 칩(ChoiceChip 행).
-- **A3 Implementer**: 위 스펙만 구현. UI는 PremiumCard/PillBadge 재사용.
-- **A4/A5**: 표준 검증·기록.
+### T-4. 스트릭 보호권 "마법 방패" (★★★ — Duolingo §4.3 직접 근거, 리텐션 핵심 레버)
+- **A1 Researcher**: 완료. Duolingo streak freeze — 끊길 날 자동 소모로 스트릭 유지, 리텐션 +43%p 문맥.
+- **A2 Architect 스펙 (정밀)**:
+  - **저장소**: 기존 Hive `settings` 박스 재사용(신규 박스 금지). 키: `shieldCount`(int, 기본 0, 최대 2), `shieldLastEarnDay`(String 'yyyy-MM-dd' — 하루 1회 지급 가드), `shieldUsedDates`(List<String> — 방패로 보호된 날짜들).
+  - **AppProvider 신규 API**:
+    - `int shieldCount` 필드 + `_load()`에서 복원.
+    - `bool get todayMissionsAllDone` — daily_mission_card.dart의 3개 조건(todayMinutes≥30 ∧ todayQuizSolved≥10 ∧ todayQuizCorrect≥5)과 **동일 공식** (단일 진실 원천을 Provider로 이동).
+    - `void maybeEarnShield()` — 올클리어 ∧ 오늘 미지급 ∧ shieldCount<2 → +1, notifyListeners. 반환 bool(지급 여부)로 스낵바 트리거.
+    - **스트릭 게터 수정**: 빈 날을 만나면 `shieldUsedDates` 포함 여부 확인 → 포함 시 연속으로 간주. `int get effectiveStreak`.
+    - `void autoConsumeShield()` — 어제 학습 0분 ∧ 그제까지 스트릭 존재 ∧ shieldCount>0 ∧ 어제가 미보호 → 어제를 shieldUsedDates에 추가, shieldCount-1. `_load()` 말미에서 1회 호출.
+  - **UI**: home_screen 스트릭 카드에 `🛡️×N` PillBadge; addQuizResult/stopTimer 직후 maybeEarnShield → 지급 시 "🛡️ 마법 방패 획득!" 스낵바.
+- **완료 기준**: 하루 건너뛴 시나리오에서 방패 자동 소모 후 스트릭 유지(수동 데이터 조작 검증).
 
-### T-2. 해설 루프 완결 — "풀기→채점→해설→오답복습" 무단절 (★★★)
-- **A2 스펙**:
-  - 채점 직후 각 문항 카드에서 접이식(ExpansionTile) 해설 즉시 노출. Cerebras 해설은 캐시(`Hive box 'explanations'`)하여 재호출 방지·오프라인 재열람.
-  - 결과 다이얼로그에 "오답 즉시 복습" 버튼 → SmartReviewScreen으로 틀린 문항 id 목록 직접 전달.
-  - `cerebras_service.dart`: 실패 시 solution_recipes.json 기반 로컬 폴백 해설.
-- **완료 기준**: 네트워크 차단 상태에서도 해설 열람 가능(캐시/폴백).
+### T-5. CBT 문항 그리드 네비게이터 (★★★ — 맞추다 CBT 재현 갭)
+- **A2 Architect 스펙 (정밀)**:
+  - 신규 화면 금지 — **quiz_play_screen.dart의 examMode에 내장**(기존 채점 `_finish()` 파이프라인 100% 재사용).
+  - AppBar actions에 그리드 아이콘(`Icons.grid_view_rounded`) → `showModalBottomSheet`로 문항 번호판:
+    - GridView 8열, 셀 상태 3색: 답함(primary 채움)/현재(테두리 강조)/안 푼 문항(회색), 북마크 문항 우상단 ⭐ 도트.
+    - 셀 탭 → `setState(_idx = i)` + 시트 닫기 + `_syncBookmark()` 재호출.
+    - 시트 상단: "푼 문항 N/총 M" + 남은 시간 표시(examMode).
+  - 하단 내비 행에 "번호판" 버튼 추가(연습 모드에서도 사용 가능).
+- **완료 기준**: 100문항 모의고사에서 임의 문항 점프·복귀 정상, 채점 결과 불변.
 
-### T-3. 약점 분석 대시보드 (★★)
-- **A2 스펙**: `progress_service.dart` 데이터로 과목×주제(topic_freq.json) 교차 정답률 계산 → stats_screen에 `WeaknessRadarCard` 위젯(과목별 정답률 가로 막대 + "가장 약한 주제 3개" 리스트, 탭 시 해당 주제 문제풀이 진입).
+### T-6. 온보딩 30분 루틴 (★ — 오르조 시사점, 다음 턴)
+- 첫 실행 감지(settings 박스 `onboarded_v1`) → 3페이지(목표 시험일→일일 목표→핵심 루프 안내). PageView + 기존 exam/goal setter 재사용.
 
-### T-4. 스트릭 보호권 (Streak Shield) (★★ — Duolingo 근거)
-- **A2 스펙**: AppProvider에 `shieldCount`(Hive). 일일 미션 올클리어 시 1개 지급(최대 2). 스트릭 끊길 날 자동 소모·유지. home_screen 스트릭 표시에 방패 아이콘+개수. 소모 시 스낵바 알림.
-
-### T-5. CBT 모의고사 모드 (★★)
-- **A2 스펙**: 실제 CBT 유사 레이아웃 — 상단 남은시간(150분 카운트다운), 문항 번호 그리드 네비게이터(답함/안함/북마크 색상), 한 문항씩 표시, "검토" 플래그. 기존 quiz_play와 별도 `cbt_exam_screen.dart`. 종료 시 기존 채점·결과 파이프라인 재사용.
-
-### T-6. 마감 후 폴리시: 온보딩 30분 루틴 (★ — 오르조 시사점)
-- 첫 실행 감지(shared_preferences `onboarded_v1`) → 3페이지 온보딩(목표 시험일 선택→일일 목표→핵심 루프 안내).
+### T-7. 백로그 (사용자 승인 후 착수)
+- FSRS 전환 검토(§4.4 보류 사유 재평가), 위클리 리그(익명 랭킹), 푸시 리마인더(Android 빌드 시).
 
 ---
 
@@ -214,6 +227,7 @@ assets/data/ (12 JSON)           # exams.json(29회차·2,897문항: id/label/ye
 | R20 | 0ab0b91 | XP 피드백, 배지 컬렉션(10종) | dIE7s8Mg |
 | R21 | a6a983d | 레벨업 파티클 팝업 | a3o8pt1V |
 | R22 | 2da231f | 시간대별 그라디언트, 12주 히트맵, 주간 성장 리포트 | E7gTXo6v |
-| R23 | (이번) | **MASTER_PLAN.md 바이블 제정** — 오케스트레이터 헌장·갭분석·로드맵 | (커밋 후 기입) |
+| R23 | b5805e4 | **MASTER_PLAN.md 바이블 제정** — 오케스트레이터 헌장·갭분석·로드맵 | Roas0KcH |
+| R24 | (이번) | **바이블 v2.0** (갭분석 자기검증 정정 + 리서치 §4.4/4.5 증보) + **T-4 마법 방패**(streak freeze: 자동소모·미션 올클리어 지급) + **T-5 CBT 문항 번호판**(그리드 점프, 답함/현재/북마크 표시) + **T-6 프리미엄 온보딩**(시험일→목표→루프, 3페이지) | (커밋 후 기입) |
 
-> **다음 착수 태스크: T-1 (북마크 + 과목 필터)** — 사용자 별도 지시 없으면 이 순서를 따른다.
+> **다음 착수 태스크: T-7 백로그 협의** — T-4/5/6 완료로 §6 갭 전항목 해소. 사용자 승인 후 백로그(위클리 리그·FSRS·푸시) 착수.

@@ -183,6 +183,17 @@ class _TimerScreenState extends State<TimerScreen> {
                             await LevelUpDialog.showIfLevelUp(context,
                                 levelBefore, app.level, app.levelTitle);
                           }
+                          // 🛡️ 미션 올클리어 시 마법 방패 지급
+                          final earnedShield = await app.maybeEarnShield();
+                          if (earnedShield && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    '🛡️ 마법 방패 획득! 하루 건너뛰어도 스트릭이 유지돼요'),
+                                backgroundColor: Color(0xFF4F46E5),
+                              ),
+                            );
+                          }
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(

@@ -58,6 +58,9 @@ class AppProvider extends ChangeNotifier {
     dailyGoalMinutes = (_settingsBox.get('dailyGoal') as int?) ?? 120;
     weeklyGoalMinutes = (_settingsBox.get('weeklyGoal') as int?) ?? 600;
     darkMode = (_settingsBox.get('darkMode') as bool?) ?? false;
+    shieldCount = (_settingsBox.get('shieldCount') as int?) ?? 0;
+    onboarded = (_settingsBox.get('onboarded_v1') as bool?) ?? false;
+    _autoConsumeShield();
     notifyListeners();
   }
 
@@ -244,18 +247,81 @@ class AppProvider extends ChangeNotifier {
 
   int get totalMinutes => sessions.fold(0, (sum, s) => sum + s.minutes);
 
-  /// Streak: consecutive days with study up to today (or yesterday)
+  /// Streak: consecutive days with study up to today (or yesterday).
+  /// 🛡️ 마법 방패로 보호된 날짜(shieldUsedDates)는 학습한 날로 간주.
   int get streak {
     int count = 0;
     var day = DateTime.now();
-    if (minutesOnDate(day) == 0) {
+    if (!_countsForStreak(day)) {
       day = day.subtract(const Duration(days: 1));
     }
-    while (minutesOnDate(day) > 0) {
+    while (_countsForStreak(day)) {
       count++;
       day = day.subtract(const Duration(days: 1));
     }
     return count;
+  }
+
+  bool _countsForStreak(DateTime day) =>
+      minutesOnDate(day) > 0 || _shieldUsedDates.contains(_dayKey(day));
+
+  // ===== 🛡️ 스트릭 보호권 (마법 방패) =====
+  /// Duolingo streak-freeze 방식: 하루 건너뛰면 방패가 자동 소모되어 스트릭 유지.
+  int shieldCount = 0;
+  static const int maxShields = 2;
+
+  String _dayKey(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  List<String> get _shieldUsedDates =>
+      List<String>.from(_settingsBox.get('shieldUsedDates') as List? ?? []);
+
+  /// 오늘의 3대 마법 미션 올클리어 여부 (daily_mission_card와 단일 공식)
+  bool get todayMissionsAllDone =>
+      todayMinutes >= 30 && todayQuizSolved >= 10 && todayQuizCorrect >= 5;
+
+  /// 미션 올클리어 시 방패 1개 지급 (하루 1회, 최대 2개). 지급되면 true.
+  Future<bool> maybeEarnShield() async {
+    if (!todayMissionsAllDone || shieldCount >= maxShields) return false;
+    final today = _dayKey(DateTime.now());
+    if ((_settingsBox.get('shieldLastEarnDay') as String?) == today) {
+      return false;
+    }
+    shieldCount++;
+    await _settingsBox.put('shieldCount', shieldCount);
+    await _settingsBox.put('shieldLastEarnDay', today);
+    notifyListeners();
+    return true;
+  }
+
+  /// 앱 시작 시 자동 점검: 어제를 건너뛪고 그전까지 스트릭이 있었다면 방패 소모.
+  void _autoConsumeShield() {
+    if (shieldCount <= 0) return;
+    final yesterday = DateTime.now().subtract(const Duration(days: 1));
+    final yKey = _dayKey(yesterday);
+    if (minutesOnDate(yesterday) > 0) return; // 어제 학습함 — 불필요
+    final used = _shieldUsedDates;
+    if (used.contains(yKey)) return; // 이미 보호됨
+    // 그전날까지 스트릭이 있었는지 확인 (보호할 가치가 있는지)
+    final dayBefore = yesterday.subtract(const Duration(days: 1));
+    if (!_countsForStreak(dayBefore)) return;
+    used.add(yKey);
+    shieldCount--;
+    _settingsBox.put('shieldUsedDates', used);
+    _settingsBox.put('shieldCount', shieldCount);
+    shieldJustConsumed = true; // UI에서 1회성 안내용
+  }
+
+  /// 방패가 방금 소모됐음을 UI에 1회 알리기 위한 플래그
+  bool shieldJustConsumed = false;
+
+  // ===== ✨ 온보딩 =====
+  bool onboarded = false;
+
+  Future<void> completeOnboarding() async {
+    onboarded = true;
+    await _settingsBox.put('onboarded_v1', true);
+    notifyListeners();
   }
 
   /// Last N days minutes for chart (oldest first)

@@ -484,8 +484,14 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              _miniStat(context, Icons.local_fire_department_rounded,
-                  '${app.streak}일', '연속 학습', const Color(0xFFF97316),
+              _miniStat(
+                  context,
+                  Icons.local_fire_department_rounded,
+                  app.shieldCount > 0
+                      ? '${app.streak}일 🛡️${app.shieldCount}'
+                      : '${app.streak}일',
+                  '연속 학습',
+                  const Color(0xFFF97316),
                   () => onNavigate(4)),
               _vDivider(context),
               _miniStat(context, Icons.schedule_rounded,

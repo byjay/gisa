@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/app_provider.dart';
+import '../../theme/app_theme.dart';
 import '../../services/study_data.dart';
 import '../../services/progress_service.dart';
 import '../../services/pass_prediction.dart';
@@ -209,6 +210,112 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     );
   }
 
+  /// 🗂 CBT 문항 번호판 — 실제 CBT처럼 문항 간 자유 이동 (답함/현재/미답 3색)
+  Future<void> _openQuestionGrid() async {
+    final bookmarked = await ProgressService.instance.bookmarkedQids();
+    if (!mounted) return;
+    final scheme = Theme.of(context).colorScheme;
+    final answered = _picked.length;
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.grid_view_rounded, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    'CBT 문항 번호판 — 푼 문항 $answered / ${widget.questions.length}',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w800, fontSize: 14),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '탭하면 해당 문항으로 이동 · ⭐ = 북마크',
+                style: TextStyle(
+                    fontSize: 12, color: scheme.onSurfaceVariant),
+              ),
+              const SizedBox(height: 12),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Wrap(
+                    spacing: 7,
+                    runSpacing: 7,
+                    children: [
+                      for (var i = 0; i < widget.questions.length; i++)
+                        _gridCell(ctx, i,
+                            bookmarked.contains(widget.questions[i].qid)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _gridCell(BuildContext ctx, int i, bool isBookmarked) {
+    final scheme = Theme.of(ctx).colorScheme;
+    final isCurrent = i == _idx;
+    final isAnswered = _picked.containsKey(i);
+    return InkWell(
+      onTap: () {
+        Navigator.of(ctx).pop();
+        setState(() {
+          _idx = i;
+          _showAnswer = false;
+        });
+        _syncBookmark();
+      },
+      borderRadius: BorderRadius.circular(9),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 40,
+            height: 36,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: isAnswered
+                  ? scheme.primary
+                  : scheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(9),
+              border: isCurrent
+                  ? Border.all(color: AppTheme.accent, width: 2.5)
+                  : null,
+            ),
+            child: Text(
+              '${i + 1}',
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color: isAnswered ? scheme.onPrimary : scheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          if (isBookmarked)
+            const Positioned(
+              top: -4,
+              right: -4,
+              child: Text('⭐', style: TextStyle(fontSize: 10)),
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.questions.isEmpty) {
@@ -228,6 +335,11 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
           overflow: TextOverflow.ellipsis,
         ),
         actions: [
+          IconButton(
+            tooltip: 'CBT 문항 번호판 (문항 이동)',
+            icon: const Icon(Icons.grid_view_rounded),
+            onPressed: _openQuestionGrid,
+          ),
           IconButton(
             tooltip: _bookmarked ? '북마크 해제' : '북마크 (헷갈리는 문제 표시)',
             icon: Icon(
@@ -645,6 +757,18 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     if (mounted) {
       await LevelUpDialog.showIfLevelUp(
           context, levelBefore, appProv.level, appProv.levelTitle);
+    }
+    if (!mounted) return;
+
+    // 🛡️ 오늘의 미션 올클리어 시 마법 방패 지급
+    final earnedShield = await appProv.maybeEarnShield();
+    if (earnedShield && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('🛡️ 마법 방패 획득! 하루 건너뛰어도 스트릭이 유지돼요'),
+          backgroundColor: Color(0xFF4F46E5),
+        ),
+      );
     }
     if (!mounted) return;
 

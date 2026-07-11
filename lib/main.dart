@@ -5,6 +5,7 @@ import 'providers/app_provider.dart';
 import 'theme/app_theme.dart';
 import 'screens/exams_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/onboarding_screen.dart';
 import 'screens/stats_screen.dart';
 import 'screens/study/study_screen.dart';
 import 'screens/timer_screen.dart';
@@ -34,8 +35,25 @@ class CertStudyApp extends StatelessWidget {
       themeMode: dark ? ThemeMode.dark : ThemeMode.light,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      home: const MainShell(),
+      home: const _RootGate(),
     );
+  }
+}
+
+/// 첫 실행 시에만 온보딩을 보여주는 게이트
+class _RootGate extends StatelessWidget {
+  const _RootGate();
+
+  @override
+  Widget build(BuildContext context) {
+    final onboarded =
+        context.select<AppProvider, bool>((p) => p.onboarded);
+    if (!onboarded) {
+      return OnboardingScreen(
+        onDone: () => context.read<AppProvider>().completeOnboarding(),
+      );
+    }
+    return const MainShell();
   }
 }
 
