@@ -270,6 +270,61 @@ class AppProvider extends ChangeNotifier {
   int minutesForExam(String examId) =>
       sessions.where((s) => s.examId == examId).fold(0, (sum, s) => sum + s.minutes);
 
+  // ===== XP & 레벨 (마법사 성장 시스템) =====
+  /// 학습 1분 = 2XP, 정답 1개 = 5XP
+  int get xp {
+    final quizXp = quizResults.fold<int>(
+        0, (s, r) => s + ((r['correct'] as int?) ?? 0) * 5);
+    return totalMinutes * 2 + quizXp;
+  }
+
+  /// 레벨 n 도달에 필요한 누적 XP = (n-1)^2 * 120
+  int xpForLevel(int level) => (level - 1) * (level - 1) * 120;
+
+  int get level {
+    var l = 1;
+    while (xp >= xpForLevel(l + 1)) {
+      l++;
+    }
+    return l;
+  }
+
+  /// 현재 레벨 내 진행률 (0.0 ~ 1.0)
+  double get levelProgress {
+    final cur = xpForLevel(level);
+    final next = xpForLevel(level + 1);
+    if (next == cur) return 0;
+    return ((xp - cur) / (next - cur)).clamp(0.0, 1.0);
+  }
+
+  int get xpToNextLevel => xpForLevel(level + 1) - xp;
+
+  String get levelTitle {
+    final l = level;
+    if (l >= 15) return '전설의 대마법사';
+    if (l >= 10) return '대마법사';
+    if (l >= 7) return '상급 마법사';
+    if (l >= 5) return '정식 마법사';
+    if (l >= 3) return '수습 마법사';
+    return '견습 마법사';
+  }
+
+  /// 오늘 푼 문제 수 (퀴즈 결과 기준)
+  int get todayQuizSolved {
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    return quizResults
+        .where((r) => (r['date'] as String).startsWith(today))
+        .fold<int>(0, (s, r) => s + ((r['total'] as int?) ?? 0));
+  }
+
+  /// 오늘 맞힌 문제 수
+  int get todayQuizCorrect {
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    return quizResults
+        .where((r) => (r['date'] as String).startsWith(today))
+        .fold<int>(0, (s, r) => s + ((r['correct'] as int?) ?? 0));
+  }
+
   @override
   void dispose() {
     _ticker?.cancel();

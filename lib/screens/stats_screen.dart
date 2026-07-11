@@ -21,6 +21,71 @@ class StatsScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
           children: [
+            // ── 🧙 마법사 레벨 카드 ──
+            PremiumCard(
+              gradient: AppTheme.heroGradient,
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFBBF24), Color(0xFFF59E0B)],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFF59E0B)
+                              .withValues(alpha: 0.5),
+                          blurRadius: 12,
+                        ),
+                      ],
+                    ),
+                    alignment: Alignment.center,
+                    child: Text('Lv${app.level}',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900)),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('🧙 ${app.levelTitle}',
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800)),
+                        const SizedBox(height: 3),
+                        Text(
+                            '총 ${app.xp} XP · 다음 레벨까지 ${app.xpToNextLevel} XP',
+                            style: TextStyle(
+                                color:
+                                    Colors.white.withValues(alpha: 0.75),
+                                fontSize: 11.5)),
+                        const SizedBox(height: 8),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(5),
+                          child: LinearProgressIndicator(
+                            value: app.levelProgress,
+                            minHeight: 7,
+                            backgroundColor:
+                                Colors.white.withValues(alpha: 0.2),
+                            valueColor: const AlwaysStoppedAnimation(
+                                Color(0xFFFBBF24)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
             // ── 목표 진행 카드 ──
             PremiumCard(
               child: Column(

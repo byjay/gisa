@@ -7,6 +7,8 @@ import '../widgets/pass_prediction_card.dart';
 import '../widgets/dday_plan_card.dart';
 import '../widgets/due_review_card.dart';
 import '../widgets/due_flashcard_card.dart';
+import '../widgets/daily_mission_card.dart';
+import '../widgets/magic_effects.dart';
 import 'study/smart_review_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -35,48 +37,65 @@ class HomeScreen extends StatelessWidget {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   // 오늘 학습 진행 스트립
-                  _todayStrip(context, app, dailyRatio, pendingNotes),
-                  const SizedBox(height: 14),
-                  // 복습 카드들
-                  const DueReviewCard(),
-                  const DueFlashcardCard(),
-                  // 🎯 합격 예측
-                  const PassPredictionCard(),
+                  FadeSlideIn(
+                      index: 0,
+                      child: _todayStrip(
+                          context, app, dailyRatio, pendingNotes)),
                   const SizedBox(height: 12),
-                  DDayPlanCard(dDay: nearest?.dDay ?? 0),
+                  // 🪄 오늘의 마법 미션
+                  const FadeSlideIn(index: 1, child: DailyMissionCard()),
+                  const SizedBox(height: 12),
+                  // 복습 카드들
+                  const FadeSlideIn(index: 2, child: DueReviewCard()),
+                  const FadeSlideIn(index: 2, child: DueFlashcardCard()),
+                  // 🎯 합격 예측
+                  const FadeSlideIn(index: 3, child: PassPredictionCard()),
+                  const SizedBox(height: 12),
+                  FadeSlideIn(
+                      index: 4,
+                      child: DDayPlanCard(dDay: nearest?.dDay ?? 0)),
                   // 문제은행 배너
-                  const SectionHeader(
-                    emoji: '⚡',
-                    title: '전기기사 문제은행',
-                    subtitle: '이론-문제-암기법 완전 연동 학습 시스템',
+                  const FadeSlideIn(
+                    index: 5,
+                    child: SectionHeader(
+                      emoji: '⚡',
+                      title: '전기기사 문제은행',
+                      subtitle: '이론-문제-암기법 완전 연동 학습 시스템',
+                    ),
                   ),
-                  _bankBanner(context),
+                  FadeSlideIn(index: 5, child: _bankBanner(context)),
                   // 빠른 실행
-                  const SectionHeader(emoji: '🚀', title: '빠른 실행'),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _actionTile(
-                          context,
-                          icon: Icons.play_circle_fill_rounded,
-                          label: '타이머 시작',
-                          sub: '집중 학습 기록',
-                          gradient: AppTheme.heroGradient,
-                          onTap: () => onNavigate(3),
+                  const FadeSlideIn(
+                      index: 6,
+                      child:
+                          SectionHeader(emoji: '🚀', title: '빠른 실행')),
+                  FadeSlideIn(
+                    index: 6,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _actionTile(
+                            context,
+                            icon: Icons.play_circle_fill_rounded,
+                            label: '타이머 시작',
+                            sub: '집중 학습 기록',
+                            gradient: AppTheme.heroGradient,
+                            onTap: () => onNavigate(3),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _actionTile(
-                          context,
-                          icon: Icons.school_rounded,
-                          label: '오늘의 학습',
-                          sub: '문제·강의·암기',
-                          gradient: AppTheme.electricGradient,
-                          onTap: () => onNavigate(1),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _actionTile(
+                            context,
+                            icon: Icons.school_rounded,
+                            label: '오늘의 학습',
+                            sub: '문제·강의·암기',
+                            gradient: AppTheme.electricGradient,
+                            onTap: () => onNavigate(1),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   // 다가오는 시험
                   if (upcoming.length > 1) ...[
@@ -158,49 +177,67 @@ class HomeScreen extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
       decoration: BoxDecoration(
         gradient: AppTheme.heroGradient,
         borderRadius: BorderRadius.circular(AppTheme.rXl - 4),
         boxShadow: AppTheme.glowShadow(AppTheme.primary),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          // ✨ 반짝이는 별 장식
+          Positioned.fill(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppTheme.rXl - 4),
+              child: LayoutBuilder(
+                builder: (_, c) => SparkleOverlay(
+                    width: c.maxWidth, height: c.maxHeight),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Text(
-                      DateFormat('M월 d일 EEEE', 'ko').format(now),
-                      style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.75),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            DateFormat('M월 d일 EEEE', 'ko').format(now),
+                            style: TextStyle(
+                                color:
+                                    Colors.white.withValues(alpha: 0.75),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(greeting,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.4)),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 3),
-                    Text(greeting,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.4)),
+                    // 다크모드 토글
+                    _glassIconButton(
+                      context,
+                      icon: app.darkMode
+                          ? Icons.light_mode_rounded
+                          : Icons.dark_mode_rounded,
+                      onTap: () =>
+                          context.read<AppProvider>().toggleDarkMode(),
+                    ),
                   ],
                 ),
-              ),
-              // 다크모드 토글
-              _glassIconButton(
-                context,
-                icon: app.darkMode
-                    ? Icons.light_mode_rounded
-                    : Icons.dark_mode_rounded,
-                onTap: () => context.read<AppProvider>().toggleDarkMode(),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
+                const SizedBox(height: 14),
+                // 🧙 레벨 & XP 바
+                _levelStrip(context, app),
+                const SizedBox(height: 12),
           // D-Day 히어로 영역
           GestureDetector(
             onTap: () => onNavigate(2),
@@ -274,6 +311,90 @@ class HomeScreen extends StatelessWidget {
                             color: Colors.white70),
                       ],
                     ),
+            ),
+          ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 🧙 레벨 배지 + XP 진행바
+  Widget _levelStrip(BuildContext context, AppProvider app) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppTheme.rMd),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+      ),
+      child: Row(
+        children: [
+          // 레벨 원형 배지
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFBBF24), Color(0xFFF59E0B)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: Text('Lv${app.level}',
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900)),
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text('🧙 ${app.levelTitle}',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w800)),
+                    const Spacer(),
+                    Text('${app.xp} XP · 다음까지 ${app.xpToNextLevel}',
+                        style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.7),
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(5),
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: app.levelProgress),
+                    duration: const Duration(milliseconds: 1100),
+                    curve: Curves.easeOutCubic,
+                    builder: (_, v, __) => LinearProgressIndicator(
+                      value: v,
+                      minHeight: 7,
+                      backgroundColor:
+                          Colors.white.withValues(alpha: 0.18),
+                      valueColor: const AlwaysStoppedAnimation(
+                          Color(0xFFFBBF24)),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
