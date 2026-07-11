@@ -9,6 +9,7 @@ import '../widgets/due_review_card.dart';
 import '../widgets/due_flashcard_card.dart';
 import '../widgets/daily_mission_card.dart';
 import '../widgets/magic_effects.dart';
+import '../widgets/weekly_league_card.dart';
 import 'study/smart_review_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -44,6 +45,11 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   // 🪄 오늘의 마법 미션
                   const FadeSlideIn(index: 1, child: DailyMissionCard()),
+                  const SizedBox(height: 12),
+                  // 🏆 위클리 리그 미니 스트립
+                  FadeSlideIn(
+                      index: 2,
+                      child: LeagueMiniStrip(onTap: () => onNavigate(4))),
                   const SizedBox(height: 12),
                   // 복습 카드들
                   const FadeSlideIn(index: 2, child: DueReviewCard()),

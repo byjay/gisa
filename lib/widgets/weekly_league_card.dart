@@ -4,6 +4,70 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
 
+/// 리그 순위 계산 공용 로직 (카드/미니 스트립에서 공유)
+({int rank, int gapToNext, int total}) leagueStanding(AppProvider app) {
+  final now = DateTime.now();
+  final myXp = app.weekXp;
+  final rivals = WeeklyLeagueCard.rivalsFor(now);
+  final xps = [myXp, ...rivals.map((r) => r.xp)]..sort((a, b) => b - a);
+  final rank = xps.indexOf(myXp) + 1;
+  final gap = rank > 1 ? xps[rank - 2] - myXp + 1 : 0;
+  return (rank: rank, gapToNext: gap, total: xps.length);
+}
+
+/// 🏠 홈 상단용 리그 미니 스트립 — 탭하면 통계 탭으로 이동
+class LeagueMiniStrip extends StatelessWidget {
+  const LeagueMiniStrip({super.key, required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final app = context.watch<AppProvider>();
+    final s = leagueStanding(app);
+    final promoted = s.rank <= 3;
+    final medal = switch (s.rank) { 1 => '🥇', 2 => '🥈', 3 => '🥉', _ => '🏆' };
+    return PremiumCard(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      onTap: onTap,
+      child: Row(
+        children: [
+          Text(medal, style: const TextStyle(fontSize: 20)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '위클리 리그 ${s.rank}위 / ${s.total}명',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w800, fontSize: 13.5),
+                ),
+                Text(
+                  promoted
+                      ? '승급권 안! 이대로 지켜내세요'
+                      : '${s.gapToNext}XP 더 모으면 ${s.rank - 1}위 탈환',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          PillBadge(
+            text: '${app.weekXp} XP',
+            color: promoted ? AppTheme.success : AppTheme.accent,
+            filled: promoted,
+          ),
+          const SizedBox(width: 4),
+          Icon(Icons.chevron_right_rounded,
+              color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ],
+      ),
+    );
+  }
+}
+
 /// 🏆 위클리 마법 리그 — Duolingo 리그 시스템의 오프라인 재해석.
 /// 같은 주차 시드로 생성되는 가상 라이벌 9명과 주간 XP 경쟁.
 /// 라이벌들은 요일이 지날수록 점수가 차오르므로 "지금 안 하면 밀린다"는 긴장감을 만든다.
@@ -17,7 +81,7 @@ class WeeklyLeagueCard extends StatelessWidget {
   ];
 
   /// 주차 시드 → 이번 주 내내 같은 라이벌·같은 성장 곡선 (결정적)
-  List<({String name, int xp})> _rivals(DateTime now) {
+  static List<({String name, int xp})> rivalsFor(DateTime now) {
     final monday = DateTime(now.year, now.month, now.day)
         .subtract(Duration(days: now.weekday - 1));
     final seed = monday.year * 10000 + monday.month * 100 + monday.day;
@@ -47,7 +111,7 @@ class WeeklyLeagueCard extends StatelessWidget {
     final myXp = app.weekXp;
     final entries = <({String name, int xp, bool me})>[
       (name: '나 (${app.levelTitle})', xp: myXp, me: true),
-      for (final r in _rivals(now)) (name: r.name, xp: r.xp, me: false),
+      for (final r in rivalsFor(now)) (name: r.name, xp: r.xp, me: false),
     ]..sort((a, b) => b.xp.compareTo(a.xp));
 
     final myRank = entries.indexWhere((e) => e.me) + 1;
