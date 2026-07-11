@@ -176,11 +176,23 @@ class _TimerScreenState extends State<TimerScreen> {
                       child: FilledButton.icon(
                         onPressed: () async {
                           final sec = await app.stopTimer();
+                          final min = (sec / 60).ceil();
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                  content: Text(
-                                      '${(sec / 60).ceil()}분 학습 기록이 저장되었습니다!')),
+                                content: Row(
+                                  children: [
+                                    const Text('✨',
+                                        style: TextStyle(fontSize: 16)),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                          '$min분 학습 완료! +${min * 2} XP 획득'),
+                                    ),
+                                  ],
+                                ),
+                                backgroundColor: AppTheme.primary,
+                              ),
                             );
                           }
                         },

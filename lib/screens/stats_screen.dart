@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/badge_collection.dart';
 
 class StatsScreen extends StatelessWidget {
   const StatsScreen({super.key});
@@ -85,6 +86,9 @@ class StatsScreen extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 12),
+            // ── 🏅 마법 배지 도감 ──
+            const BadgeCollection(),
             const SizedBox(height: 12),
             // ── 목표 진행 카드 ──
             PremiumCard(
