@@ -5,6 +5,7 @@ import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/badge_collection.dart';
 import '../widgets/study_heatmap.dart';
+import '../widgets/weekly_league_card.dart';
 import '../widgets/weekly_report_card.dart';
 
 class StatsScreen extends StatelessWidget {
@@ -88,6 +89,9 @@ class StatsScreen extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 12),
+            // ── 🏆 위클리 마법 리그 ──
+            const WeeklyLeagueCard(),
             const SizedBox(height: 12),
             // ── 📈 주간 성장 리포트 ──
             const WeeklyReportCard(),

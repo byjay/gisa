@@ -375,6 +375,19 @@ class AppProvider extends ChangeNotifier {
     return '견습 마법사';
   }
 
+  /// 🏆 이번 주(월~지금) 획득 XP — 위클리 리그 순위 산정용
+  int get weekXp {
+    final now = DateTime.now();
+    final monday = DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: now.weekday - 1));
+    final minuteXp = weekMinutes * 2;
+    final quizXp = quizResults.where((r) {
+      final d = DateTime.tryParse(r['date'] as String? ?? '');
+      return d != null && !d.isBefore(monday);
+    }).fold<int>(0, (s, r) => s + ((r['correct'] as int?) ?? 0) * 5);
+    return minuteXp + quizXp;
+  }
+
   /// 오늘 푼 문제 수 (퀴즈 결과 기준)
   int get todayQuizSolved {
     final today = DateTime.now().toIso8601String().substring(0, 10);
