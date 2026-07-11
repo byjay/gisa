@@ -43,40 +43,40 @@ class HomeScreen extends StatelessWidget {
                       child: _todayStrip(
                           context, app, dailyRatio, pendingNotes)),
                   const SizedBox(height: 12),
+                  // 🔁 긴급 복습 (기억이 사라지기 전 최우선 행동)
+                  const FadeSlideIn(index: 1, child: DueReviewCard()),
+                  const FadeSlideIn(index: 1, child: DueFlashcardCard()),
                   // 🪄 오늘의 마법 미션
-                  const FadeSlideIn(index: 1, child: DailyMissionCard()),
+                  const FadeSlideIn(index: 2, child: DailyMissionCard()),
                   const SizedBox(height: 12),
                   // 🏆 위클리 리그 미니 스트립
                   FadeSlideIn(
-                      index: 2,
+                      index: 3,
                       child: LeagueMiniStrip(onTap: () => onNavigate(4))),
                   const SizedBox(height: 12),
-                  // 복습 카드들
-                  const FadeSlideIn(index: 2, child: DueReviewCard()),
-                  const FadeSlideIn(index: 2, child: DueFlashcardCard()),
                   // 🎯 합격 예측
-                  const FadeSlideIn(index: 3, child: PassPredictionCard()),
+                  const FadeSlideIn(index: 4, child: PassPredictionCard()),
                   const SizedBox(height: 12),
                   FadeSlideIn(
-                      index: 4,
+                      index: 5,
                       child: DDayPlanCard(dDay: nearest?.dDay ?? 0)),
                   // 문제은행 배너
                   const FadeSlideIn(
-                    index: 5,
+                    index: 6,
                     child: SectionHeader(
                       emoji: '⚡',
                       title: '전기기사 문제은행',
                       subtitle: '이론-문제-암기법 완전 연동 학습 시스템',
                     ),
                   ),
-                  FadeSlideIn(index: 5, child: _bankBanner(context)),
+                  FadeSlideIn(index: 6, child: _bankBanner(context)),
                   // 빠른 실행
                   const FadeSlideIn(
-                      index: 6,
+                      index: 7,
                       child:
                           SectionHeader(emoji: '🚀', title: '빠른 실행')),
                   FadeSlideIn(
-                    index: 6,
+                    index: 7,
                     child: Row(
                       children: [
                         Expanded(

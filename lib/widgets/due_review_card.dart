@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import '../services/progress_service.dart';
 import '../screens/study/quiz_play_screen.dart';
+import '../theme/app_theme.dart';
 
 /// 🔁 오늘의 복습 카드 — 간격반복(SRS) 큐에 쌓인 "지금 안 보면 잊어버릴" 문제를
-/// 홈 최상단 가까이에서 숫자로 보여주고 탭 한 번에 시작.
-/// "봤던 문제 또 보면 바로 정답" 훈련의 진입점.
+/// 홈 상단에서 숫자로 보여주고 탭 한 번에 시작.
+/// 디자인 시스템(PremiumCard/IconBadge) 준수 + 다크모드 대응.
 class DueReviewCard extends StatefulWidget {
   const DueReviewCard({super.key});
 
@@ -35,63 +36,40 @@ class _DueReviewCardState extends State<DueReviewCard> {
   @override
   Widget build(BuildContext context) {
     if (!_loaded || _count == 0) return const SizedBox.shrink();
+    final scheme = Theme.of(context).colorScheme;
+    const purple = Color(0xFF7C3AED);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Material(
-        color: Colors.deepPurple.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(14),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: _startReview,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: Colors.deepPurple.withValues(alpha: 0.3),
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.deepPurple.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Text('🔁', style: TextStyle(fontSize: 20)),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.only(bottom: 12),
+      child: PremiumCard(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        onTap: _startReview,
+        child: Row(
+          children: [
+            const IconBadge(
+                icon: Icons.replay_rounded, color: purple, size: 40),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Text(
-                        '오늘의 복습카드  $_count개',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.deepPurple,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      const Text(
-                        '지금 안 보면 잊어버려요 — 30초면 끝!',
-                        style: TextStyle(fontSize: 11.5, color: Colors.grey),
-                      ),
+                      const Text('오늘의 복습 카드',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w800)),
+                      const SizedBox(width: 7),
+                      PillBadge(text: '$_count개', color: purple, filled: true),
                     ],
                   ),
-                ),
-                const Icon(
-                  Icons.play_circle_fill,
-                  color: Colors.deepPurple,
-                  size: 30,
-                ),
-              ],
+                  const SizedBox(height: 3),
+                  Text('지금 안 보면 잊어버려요 — 30초면 끝!',
+                      style: TextStyle(
+                          fontSize: 11.5, color: scheme.onSurfaceVariant)),
+                ],
+              ),
             ),
-          ),
+            const Icon(Icons.play_circle_fill, color: purple, size: 30),
+          ],
         ),
       ),
     );

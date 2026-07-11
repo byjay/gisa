@@ -230,6 +230,13 @@ assets/data/ (12 JSON)           # exams.json(29회차·2,897문항: id/label/ye
 | R23 | b5805e4 | **MASTER_PLAN.md 바이블 제정** — 오케스트레이터 헌장·갭분석·로드맵 | Roas0KcH |
 | R24 | 2cdc24c | **바이블 v2.0** (갭분석 자기검증 정정 + 리서치 §4.4/4.5 증보) + **T-4 마법 방패**(streak freeze: 자동소모·미션 올클리어 지급) + **T-5 CBT 문항 번호판**(그리드 점프, 답함/현재/북마크 표시) + **T-6 프리미엄 온보딩**(시험일→목표→루프, 3페이지) | 9PFMBP56 |
 | R25 | b290165 | **T-7a 위클리 마법 리그** — 주차 시드 결정적 가상 라이벌 9명, 요일 경과에 따라 라이벌 XP 성장(긴장감 유발), 승급권 Top3 배지, 다음 순위까지 필요 XP 코칭, `weekXp` 게터 신설 | q51NAiZV |
-| R26 | (이번) | **T-7a2 홈 리그 미니 스트립** — 홈 미션 카드 아래 순위/승급권/XP 요약 + 탭 시 통계 탭 이동, `leagueStanding()` 공용 로직 추출, `rivalsFor()` static 화 | (커밋 후 기입) |
+| R26 | c8df58e | **T-7a2 홈 리그 미니 스트립** — 홈 미션 카드 아래 순위/승급권/XP 요약 + 탭 시 통계 탭 이동, `leagueStanding()` 공용 로직 추출, `rivalsFor()` static 화 | P79ErOlT |
+| R27 | (이번) | **레이아웃 전수감사 1차** — ① 홈 우선순위 재배치(긴급 복습을 목표 스트립 직하로 승격: 망각곡선상 최우선 행동이 미션·리그보다 위) ② DueReviewCard/DueFlashcardCard 디자인 시스템 위반 교정(수제 Material→PremiumCard+IconBadge+PillBadge, 하드코딩 grey→onSurfaceVariant 다크모드 대응) ③ FadeSlideIn 스태거 인덱스 1~7 순차 정렬 | (커밋 후 기입) |
 
-> **다음 착수**: Android APK 릴리즈 빌드 또는 T-7b(FSRS 검토) — 사용자 지시 대기.
+**§9.1 레이아웃 감사 잔여 항목 (다음 턴 이어서)**
+- [ ] exams_screen(744줄)·study_screen(812줄) 대형 화면 배치 정밀 감사
+- [ ] quiz_play_screen(903줄) 문항 카드 내부 시각 위계 점검
+- [ ] 온보딩→홈 첫 진입 시 카드 과밀 여부 (신규 유저 빈 상태 시나리오)
+- [ ] stats_screen 카드 순서: 리그(경쟁)와 리포트(성찰) 사이 시각적 구분
+
+> **다음 착수**: §9.1 잔여 감사 항목 → Android APK 릴리즈 빌드.
