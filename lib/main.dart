@@ -6,7 +6,6 @@ import 'theme/app_theme.dart';
 import 'screens/exams_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/stats_screen.dart';
-import 'screens/study/smart_review_screen.dart';
 import 'screens/study/study_screen.dart';
 import 'screens/timer_screen.dart';
 
@@ -60,7 +59,6 @@ class _MainShellState extends State<MainShell> {
       const ExamsScreen(),
       const TimerScreen(),
       const StatsScreen(),
-      const SmartReviewScreen(),
     ];
 
     final dark = Theme.of(context).brightness == Brightness.dark;
@@ -86,7 +84,6 @@ class _MainShellState extends State<MainShell> {
             NavigationDestination(icon: Icon(Icons.event_outlined), selectedIcon: Icon(Icons.event_rounded), label: '시험'),
             NavigationDestination(icon: Icon(Icons.timer_outlined), selectedIcon: Icon(Icons.timer_rounded), label: '타이머'),
             NavigationDestination(icon: Icon(Icons.insights_outlined), selectedIcon: Icon(Icons.insights_rounded), label: '통계'),
-            NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), selectedIcon: Icon(Icons.auto_awesome_rounded), label: '복습'),
           ],
         ),
       ),

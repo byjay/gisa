@@ -178,6 +178,18 @@ class AppTheme {
           );
         }),
       ),
+      tabBarTheme: TabBarThemeData(
+        labelColor: scheme.primary,
+        unselectedLabelColor: dark ? Colors.white54 : textMuted,
+        indicatorColor: scheme.primary,
+        indicatorSize: TabBarIndicatorSize.label,
+        dividerColor: dark
+            ? Colors.white.withValues(alpha: 0.06)
+            : const Color(0xFFE8EAF2),
+        overlayColor: WidgetStatePropertyAll(
+          scheme.primary.withValues(alpha: 0.06),
+        ),
+      ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),

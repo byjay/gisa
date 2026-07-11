@@ -18,7 +18,7 @@ import 'exam_info_screen.dart';
 import 'smart_review_screen.dart';
 import '../../widgets/tutor_avatar.dart';
 
-/// 학습 허브: CBT 문제풀이 / 빈출순 풀기 / 이론서 / 암기법 / 강의 / 학습이력
+/// 학습 허브: 탭 구조로 직관적 분류 — 기초학습 / 문제풀이 / 모의고사 / 이력
 class StudyScreen extends StatefulWidget {
   const StudyScreen({super.key});
 
@@ -26,9 +26,11 @@ class StudyScreen extends StatefulWidget {
   State<StudyScreen> createState() => _StudyScreenState();
 }
 
-class _StudyScreenState extends State<StudyScreen> {
+class _StudyScreenState extends State<StudyScreen>
+    with SingleTickerProviderStateMixin {
   List<ExamPaper>? _exams;
   Map<String, List<TopicFreq>>? _freq;
+  late final TabController _tab;
 
   static const _subjectColors = [
     Color(0xFF4F46E5),
@@ -41,12 +43,19 @@ class _StudyScreenState extends State<StudyScreen> {
   @override
   void initState() {
     super.initState();
+    _tab = TabController(length: 4, vsync: this);
     StudyData.instance.loadExams().then((v) {
       if (mounted) setState(() => _exams = v);
     });
     StudyData.instance.loadTopicFreq().then((v) {
       if (mounted) setState(() => _freq = v);
     });
+  }
+
+  @override
+  void dispose() {
+    _tab.dispose();
+    super.dispose();
   }
 
   @override
@@ -61,89 +70,147 @@ class _StudyScreenState extends State<StudyScreen> {
             Text('전기기사 학습'),
           ],
         ),
+        bottom: TabBar(
+          controller: _tab,
+          isScrollable: false,
+          labelStyle:
+              const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
+          unselectedLabelStyle:
+              const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          tabs: const [
+            Tab(text: '기초학습'),
+            Tab(text: '문제풀이'),
+            Tab(text: '모의고사'),
+            Tab(text: '이력'),
+          ],
+        ),
       ),
       body: exams == null
           ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: EdgeInsets.symmetric(
-                horizontal: MediaQuery.of(context).size.width > 900
-                    ? (MediaQuery.of(context).size.width - 800) / 2
-                    : 16,
-                vertical: 8,
-              ),
+          : TabBarView(
+              controller: _tab,
               children: [
-                TutorBanner(
-                  mood: TutorMood.cheer,
-                  message: '지금은 기초를 단단히 할 때예요. 이론을 짧게 보고 쉬운 문제로 바로 확인해 보세요.',
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const SlidesHomeScreen()),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                _heroCards(context),
-                const SectionHeader(emoji: '✨', title: '핵심 기능'),
-                _featureGrid(context),
-                const SizedBox(height: 8),
-                _beginnerCard(context),
-                _examInfoCard(context),
-                _cbtTrendCard(context),
-                const SectionHeader(
-                  emoji: '🔥',
-                  title: '빈출순 문제풀기',
-                  subtitle: '10년치 2,897문제를 출제 빈도 높은 토픽 순서로',
-                ),
-                for (var i = 0; i < kSubjects.length; i++)
-                  _freqCard(context, kSubjects[i], _subjectColors[i]),
-                const SectionHeader(
-                  emoji: '🌱',
-                  title: '쉬운 문제부터 풀기',
-                  subtitle: '난이도 하→중→상 순서로 자신감을 쌓으세요 (초보자 추천)',
-                ),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final s in kSubjects)
-                      ActionChip(
-                        avatar: const Icon(
-                          Icons.stairs_rounded,
-                          size: 17,
-                          color: AppTheme.success,
-                        ),
-                        label: Text(s, style: const TextStyle(fontSize: 12.5)),
-                        onPressed: () => _startEasyFirst(s),
-                      ),
-                  ],
-                ),
-                const SectionHeader(
-                  emoji: '🎲',
-                  title: '과목별 랜덤 연습',
-                  subtitle: '무작위 20문제로 실력 점검',
-                ),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final s in kSubjects)
-                      ActionChip(
-                        avatar: const Icon(Icons.shuffle_rounded,
-                            size: 17, color: AppTheme.electric),
-                        label: Text(s, style: const TextStyle(fontSize: 12.5)),
-                        onPressed: () => _startRandom(s),
-                      ),
-                  ],
-                ),
-                const SectionHeader(
-                  emoji: '📝',
-                  title: '회차별 실전 모의고사',
-                  subtitle: '실제 시험과 동일한 100문항 · 합격 기준 60점',
-                ),
-                for (final e in exams) _examCard(context, e),
-                const SizedBox(height: 8),
-                _historySection(context),
-                const SizedBox(height: 24),
+                _basicsTab(context),
+                _practiceTab(context),
+                _mockExamTab(context, exams),
+                _historyTab(context),
               ],
             ),
+    );
+  }
+
+  EdgeInsets get _pagePadding => EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width > 900
+            ? (MediaQuery.of(context).size.width - 800) / 2
+            : 16,
+        vertical: 12,
+      );
+
+  // ── 탭 1: 기초학습 (강의·이론·암기·도구) ─────────────
+  Widget _basicsTab(BuildContext context) {
+    return ListView(
+      padding: _pagePadding,
+      children: [
+        TutorBanner(
+          mood: TutorMood.cheer,
+          message: '지금은 기초를 단단히 할 때예요. 이론을 짧게 보고 쉬운 문제로 바로 확인해 보세요.',
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const SlidesHomeScreen()),
+          ),
+        ),
+        const SizedBox(height: 12),
+        _heroCards(context),
+        const SectionHeader(emoji: '✨', title: '핵심 기능'),
+        _featureGrid(context),
+        const SizedBox(height: 8),
+        _beginnerCard(context),
+        _examInfoCard(context),
+        _cbtTrendCard(context),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  // ── 탭 2: 문제풀이 (빈출순·쉬운순·랜덤) ───────────────
+  Widget _practiceTab(BuildContext context) {
+    return ListView(
+      padding: _pagePadding,
+      children: [
+        const SectionHeader(
+          emoji: '🔥',
+          title: '빈출순 문제풀기',
+          subtitle: '10년치 2,897문제를 출제 빈도 높은 토픽 순서로',
+        ),
+        for (var i = 0; i < kSubjects.length; i++)
+          _freqCard(context, kSubjects[i], _subjectColors[i]),
+        const SectionHeader(
+          emoji: '🌱',
+          title: '쉬운 문제부터 풀기',
+          subtitle: '난이도 하→중→상 순서로 자신감을 쌓으세요 (초보자 추천)',
+        ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final s in kSubjects)
+              ActionChip(
+                avatar: const Icon(
+                  Icons.stairs_rounded,
+                  size: 17,
+                  color: AppTheme.success,
+                ),
+                label: Text(s, style: const TextStyle(fontSize: 12.5)),
+                onPressed: () => _startEasyFirst(s),
+              ),
+          ],
+        ),
+        const SectionHeader(
+          emoji: '🎲',
+          title: '과목별 랜덤 연습',
+          subtitle: '무작위 20문제로 실력 점검',
+        ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final s in kSubjects)
+              ActionChip(
+                avatar: const Icon(Icons.shuffle_rounded,
+                    size: 17, color: AppTheme.electric),
+                label: Text(s, style: const TextStyle(fontSize: 12.5)),
+                onPressed: () => _startRandom(s),
+              ),
+          ],
+        ),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  // ── 탭 3: 모의고사 ────────────────────────────
+  Widget _mockExamTab(BuildContext context, List<ExamPaper> exams) {
+    return ListView(
+      padding: _pagePadding,
+      children: [
+        const SectionHeader(
+          emoji: '📝',
+          title: '회차별 실전 모의고사',
+          subtitle: '실제 시험과 동일한 100문항 · 문항당 90초 타이머 · 합격 기준 60점',
+        ),
+        for (final e in exams) _examCard(context, e),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  // ── 탭 4: 학습 이력 ───────────────────────────
+  Widget _historyTab(BuildContext context) {
+    return ListView(
+      padding: _pagePadding,
+      children: [
+        _historySection(context),
+        const SizedBox(height: 24),
+      ],
     );
   }
 

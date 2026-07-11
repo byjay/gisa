@@ -7,6 +7,7 @@ import '../widgets/pass_prediction_card.dart';
 import '../widgets/dday_plan_card.dart';
 import '../widgets/due_review_card.dart';
 import '../widgets/due_flashcard_card.dart';
+import 'study/smart_review_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final void Function(int) onNavigate;
@@ -370,7 +371,10 @@ class HomeScreen extends StatelessWidget {
                   () => onNavigate(4)),
               _vDivider(context),
               _miniStat(context, Icons.quiz_rounded, '$pendingNotes개',
-                  '복습할 오답', AppTheme.danger, () => onNavigate(5)),
+                  '복습할 오답', AppTheme.danger, () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const SmartReviewScreen()));
+              }),
             ],
           ),
         ],
