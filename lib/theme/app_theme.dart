@@ -58,6 +58,36 @@ class AppTheme {
     end: Alignment.bottomRight,
   );
 
+  /// 🕐 시간대별 살아있는 헤더 그라데이션 — 앱이 하루의 리듬을 함께한다
+  static LinearGradient timeGradient([DateTime? at]) {
+    final h = (at ?? DateTime.now()).hour;
+    if (h < 6) {
+      // 새벽 — 깊은 남색+보라 (고요한 몰입)
+      return const LinearGradient(
+        colors: [Color(0xFF1E1B4B), Color(0xFF4C1D95)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
+    } else if (h < 12) {
+      // 아침 — 인디고+스카이 (상쾌한 시작)
+      return const LinearGradient(
+        colors: [Color(0xFF4F46E5), Color(0xFF0EA5E9)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
+    } else if (h < 18) {
+      // 오후 — 브랜드 인디고+바이올렛 (집중의 절정)
+      return heroGradient;
+    } else {
+      // 밤 — 바이올렛+로즈 (하루 마무리)
+      return const LinearGradient(
+        colors: [Color(0xFF6D28D9), Color(0xFFBE185D)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
+    }
+  }
+
   // ── Shadows ─────────────────────────────────────
   static List<BoxShadow> softShadow(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;

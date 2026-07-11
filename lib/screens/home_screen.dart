@@ -175,12 +175,13 @@ class HomeScreen extends StatelessWidget {
                 ? '오늘도 화이팅! 💪'
                 : '저녁 학습 시간이에요 🌆';
 
+    final timeGrad = AppTheme.timeGradient(now);
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       decoration: BoxDecoration(
-        gradient: AppTheme.heroGradient,
+        gradient: timeGrad,
         borderRadius: BorderRadius.circular(AppTheme.rXl - 4),
-        boxShadow: AppTheme.glowShadow(AppTheme.primary),
+        boxShadow: AppTheme.glowShadow(timeGrad.colors.first),
       ),
       child: Stack(
         children: [

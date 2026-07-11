@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/badge_collection.dart';
+import '../widgets/study_heatmap.dart';
+import '../widgets/weekly_report_card.dart';
 
 class StatsScreen extends StatelessWidget {
   const StatsScreen({super.key});
@@ -86,6 +88,12 @@ class StatsScreen extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 12),
+            // ── 📈 주간 성장 리포트 ──
+            const WeeklyReportCard(),
+            const SizedBox(height: 12),
+            // ── 🟩 12주 학습 히트맵 ──
+            const StudyHeatmap(),
             const SizedBox(height: 12),
             // ── 🏅 마법 배지 도감 ──
             const BadgeCollection(),
