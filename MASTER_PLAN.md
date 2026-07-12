@@ -231,12 +231,14 @@ assets/data/ (12 JSON)           # exams.json(29회차·2,897문항: id/label/ye
 | R24 | 2cdc24c | **바이블 v2.0** (갭분석 자기검증 정정 + 리서치 §4.4/4.5 증보) + **T-4 마법 방패**(streak freeze: 자동소모·미션 올클리어 지급) + **T-5 CBT 문항 번호판**(그리드 점프, 답함/현재/북마크 표시) + **T-6 프리미엄 온보딩**(시험일→목표→루프, 3페이지) | 9PFMBP56 |
 | R25 | b290165 | **T-7a 위클리 마법 리그** — 주차 시드 결정적 가상 라이벌 9명, 요일 경과에 따라 라이벌 XP 성장(긴장감 유발), 승급권 Top3 배지, 다음 순위까지 필요 XP 코칭, `weekXp` 게터 신설 | q51NAiZV |
 | R26 | c8df58e | **T-7a2 홈 리그 미니 스트립** — 홈 미션 카드 아래 순위/승급권/XP 요약 + 탭 시 통계 탭 이동, `leagueStanding()` 공용 로직 추출, `rivalsFor()` static 화 | P79ErOlT |
-| R27 | (이번) | **레이아웃 전수감사 1차** — ① 홈 우선순위 재배치(긴급 복습을 목표 스트립 직하로 승격: 망각곡선상 최우선 행동이 미션·리그보다 위) ② DueReviewCard/DueFlashcardCard 디자인 시스템 위반 교정(수제 Material→PremiumCard+IconBadge+PillBadge, 하드코딩 grey→onSurfaceVariant 다크모드 대응) ③ FadeSlideIn 스태거 인덱스 1~7 순차 정렬 | (커밋 후 기입) |
+| R27 | e4d9bef | **레이아웃 전수감사 1차** — ① 홈 우선순위 재배치(긴급 복습을 목표 스트립 직하로 승격: 망각곡선상 최우선 행동이 미션·리그보다 위) ② DueReviewCard/DueFlashcardCard 디자인 시스템 위반 교정(수제 Material→PremiumCard+IconBadge+PillBadge, 하드코딩 grey→onSurfaceVariant 다크모드 대응) ③ FadeSlideIn 스태거 인덱스 1~7 순차 정렬 | 52UgkiIl |
+| R28 | (이번) | **레이아웃 전수감사 2차 (§9.1 전항목 완료)** — ① 레거시 `Card(` 전수 스캔(3건) 후 교정: dday_plan_card 성장그래프→PremiumCard+IconBadge(electric), study_screen _cbtTrendCard→PremiumCard(padding zero)+collapsedShape 보정 ② quiz_play_screen 옵션 타일 Card는 **의도적 예외로 판정**(정답/오답/선택 상태색 동적 변경 인터랙티브 타일, scheme 기반이라 다크모드 안전) ③ stats_screen 리그(경쟁)↔리포트(성찰) 사이 SectionHeader 2종 삽입(⚔️ 이번 주 경쟁 / 📊 나의 성장 기록) ④ 신규 유저 빈 상태 검증: Due 카드 2종 count==0이면 shrink, 예측카드 진단유도 분기, 리그 0XP 안전 — 과밀 없음 | (커밋 후 기입) |
 
-**§9.1 레이아웃 감사 잔여 항목 (다음 턴 이어서)**
-- [ ] exams_screen(744줄)·study_screen(812줄) 대형 화면 배치 정밀 감사
-- [ ] quiz_play_screen(903줄) 문항 카드 내부 시각 위계 점검
-- [ ] 온보딩→홈 첫 진입 시 카드 과밀 여부 (신규 유저 빈 상태 시나리오)
-- [ ] stats_screen 카드 순서: 리그(경쟁)와 리포트(성찰) 사이 시각적 구분
+**§9.1 레이아웃 감사 잔여 항목 — R28에서 전항목 완료 ✅**
+- [x] exams_screen(744줄)·study_screen(812줄) 배치 감사 — exams 빈상태 OK(L203), study는 _cbtTrendCard 레거시 Card 교정 완료
+- [x] quiz_play_screen(903줄) 시각 위계 — 옵션 타일 Card는 상태색(정답녹/오답빨/선택 primary) 의도적 예외로 판정·문서화
+- [x] 온보딩→홈 첫 진입 빈 상태 — Due카드 2종 shrink, 예측카드 진단유도 분기, 리그 0XP 안전. 과밀 없음
+- [x] stats_screen 리그/리포트 시각 구분 — SectionHeader(⚔️ 경쟁 / 📊 성찰) 삽입 완료
+- [x] 레거시 `Card(` 전수 스캔 — 주요 표면(홈/통계/학습허브/DDay카드) 0건. 심층 서브화면 27건은 **전역 CardThemeData(L159, rMd·테두리·elevation0 동일 적용)를 상속하므로 위반 아님으로 판정** — 차이는 softShadow뿐, 시각 일관성 유지됨. quiz 옵션 타일 1건은 상태색 인터랙티브 예외
 
-> **다음 착수**: §9.1 잔여 감사 항목 → Android APK 릴리즈 빌드.
+> **다음 착수**: Android APK 릴리즈 빌드 (패키지명 일치 검증 → flutter_signing_tool).

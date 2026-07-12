@@ -457,7 +457,8 @@ class _StudyScreenState extends State<StudyScreen>
   }
 
   Widget _cbtTrendCard(BuildContext context) {
-    return Card(
+    return PremiumCard(
+      padding: EdgeInsets.zero,
       child: ExpansionTile(
         leading: const IconBadge(
             icon: Icons.insights_rounded,
@@ -469,6 +470,7 @@ class _StudyScreenState extends State<StudyScreen>
           style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
         ),
         shape: const RoundedRectangleBorder(side: BorderSide.none),
+        collapsedShape: const RoundedRectangleBorder(side: BorderSide.none),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
         children: const [
           Align(

@@ -89,11 +89,17 @@ class StatsScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
-            // ── 🏆 위클리 마법 리그 ──
+            // ── ⚔️ 경쟁 섹션 ──
+            const SectionHeader(
+                emoji: '⚔️',
+                title: '이번 주 경쟁',
+                subtitle: '라이벌과 XP를 겨루고 승급하세요'),
             const WeeklyLeagueCard(),
-            const SizedBox(height: 12),
-            // ── 📈 주간 성장 리포트 ──
+            // ── 📊 성찰 섹션 ──
+            const SectionHeader(
+                emoji: '📊',
+                title: '나의 성장 기록',
+                subtitle: '숫자로 확인하는 학습의 증거'),
             const WeeklyReportCard(),
             const SizedBox(height: 12),
             // ── 🟩 12주 학습 히트맵 ──

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/dday_planner.dart';
+import '../theme/app_theme.dart';
 import '../services/score_history.dart';
 import '../services/pass_prediction.dart';
 import '../widgets/score_sparkline.dart';
@@ -56,49 +57,52 @@ class _DDayPlanCardState extends State<DDayPlanCard> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // ── 점수 추이 그래프 ────────────────────────────
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+        PremiumCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const IconBadge(
+                      icon: Icons.show_chart_rounded,
+                      color: AppTheme.electric,
+                      size: 34,
+                      iconSize: 18),
+                  const SizedBox(width: 8),
+                  const Text('내 성장 그래프',
+                      style: TextStyle(
+                          fontSize: 13.5, fontWeight: FontWeight.w800)),
+                  const SizedBox(width: 6),
+                  Text('최근 14일',
+                      style: TextStyle(
+                          fontSize: 11, color: scheme.onSurfaceVariant)),
+                  const Spacer(),
+                  if (_history.length >= 2)
+                    _trendBadge(_history.first.$2, _history.last.$2),
+                ],
+              ),
+              const SizedBox(height: 10),
+              ScoreSparkline(
+                values: _history.map((e) => e.$2).toList(),
+                color: scheme.primary,
+              ),
+              if (_history.length >= 2) ...[
+                const SizedBox(height: 6),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('📈', style: TextStyle(fontSize: 16)),
-                    const SizedBox(width: 6),
-                    Text('내 성장 그래프 (최근 14일)',
+                    Text('${_history.first.$1.month}/${_history.first.$1.day}',
                         style: TextStyle(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w800,
-                            color: scheme.primary)),
-                    const Spacer(),
-                    if (_history.length >= 2)
-                      _trendBadge(_history.first.$2, _history.last.$2),
+                            fontSize: 10.5,
+                            color: scheme.onSurfaceVariant)),
+                    Text('오늘',
+                        style: TextStyle(
+                            fontSize: 10.5,
+                            color: scheme.onSurfaceVariant)),
                   ],
                 ),
-                const SizedBox(height: 10),
-                ScoreSparkline(
-                  values: _history.map((e) => e.$2).toList(),
-                  color: scheme.primary,
-                ),
-                if (_history.length >= 2) ...[
-                  const SizedBox(height: 6),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('${_history.first.$1.month}/${_history.first.$1.day}',
-                          style: TextStyle(
-                              fontSize: 10.5,
-                              color: scheme.onSurfaceVariant)),
-                      Text('오늘',
-                          style: TextStyle(
-                              fontSize: 10.5,
-                              color: scheme.onSurfaceVariant)),
-                    ],
-                  ),
-                ],
               ],
-            ),
+            ],
           ),
         ),
         const SizedBox(height: 12),
