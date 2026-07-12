@@ -260,9 +260,10 @@ class _StudyScreenState extends State<StudyScreen>
 
   /// 기초 학습 루프 — 이론을 읽고 쉬운 문제로 바로 확인한다.
   Widget _heroCards(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
         Expanded(
           child: _heroCard(
             context,
@@ -288,7 +289,8 @@ class _StudyScreenState extends State<StudyScreen>
             onTap: () => _showFoundationSubjects(context),
           ),
         ),
-      ],
+        ],
+      ),
     );
   }
 

@@ -30,30 +30,35 @@ class AppTheme {
   // ── Gradients ───────────────────────────────────
   static const LinearGradient heroGradient = LinearGradient(
     colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
+    stops: [0.0, 1.0],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient electricGradient = LinearGradient(
     colors: [Color(0xFF0891B2), Color(0xFF06B6D4)],
+    stops: [0.0, 1.0],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient successGradient = LinearGradient(
     colors: [Color(0xFF047857), Color(0xFF10B981)],
+    stops: [0.0, 1.0],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient dangerGradient = LinearGradient(
     colors: [Color(0xFFB91C1C), Color(0xFFEF4444)],
+    stops: [0.0, 1.0],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient warningGradient = LinearGradient(
     colors: [Color(0xFFB45309), Color(0xFFF59E0B)],
+    stops: [0.0, 1.0],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -432,6 +437,7 @@ class IconBadge extends StatelessWidget {
             color.withValues(alpha: 0.16),
             color.withValues(alpha: 0.08)
           ],
+          stops: const [0.0, 1.0],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
