@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# APK 배포용 임시 서빙 디렉터리(포트 8899) - git 추적 제외, curl 다운로드 전용
+/releases/

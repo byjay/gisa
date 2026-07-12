@@ -246,4 +246,7 @@ assets/data/ (12 JSON)           # exams.json(29회차·2,897문항: id/label/ye
 
 | R31 | (이번) | **Android APK 릴리즈 빌드** — ① 패키지명 불일치 발견·정정: `com.example.cert_study_tracker`(기본값) → `com.certstudytracker.study` 4개소 동시 동기화(build.gradle.kts namespace/applicationId, AndroidManifest label, MainActivity.kt 패키지선언+디렉터리 이동, 구 디렉터리 삭제) ② android 빌드캐시 클린 후 flutter_signing_tool로 keystore(release-key.jks)+key.properties 자동 생성 ③ build.gradle.kts에 signingConfigs release 블록 결선(keystoreProperties 로드→keyAlias/keyPassword/storeFile/storePassword) — 기존 debug 서명 임시배선을 release 서명으로 교체 ④ `flutter build apk --release` 성공, app-release.apk 55MB 산출 ⑤ analyze 0 issue 재확인 | (커밋 후 기입) |
 
+| R32 | (이번) | **cmd 다운로드 인프라 + 3차 전수 안정화** — ① ProjectBackup 공유링크(`/api/files/s/*`)가 순수 curl(무인증)에서 403 반환하는 결함 발견 → `releases/` 디렉터리 신설 + 포트 8899 전용 Python 서버 상시 기동으로 **인증 불필요 curl 다운로드** 확보(200, 56,817,118 bytes, Android package 검증 통과) ② flutter analyze 0 재확인 ③ 문항 무결성 재검증(2,897개, answer/옵션/해설 위반 0 + **신규: 회차·문항번호 중복 0** 추가 검사) ④ 패키지명 4자 일치(namespace/applicationId/MainActivity 경로/패키지선언) + example 잔존 디렉터리 없음 재확인 ⑤ signingConfig release 결선 유지 확인 ⑥ 위험패턴(firstWhere/0분모/first) R30 대비 lib/ 무변경으로 안전 재확인 ⑦ 웹 릴리즈 재빌드→서빙 바이트 재대조 일치(3,534,878) ⑧ **결함 수정**: `.gitignore`에 `/releases/` 미등록되어 55MB APK 커밋 위험 발견 → 규칙 추가 | (커밋 후 기입) |
+
 > **다음 착수**: (사용자 지시 대기 — AAB 빌드/Play스토어 등록 준비 or 추가 기능 개발).
+> **상시 다운로드 서버**: 8899 포트가 `releases/` 디렉터리를 서빙 중. 세션 재개 시 죽어있으면 `cd /home/user/flutter_app/releases && nohup python3 -m http.server 8899 --bind 0.0.0.0 &`로 재기동.
