@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../services/study_data.dart';
+import '../../services/link_launcher.dart';
 import '../../services/slide_progress.dart';
 import '../../widgets/tutor_avatar.dart';
 import '../../widgets/rich_slide_body.dart';
@@ -356,11 +356,8 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
   }
 
   Future<void> _openUrl(String url) async {
-    try {
-      final ok = await launchUrl(Uri.parse(url),
-          mode: LaunchMode.externalApplication);
-      if (!ok) throw Exception('launch failed');
-    } catch (_) {
+    final ok = await openInYoutubeApp(url);
+    if (!ok) {
       await Clipboard.setData(ClipboardData(text: url));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
