@@ -74,7 +74,10 @@ class ExamsScreen extends StatelessWidget {
   }
 
   Future<void> _openQnet() async {
-    final uri = Uri.parse('https://www.q-net.or.kr/crf005.do?id=crf00501');
+    // 전기기사 국가자격 종목별 상세정보 (회차별 원서접수 일정 + 접수 진입)
+    // 검증: Q-net 공식 crf00503 · jmCd=1150(전기기사)
+    final uri =
+        Uri.parse('https://www.q-net.or.kr/crf005.do?id=crf00503&jmCd=1150');
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
