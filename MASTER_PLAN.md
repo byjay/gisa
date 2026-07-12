@@ -244,4 +244,6 @@ assets/data/ (12 JSON)           # exams.json(29회차·2,897문항: id/label/ye
 | R29 | 49209ab | 신규 프로젝트(중·고 교과앱) 작업지시서 NEW_PROJECT_WORKORDER.md 제정 — 별도 세션에서 진행, 본 앱은 전기기사 유지 | WgILqwiZ |
 | R30 | (이번) | **안정화 스윕** — ① JSON 12종 파싱+2,897문항 무결성 게이트 통과(answer/옵션/해설 위반 0) ② 위험 패턴 전수 그리프: firstWhere 2건(try-catch/orElse 기보호 확인), 0-분모 나눗셈 14건(전부 가드 확인), `.first` 접근(정적 리스트/isEmpty 선행 확인) ③ 유일 실결함 home_screen `e.name[0]` 빈 문자열 크래시 가능성 → `isEmpty ? '?'` 가드 추가 ④ analyze 0 + release build + 서빙 바이트 일치(3,534,878) | (커밋 후 기입) |
 
-> **다음 착수**: Android APK 릴리즈 빌드 (패키지명 일치 검증 → flutter_signing_tool).
+| R31 | (이번) | **Android APK 릴리즈 빌드** — ① 패키지명 불일치 발견·정정: `com.example.cert_study_tracker`(기본값) → `com.certstudytracker.study` 4개소 동시 동기화(build.gradle.kts namespace/applicationId, AndroidManifest label, MainActivity.kt 패키지선언+디렉터리 이동, 구 디렉터리 삭제) ② android 빌드캐시 클린 후 flutter_signing_tool로 keystore(release-key.jks)+key.properties 자동 생성 ③ build.gradle.kts에 signingConfigs release 블록 결선(keystoreProperties 로드→keyAlias/keyPassword/storeFile/storePassword) — 기존 debug 서명 임시배선을 release 서명으로 교체 ④ `flutter build apk --release` 성공, app-release.apk 55MB 산출 ⑤ analyze 0 issue 재확인 | (커밋 후 기입) |
+
+> **다음 착수**: (사용자 지시 대기 — AAB 빌드/Play스토어 등록 준비 or 추가 기능 개발).

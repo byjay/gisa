@@ -1,4 +1,4 @@
-package com.example.cert_study_tracker
+package com.certstudytracker.study
 
 import io.flutter.embedding.android.FlutterActivity
 
