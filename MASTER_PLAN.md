@@ -241,4 +241,7 @@ assets/data/ (12 JSON)           # exams.json(29회차·2,897문항: id/label/ye
 - [x] stats_screen 리그/리포트 시각 구분 — SectionHeader(⚔️ 경쟁 / 📊 성찰) 삽입 완료
 - [x] 레거시 `Card(` 전수 스캔 — 주요 표면(홈/통계/학습허브/DDay카드) 0건. 심층 서브화면 27건은 **전역 CardThemeData(L159, rMd·테두리·elevation0 동일 적용)를 상속하므로 위반 아님으로 판정** — 차이는 softShadow뿐, 시각 일관성 유지됨. quiz 옵션 타일 1건은 상태색 인터랙티브 예외
 
+| R29 | 49209ab | 신규 프로젝트(중·고 교과앱) 작업지시서 NEW_PROJECT_WORKORDER.md 제정 — 별도 세션에서 진행, 본 앱은 전기기사 유지 | WgILqwiZ |
+| R30 | (이번) | **안정화 스윕** — ① JSON 12종 파싱+2,897문항 무결성 게이트 통과(answer/옵션/해설 위반 0) ② 위험 패턴 전수 그리프: firstWhere 2건(try-catch/orElse 기보호 확인), 0-분모 나눗셈 14건(전부 가드 확인), `.first` 접근(정적 리스트/isEmpty 선행 확인) ③ 유일 실결함 home_screen `e.name[0]` 빈 문자열 크래시 가능성 → `isEmpty ? '?'` 가드 추가 ④ analyze 0 + release build + 서빙 바이트 일치(3,534,878) | (커밋 후 기입) |
+
 > **다음 착수**: Android APK 릴리즈 빌드 (패키지명 일치 검증 → flutter_signing_tool).

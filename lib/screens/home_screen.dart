@@ -126,7 +126,7 @@ class HomeScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               alignment: Alignment.center,
-                              child: Text(e.name[0],
+                              child: Text(e.name.isEmpty ? '?' : e.name[0],
                                   style: TextStyle(
                                       color: e.color,
                                       fontWeight: FontWeight.w800,
