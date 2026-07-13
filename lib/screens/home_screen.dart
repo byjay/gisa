@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
+import '../services/study_data.dart';
 import '../theme/app_theme.dart';
 import '../widgets/pass_prediction_card.dart';
 import '../widgets/dday_plan_card.dart';
@@ -61,11 +62,11 @@ class HomeScreen extends StatelessWidget {
                       index: 5,
                       child: DDayPlanCard(dDay: nearest?.dDay ?? 0)),
                   // 문제은행 배너
-                  const FadeSlideIn(
+                  FadeSlideIn(
                     index: 6,
                     child: SectionHeader(
                       emoji: '⚡',
-                      title: '전기기사 문제은행',
+                      title: '${StudyData.instance.track.name} 문제은행',
                       subtitle: '이론-문제-암기법 완전 연동 학습 시스템',
                     ),
                   ),
@@ -230,6 +231,9 @@ class HomeScreen extends StatelessWidget {
                         ],
                       ),
                     ),
+                    // 종목 전환 (다른 시험 고르기)
+                    _trackChip(context),
+                    const SizedBox(width: 8),
                     // 다크모드 토글
                     _glassIconButton(
                       context,
@@ -409,6 +413,59 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  /// 현재 종목 표시 + 탭 시 종목 전환 확인 다이얼로그
+  Widget _trackChip(BuildContext context) {
+    final track = StudyData.instance.track;
+    return Material(
+      color: Colors.white.withValues(alpha: 0.15),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => _confirmTrackChange(context),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(track.emoji, style: const TextStyle(fontSize: 13)),
+              const SizedBox(width: 4),
+              Text(track.shortName,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800)),
+              const SizedBox(width: 2),
+              const Icon(Icons.swap_horiz_rounded,
+                  color: Colors.white, size: 15),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmTrackChange(BuildContext context) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('다른 시험으로 바꿀까요?'),
+        content: const Text(
+            '종목 선택 화면으로 이동합니다.\n학습 기록·XP·스트릭은 그대로 유지돼요.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('취소')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('종목 바꾸기')),
+        ],
+      ),
+    );
+    if (ok == true && context.mounted) {
+      await context.read<AppProvider>().clearTrack();
+    }
+  }
+
   Widget _glassIconButton(BuildContext context,
       {required IconData icon, required VoidCallback onTap}) {
     return Material(
@@ -577,8 +634,8 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('10년치 기출 완전 정복',
-                        style: TextStyle(
+                    Text('${StudyData.instance.track.bankLabel} 완전 정복',
+                        style: const TextStyle(
                             fontSize: 15, fontWeight: FontWeight.w800)),
                     const SizedBox(height: 3),
                     Text('CBT 출제의 50%는 기출 재출제 — 여기서 다 잡아요',
@@ -597,9 +654,12 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 14),
           Row(
             children: [
-              _bankStat(context, '2,897', '기출 문항'),
-              _bankStat(context, '46', '1:1 강의 토픽'),
-              _bankStat(context, '347', '반복기출 암기'),
+              _bankStat(context, StudyData.instance.track.questionCountLabel,
+                  '기출 문항'),
+              _bankStat(context, '${StudyData.instance.track.topicCount}',
+                  '1:1 강의 토픽'),
+              _bankStat(context, '${StudyData.instance.track.repeatCount}',
+                  '반복기출 암기'),
             ],
           ),
         ],

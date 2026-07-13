@@ -236,7 +236,7 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
           .map((h) => '[${h.kind}] ${h.title}: ${h.snippet}')
           .join('\n');
       final ans = await CerebrasService.instance
-          .askTheory('전기기사 시험 관련 질문: $q', context: ctx.isEmpty ? null : ctx);
+          .askTheory('${StudyData.instance.track.name} 시험 관련 질문: $q', context: ctx.isEmpty ? null : ctx);
       if (mounted) {
         setState(() {
           _aiAnswer = ans;

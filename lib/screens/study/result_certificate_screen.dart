@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/pass_prediction.dart';
+import '../../services/study_data.dart';
 
 /// 🏆 합격 성적표 — 100문항 실전 모의고사를 마치면 나오는 결과 화면.
 /// 캡처해서 자랑하고 싶은, "990원도 아깝지 않다"를 느끼게 하는 화면.
@@ -88,7 +89,7 @@ class ResultCertificateScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    Text('전기기사 필기 $examLabel',
+                    Text('${StudyData.instance.track.name} 필기 $examLabel',
                         style: const TextStyle(
                             color: Colors.white70, fontSize: 13)),
                     const SizedBox(height: 14),
@@ -284,7 +285,7 @@ class ResultCertificateScreen extends StatelessWidget {
 
   void _copyResult(BuildContext context) {
     final buf = StringBuffer();
-    buf.writeln('⚡ 전기기사 필기 $examLabel 결과');
+    buf.writeln('⚡ ${StudyData.instance.track.name} 필기 $examLabel 결과');
     buf.writeln('점수: $correct/$total ($pct점) — ${passed ? "합격권" : "불합격권"}');
     for (final s in subjectTotal.keys) {
       final t = subjectTotal[s] ?? 0;
@@ -292,7 +293,7 @@ class ResultCertificateScreen extends StatelessWidget {
       final p = t == 0 ? 0 : (c * 100 / t).round();
       buf.writeln('· $s: $c/$t ($p점)');
     }
-    buf.writeln('#Cert스터디트래커 #전기기사');
+    buf.writeln('#Cert스터디트래커 #${StudyData.instance.track.name.replaceAll(RegExp(r"[()\s]"), "")}');
     Clipboard.setData(ClipboardData(text: buf.toString()));
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text('결과가 복사되었습니다 — 오픈채팅방에 자랑해보세요!'),

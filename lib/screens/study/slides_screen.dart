@@ -270,7 +270,7 @@ const Map<String, _CardStyle> _cardStyles = {
 
 /// 유튜브 딥링크: "전기기사 <토픽>" 검색 — 단원별 강의가 매우 많음
 String topicYoutubeUrl(String topic) {
-  final q = Uri.encodeComponent('전기기사 ${topic.replaceAll('·', ' ')}');
+  final q = Uri.encodeComponent('${StudyData.instance.track.name} ${topic.replaceAll('·', ' ')}');
   return 'https://www.youtube.com/results?search_query=$q';
 }
 
@@ -843,7 +843,7 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
             children: [
               ActionChip(
                 avatar: const Icon(Icons.search, size: 16, color: Colors.red),
-                label: Text('전기기사 ${topic.replaceAll('·', ' ')} 검색',
+                label: Text('${StudyData.instance.track.shortName} ${topic.replaceAll('·', ' ')} 검색',
                     style: const TextStyle(fontSize: 12)),
                 onPressed: () => _openUrl(topicYoutubeUrl(topic)),
               ),

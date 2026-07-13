@@ -65,8 +65,12 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/data/
-    - assets/theory/
+    - assets/data/electrician/
+    - assets/data/elec_construction/
+    - assets/data/fire_electric/
+    - assets/theory/electrician/
+    - assets/theory/elec_construction/
+    - assets/theory/fire_electric/
     - assets/tutor/
 
   # An image asset can refer to one or more resolution-specific "variants", see

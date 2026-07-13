@@ -46,7 +46,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (_examDate != null) {
       await app.addExam(Exam(
         id: DateTime.now().microsecondsSinceEpoch.toString(),
-        name: '전기기사 필기',
+        name: '목표 자격증 필기',
         category: '국가기술자격',
         examDate: _examDate!,
         memo: '온보딩에서 설정한 목표 시험',
@@ -75,9 +75,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       children: [
                         _pageShell(
                           emoji: '⚡',
-                          title: '전기기사 합격,\n마법처럼 만들어 드릴게요',
+                          title: '자격증 합격,\n마법처럼 만들어 드릴게요',
                           subtitle:
-                              '10년치 기출 2,897문항 · 해설 100% · 완전 무료\n풀기→채점→해설→오답복습이 끊기지 않는 학습 루프',
+                              '전기기사·전기공사기사·소방설비기사(전기) 지원\n기출·해설 100% · 완전 무료 · 풀기→채점→해설→오답복습 루프',
                           child: _loopPreview(),
                         ),
                         _pageShell(

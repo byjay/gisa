@@ -61,13 +61,14 @@ class _StudyScreenState extends State<StudyScreen>
   @override
   Widget build(BuildContext context) {
     final exams = _exams;
+    final trackName = StudyData.instance.track.name;
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.bolt_rounded, color: AppTheme.accent, size: 24),
-            SizedBox(width: 6),
-            Text('전기기사 학습'),
+            const Icon(Icons.bolt_rounded, color: AppTheme.accent, size: 24),
+            const SizedBox(width: 6),
+            Text('$trackName 학습'),
           ],
         ),
         bottom: TabBar(
@@ -136,10 +137,11 @@ class _StudyScreenState extends State<StudyScreen>
     return ListView(
       padding: _pagePadding,
       children: [
-        const SectionHeader(
+        SectionHeader(
           emoji: '🔥',
           title: '빈출순 문제풀기',
-          subtitle: '10년치 2,897문제를 출제 빈도 높은 토픽 순서로',
+          subtitle:
+              '${StudyData.instance.track.bankLabel} ${StudyData.instance.track.questionCountLabel}문제를 출제 빈도 높은 토픽 순서로',
         ),
         for (var i = 0; i < kSubjects.length; i++)
           _freqCard(context, kSubjects[i], _subjectColors[i]),
@@ -192,10 +194,11 @@ class _StudyScreenState extends State<StudyScreen>
     return ListView(
       padding: _pagePadding,
       children: [
-        const SectionHeader(
+        SectionHeader(
           emoji: '📝',
           title: '회차별 실전 모의고사',
-          subtitle: '실제 시험과 동일한 100문항 · 문항당 90초 타이머 · 합격 기준 60점',
+          subtitle:
+              '회차당 ${StudyData.instance.track.paperSize}문항 · 문항당 90초 타이머 · 합격 기준 60점',
         ),
         for (final e in exams) _examCard(context, e),
         const SizedBox(height: 24),
@@ -240,7 +243,7 @@ class _StudyScreenState extends State<StudyScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('전기기사 ${e.label}',
+                Text('${StudyData.instance.track.name} ${e.label}',
                     style: const TextStyle(
                         fontSize: 13.5, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 2),
@@ -270,7 +273,7 @@ class _StudyScreenState extends State<StudyScreen>
             gradient: AppTheme.heroGradient,
             icon: Icons.school_rounded,
             title: '1:1 이론 강의',
-            sub: '46토픽 완전 강의\n공식·암기법·함정',
+            sub: '${StudyData.instance.track.topicCount}토픽 완전 강의\n공식·암기법·함정',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => const LessonCurriculumScreen(),
@@ -715,7 +718,7 @@ class _StudyScreenState extends State<StudyScreen>
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => QuizPlayScreen(
-          title: '전기기사 ${e.label}',
+          title: '${StudyData.instance.track.name} ${e.label}',
           questions: qs,
           examMode: true,
         ),

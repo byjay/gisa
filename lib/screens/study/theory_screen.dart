@@ -13,9 +13,9 @@ class TheoryScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text(
-            '10년치 기출 2,897문제 빈출 분석을 반영한 과목별 핵심이론서입니다. '
-            '실기(전기설비 설계·시공) 연계 포인트도 함께 정리했습니다.',
+          Text(
+            '${StudyData.instance.track.bankLabel} ${StudyData.instance.track.questionCountLabel}문제 빈출 분석을 반영한 과목별 핵심이론서입니다. '
+            '실기 연계 포인트도 함께 정리했습니다.',
           ),
           const SizedBox(height: 12),
           for (var i = 0; i < kSubjects.length; i++)

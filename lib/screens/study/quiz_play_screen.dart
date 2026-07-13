@@ -784,7 +784,8 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => ResultCertificateScreen(
-            examLabel: widget.title.replaceFirst('전기기사 ', ''),
+            examLabel: widget.title
+                .replaceFirst('${StudyData.instance.track.name} ', ''),
             correct: correct,
             total: total,
             subjectTotal: subjectTotal,

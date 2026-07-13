@@ -1,23 +1,16 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
 import 'package:flutter/services.dart' show rootBundle;
+import 'exam_track.dart';
 
-/// 과목 정의 (순서 고정)
-const List<String> kSubjects = [
-  '전자기학',
-  '전력공학',
-  '전기기기',
-  '회로이론 및 제어공학',
-  '전기설비기술기준',
-];
+/// 현재 선택된 종목 (기본: 전기기사). StudyData.setTrack 으로 변경된다.
+ExamTrack _currentTrack = kExamTracks.first;
 
-const Map<String, String> kTheoryFiles = {
-  '전자기학': 'assets/theory/01.md',
-  '전력공학': 'assets/theory/02.md',
-  '전기기기': 'assets/theory/03.md',
-  '회로이론 및 제어공학': 'assets/theory/04.md',
-  '전기설비기술기준': 'assets/theory/05.md',
-};
+/// 현재 종목의 과목 목록 (순서 고정) — 전 화면에서 이 상수처럼 사용.
+List<String> get kSubjects => _currentTrack.subjects;
+
+/// 현재 종목의 이론 파일 경로 맵.
+Map<String, String> get kTheoryFiles => _currentTrack.theoryFiles;
 
 class Question {
   final int no;
@@ -372,9 +365,13 @@ class StudyPlan {
   factory StudyPlan.fromJson(Map<String, dynamic> j) => StudyPlan(
         title: (j['title'] as String?) ?? '',
         description: (j['description'] as String?) ?? '',
-        strategy: ((j['strategy'] as List?) ?? const [])
-            .map((e) => e.toString())
-            .toList(),
+        // strategy 는 트랙별 JSON 에 따라 List<String> 또는 String 이 올 수 있어
+        // 두 형식 모두 허용한다 (String 이면 단일 항목 리스트로 변환).
+        strategy: switch (j['strategy']) {
+          final List l => l.map((e) => e.toString()).toList(),
+          final String s when s.isNotEmpty => [s],
+          _ => const <String>[],
+        },
         days: ((j['days'] as List?) ?? const [])
             .map((e) => PlanDay.fromJson(e as Map<String, dynamic>))
             .toList(),
@@ -589,6 +586,38 @@ class StudyData {
   StudyData._();
   static final StudyData instance = StudyData._();
 
+  /// 현재 종목 폴더 (assets/data/[dir]/)
+  String get _dir => _currentTrack.dir;
+
+  /// data 파일 경로 헬퍼 — 종목 폴더를 앞에 붙인다.
+  String _p(String file) => 'assets/data/$_dir/$file';
+
+  /// 종목 전환: 캐시를 모두 비우고 다음 로드부터 새 종목 데이터를 읽는다.
+  void setTrack(ExamTrack track) {
+    if (_currentTrack.id == track.id) return;
+    _currentTrack = track;
+    _clearCache();
+  }
+
+  ExamTrack get track => _currentTrack;
+
+  void _clearCache() {
+    _exams = null;
+    _mnemonics = null;
+    _videos = null;
+    _lessons = null;
+    _repeats = null;
+    _topicFreq = null;
+    _plan = null;
+    _slideDecks = null;
+    _silgi = null;
+    _formulaGuide = null;
+    _examInfo = null;
+    _recipes = null;
+    _recipeByTopic = null;
+    _theoryCache.clear();
+  }
+
   List<ExamPaper>? _exams;
   List<Mnemonic>? _mnemonics;
   List<VideoLink>? _videos;
@@ -604,7 +633,7 @@ class StudyData {
   Future<StudyPlan?> loadPlan() async {
     if (_plan != null) return _plan;
     try {
-      final raw = await rootBundle.loadString('assets/data/study_plan.json');
+      final raw = await rootBundle.loadString(_p('study_plan.json'));
       _plan = StudyPlan.fromJson(jsonDecode(raw) as Map<String, dynamic>);
     } catch (e) {
       if (kDebugMode) debugPrint('study_plan.json 로드 실패: $e');
@@ -616,7 +645,7 @@ class StudyData {
   Future<List<SlideDeck>> loadSlideDecks() async {
     if (_slideDecks != null) return _slideDecks!;
     _slideDecks = await _safeLoadList(
-        'assets/data/theory_slides.json', SlideDeck.fromJson);
+        _p('theory_slides.json'), SlideDeck.fromJson);
     return _slideDecks!;
   }
 
@@ -628,7 +657,7 @@ class StudyData {
     if (_examInfo != null) return _examInfo;
     try {
       final raw =
-          await rootBundle.loadString('assets/data/exam_info_2026.json');
+          await rootBundle.loadString(_p('exam_info_2026.json'));
       _examInfo = jsonDecode(raw) as Map<String, dynamic>;
     } catch (e) {
       if (kDebugMode) debugPrint('exam_info_2026.json 로드 실패: $e');
@@ -641,7 +670,7 @@ class StudyData {
     if (_formulaGuide != null) return _formulaGuide;
     try {
       final raw =
-          await rootBundle.loadString('assets/data/formula_guide.json');
+          await rootBundle.loadString(_p('formula_guide.json'));
       _formulaGuide =
           FormulaGuideData.fromJson(jsonDecode(raw) as Map<String, dynamic>);
     } catch (e) {
@@ -654,7 +683,7 @@ class StudyData {
   Future<SilgiData?> loadSilgi() async {
     if (_silgi != null) return _silgi;
     try {
-      final raw = await rootBundle.loadString('assets/data/silgi.json');
+      final raw = await rootBundle.loadString(_p('silgi.json'));
       _silgi = SilgiData.fromJson(jsonDecode(raw) as Map<String, dynamic>);
     } catch (e) {
       if (kDebugMode) debugPrint('silgi.json 로드 실패: $e');
@@ -682,7 +711,7 @@ class StudyData {
   Future<List<ExamPaper>> loadExams() async {
     if (_exams != null) return _exams!;
     _exams = await _safeLoadList(
-        'assets/data/exams.json', ExamPaper.fromJson)
+        _p('exams.json'), ExamPaper.fromJson)
       ..sort((a, b) {
         final c = b.year.compareTo(a.year);
         return c != 0 ? c : b.session.compareTo(a.session);
@@ -697,7 +726,7 @@ class StudyData {
   Future<List<SolutionRecipe>> loadRecipes() async {
     if (_recipes != null) return _recipes!;
     _recipes = await _safeLoadList(
-        'assets/data/solution_recipes.json', SolutionRecipe.fromJson);
+        _p('solution_recipes.json'), SolutionRecipe.fromJson);
     _recipeByTopic = {for (final r in _recipes!) r.topic: r};
     return _recipes!;
   }
@@ -708,21 +737,21 @@ class StudyData {
   Future<List<Mnemonic>> loadMnemonics() async {
     if (_mnemonics != null) return _mnemonics!;
     _mnemonics = await _safeLoadList(
-        'assets/data/mnemonics.json', Mnemonic.fromJson);
+        _p('mnemonics.json'), Mnemonic.fromJson);
     return _mnemonics!;
   }
 
   Future<List<VideoLink>> loadVideos() async {
     if (_videos != null) return _videos!;
     _videos = await _safeLoadList(
-        'assets/data/videos.json', VideoLink.fromJson);
+        _p('videos.json'), VideoLink.fromJson);
     return _videos!;
   }
 
   Future<Map<String, List<TopicFreq>>> loadTopicFreq() async {
     if (_topicFreq != null) return _topicFreq!;
     try {
-      final raw = await rootBundle.loadString('assets/data/topic_freq.json');
+      final raw = await rootBundle.loadString(_p('topic_freq.json'));
       final map = jsonDecode(raw) as Map<String, dynamic>;
       _topicFreq = map.map((k, v) => MapEntry(
           k,
@@ -804,7 +833,7 @@ class StudyData {
   Future<List<Lesson>> loadLessons() async {
     if (_lessons != null) return _lessons!;
     _lessons = await _safeLoadList(
-        'assets/data/lessons.json', Lesson.fromJson);
+        _p('lessons.json'), Lesson.fromJson);
     return _lessons!;
   }
 
@@ -833,7 +862,7 @@ class StudyData {
   Future<List<RepeatCluster>> loadRepeats() async {
     if (_repeats != null) return _repeats!;
     _repeats = await _safeLoadList(
-        'assets/data/repeat_questions.json', RepeatCluster.fromJson);
+        _p('repeat_questions.json'), RepeatCluster.fromJson);
     return _repeats!;
   }
 

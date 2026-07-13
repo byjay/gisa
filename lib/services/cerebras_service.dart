@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'study_data.dart';
 
 /// Cerebras AI API 서비스 — OpenAI 호환 chat completions
 /// API 키는 사용자가 설정에서 직접 입력 (cloud.cerebras.ai에서 발급)
@@ -43,8 +44,8 @@ class CerebrasService {
     final messages = [
       {
         'role': 'system',
-        'content': '당신은 한국 전기기사 필기·실기 시험 전문 튜터입니다. '
-            '전자기학, 전력공학, 전기기기, 회로이론 및 제어공학, 전기설비기술기준(KEC) 전 과목에 정통합니다. '
+        'content': '당신은 한국 ${StudyData.instance.track.name} 필기·실기 시험 전문 튜터입니다. '
+            '${StudyData.instance.track.subjects.join(", ")} 전 과목에 정통합니다. '
             '답변 규칙: (1) 한국어로 간결하고 정확하게, (2) 공식은 명확히 표기, '
             '(3) 시험에 나오는 핵심 포인트와 함정을 짚어주기, (4) 가능하면 암기법도 제안, '
             '(5) 확실하지 않은 내용은 솔직하게 말하기. 답변은 500자 이내로 압축.'

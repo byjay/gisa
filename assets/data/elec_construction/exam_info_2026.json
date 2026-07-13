@@ -1,0 +1,34 @@
+{
+ "updated": "2026-01",
+ "sources": [
+  "Q-net 국가자격 시험정보"
+ ],
+ "schedule": [
+  {
+   "round": "2026년 1회",
+   "apply": "2026.01",
+   "written": "2026.03",
+   "practical": "2026.05"
+  },
+  {
+   "round": "2026년 2회",
+   "apply": "2026.04",
+   "written": "2026.06",
+   "practical": "2026.08"
+  }
+ ],
+ "qnetLinks": [
+  {
+   "name": "Q-net 원서접수",
+   "url": "https://www.q-net.or.kr"
+  }
+ ],
+ "relatedCerts": [],
+ "scheduleNotes": "전기공사기사 시험 일정은 Q-net 공고를 반드시 확인하세요.",
+ "criteria2026": "전기공사기사 출제기준(2026)에 따른 과목 구성.",
+ "passRates": [],
+ "passRateInsights": "전기공사기사 합격 전략: 고빈출 과목 우선, 법규/암기는 반복.",
+ "passRates2025": [],
+ "latestTrends": "전기공사기사 최근 출제 경향 요약.",
+ "kecChanges2026": ""
+}

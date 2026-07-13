@@ -6,6 +6,7 @@ import 'theme/app_theme.dart';
 import 'screens/exams_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/track_select_screen.dart';
 import 'screens/stats_screen.dart';
 import 'screens/study/study_screen.dart';
 import 'screens/timer_screen.dart';
@@ -53,7 +54,14 @@ class _RootGate extends StatelessWidget {
         onDone: () => context.read<AppProvider>().completeOnboarding(),
       );
     }
-    return const MainShell();
+    // 온보딩 후 종목 미선택이면 큰 버튼 3개 진입 화면
+    final trackId =
+        context.select<AppProvider, String?>((p) => p.selectedTrackId);
+    if (trackId == null) {
+      return const TrackSelectScreen();
+    }
+    // 종목이 바뀌면 MainShell 하위 상태가 새 데이터로 초기화되도록 key 부여
+    return MainShell(key: ValueKey(trackId));
   }
 }
 

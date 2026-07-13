@@ -806,9 +806,9 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const TutorBanner(
+        TutorBanner(
           mood: TutorMood.teaching,
-          message: '전기기사는 절대평가! 100점이 아니라 "평균 60 + 과목당 40 이상"을 설계하는 시험이에요.',
+          message: '${StudyData.instance.track.name}은(는) 절대평가! 100점이 아니라 "평균 60 + 과목당 40 이상"을 설계하는 시험이에요.',
         ),
         const SizedBox(height: 12),
         const Text('합격 점수 시나리오',

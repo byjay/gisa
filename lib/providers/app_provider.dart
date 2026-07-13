@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/models.dart';
+import '../services/exam_track.dart';
+import '../services/study_data.dart';
 
 class AppProvider extends ChangeNotifier {
   late Box _examBox;
@@ -60,6 +62,10 @@ class AppProvider extends ChangeNotifier {
     darkMode = (_settingsBox.get('darkMode') as bool?) ?? false;
     shieldCount = (_settingsBox.get('shieldCount') as int?) ?? 0;
     onboarded = (_settingsBox.get('onboarded_v1') as bool?) ?? false;
+    selectedTrackId = _settingsBox.get('selectedTrack') as String?;
+    if (selectedTrackId != null) {
+      StudyData.instance.setTrack(trackById(selectedTrackId!));
+    }
     _autoConsumeShield();
     notifyListeners();
   }
@@ -321,6 +327,28 @@ class AppProvider extends ChangeNotifier {
   Future<void> completeOnboarding() async {
     onboarded = true;
     await _settingsBox.put('onboarded_v1', true);
+    notifyListeners();
+  }
+
+  // ===== 🎯 시험 종목 선택 =====
+  /// 선택된 종목 id. null 이면 아직 종목 미선택(진입 화면 표시).
+  String? selectedTrackId;
+
+  ExamTrack? get selectedTrack =>
+      selectedTrackId == null ? null : trackById(selectedTrackId!);
+
+  /// 종목 선택/전환: StudyData 캐시를 리셋하고 화면을 갱신한다.
+  Future<void> selectTrack(String trackId) async {
+    selectedTrackId = trackId;
+    StudyData.instance.setTrack(trackById(trackId));
+    await _settingsBox.put('selectedTrack', trackId);
+    notifyListeners();
+  }
+
+  /// 종목 선택 화면으로 되돌리기(다른 시험 고르기).
+  Future<void> clearTrack() async {
+    selectedTrackId = null;
+    await _settingsBox.delete('selectedTrack');
     notifyListeners();
   }
 
