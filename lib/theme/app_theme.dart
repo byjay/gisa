@@ -125,12 +125,58 @@ class AppTheme {
   static const double rLg = 20;
   static const double rXl = 28;
 
+  // ── 테마 팔레트 (5종) ─────────────────────────────
+  // 사용자가 설정에서 선택. seed 색상으로 전체 톤을 결정하며
+  // 브랜드 static const(primary/accent 등)는 포인트 컬러로 유지한다.
+  static const List<ThemePalette> palettes = [
+    ThemePalette(
+      id: 'indigo',
+      name: '일렉트릭 인디고',
+      emoji: '⚡',
+      seed: Color(0xFF4F46E5),
+      accent: Color(0xFF7C3AED),
+    ),
+    ThemePalette(
+      id: 'emerald',
+      name: '포레스트 에메랄드',
+      emoji: '🌿',
+      seed: Color(0xFF059669),
+      accent: Color(0xFF0D9488),
+    ),
+    ThemePalette(
+      id: 'rose',
+      name: '선셋 로즈',
+      emoji: '🌸',
+      seed: Color(0xFFE11D48),
+      accent: Color(0xFFF43F5E),
+    ),
+    ThemePalette(
+      id: 'amber',
+      name: '골든 앰버',
+      emoji: '🔥',
+      seed: Color(0xFFD97706),
+      accent: Color(0xFFEA580C),
+    ),
+    ThemePalette(
+      id: 'ocean',
+      name: '딥 오션',
+      emoji: '🌊',
+      seed: Color(0xFF0284C7),
+      accent: Color(0xFF06B6D4),
+    ),
+  ];
+
+  static ThemePalette paletteById(String? id) => palettes.firstWhere(
+        (p) => p.id == id,
+        orElse: () => palettes.first,
+      );
+
   // ── ThemeData ───────────────────────────────────
-  static ThemeData light() {
-    final scheme = ColorScheme.fromSeed(seedColor: primary).copyWith(
-      primary: primary,
-      secondary: accent,
-      tertiary: electric,
+  static ThemeData light([ThemePalette? palette]) {
+    final p = palette ?? palettes.first;
+    final scheme = ColorScheme.fromSeed(seedColor: p.seed).copyWith(
+      primary: p.seed,
+      secondary: p.accent,
       surface: cardLight,
     );
     return _base(scheme, Brightness.light).copyWith(
@@ -138,14 +184,12 @@ class AppTheme {
     );
   }
 
-  static ThemeData dark() {
+  static ThemeData dark([ThemePalette? palette]) {
+    final p = palette ?? palettes.first;
     final scheme = ColorScheme.fromSeed(
-      seedColor: primary,
+      seedColor: p.seed,
       brightness: Brightness.dark,
     ).copyWith(
-      primary: const Color(0xFF818CF8),
-      secondary: const Color(0xFFA78BFA),
-      tertiary: const Color(0xFF22D3EE),
       surface: cardDark,
     );
     return _base(scheme, Brightness.dark).copyWith(
@@ -479,4 +523,20 @@ class PillBadge extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 테마 팔레트 정의 (5종)
+class ThemePalette {
+  final String id;
+  final String name;
+  final String emoji;
+  final Color seed;
+  final Color accent;
+  const ThemePalette({
+    required this.id,
+    required this.name,
+    required this.emoji,
+    required this.seed,
+    required this.accent,
+  });
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/cerebras_service.dart';
+import '../../services/kimi_service.dart';
 import '../../services/study_data.dart';
 import '../../widgets/tutor_avatar.dart';
 import 'lesson_screen.dart';
@@ -43,7 +43,7 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
   @override
   void initState() {
     super.initState();
-    CerebrasService.instance.hasKey().then((v) {
+    KimiService.instance.hasKey().then((v) {
       if (mounted) setState(() => _hasKey = v);
     });
   }
@@ -219,10 +219,10 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
   Future<void> _askAi() async {
     final q = _controller.text.trim();
     if (q.isEmpty) return;
-    if (!await CerebrasService.instance.hasKey()) {
+    if (!await KimiService.instance.hasKey()) {
       if (!mounted) return;
       await _showKeyDialog();
-      if (!await CerebrasService.instance.hasKey()) return;
+      if (!await KimiService.instance.hasKey()) return;
     }
     setState(() {
       _aiLoading = true;
@@ -235,7 +235,7 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
           .take(3)
           .map((h) => '[${h.kind}] ${h.title}: ${h.snippet}')
           .join('\n');
-      final ans = await CerebrasService.instance
+      final ans = await KimiService.instance
           .askTheory('${StudyData.instance.track.name} 시험 관련 질문: $q', context: ctx.isEmpty ? null : ctx);
       if (mounted) {
         setState(() {
@@ -256,19 +256,19 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
 
   Future<void> _showKeyDialog() async {
     final keyCtrl = TextEditingController(
-        text: await CerebrasService.instance.getApiKey() ?? '');
+        text: await KimiService.instance.getApiKey() ?? '');
     if (!mounted) return;
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cerebras API 키 설정'),
+        title: const Text('Kimi(Moonshot) API 키 설정'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'AI 검증 기능을 쓰려면 무료 API 키가 필요해요.\n'
-              '1. cloud.cerebras.ai 접속 → 로그인\n'
+              'AI 검증 기능을 쓰려면 Kimi(Moonshot) API 키가 필요해요.\n'
+              '1. platform.moonshot.ai 접속 → 로그인\n'
               '2. API Keys 메뉴에서 키 생성\n'
               '3. 아래에 붙여넣기 (기기에만 저장됩니다)',
               style: TextStyle(fontSize: 13, height: 1.5),
@@ -278,7 +278,7 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
               controller: keyCtrl,
               obscureText: true,
               decoration: const InputDecoration(
-                labelText: 'API Key (csk-...)',
+                labelText: 'API Key (sk-...)',
                 border: OutlineInputBorder(),
                 isDense: true,
               ),
@@ -290,10 +290,10 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
               onPressed: () => Navigator.pop(ctx), child: const Text('취소')),
           FilledButton(
             onPressed: () async {
-              await CerebrasService.instance.setApiKey(keyCtrl.text);
+              await KimiService.instance.setApiKey(keyCtrl.text);
               if (ctx.mounted) Navigator.pop(ctx);
               if (mounted) {
-                final has = await CerebrasService.instance.hasKey();
+                final has = await KimiService.instance.hasKey();
                 setState(() => _hasKey = has);
               }
             },

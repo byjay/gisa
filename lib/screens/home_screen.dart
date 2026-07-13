@@ -234,6 +234,13 @@ class HomeScreen extends StatelessWidget {
                     // 종목 전환 (다른 시험 고르기)
                     _trackChip(context),
                     const SizedBox(width: 8),
+                    // 테마 팔레트 선택
+                    _glassIconButton(
+                      context,
+                      icon: Icons.palette_rounded,
+                      onTap: () => _showThemeSheet(context, app),
+                    ),
+                    const SizedBox(width: 8),
                     // 다크모드 토글
                     _glassIconButton(
                       context,
@@ -479,6 +486,115 @@ class HomeScreen extends StatelessWidget {
           child: Icon(icon, color: Colors.white, size: 20),
         ),
       ),
+    );
+  }
+
+  // ── 🎨 테마 팔레트 선택 바텀시트 ─────────────────────
+  void _showThemeSheet(BuildContext context, AppProvider app) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final cs = Theme.of(ctx).colorScheme;
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(ctx).scaffoldBackgroundColor,
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: cs.onSurface.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text('🎨 테마 컬러',
+                  style: TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 4),
+              Text('앱 전체 색감을 5가지 중에 골라보세요',
+                  style: TextStyle(
+                      fontSize: 12.5,
+                      color: cs.onSurface.withValues(alpha: 0.6))),
+              const SizedBox(height: 18),
+              ...AppTheme.palettes.map((p) {
+                final selected = p.id == app.themePaletteId;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Material(
+                    color: selected
+                        ? p.seed.withValues(alpha: 0.12)
+                        : cs.surfaceContainerHighest.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(14),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () {
+                        app.setThemePalette(p.id);
+                        Navigator.pop(ctx);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 13),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: selected
+                                ? p.seed
+                                : Colors.transparent,
+                            width: 1.6,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            // 색상 미리보기 (seed + accent)
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(11),
+                                gradient: LinearGradient(
+                                  colors: [p.seed, p.accent],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(p.emoji,
+                                  style: const TextStyle(fontSize: 18)),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Text(p.name,
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: selected
+                                          ? FontWeight.w800
+                                          : FontWeight.w600)),
+                            ),
+                            if (selected)
+                              Icon(Icons.check_circle_rounded,
+                                  color: p.seed, size: 22),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
+        );
+      },
     );
   }
 

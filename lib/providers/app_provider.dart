@@ -21,6 +21,7 @@ class AppProvider extends ChangeNotifier {
   int dailyGoalMinutes = 120;
   bool darkMode = false;
   int weeklyGoalMinutes = 600;
+  String themePaletteId = 'indigo';
 
   // Timer state
   bool timerRunning = false;
@@ -60,6 +61,8 @@ class AppProvider extends ChangeNotifier {
     dailyGoalMinutes = (_settingsBox.get('dailyGoal') as int?) ?? 120;
     weeklyGoalMinutes = (_settingsBox.get('weeklyGoal') as int?) ?? 600;
     darkMode = (_settingsBox.get('darkMode') as bool?) ?? false;
+    themePaletteId =
+        (_settingsBox.get('themePalette') as String?) ?? 'indigo';
     shieldCount = (_settingsBox.get('shieldCount') as int?) ?? 0;
     onboarded = (_settingsBox.get('onboarded_v1') as bool?) ?? false;
     selectedTrackId = _settingsBox.get('selectedTrack') as String?;
@@ -172,6 +175,12 @@ class AppProvider extends ChangeNotifier {
   Future<void> toggleDarkMode() async {
     darkMode = !darkMode;
     await _settingsBox.put('darkMode', darkMode);
+    notifyListeners();
+  }
+
+  Future<void> setThemePalette(String id) async {
+    themePaletteId = id;
+    await _settingsBox.put('themePalette', id);
     notifyListeners();
   }
 

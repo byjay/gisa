@@ -30,12 +30,15 @@ class CertStudyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dark = context.select<AppProvider, bool>((p) => p.darkMode);
+    final paletteId =
+        context.select<AppProvider, String>((p) => p.themePaletteId);
+    final palette = AppTheme.paletteById(paletteId);
     return MaterialApp(
       title: 'Cert Study Tracker',
       debugShowCheckedModeBanner: false,
       themeMode: dark ? ThemeMode.dark : ThemeMode.light,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      theme: AppTheme.light(palette),
+      darkTheme: AppTheme.dark(palette),
       home: const _RootGate(),
     );
   }
