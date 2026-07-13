@@ -16,6 +16,7 @@ import 'repeat_analysis_screen.dart';
 import 'formula_guide_screen.dart';
 import 'exam_info_screen.dart';
 import 'smart_review_screen.dart';
+import 'study_guide_screen.dart';
 import '../../widgets/tutor_avatar.dart';
 
 /// 학습 허브: 탭 구조로 직관적 분류 — 기초학습 / 문제풀이 / 모의고사 / 이력
@@ -503,6 +504,8 @@ class _StudyScreenState extends State<StudyScreen>
   /// 핵심 기능 그리드 (3x3)
   Widget _featureGrid(BuildContext context) {
     final items = <(String, IconData, Color, Widget)>[
+      ('합격 공부법', Icons.emoji_events_rounded, const Color(0xFFF59E0B),
+          const StudyGuideScreen()),
       ('30일 슬라이드', Icons.style_rounded, AppTheme.primary,
           const SlidesHomeScreen()),
       ('유형변형 분석', Icons.track_changes_rounded, const Color(0xFFF97316),
@@ -549,25 +552,29 @@ class _StudyScreenState extends State<StudyScreen>
     }
 
     Widget row(List<(String, IconData, Color, Widget)> rowItems) {
+      // 3열 기준으로 빈 칸을 채워 마지막 행 정렬 유지
       return Row(
         children: [
-          for (var i = 0; i < rowItems.length; i++) ...[
+          for (var i = 0; i < 3; i++) ...[
             if (i > 0) const SizedBox(width: 8),
-            cell(rowItems[i]),
+            if (i < rowItems.length)
+              cell(rowItems[i])
+            else
+              const Expanded(child: SizedBox()),
           ],
         ],
       );
     }
 
-    return Column(
-      children: [
-        row(items.sublist(0, 3)),
-        const SizedBox(height: 8),
-        row(items.sublist(3, 6)),
-        const SizedBox(height: 8),
-        row(items.sublist(6, 9)),
-      ],
-    );
+    // 3개씩 묶어 동적으로 행 생성 (항목 수 변화에 안전)
+    final rows = <Widget>[];
+    for (var i = 0; i < items.length; i += 3) {
+      if (i > 0) rows.add(const SizedBox(height: 8));
+      final end = (i + 3 <= items.length) ? i + 3 : items.length;
+      rows.add(row(items.sublist(i, end)));
+    }
+
+    return Column(children: rows);
   }
 
   Widget _freqCard(BuildContext context, String subject, Color color) {

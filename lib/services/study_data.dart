@@ -6,6 +6,13 @@ import 'exam_track.dart';
 /// 현재 선택된 종목 (기본: 전기기사). StudyData.setTrack 으로 변경된다.
 ExamTrack _currentTrack = kExamTracks.first;
 
+/// JSON 값을 문자열 리스트로 안전 변환 (top-level 헬퍼).
+List<String> _strList(dynamic v) => switch (v) {
+      final List l => l.map((e) => e.toString()).toList(),
+      final String s when s.isNotEmpty => [s],
+      _ => const <String>[],
+    };
+
 /// 현재 종목의 과목 목록 (순서 고정) — 전 화면에서 이 상수처럼 사용.
 List<String> get kSubjects => _currentTrack.subjects;
 
@@ -410,6 +417,136 @@ class StudyPlan {
       );
 }
 
+/// 합격 공부법 가이드 — 딥리서치(합격후기·기출현황) 기반 학습 전략
+class StudyGuide {
+  final String title;
+  final String intro;
+  final GuideNote? examNote; // 기출 데이터 신뢰도 안내
+  final GuideOrder? order; // 과목 공부 순서 (전공/비전공)
+  final List<GuideSubject> subjects;
+  final GuideList? principles; // 합격자 공통 원칙
+  final GuidePeriod? period; // 권장 학습 기간
+
+  StudyGuide({
+    required this.title,
+    required this.intro,
+    required this.examNote,
+    required this.order,
+    required this.subjects,
+    required this.principles,
+    required this.period,
+  });
+
+  factory StudyGuide.fromJson(Map<String, dynamic> j) => StudyGuide(
+        title: (j['title'] as String?) ?? '합격 공부법',
+        intro: (j['intro'] as String?) ?? '',
+        examNote: j['exam_data_note'] is Map
+            ? GuideNote.fromJson(j['exam_data_note'] as Map<String, dynamic>)
+            : null,
+        order: j['order'] is Map
+            ? GuideOrder.fromJson(j['order'] as Map<String, dynamic>)
+            : null,
+        subjects: ((j['subjects'] as List?) ?? const [])
+            .map((e) => GuideSubject.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        principles: j['principles'] is Map
+            ? GuideList.fromJson(j['principles'] as Map<String, dynamic>)
+            : null,
+        period: j['period'] is Map
+            ? GuidePeriod.fromJson(j['period'] as Map<String, dynamic>)
+            : null,
+      );
+}
+
+class GuideNote {
+  final String title;
+  final String body;
+  final List<String> highlights;
+  GuideNote(
+      {required this.title, required this.body, required this.highlights});
+  factory GuideNote.fromJson(Map<String, dynamic> j) => GuideNote(
+        title: (j['title'] as String?) ?? '',
+        body: (j['body'] as String?) ?? '',
+        highlights: _strList(j['highlights']),
+      );
+}
+
+class GuideOrder {
+  final String title;
+  final String body;
+  final OrderPath? nonMajor;
+  final OrderPath? major;
+  GuideOrder(
+      {required this.title,
+      required this.body,
+      required this.nonMajor,
+      required this.major});
+  factory GuideOrder.fromJson(Map<String, dynamic> j) => GuideOrder(
+        title: (j['title'] as String?) ?? '',
+        body: (j['body'] as String?) ?? '',
+        nonMajor: j['non_major'] is Map
+            ? OrderPath.fromJson(j['non_major'] as Map<String, dynamic>)
+            : null,
+        major: j['major'] is Map
+            ? OrderPath.fromJson(j['major'] as Map<String, dynamic>)
+            : null,
+      );
+}
+
+class OrderPath {
+  final String label;
+  final String reason;
+  final List<String> steps;
+  OrderPath({required this.label, required this.reason, required this.steps});
+  factory OrderPath.fromJson(Map<String, dynamic> j) => OrderPath(
+        label: (j['label'] as String?) ?? '',
+        reason: (j['reason'] as String?) ?? '',
+        steps: _strList(j['steps']),
+      );
+}
+
+class GuideSubject {
+  final String name;
+  final String role;
+  final String method;
+  final List<String> tips;
+  GuideSubject(
+      {required this.name,
+      required this.role,
+      required this.method,
+      required this.tips});
+  factory GuideSubject.fromJson(Map<String, dynamic> j) => GuideSubject(
+        name: (j['name'] as String?) ?? '',
+        role: (j['role'] as String?) ?? '',
+        method: (j['method'] as String?) ?? '',
+        tips: _strList(j['tips']),
+      );
+}
+
+class GuideList {
+  final String title;
+  final List<String> items;
+  GuideList({required this.title, required this.items});
+  factory GuideList.fromJson(Map<String, dynamic> j) => GuideList(
+        title: (j['title'] as String?) ?? '',
+        items: _strList(j['items']),
+      );
+}
+
+class GuidePeriod {
+  final String title;
+  final String body;
+  final List<List<String>> table; // [라벨, 시간, 기간]
+  GuidePeriod({required this.title, required this.body, required this.table});
+  factory GuidePeriod.fromJson(Map<String, dynamic> j) => GuidePeriod(
+        title: (j['title'] as String?) ?? '',
+        body: (j['body'] as String?) ?? '',
+        table: ((j['table'] as List?) ?? const [])
+            .map<List<String>>((row) => _strList(row))
+            .toList(),
+      );
+}
+
 /// 슬라이드 카드 (30일 이론 덱)
 class SlideCard {
   final String type; // mission/concept/core/formula/mnemonic/trap/strategy/recap
@@ -641,6 +778,7 @@ class StudyData {
     _repeats = null;
     _topicFreq = null;
     _plan = null;
+    _guide = null;
     _slideDecks = null;
     _silgi = null;
     _formulaGuide = null;
@@ -657,6 +795,7 @@ class StudyData {
   List<RepeatCluster>? _repeats;
   Map<String, List<TopicFreq>>? _topicFreq;
   StudyPlan? _plan;
+  StudyGuide? _guide;
   List<SlideDeck>? _slideDecks;
   SilgiData? _silgi;
   final Map<String, String> _theoryCache = {};
@@ -671,6 +810,18 @@ class StudyData {
       if (kDebugMode) debugPrint('study_plan.json 로드 실패: $e');
     }
     return _plan;
+  }
+
+  /// 합격 공부법 가이드 로드 (딥리서치 기반)
+  Future<StudyGuide?> loadStudyGuide() async {
+    if (_guide != null) return _guide;
+    try {
+      final raw = await rootBundle.loadString(_p('study_guide.json'));
+      _guide = StudyGuide.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (e) {
+      if (kDebugMode) debugPrint('study_guide.json 로드 실패: $e');
+    }
+    return _guide;
   }
 
   /// 30일 슬라이드 덱 로드
