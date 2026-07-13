@@ -47,6 +47,37 @@ class LessonView extends StatelessWidget {
           ),
           const SizedBox(height: 12),
         ],
+        // ── 왕초보 기초 설명 (공식·개념의 '왜'를 비유로)
+        if (lesson.basicExplain.isNotEmpty) ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            margin: const EdgeInsets.only(bottom: 10),
+            decoration: BoxDecoration(
+              color: Colors.blue.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.child_care, size: 18, color: Colors.blue[700]),
+                    const SizedBox(width: 6),
+                    Text('왕초보 기초 — 이것부터 이해하세요',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: Colors.blue[800])),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                _richText(context, lesson.basicExplain),
+              ],
+            ),
+          ),
+        ],
         // ── 도입부 (강사 오프닝 멘트)
         if (lesson.intro.isNotEmpty)
           Container(
@@ -99,6 +130,34 @@ class LessonView extends StatelessWidget {
             child: _bodyContent(context, lesson.sections[i].body),
           ),
         ],
+        // ── 시험에 이렇게 나온다 (출제 패턴)
+        if (lesson.examHow.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          _sectionLabel(context, Icons.quiz, '시험에 이렇게 나온다',
+              Colors.deepPurple),
+          const SizedBox(height: 8),
+          for (final e in lesson.examHow)
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.deepPurple.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                    color: Colors.deepPurple.withValues(alpha: 0.25)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.edit_note,
+                      size: 18, color: Colors.deepPurple[400]),
+                  const SizedBox(width: 8),
+                  Expanded(child: _richText(context, e)),
+                ],
+              ),
+            ),
+        ],
         // ── 핵심 공식 카드
         if (lesson.formulas.isNotEmpty) ...[
           const SizedBox(height: 20),
@@ -142,6 +201,89 @@ class LessonView extends StatelessWidget {
               ),
             ),
         ],
+        // ── 필수 암기 (골드 하이라이트)
+        if (lesson.must.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFFFFF8E1),
+                  Colors.amber.withValues(alpha: 0.25),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFD4A017), width: 1.6),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.workspace_premium,
+                        size: 20, color: Color(0xFFB8860B)),
+                    const SizedBox(width: 6),
+                    const Text('필수 암기 — 시험장 직행',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Color(0xFF8B6508))),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFB8860B),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text('${lesson.must.length}개',
+                          style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                for (var i = 0; i < lesson.must.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 20,
+                          height: 20,
+                          alignment: Alignment.center,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFB8860B),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text('${i + 1}',
+                              style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white)),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: DefaultTextStyle.merge(
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w600),
+                            child: _richText(context, lesson.must[i]),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
         // ── 암기법
         if (lesson.mnemonics.isNotEmpty) ...[
           const SizedBox(height: 16),
@@ -181,6 +323,54 @@ class LessonView extends StatelessWidget {
               ),
             ),
         ],
+        // ── 심화 암기 (접이식 — 고득점용)
+        if (lesson.advanced.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                  color: scheme.outlineVariant.withValues(alpha: 0.8)),
+            ),
+            child: Theme(
+              data: Theme.of(context)
+                  .copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                tilePadding:
+                    const EdgeInsets.symmetric(horizontal: 14),
+                childrenPadding:
+                    const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                leading: Icon(Icons.rocket_launch,
+                    size: 20, color: scheme.tertiary),
+                title: Text('심화 암기 — 만점·고득점 포인트',
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: scheme.tertiary)),
+                subtitle: Text(
+                    '기초가 끝났다면 열어보세요 (${lesson.advanced.length}개)',
+                    style: TextStyle(
+                        fontSize: 11.5,
+                        color: scheme.onSurfaceVariant)),
+                children: [
+                  for (final a in lesson.advanced)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.add_circle_outline,
+                              size: 16, color: scheme.tertiary),
+                          const SizedBox(width: 8),
+                          Expanded(child: _richText(context, a)),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
         // ── 합격 전략
         if (lesson.strategy.isNotEmpty) ...[
           const SizedBox(height: 16),
@@ -208,6 +398,37 @@ class LessonView extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 _richText(context, lesson.strategy),
+              ],
+            ),
+          ),
+        ],
+        // ── 실기 연계 포인트
+        if (lesson.silgi.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.teal.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.teal.withValues(alpha: 0.35)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.construction,
+                        size: 18, color: Colors.teal[700]),
+                    const SizedBox(width: 6),
+                    Text('실기 연계 포인트',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.teal[800])),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                _richText(context, lesson.silgi),
               ],
             ),
           ),
@@ -309,11 +530,13 @@ class LessonView extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 7),
-                    child: Text(
+                    child: _richText(
+                      context,
                       c < parsed[i].length ? parsed[i][c] : '',
-                      style: TextStyle(
+                      baseStyle: TextStyle(
                         fontSize: 12.5,
                         height: 1.3,
+                        color: scheme.onSurface,
                         fontWeight:
                             i == 0 ? FontWeight.bold : FontWeight.normal,
                       ),
@@ -327,7 +550,8 @@ class LessonView extends StatelessWidget {
   }
 
   /// **볼드** 인라인 마크다운 지원 텍스트
-  Widget _richText(BuildContext context, String text) {
+  /// [baseStyle]을 넘기면 기본 스타일을 대체(표 셀 등 문맥별 스타일 대응).
+  Widget _richText(BuildContext context, String text, {TextStyle? baseStyle}) {
     final spans = <TextSpan>[];
     final re = RegExp(r'\*\*(.+?)\*\*');
     var last = 0;
@@ -345,13 +569,13 @@ class LessonView extends StatelessWidget {
     if (last < text.length) {
       spans.add(TextSpan(text: text.substring(last)));
     }
+    final style = baseStyle ??
+        TextStyle(
+            fontSize: 14,
+            height: 1.65,
+            color: Theme.of(context).colorScheme.onSurface);
     return Text.rich(
-      TextSpan(
-          children: spans,
-          style: TextStyle(
-              fontSize: 14,
-              height: 1.65,
-              color: Theme.of(context).colorScheme.onSurface)),
+      TextSpan(children: spans, style: style),
     );
   }
 }

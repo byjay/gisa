@@ -189,6 +189,22 @@ class Lesson {
   final String strategy;
   final List<String> traps;
 
+  // ── 레벨별 학습 확장 필드 (R36) ──
+  /// 왕초보 기초 설명 — 공식·개념의 '왜'를 비유로 풀어주는 도입부
+  final String basicExplain;
+
+  /// 시험에 이렇게 나온다 — 실제 출제 패턴 (문항 유형·단서 키워드)
+  final List<String> examHow;
+
+  /// 필수 암기 — 시험장 직행 최우선 암기 항목 (골드 하이라이트 렌더)
+  final List<String> must;
+
+  /// 심화 암기 — 만점·고득점용 고급 포인트 (접이식 렌더)
+  final List<String> advanced;
+
+  /// 실기 연계 포인트 — 필기 이론이 실기에서 어떻게 확장되는지
+  final String silgi;
+
   Lesson({
     required this.subject,
     required this.topic,
@@ -200,7 +216,18 @@ class Lesson {
     required this.mnemonics,
     required this.strategy,
     required this.traps,
+    this.basicExplain = '',
+    this.examHow = const [],
+    this.must = const [],
+    this.advanced = const [],
+    this.silgi = '',
   });
+
+  static List<String> _strList(dynamic v) => switch (v) {
+        final List l => l.map((e) => e.toString()).toList(),
+        final String s when s.isNotEmpty => [s],
+        _ => const <String>[],
+      };
 
   factory Lesson.fromJson(Map<String, dynamic> j) => Lesson(
         subject: (j['subject'] as String?) ?? '',
@@ -221,6 +248,11 @@ class Lesson {
         traps: ((j['traps'] as List?) ?? const [])
             .map((e) => e.toString())
             .toList(),
+        basicExplain: (j['basic_explain'] as String?) ?? '',
+        examHow: _strList(j['exam_how']),
+        must: _strList(j['must']),
+        advanced: _strList(j['advanced']),
+        silgi: (j['silgi'] as String?) ?? '',
       );
 }
 
