@@ -18,6 +18,7 @@ import 'exam_info_screen.dart';
 import 'smart_review_screen.dart';
 import 'study_guide_screen.dart';
 import 'tutor_chat_screen.dart';
+import 'auto_study_screen.dart';
 import '../../widgets/tutor_avatar.dart';
 
 /// 학습 허브: 탭 구조로 직관적 분류 — 기초학습 / 문제풀이 / 모의고사 / 이력
@@ -505,6 +506,8 @@ class _StudyScreenState extends State<StudyScreen>
   /// 핵심 기능 그리드 (3x3)
   Widget _featureGrid(BuildContext context) {
     final items = <(String, IconData, Color, Widget)>[
+      ('자동학습', Icons.auto_awesome_rounded, const Color(0xFF7C3AED),
+          const AutoStudyScreen()),
       ('AI 튜터', Icons.smart_toy_rounded, const Color(0xFF10B981),
           const TutorChatScreen()),
       ('합격 공부법', Icons.emoji_events_rounded, const Color(0xFFF59E0B),

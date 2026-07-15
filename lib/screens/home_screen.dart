@@ -12,6 +12,7 @@ import '../widgets/daily_mission_card.dart';
 import '../widgets/magic_effects.dart';
 import '../widgets/weekly_league_card.dart';
 import 'study/smart_review_screen.dart';
+import 'study/auto_study_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final void Function(int) onNavigate;
@@ -44,8 +45,19 @@ class HomeScreen extends StatelessWidget {
                       child: _todayStrip(
                           context, app, dailyRatio, pendingNotes)),
                   const SizedBox(height: 12),
+                  FadeSlideIn(
+                    index: 1,
+                    child: AutoStudyPreviewCard(
+                      onOpen: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const AutoStudyScreen(),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   // 🔁 긴급 복습 (기억이 사라지기 전 최우선 행동)
-                  const FadeSlideIn(index: 1, child: DueReviewCard()),
+                  const FadeSlideIn(index: 2, child: DueReviewCard()),
                   const FadeSlideIn(index: 1, child: DueFlashcardCard()),
                   // 🪄 오늘의 마법 미션
                   const FadeSlideIn(index: 2, child: DailyMissionCard()),

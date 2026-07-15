@@ -887,7 +887,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
           ),
         ),
       );
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) Navigator.of(context).pop(true);
       return;
     }
 
@@ -981,7 +981,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(true);
             },
             child: const Text('종료'),
           ),
