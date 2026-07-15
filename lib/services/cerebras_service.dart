@@ -25,7 +25,8 @@ class TutorTurn {
 /// 모델: gpt-oss-120b (reasoning 지원 — 답변 전에 '생각'을 먼저 수행)
 ///   - reasoning_effort 파라미터로 사고 깊이 조절 (low/medium/high)
 ///   - 응답 message.reasoning 필드에 사고 과정이 담겨 옴
-/// 앱에 기본 키가 내장되어 있으며, 설정에서 교체 가능.
+/// 보안 원칙: 앱에는 운영 키를 내장하지 않는다.
+/// 사용자가 직접 발급한 키(BYOK)만 기기에 저장해 사용한다.
 class CerebrasService {
   CerebrasService._();
   static final CerebrasService instance = CerebrasService._();
@@ -34,29 +35,27 @@ class CerebrasService {
   static const _endpoint = 'https://api.cerebras.ai/v1/chat/completions';
   static const _model = 'gpt-oss-120b';
 
-  /// 내장 기본 키 — 사용자가 설정에서 교체하면 그 키를 우선 사용
-  static const _builtinKey =
-      'csk-m9cm2djcyy6vc3fj63mkvm5xenp8erncdkmcyx88xfn9rrr6';
-
   String? _cachedKey;
 
   Future<String> getApiKey() async {
-    if (_cachedKey != null && _cachedKey!.isNotEmpty) return _cachedKey!;
+    if (_cachedKey != null) return _cachedKey!;
     final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString(_keyPref);
-    _cachedKey = (saved == null || saved.isEmpty) ? _builtinKey : saved;
+    _cachedKey = (prefs.getString(_keyPref) ?? '').trim();
     return _cachedKey!;
   }
 
   Future<void> setApiKey(String key) async {
     final k = key.trim();
-    _cachedKey = k.isEmpty ? _builtinKey : k;
+    _cachedKey = k;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyPref, k);
+    if (k.isEmpty) {
+      await prefs.remove(_keyPref);
+    } else {
+      await prefs.setString(_keyPref, k);
+    }
   }
 
-  /// 내장 키가 있으므로 항상 사용 가능
-  Future<bool> hasKey() async => true;
+  Future<bool> hasKey() async => (await getApiKey()).isNotEmpty;
 
   /// 튜터 시스템 프롬프트 — 현재 종목 맞춤 + 사고 지시
   String _systemPrompt() {
@@ -76,14 +75,20 @@ class CerebrasService {
   }
 
   /// 대화형 튜터 — 생각(추론) + 답변을 함께 반환
-  Future<TutorReply> chat(List<TutorTurn> history,
-      {String effort = 'medium'}) async {
+  Future<TutorReply> chat(
+    List<TutorTurn> history, {
+    String effort = 'medium',
+  }) async {
     final messages = <Map<String, String>>[
       {'role': 'system', 'content': _systemPrompt()},
       ...history.map((t) => t.toJson()),
     ];
-    return _complete(messages,
-        maxTokens: 2200, temperature: 0.5, effort: effort);
+    return _complete(
+      messages,
+      maxTokens: 2200,
+      temperature: 0.5,
+      effort: effort,
+    );
   }
 
   /// 단발성 질문 (이론 검증용) — 답변 텍스트만 반환
@@ -93,12 +98,16 @@ class CerebrasService {
       if (context != null && context.isNotEmpty)
         {
           'role': 'user',
-          'content': '참고 자료:\n$context\n\n위 자료를 참고하되, 오류가 있으면 바로잡아 주세요.'
+          'content': '참고 자료:\n$context\n\n위 자료를 참고하되, 오류가 있으면 바로잡아 주세요.',
         },
       {'role': 'user', 'content': question},
     ];
-    final r = await _complete(messages,
-        maxTokens: 1600, temperature: 0.3, effort: 'medium');
+    final r = await _complete(
+      messages,
+      maxTokens: 1600,
+      temperature: 0.3,
+      effort: 'medium',
+    );
     return r.answer;
   }
 
@@ -109,6 +118,11 @@ class CerebrasService {
     required String effort,
   }) async {
     final key = await getApiKey();
+    if (key.isEmpty) {
+      throw CerebrasException(
+        'AI API 키가 설정되지 않았습니다. 키를 설정하거나 로컬 자료 검색을 이용해주세요.',
+      );
+    }
 
     late final http.Response res;
     try {
@@ -151,9 +165,8 @@ class CerebrasService {
     }
     final msg = (choices.first as Map)['message'] as Map?;
     final answer = (msg?['content'] as String?)?.trim() ?? '';
-    final thinking = ((msg?['reasoning'] ?? msg?['reasoning_content'])
-                as String?)
-            ?.trim() ??
+    final thinking =
+        ((msg?['reasoning'] ?? msg?['reasoning_content']) as String?)?.trim() ??
         '';
     if (answer.isEmpty) throw CerebrasException('응답이 비어있습니다.');
     return TutorReply(thinking: thinking, answer: answer);

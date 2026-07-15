@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/pass_prediction.dart';
+import '../../services/quiz_policy.dart';
 import '../../services/study_data.dart';
 
 /// 🏆 합격 성적표 — 100문항 실전 모의고사를 마치면 나오는 결과 화면.
@@ -34,7 +35,12 @@ class ResultCertificateScreen extends StatelessWidget {
     return false;
   }
 
-  bool get passed => pct >= 60 && !gwarakAny;
+  bool get passed => QuizPolicy.isPassed(
+    correct: correct,
+    total: total,
+    subjectTotal: subjectTotal,
+    subjectCorrect: subjectCorrect,
+  );
 
   /// 등급 뱃지 — 게임화 요소. 90+ S, 80+ A, 70+ B, 60+ C, else D
   (String, Color) get _grade {
@@ -78,7 +84,9 @@ class ResultCertificateScreen extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                      color: gradeColor.withValues(alpha: 0.6), width: 1.5),
+                    color: gradeColor.withValues(alpha: 0.6),
+                    width: 1.5,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: gradeColor.withValues(alpha: 0.35),
@@ -89,9 +97,13 @@ class ResultCertificateScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    Text('${StudyData.instance.track.name} 필기 $examLabel',
-                        style: const TextStyle(
-                            color: Colors.white70, fontSize: 13)),
+                    Text(
+                      '${StudyData.instance.track.name} 필기 $examLabel',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
+                    ),
                     const SizedBox(height: 14),
                     // 등급 원형 배지
                     Container(
@@ -113,42 +125,55 @@ class ResultCertificateScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: Text(grade,
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 46,
-                              fontWeight: FontWeight.w900)),
+                      child: Text(
+                        grade,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 46,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 16),
-                    Text('$correct / $total',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 34,
-                            fontWeight: FontWeight.w900)),
-                    Text('$pct점',
-                        style: TextStyle(
-                            color: gradeColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700)),
+                    Text(
+                      '$correct / $total',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 34,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    Text(
+                      '$pct점',
+                      style: TextStyle(
+                        color: gradeColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 14),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 9),
+                        horizontal: 18,
+                        vertical: 9,
+                      ),
                       decoration: BoxDecoration(
                         color: (passed ? Colors.green : Colors.redAccent)
                             .withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                            color: passed ? Colors.greenAccent : Colors.redAccent),
+                          color: passed ? Colors.greenAccent : Colors.redAccent,
+                        ),
                       ),
                       child: Text(
                         passed
                             ? '🎉 합격권입니다!'
                             : (gwarakAny ? '🚨 과락으로 불합격' : '조금 더! 불합격권'),
                         style: TextStyle(
-                            color: passed ? Colors.greenAccent : Colors.redAccent,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800),
+                          color: passed ? Colors.greenAccent : Colors.redAccent,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ],
@@ -162,16 +187,21 @@ class ResultCertificateScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.04),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.08),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('과목별 성적',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800)),
+                    const Text(
+                      '과목별 성적',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     for (final s in subjectTotal.keys) _subjectRow(s),
                   ],
@@ -195,7 +225,10 @@ class ResultCertificateScreen extends StatelessWidget {
                         child: Text(
                           '이 결과 반영 → 전체 합격 예측 ${prediction!.overall.round()}점',
                           style: const TextStyle(
-                              color: Colors.white, fontSize: 13, height: 1.4),
+                            color: Colors.white,
+                            fontSize: 13,
+                            height: 1.4,
+                          ),
                         ),
                       ),
                     ],
@@ -208,7 +241,9 @@ class ResultCertificateScreen extends StatelessWidget {
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
-                        side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+                        side: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.3),
+                        ),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       onPressed: () => _copyResult(context),
@@ -242,17 +277,21 @@ class ResultCertificateScreen extends StatelessWidget {
     final c = subjectCorrect[s] ?? 0;
     final p = t == 0 ? 0 : (c * 100 / t).round();
     final gwarak = p < 40;
-    final color = gwarak ? Colors.redAccent : (p >= 60 ? Colors.greenAccent : Colors.orangeAccent);
+    final color = gwarak
+        ? Colors.redAccent
+        : (p >= 60 ? Colors.greenAccent : Colors.orangeAccent);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
           SizedBox(
             width: 92,
-            child: Text(s,
-                style: const TextStyle(color: Colors.white70, fontSize: 11.5),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis),
+            child: Text(
+              s,
+              style: const TextStyle(color: Colors.white70, fontSize: 11.5),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           Expanded(
             child: ClipRRect(
@@ -268,10 +307,15 @@ class ResultCertificateScreen extends StatelessWidget {
           const SizedBox(width: 10),
           SizedBox(
             width: 44,
-            child: Text('$p점',
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                    color: color, fontSize: 12.5, fontWeight: FontWeight.w800)),
+            child: Text(
+              '$p점',
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                color: color,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
           if (gwarak)
             const Padding(
@@ -293,11 +337,15 @@ class ResultCertificateScreen extends StatelessWidget {
       final p = t == 0 ? 0 : (c * 100 / t).round();
       buf.writeln('· $s: $c/$t ($p점)');
     }
-    buf.writeln('#Cert스터디트래커 #${StudyData.instance.track.name.replaceAll(RegExp(r"[()\s]"), "")}');
+    buf.writeln(
+      '#Cert스터디트래커 #${StudyData.instance.track.name.replaceAll(RegExp(r"[()\s]"), "")}',
+    );
     Clipboard.setData(ClipboardData(text: buf.toString()));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('결과가 복사되었습니다 — 오픈채팅방에 자랑해보세요!'),
-      duration: Duration(seconds: 2),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('결과가 복사되었습니다 — 오픈채팅방에 자랑해보세요!'),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 }

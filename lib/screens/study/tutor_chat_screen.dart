@@ -51,6 +51,22 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
     if (msg.isEmpty || _loading) return;
 
     FocusScope.of(context).unfocus();
+    final hasKey = await CerebrasService.instance.hasKey();
+    if (!mounted) return;
+    if (!hasKey) {
+      setState(() {
+        _msgs.add(_Msg('user', msg));
+        _msgs.add(
+          _Msg(
+            'assistant',
+            'AI 키가 아직 설정되지 않았어요. 우측 상단의 열쇠 버튼에서 본인 키를 설정하거나, 학습 메뉴의 이론 검색에서 로컬 강의·공식·암기법을 바로 찾아보세요.',
+          ),
+        );
+        _controller.clear();
+      });
+      _scrollToBottom();
+      return;
+    }
     setState(() {
       _msgs.add(_Msg('user', msg));
       _loading = true;
@@ -62,12 +78,13 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
       final history = _msgs
           .map((m) => TutorTurn(m.role, m.content))
           .toList(growable: false);
-      final reply =
-          await CerebrasService.instance.chat(history, effort: _effort);
+      final reply = await CerebrasService.instance.chat(
+        history,
+        effort: _effort,
+      );
       if (!mounted) return;
       setState(() {
-        _msgs.add(
-            _Msg('assistant', reply.answer, thinking: reply.thinking));
+        _msgs.add(_Msg('assistant', reply.answer, thinking: reply.thinking));
         _loading = false;
       });
     } catch (e) {
@@ -94,7 +111,8 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
 
   Future<void> _showSettings() async {
     final keyCtrl = TextEditingController(
-        text: await CerebrasService.instance.getApiKey());
+      text: await CerebrasService.instance.getApiKey(),
+    );
     if (!mounted) return;
     await showDialog<void>(
       context: context,
@@ -106,9 +124,9 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Cerebras 초고속 추론 엔진(gpt-oss-120b)을 사용합니다.\n'
-                '기본 키가 내장되어 있어 바로 사용 가능하며,\n'
-                '원하면 본인 키(cloud.cerebras.ai)로 교체할 수 있어요.',
+                'Cerebras 추론 엔진(gpt-oss-120b)을 사용합니다.\n'
+                '보안을 위해 앱에는 공용 키를 넣지 않습니다.\n'
+                '본인이 발급한 키를 입력하면 이 기기에만 저장됩니다.',
                 style: TextStyle(fontSize: 13, height: 1.5),
               ),
               const SizedBox(height: 12),
@@ -126,7 +144,9 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('취소')),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('취소'),
+          ),
           FilledButton(
             onPressed: () async {
               await CerebrasService.instance.setApiKey(keyCtrl.text);
@@ -201,13 +221,14 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
         const Center(child: TutorAvatar(mood: TutorMood.teaching, size: 120)),
         const SizedBox(height: 14),
         Text(
-          '무엇이든 물어보세요!\n튜터가 단계별로 깊이 생각한 뒤\n정확한 답을 알려드립니다.',
+          'AI 튜터에게 질문해보세요.\n답변은 학습 참고용이며, 중요한 법규·수치는\n앱의 최신 시험정보와 함께 확인하세요.',
           textAlign: TextAlign.center,
           style: TextStyle(
-              fontSize: 14.5,
-              height: 1.6,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurface.withValues(alpha: 0.75)),
+            fontSize: 14.5,
+            height: 1.6,
+            fontWeight: FontWeight.w600,
+            color: cs.onSurface.withValues(alpha: 0.75),
+          ),
         ),
         const SizedBox(height: 10),
         Center(
@@ -220,46 +241,67 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
             ),
             child: const Text(
               '🧠 Cerebras 초고속 추론 · 답변마다 생각 과정 확인 가능',
-              style: TextStyle(fontSize: 11.5, color: Colors.teal, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                fontSize: 11.5,
+                color: Colors.teal,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ),
         const SizedBox(height: 22),
-        Text('추천 질문',
-            style: TextStyle(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurface.withValues(alpha: 0.5))),
+        Text(
+          '추천 질문',
+          style: TextStyle(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w700,
+            color: cs.onSurface.withValues(alpha: 0.5),
+          ),
+        ),
         const SizedBox(height: 10),
-        ..._suggestions.map((s) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Material(
-                color: cs.primaryContainer.withValues(alpha: 0.5),
+        ..._suggestions.map(
+          (s) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Material(
+              color: cs.primaryContainer.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(14),
+              child: InkWell(
                 borderRadius: BorderRadius.circular(14),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(14),
-                  onTap: () => _send(s),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 13),
-                    child: Row(
-                      children: [
-                        Icon(Icons.chat_bubble_outline_rounded,
-                            size: 17, color: cs.primary),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(s,
-                              style: const TextStyle(
-                                  fontSize: 13.5, fontWeight: FontWeight.w600)),
+                onTap: () => _send(s),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 13,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.chat_bubble_outline_rounded,
+                        size: 17,
+                        color: cs.primary,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          s,
+                          style: const TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                        Icon(Icons.arrow_forward_rounded,
-                            size: 16, color: cs.primary),
-                      ],
-                    ),
+                      ),
+                      Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 16,
+                        color: cs.primary,
+                      ),
+                    ],
                   ),
                 ),
               ),
-            )),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -270,8 +312,9 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment:
-            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isUser
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         children: [
           if (!isUser) ...[
             const TutorAvatar(mood: TutorMood.happy, size: 34, animate: false),
@@ -279,8 +322,9 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
           ],
           Flexible(
             child: Column(
-              crossAxisAlignment:
-                  isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment: isUser
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
               children: [
                 // 🧠 생각 과정 (접기/펼치기)
                 if (!isUser && m.thinking.isNotEmpty) ...[
@@ -290,13 +334,15 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
                         setState(() => m.showThinking = !m.showThinking),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.deepPurple.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                            color:
-                                Colors.deepPurple.withValues(alpha: 0.25)),
+                          color: Colors.deepPurple.withValues(alpha: 0.25),
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -306,9 +352,10 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
                           Text(
                             m.showThinking ? '생각 과정 접기' : '생각 과정 보기',
                             style: const TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.deepPurple),
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.deepPurple,
+                            ),
                           ),
                           Icon(
                             m.showThinking
@@ -329,8 +376,8 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
                         color: Colors.deepPurple.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                            color:
-                                Colors.deepPurple.withValues(alpha: 0.18)),
+                          color: Colors.deepPurple.withValues(alpha: 0.18),
+                        ),
                       ),
                       child: SelectableText(
                         m.thinking,
@@ -399,9 +446,10 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
                 Text(
                   '🧠 생각하는 중…',
                   style: TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface.withValues(alpha: 0.6)),
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface.withValues(alpha: 0.6),
+                  ),
                 ),
               ],
             ),
@@ -436,10 +484,13 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
               onSubmitted: _send,
               decoration: InputDecoration(
                 hintText: '질문을 입력하세요…',
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 isDense: true,
               ),
             ),
@@ -449,10 +500,12 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
             onPressed: _loading ? null : () => _send(_controller.text),
             elevation: 0,
             backgroundColor: _loading ? cs.surfaceContainerHighest : cs.primary,
-            child: Icon(Icons.send_rounded,
-                color: _loading
-                    ? cs.onSurface.withValues(alpha: 0.4)
-                    : Colors.white),
+            child: Icon(
+              Icons.send_rounded,
+              color: _loading
+                  ? cs.onSurface.withValues(alpha: 0.4)
+                  : Colors.white,
+            ),
           ),
         ],
       ),

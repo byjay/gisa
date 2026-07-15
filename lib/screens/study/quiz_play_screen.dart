@@ -6,6 +6,7 @@ import '../../theme/app_theme.dart';
 import '../../services/study_data.dart';
 import '../../services/progress_service.dart';
 import '../../services/pass_prediction.dart';
+import '../../services/quiz_policy.dart';
 import '../../widgets/lesson_view.dart';
 import '../../widgets/rich_slide_body.dart';
 import '../../widgets/teacher_recipe_box.dart';
@@ -35,6 +36,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   final Set<int> _recorded = {}; // 진척도 중복 기록 방지
   bool _showAnswer = false;
   bool _bookmarked = false;
+  bool _allowExit = false;
   ({int seenCount, String? lastResult, int box})? _history; // 다시 만난 문제 인식 배너
 
   // ⏱ 실전 타이머 (examMode 전용) — 실제 시험 페이스: 문제당 90초
@@ -234,15 +236,16 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                   Text(
                     'CBT 문항 번호판 — 푼 문항 $answered / ${widget.questions.length}',
                     style: const TextStyle(
-                        fontWeight: FontWeight.w800, fontSize: 14),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 6),
               Text(
                 '탭하면 해당 문항으로 이동 · ⭐ = 북마크',
-                style: TextStyle(
-                    fontSize: 12, color: scheme.onSurfaceVariant),
+                style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
               ),
               const SizedBox(height: 12),
               Flexible(
@@ -252,8 +255,11 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                     runSpacing: 7,
                     children: [
                       for (var i = 0; i < widget.questions.length; i++)
-                        _gridCell(ctx, i,
-                            bookmarked.contains(widget.questions[i].qid)),
+                        _gridCell(
+                          ctx,
+                          i,
+                          bookmarked.contains(widget.questions[i].qid),
+                        ),
                     ],
                   ),
                 ),
@@ -327,126 +333,138 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     final scheme = Theme.of(context).colorScheme;
     final picked = _picked[_idx];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.title,
-          style: const TextStyle(fontSize: 15),
-          overflow: TextOverflow.ellipsis,
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'CBT 문항 번호판 (문항 이동)',
-            icon: const Icon(Icons.grid_view_rounded),
-            onPressed: _openQuestionGrid,
+    return PopScope(
+      canPop: _allowExit || _finished,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _requestExit();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            widget.title,
+            style: const TextStyle(fontSize: 15),
+            overflow: TextOverflow.ellipsis,
           ),
-          IconButton(
-            tooltip: _bookmarked ? '북마크 해제' : '북마크 (헷갈리는 문제 표시)',
-            icon: Icon(
-              _bookmarked ? Icons.bookmark : Icons.bookmark_border,
-              color: _bookmarked ? Colors.amber : null,
+          actions: [
+            IconButton(
+              tooltip: 'CBT 문항 번호판 (문항 이동)',
+              icon: const Icon(Icons.grid_view_rounded),
+              onPressed: _openQuestionGrid,
             ),
-            onPressed: _toggleBookmark,
-          ),
-          IconButton(
-            tooltip: '기초이론 다시 보기',
-            icon: const Icon(Icons.school_outlined),
-            onPressed: _openLesson,
-          ),
-          if (widget.examMode && _totalSec > 0)
-            Center(
-              child: Container(
-                margin: const EdgeInsets.only(right: 4),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  color:
-                      (_remainSec < _totalSec * 0.2 ? Colors.red : Colors.teal)
-                          .withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.timer,
-                      size: 15,
-                      color: _remainSec < _totalSec * 0.2
-                          ? Colors.red
-                          : Colors.teal,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      _timeLabel,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        fontFeatures: const [FontFeature.tabularFigures()],
+            IconButton(
+              tooltip: _bookmarked ? '북마크 해제' : '북마크 (헷갈리는 문제 표시)',
+              icon: Icon(
+                _bookmarked ? Icons.bookmark : Icons.bookmark_border,
+                color: _bookmarked ? Colors.amber : null,
+              ),
+              onPressed: _toggleBookmark,
+            ),
+            IconButton(
+              tooltip: '기초이론 다시 보기',
+              icon: const Icon(Icons.school_outlined),
+              onPressed: _openLesson,
+            ),
+            if (widget.examMode && _totalSec > 0)
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(right: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color:
+                        (_remainSec < _totalSec * 0.2
+                                ? Colors.red
+                                : Colors.teal)
+                            .withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.timer,
+                        size: 15,
                         color: _remainSec < _totalSec * 0.2
                             ? Colors.red
                             : Colors.teal,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Text('${_idx + 1}/${widget.questions.length}'),
-            ),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            LinearProgressIndicator(
-              value: (_idx + 1) / widget.questions.length,
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 다시 만난 문제라면 이전 결과와 복습 단계를 안내한다.
-                    if (_history != null) _repeatBanner(_history!),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      children: [
-                        _chip(_q.subject),
-                        if (_q.topic != '기타') _chip('빈출: ${_q.topic}'),
-                        if (_q.examLabel.isNotEmpty) _chip(_q.examLabel),
-                        _difficultyChip(),
-                        if (_q.freqScore >= 50) _freqChip(),
-                        if (_q.hasImage) _chip('그림문제·원본PDF 참고'),
-                      ],
-                    ),
-                    if (_kecRiskLevel > 0) _kecWarningBanner(),
-                    const SizedBox(height: 12),
-                    Text(
-                      '${_q.no}. ${_q.question}',
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                        height: 1.5,
+                      const SizedBox(width: 4),
+                      Text(
+                        _timeLabel,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                          color: _remainSec < _totalSec * 0.2
+                              ? Colors.red
+                              : Colors.teal,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    for (var i = 0; i < _q.options.length; i++)
-                      _optionTile(i + 1, _q.options[i], picked, scheme),
-                    if (_showAnswer || (!widget.examMode && picked != null))
-                      _answerBox(scheme),
-                  ],
+                    ],
+                  ),
                 ),
               ),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Text('${_idx + 1}/${widget.questions.length}'),
+              ),
             ),
-            _bottomBar(),
           ],
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              LinearProgressIndicator(
+                value: (_idx + 1) / widget.questions.length,
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 다시 만난 문제라면 이전 결과와 복습 단계를 안내한다.
+                      if (_history != null) _repeatBanner(_history!),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          _chip(_q.subject),
+                          if (_q.topic != '기타') _chip('빈출: ${_q.topic}'),
+                          if (_q.examLabel.isNotEmpty) _chip(_q.examLabel),
+                          _difficultyChip(),
+                          if (_q.freqScore >= 50) _freqChip(),
+                          if (_q.hasImage) _chip('그림문제·원본PDF 참고'),
+                        ],
+                      ),
+                      if (_kecRiskLevel > 0) _kecWarningBanner(),
+                      const SizedBox(height: 12),
+                      Text(
+                        '${_q.no}. ${_q.question}',
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      for (var i = 0; i < _q.options.length; i++)
+                        _optionTile(i + 1, _q.options[i], picked, scheme),
+                      if (QuizPolicy.canRevealAnswer(
+                            examMode: widget.examMode,
+                            submitted: _finished,
+                          ) &&
+                          (_showAnswer || picked != null))
+                        _answerBox(scheme),
+                    ],
+                  ),
+                ),
+              ),
+              _bottomBar(),
+            ],
+          ),
         ),
       ),
     );
@@ -682,15 +700,19 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
           ),
           const Spacer(),
           if (widget.examMode)
-            TextButton(
-              onPressed: () => setState(() => _showAnswer = !_showAnswer),
-              child: Text(_showAnswer ? '정답 숨김' : '정답 보기'),
+            Text(
+              '제출 후 해설 공개',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           const Spacer(),
           FilledButton.icon(
             onPressed: () {
               if (isLast) {
-                _finish();
+                _requestFinish();
               } else {
                 setState(() {
                   _idx++;
@@ -706,6 +728,61 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _requestFinish() async {
+    final unanswered = QuizPolicy.unansweredCount(
+      total: widget.questions.length,
+      answered: _picked.length,
+    );
+    if (!widget.examMode || unanswered == 0) {
+      await _finish();
+      return;
+    }
+    final submit = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('미답 문항이 있습니다'),
+        content: Text('$unanswered문항을 풀지 않았습니다. 미답은 오답으로 처리됩니다. 그래도 제출할까요?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('계속 풀기'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('제출'),
+          ),
+        ],
+      ),
+    );
+    if (submit == true && mounted) await _finish();
+  }
+
+  Future<void> _requestExit() async {
+    if (_finished) return;
+    final leave = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('문제풀이를 종료할까요?'),
+        content: const Text('아직 제출하지 않은 답안과 현재 진행 위치는 저장되지 않습니다.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('계속 풀기'),
+          ),
+          FilledButton.tonal(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('종료'),
+          ),
+        ],
+      ),
+    );
+    if (leave == true && mounted) {
+      setState(() => _allowExit = true);
+      await Future<void>.delayed(Duration.zero);
+      if (mounted) Navigator.of(context).pop();
+    }
   }
 
   /// 정답 아래 버튼 → 해당 토픽의 완전한 1:1 강의 시트 (이론+공식+암기법+함정+전략)
@@ -740,7 +817,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     final appProv = context.read<AppProvider>();
     final levelBefore = appProv.level;
     try {
-      appProv.addQuizResult(
+      await appProv.addQuizResult(
         title: widget.title,
         total: total,
         correct: correct,
@@ -751,12 +828,26 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
             )
             .toList(),
       );
-    } catch (_) {}
+    } catch (_) {
+      _finished = false;
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('결과를 저장하지 못했습니다. 저장 공간을 확인한 뒤 다시 제출해주세요.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     // 🎉 레벨업 시 축하 팝업
     if (mounted) {
       await LevelUpDialog.showIfLevelUp(
-          context, levelBefore, appProv.level, appProv.levelTitle);
+        context,
+        levelBefore,
+        appProv.level,
+        appProv.levelTitle,
+      );
     }
     if (!mounted) return;
 
@@ -784,8 +875,10 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => ResultCertificateScreen(
-            examLabel: widget.title
-                .replaceFirst('${StudyData.instance.track.name} ', ''),
+            examLabel: widget.title.replaceFirst(
+              '${StudyData.instance.track.name} ',
+              '',
+            ),
             correct: correct,
             total: total,
             subjectTotal: subjectTotal,
@@ -821,8 +914,10 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                 ),
               const SizedBox(height: 8),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),

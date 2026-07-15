@@ -100,109 +100,138 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
 
     if (formulaGuide != null) {
       for (final f in formulaGuide.formulas) {
-        final s = _scoreText(f.name, kws, weight: 6) +
+        final s =
+            _scoreText(f.name, kws, weight: 6) +
             _scoreText(f.expr, kws, weight: 3) +
             _scoreText(f.understand, kws, weight: 2) +
             _scoreText(f.mnemonic, kws, weight: 2) +
-            _scoreText(f.symbols.map((x) => x.meaning).join(' '), kws,
-                weight: 1);
+            _scoreText(
+              f.symbols.map((x) => x.meaning).join(' '),
+              kws,
+              weight: 1,
+            );
         if (s > 0) {
-          hits.add(_SearchHit(
-            kind: '공식',
-            title: '${f.name} — ${f.expr}',
-            snippet: _makeSnippet('${f.understand} ${f.mnemonic}', kws),
-            subject: f.subject,
-            payload: f,
-            score: s,
-          ));
+          hits.add(
+            _SearchHit(
+              kind: '공식',
+              title: '${f.name} — ${f.expr}',
+              snippet: _makeSnippet('${f.understand} ${f.mnemonic}', kws),
+              subject: f.subject,
+              payload: f,
+              score: s,
+            ),
+          );
         }
       }
       for (final b in formulaGuide.basics) {
-        final s = _scoreText(b.term, kws, weight: 6) +
+        final s =
+            _scoreText(b.term, kws, weight: 6) +
             _scoreText(b.easy, kws, weight: 2) +
             _scoreText(b.detail, kws, weight: 1);
         if (s > 0) {
-          hits.add(_SearchHit(
-            kind: '기초',
-            title: b.term,
-            snippet: _makeSnippet('${b.easy} ${b.detail}', kws),
-            subject: b.category,
-            payload: b,
-            score: s,
-          ));
+          hits.add(
+            _SearchHit(
+              kind: '기초',
+              title: b.term,
+              snippet: _makeSnippet('${b.easy} ${b.detail}', kws),
+              subject: b.category,
+              payload: b,
+              score: s,
+            ),
+          );
         }
       }
     }
 
     for (final l in lessons) {
-      var s = _scoreText(l.topic, kws, weight: 6) +
+      var s =
+          _scoreText(l.topic, kws, weight: 6) +
           _scoreText(l.intro, kws, weight: 2) +
-          _scoreText(l.sections.map((e) => '${e.title} ${e.body}').join(' '),
-              kws, weight: 1) +
-          _scoreText(l.formulas.map((f) => '${f.name} ${f.expr}').join(' '),
-              kws, weight: 2);
+          _scoreText(
+            l.sections.map((e) => '${e.title} ${e.body}').join(' '),
+            kws,
+            weight: 1,
+          ) +
+          _scoreText(
+            l.formulas.map((f) => '${f.name} ${f.expr}').join(' '),
+            kws,
+            weight: 2,
+          );
       if (s > 0) {
-        hits.add(_SearchHit(
-          kind: '강의',
-          title: '${l.topic} (${l.subject})',
-          snippet: _makeSnippet(
-              '${l.intro} ${l.sections.map((e) => e.body).join(' ')}', kws),
-          subject: l.subject,
-          payload: l,
-          score: s,
-        ));
+        hits.add(
+          _SearchHit(
+            kind: '강의',
+            title: '${l.topic} (${l.subject})',
+            snippet: _makeSnippet(
+              '${l.intro} ${l.sections.map((e) => e.body).join(' ')}',
+              kws,
+            ),
+            subject: l.subject,
+            payload: l,
+            score: s,
+          ),
+        );
       }
     }
 
     for (final m in mnemonics) {
-      final s = _scoreText(m.title, kws, weight: 5) +
+      final s =
+          _scoreText(m.title, kws, weight: 5) +
           _scoreText(m.body, kws, weight: 2) +
           _scoreText(m.tip, kws, weight: 1);
       if (s > 0) {
-        hits.add(_SearchHit(
-          kind: '암기법',
-          title: m.title,
-          snippet: _makeSnippet('${m.body} ${m.tip}', kws),
-          subject: m.subject,
-          payload: m,
-          score: s,
-        ));
+        hits.add(
+          _SearchHit(
+            kind: '암기법',
+            title: m.title,
+            snippet: _makeSnippet('${m.body} ${m.tip}', kws),
+            subject: m.subject,
+            payload: m,
+            score: s,
+          ),
+        );
       }
     }
 
     for (final d in decks) {
       for (final c in d.cards) {
         if (c.type == 'mission' || c.type == 'recap') continue;
-        final s = _scoreText(c.title, kws, weight: 4) +
+        final s =
+            _scoreText(c.title, kws, weight: 4) +
             _scoreText(c.body, kws, weight: 1);
         if (s > 0) {
-          hits.add(_SearchHit(
-            kind: '슬라이드',
-            title: '${c.title} (Day ${d.day})',
-            snippet: _makeSnippet(c.body, kws),
-            subject: d.subject,
-            payload: c,
-            score: s,
-          ));
+          hits.add(
+            _SearchHit(
+              kind: '슬라이드',
+              title: '${c.title} (Day ${d.day})',
+              snippet: _makeSnippet(c.body, kws),
+              subject: d.subject,
+              payload: c,
+              score: s,
+            ),
+          );
         }
       }
     }
 
     if (silgi != null) {
       for (final it in silgi.items) {
-        final s = _scoreText(it.title, kws, weight: 5) +
+        final s =
+            _scoreText(it.title, kws, weight: 5) +
             _scoreText(it.question, kws, weight: 2) +
             _scoreText(it.answer, kws, weight: 2) +
             _scoreText(it.memo, kws, weight: 1);
         if (s > 0) {
-          hits.add(_SearchHit(
-            kind: '실기',
-            title: it.title,
-            snippet: _makeSnippet('${it.question} ${it.answer}', kws),
-            subject: it.linkSubject,
-            payload: it,
-            score: s,
-          ));
+          hits.add(
+            _SearchHit(
+              kind: '실기',
+              title: it.title,
+              snippet: _makeSnippet('${it.question} ${it.answer}', kws),
+              subject: it.linkSubject,
+              payload: it,
+              score: s,
+            ),
+          );
         }
       }
     }
@@ -219,7 +248,14 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
   Future<void> _askAi() async {
     final q = _controller.text.trim();
     if (q.isEmpty) return;
-    // Cerebras는 내장 키가 있어 별도 설정 없이 즉시 사용 가능
+    final hasKey = await CerebrasService.instance.hasKey();
+    if (!mounted) return;
+    if (!hasKey) {
+      setState(() {
+        _aiError = 'AI 키가 설정되지 않았습니다. 열쇠 버튼에서 본인 키를 설정하거나 로컬 자료 검색 결과를 이용해주세요.';
+      });
+      return;
+    }
     setState(() {
       _aiLoading = true;
       _aiAnswer = null;
@@ -232,8 +268,9 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
           .map((h) => '[${h.kind}] ${h.title}: ${h.snippet}')
           .join('\n');
       final ans = await CerebrasService.instance.askTheory(
-          '${StudyData.instance.track.name} 시험 관련 질문: $q',
-          context: ctx.isEmpty ? null : ctx);
+        '${StudyData.instance.track.name} 시험 관련 질문: $q',
+        context: ctx.isEmpty ? null : ctx,
+      );
       if (mounted) {
         setState(() {
           _aiAnswer = ans;
@@ -253,19 +290,20 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
 
   Future<void> _showKeyDialog() async {
     final keyCtrl = TextEditingController(
-        text: await CerebrasService.instance.getApiKey());
+      text: await CerebrasService.instance.getApiKey(),
+    );
     if (!mounted) return;
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('AI API 키 교체 (선택)'),
+        title: const Text('AI API 키 설정'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              '기본 AI 튜터가 내장되어 있어 바로 사용할 수 있어요.\n'
-              '직접 발급한 Cerebras 키로 교체하려면:\n'
+              '보안을 위해 앱에는 공용 키를 내장하지 않습니다.\n'
+              '직접 발급한 Cerebras 키를 사용하려면:\n'
               '1. cloud.cerebras.ai 접속 → 로그인\n'
               '2. API Keys 메뉴에서 키 생성\n'
               '3. 아래에 붙여넣기 (기기에만 저장됩니다)',
@@ -276,7 +314,7 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
               controller: keyCtrl,
               obscureText: true,
               decoration: const InputDecoration(
-                labelText: 'API Key (sk-...)',
+                labelText: 'API Key (csk-...)',
                 border: OutlineInputBorder(),
                 isDense: true,
               ),
@@ -285,7 +323,9 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('취소')),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('취소'),
+          ),
           FilledButton(
             onPressed: () async {
               await CerebrasService.instance.setApiKey(keyCtrl.text);
@@ -324,23 +364,28 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
   void _openHit(_SearchHit h) {
     final p = h.payload;
     if (p is Lesson) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (_) => LessonViewerScreen(lesson: p)));
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => LessonViewerScreen(lesson: p)),
+      );
     } else if (p is Mnemonic) {
       _showDetailSheet(h.title, '${p.body}\n\n💡 ${p.tip}');
     } else if (p is SlideCard) {
       _showDetailSheet(h.title, p.body);
     } else if (p is SilgiItem) {
       _showDetailSheet(
-          h.title, 'Q. ${p.question}\n\nA. ${p.answer}\n\n💡 ${p.memo}');
+        h.title,
+        'Q. ${p.question}\n\nA. ${p.answer}\n\n💡 ${p.memo}',
+      );
     } else if (p is FormulaGuide) {
       _showDetailSheet(
-          '${p.name}\n${p.expr}',
-          '🗣 읽기: ${p.read}\n\n'
-          '🔤 기호:\n${p.symbols.map((s) => '• ${s.sym} = ${s.meaning}').join('\n')}\n\n'
-          '💡 이해: ${p.understand}\n\n'
-          '🧠 암기법: ${p.mnemonic}\n\n'
-          '✏️ 예제: ${p.example}');
+        '${p.name}\n${p.expr}',
+        '🗣 읽기: ${p.read}\n\n'
+            '🔤 기호:\n${p.symbols.map((s) => '• ${s.sym} = ${s.meaning}').join('\n')}\n\n'
+            '💡 이해: ${p.understand}\n\n'
+            '🧠 암기법: ${p.mnemonic}\n\n'
+            '✏️ 예제: ${p.example}',
+      );
     } else if (p is BasicTerm) {
       _showDetailSheet(p.term, '${p.easy}\n\n${p.detail}');
     }
@@ -359,12 +404,15 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
           controller: scrollCtrl,
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
           children: [
-            Text(title,
-                style:
-                    const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+            ),
             const SizedBox(height: 12),
-            SelectableText(body,
-                style: const TextStyle(fontSize: 14.5, height: 1.6)),
+            SelectableText(
+              body,
+              style: const TextStyle(fontSize: 14.5, height: 1.6),
+            ),
           ],
         ),
       ),
@@ -380,8 +428,10 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
         actions: [
           IconButton(
             tooltip: 'API 키 설정',
-            icon: Icon(_hasKey ? Icons.vpn_key_rounded : Icons.vpn_key_off_rounded,
-                color: _hasKey ? Colors.teal : null),
+            icon: Icon(
+              _hasKey ? Icons.vpn_key_rounded : Icons.vpn_key_off_rounded,
+              color: _hasKey ? Colors.teal : null,
+            ),
             onPressed: _showKeyDialog,
           ),
         ],
@@ -403,7 +453,8 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
                     onPressed: _search,
                   ),
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16)),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   isDense: true,
                 ),
               ),
@@ -416,7 +467,10 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
                     child: FilledButton.tonalIcon(
                       onPressed: _search,
                       icon: const Icon(Icons.library_books_rounded, size: 18),
-                      label: const Text('자료 검색', style: TextStyle(fontSize: 13)),
+                      label: const Text(
+                        '자료 검색',
+                        style: TextStyle(fontSize: 13),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -427,10 +481,13 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
                           ? const SizedBox(
                               width: 16,
                               height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2))
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
                           : const Icon(Icons.auto_awesome_rounded, size: 18),
-                      label: Text(_aiLoading ? 'AI 분석중…' : 'AI 검증·답변',
-                          style: const TextStyle(fontSize: 13)),
+                      label: Text(
+                        _aiLoading ? 'AI 분석중…' : 'AI 검증·답변',
+                        style: const TextStyle(fontSize: 13),
+                      ),
                     ),
                   ),
                 ],
@@ -445,7 +502,10 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
                       padding: const EdgeInsets.only(top: 24),
                       child: Column(
                         children: [
-                          const TutorAvatar(mood: TutorMood.thinking, size: 110),
+                          const TutorAvatar(
+                            mood: TutorMood.thinking,
+                            size: 110,
+                          ),
                           const SizedBox(height: 12),
                           Text(
                             '궁금한 이론·공식·암기법을 검색해보세요!\n'
@@ -453,9 +513,10 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
                             'AI 튜터가 내용을 검증·보강해드려요.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                fontSize: 13.5,
-                                height: 1.6,
-                                color: cs.onSurface.withValues(alpha: 0.65)),
+                              fontSize: 13.5,
+                              height: 1.6,
+                              color: cs.onSurface.withValues(alpha: 0.65),
+                            ),
                           ),
                         ],
                       ),
@@ -468,15 +529,19 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
                         color: Colors.red.withValues(alpha: 0.07),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                            color: Colors.red.withValues(alpha: 0.3)),
+                          color: Colors.red.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Row(
                         children: [
                           const Icon(Icons.error_outline, color: Colors.red),
                           const SizedBox(width: 8),
                           Expanded(
-                              child: Text(_aiError!,
-                                  style: const TextStyle(fontSize: 13))),
+                            child: Text(
+                              _aiError!,
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -492,8 +557,9 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
                           ],
                         ),
                         borderRadius: BorderRadius.circular(16),
-                        border:
-                            Border.all(color: cs.primary.withValues(alpha: 0.2)),
+                        border: Border.all(
+                          color: cs.primary.withValues(alpha: 0.2),
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -501,19 +567,25 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
                           Row(
                             children: [
                               const TutorAvatar(
-                                  mood: TutorMood.happy, size: 44),
+                                mood: TutorMood.happy,
+                                size: 44,
+                              ),
                               const SizedBox(width: 8),
-                              Text('AI 튜터 검증 답변',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 14,
-                                      color: cs.primary)),
+                              Text(
+                                'AI 튜터 검증 답변',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 14,
+                                  color: cs.primary,
+                                ),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 10),
-                          SelectableText(_aiAnswer!,
-                              style: const TextStyle(
-                                  fontSize: 14, height: 1.65)),
+                          SelectableText(
+                            _aiAnswer!,
+                            style: const TextStyle(fontSize: 14, height: 1.65),
+                          ),
                         ],
                       ),
                     ),
@@ -524,12 +596,14 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
                         children: [
                           const TutorAvatar(mood: TutorMood.wrong, size: 90),
                           const SizedBox(height: 8),
-                          Text('자료에서 결과를 찾지 못했어요.\n\'AI 검증·답변\'으로 물어보세요!',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 13.5,
-                                  color:
-                                      cs.onSurface.withValues(alpha: 0.65))),
+                          Text(
+                            '로컬 자료에서 결과를 찾지 못했어요.\n검색어를 짧게 바꾸거나 API 키 설정 후 AI에 질문해보세요.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              color: cs.onSurface.withValues(alpha: 0.65),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -540,26 +614,37 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
                       child: ListTile(
                         leading: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 5),
+                            horizontal: 8,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
                             color: kc.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Text(h.kind,
-                              style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  color: kc)),
+                          child: Text(
+                            h.kind,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: kc,
+                            ),
+                          ),
                         ),
-                        title: Text(h.title,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w700, fontSize: 13.5),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis),
-                        subtitle: Text(h.snippet,
-                            style: const TextStyle(fontSize: 12, height: 1.4),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis),
+                        title: Text(
+                          h.title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13.5,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Text(
+                          h.snippet,
+                          style: const TextStyle(fontSize: 12, height: 1.4),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         onTap: () => _openHit(h),
                       ),
                     );
