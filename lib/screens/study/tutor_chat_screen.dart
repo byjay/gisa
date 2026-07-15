@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../services/kimi_service.dart';
+import '../../services/cerebras_service.dart';
 import '../../services/study_data.dart';
-import '../../theme/app_theme.dart';
 import '../../widgets/tutor_avatar.dart';
 
-/// AI 튜터 채팅 — Kimi K2(Moonshot) 기반. 항상 최신정보·학습가이드 제공.
+/// AI 튜터 채팅 — Cerebras gpt-oss-120b 기반 "생각하는 튜터".
+/// 답변 전에 모델이 단계별 추론(thinking)을 수행하고,
+/// 사용자는 '🧠 생각 과정' 을 펼쳐서 볼 수 있다.
 class TutorChatScreen extends StatefulWidget {
   const TutorChatScreen({super.key});
 
@@ -12,30 +13,30 @@ class TutorChatScreen extends StatefulWidget {
   State<TutorChatScreen> createState() => _TutorChatScreenState();
 }
 
+/// 화면용 메시지 — 생각 과정 포함
+class _Msg {
+  final String role; // 'user' | 'assistant'
+  final String content;
+  final String thinking;
+  bool showThinking = false; // 사용자가 '생각 과정'을 펼치면 true
+  _Msg(this.role, this.content, {this.thinking = ''});
+}
+
 class _TutorChatScreenState extends State<TutorChatScreen> {
   final _controller = TextEditingController();
   final _scrollCtrl = ScrollController();
-  final List<ChatTurn> _turns = [];
+  final List<_Msg> _msgs = [];
   bool _loading = false;
-  bool _hasKey = false;
+  String _effort = 'medium'; // 사고 깊이
 
-  // 추천 질문 (학습가이드 튜터 성격 강조)
   List<String> get _suggestions {
     final t = StudyData.instance.track.name;
     return [
       '$t 비전공자 공부 순서 알려줘',
       '가장 어려운 과목과 공략법은?',
       '시험 D-30 학습 계획 짜줘',
-      '실기에서 자주 나오는 주제는?',
+      '역률개선 콘덴서 용량 공식을 쉽게 설명해줘',
     ];
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    KimiService.instance.hasKey().then((v) {
-      if (mounted) setState(() => _hasKey = v);
-    });
   }
 
   @override
@@ -49,33 +50,30 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
     final msg = text.trim();
     if (msg.isEmpty || _loading) return;
 
-    if (!await KimiService.instance.hasKey()) {
-      if (!mounted) return;
-      await _showKeyDialog();
-      if (!await KimiService.instance.hasKey()) return;
-    }
-
-    if (!mounted) return;
     FocusScope.of(context).unfocus();
     setState(() {
-      _turns.add(ChatTurn('user', msg));
+      _msgs.add(_Msg('user', msg));
       _loading = true;
       _controller.clear();
     });
     _scrollToBottom();
 
     try {
-      final answer = await KimiService.instance.chat(_turns);
+      final history = _msgs
+          .map((m) => TutorTurn(m.role, m.content))
+          .toList(growable: false);
+      final reply =
+          await CerebrasService.instance.chat(history, effort: _effort);
       if (!mounted) return;
       setState(() {
-        _turns.add(ChatTurn('assistant', answer));
+        _msgs.add(
+            _Msg('assistant', reply.answer, thinking: reply.thinking));
         _loading = false;
-        _hasKey = true;
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _turns.add(ChatTurn('assistant', '⚠️ ${e.toString()}'));
+        _msgs.add(_Msg('assistant', '⚠️ ${e.toString()}'));
         _loading = false;
       });
     }
@@ -86,7 +84,7 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollCtrl.hasClients) {
         _scrollCtrl.animateTo(
-          _scrollCtrl.position.maxScrollExtent + 120,
+          _scrollCtrl.position.maxScrollExtent + 160,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
@@ -94,26 +92,23 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
     });
   }
 
-  Future<void> _showKeyDialog() async {
+  Future<void> _showSettings() async {
     final keyCtrl = TextEditingController(
-        text: await KimiService.instance.getApiKey() ?? '');
-    final modelCtrl = TextEditingController(
-        text: await KimiService.instance.getModel());
+        text: await CerebrasService.instance.getApiKey());
     if (!mounted) return;
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Kimi(Moonshot) API 키 설정'),
+        title: const Text('AI 튜터 설정'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'AI 튜터를 쓰려면 Kimi(Moonshot) API 키가 필요해요.\n'
-                '1. platform.moonshot.ai 접속 → 로그인\n'
-                '2. API Keys 메뉴에서 키 생성 (sk-...)\n'
-                '3. 아래에 붙여넣기 (기기에만 저장됩니다)',
+                'Cerebras 초고속 추론 엔진(gpt-oss-120b)을 사용합니다.\n'
+                '기본 키가 내장되어 있어 바로 사용 가능하며,\n'
+                '원하면 본인 키(cloud.cerebras.ai)로 교체할 수 있어요.',
                 style: TextStyle(fontSize: 13, height: 1.5),
               ),
               const SizedBox(height: 12),
@@ -121,25 +116,10 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
                 controller: keyCtrl,
                 obscureText: true,
                 decoration: const InputDecoration(
-                  labelText: 'API Key (sk-...)',
+                  labelText: 'API Key (csk-...)',
                   border: OutlineInputBorder(),
                   isDense: true,
                 ),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: modelCtrl,
-                decoration: const InputDecoration(
-                  labelText: '모델명',
-                  hintText: 'kimi-k2.6',
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                '모델은 kimi-k2.6 (기본) 또는 kimi-k2.6-thinking 사용 가능.',
-                style: TextStyle(fontSize: 11.5, color: AppTheme.textMuted),
               ),
             ],
           ),
@@ -149,13 +129,8 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
               onPressed: () => Navigator.pop(ctx), child: const Text('취소')),
           FilledButton(
             onPressed: () async {
-              await KimiService.instance.setApiKey(keyCtrl.text);
-              await KimiService.instance.setModel(modelCtrl.text);
+              await CerebrasService.instance.setApiKey(keyCtrl.text);
               if (ctx.mounted) Navigator.pop(ctx);
-              if (mounted) {
-                final has = await KimiService.instance.hasKey();
-                setState(() => _hasKey = has);
-              }
             },
             child: const Text('저장'),
           ),
@@ -171,18 +146,28 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
       appBar: AppBar(
         title: const Row(
           children: [
-            Icon(Icons.smart_toy_rounded, size: 22),
+            Icon(Icons.psychology_rounded, size: 22),
             SizedBox(width: 8),
-            Text('AI 튜터 (Kimi)'),
+            Text('생각하는 AI 튜터'),
           ],
         ),
         actions: [
+          // 사고 깊이 선택
+          PopupMenuButton<String>(
+            tooltip: '사고 깊이',
+            icon: const Icon(Icons.tune_rounded),
+            initialValue: _effort,
+            onSelected: (v) => setState(() => _effort = v),
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: 'low', child: Text('⚡ 빠른 생각 (low)')),
+              PopupMenuItem(value: 'medium', child: Text('🧠 보통 생각 (medium)')),
+              PopupMenuItem(value: 'high', child: Text('🔬 깊은 생각 (high)')),
+            ],
+          ),
           IconButton(
             tooltip: 'API 키 설정',
-            icon: Icon(
-                _hasKey ? Icons.vpn_key_rounded : Icons.vpn_key_off_rounded,
-                color: _hasKey ? Colors.teal : null),
-            onPressed: _showKeyDialog,
+            icon: const Icon(Icons.vpn_key_rounded, color: Colors.teal),
+            onPressed: _showSettings,
           ),
         ],
       ),
@@ -190,15 +175,15 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
         child: Column(
           children: [
             Expanded(
-              child: _turns.isEmpty
+              child: _msgs.isEmpty
                   ? _emptyState(cs)
                   : ListView.builder(
                       controller: _scrollCtrl,
                       padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-                      itemCount: _turns.length + (_loading ? 1 : 0),
+                      itemCount: _msgs.length + (_loading ? 1 : 0),
                       itemBuilder: (ctx, i) {
-                        if (i >= _turns.length) return _typingBubble(cs);
-                        return _bubble(_turns[i], cs);
+                        if (i >= _msgs.length) return _thinkingBubble(cs);
+                        return _bubble(_msgs[i], cs);
                       },
                     ),
             ),
@@ -216,13 +201,28 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
         const Center(child: TutorAvatar(mood: TutorMood.teaching, size: 120)),
         const SizedBox(height: 14),
         Text(
-          '무엇이든 물어보세요!\nKimi AI 튜터가 최신 시험정보와\n학습가이드를 알려드립니다.',
+          '무엇이든 물어보세요!\n튜터가 단계별로 깊이 생각한 뒤\n정확한 답을 알려드립니다.',
           textAlign: TextAlign.center,
           style: TextStyle(
               fontSize: 14.5,
               height: 1.6,
               fontWeight: FontWeight.w600,
               color: cs.onSurface.withValues(alpha: 0.75)),
+        ),
+        const SizedBox(height: 10),
+        Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.teal.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
+            ),
+            child: const Text(
+              '🧠 Cerebras 초고속 추론 · 답변마다 생각 과정 확인 가능',
+              style: TextStyle(fontSize: 11.5, color: Colors.teal, fontWeight: FontWeight.w700),
+            ),
+          ),
         ),
         const SizedBox(height: 22),
         Text('추천 질문',
@@ -264,8 +264,8 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
     );
   }
 
-  Widget _bubble(ChatTurn turn, ColorScheme cs) {
-    final isUser = turn.role == 'user';
+  Widget _bubble(_Msg m, ColorScheme cs) {
+    final isUser = m.role == 'user';
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -278,27 +278,95 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
             const SizedBox(width: 8),
           ],
           Flexible(
-            child: Container(
-              padding: const EdgeInsets.all(13),
-              decoration: BoxDecoration(
-                color: isUser
-                    ? cs.primary
-                    : cs.surfaceContainerHighest.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(16),
-                  topRight: const Radius.circular(16),
-                  bottomLeft: Radius.circular(isUser ? 16 : 4),
-                  bottomRight: Radius.circular(isUser ? 4 : 16),
+            child: Column(
+              crossAxisAlignment:
+                  isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              children: [
+                // 🧠 생각 과정 (접기/펼치기)
+                if (!isUser && m.thinking.isNotEmpty) ...[
+                  InkWell(
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: () =>
+                        setState(() => m.showThinking = !m.showThinking),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurple.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                            color:
+                                Colors.deepPurple.withValues(alpha: 0.25)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('🧠', style: TextStyle(fontSize: 13)),
+                          const SizedBox(width: 5),
+                          Text(
+                            m.showThinking ? '생각 과정 접기' : '생각 과정 보기',
+                            style: const TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.deepPurple),
+                          ),
+                          Icon(
+                            m.showThinking
+                                ? Icons.expand_less_rounded
+                                : Icons.expand_more_rounded,
+                            size: 16,
+                            color: Colors.deepPurple,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (m.showThinking)
+                    Container(
+                      margin: const EdgeInsets.only(top: 6),
+                      padding: const EdgeInsets.all(11),
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurple.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                            color:
+                                Colors.deepPurple.withValues(alpha: 0.18)),
+                      ),
+                      child: SelectableText(
+                        m.thinking,
+                        style: TextStyle(
+                          fontSize: 12,
+                          height: 1.55,
+                          fontStyle: FontStyle.italic,
+                          color: cs.onSurface.withValues(alpha: 0.65),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 6),
+                ],
+                Container(
+                  padding: const EdgeInsets.all(13),
+                  decoration: BoxDecoration(
+                    color: isUser
+                        ? cs.primary
+                        : cs.surfaceContainerHighest.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.only(
+                      topLeft: const Radius.circular(16),
+                      topRight: const Radius.circular(16),
+                      bottomLeft: Radius.circular(isUser ? 16 : 4),
+                      bottomRight: Radius.circular(isUser ? 4 : 16),
+                    ),
+                  ),
+                  child: SelectableText(
+                    m.content,
+                    style: TextStyle(
+                      fontSize: 14,
+                      height: 1.6,
+                      color: isUser ? Colors.white : cs.onSurface,
+                    ),
+                  ),
                 ),
-              ),
-              child: SelectableText(
-                turn.content,
-                style: TextStyle(
-                  fontSize: 14,
-                  height: 1.6,
-                  color: isUser ? Colors.white : cs.onSurface,
-                ),
-              ),
+              ],
             ),
           ),
         ],
@@ -306,7 +374,7 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
     );
   }
 
-  Widget _typingBubble(ColorScheme cs) {
+  Widget _thinkingBubble(ColorScheme cs) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -314,15 +382,28 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
           const TutorAvatar(mood: TutorMood.thinking, size: 34),
           const SizedBox(width: 8),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
               color: cs.surfaceContainerHighest.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  '🧠 생각하는 중…',
+                  style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface.withValues(alpha: 0.6)),
+                ),
+              ],
             ),
           ),
         ],
@@ -369,7 +450,9 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
             elevation: 0,
             backgroundColor: _loading ? cs.surfaceContainerHighest : cs.primary,
             child: Icon(Icons.send_rounded,
-                color: _loading ? cs.onSurface.withValues(alpha: 0.4) : Colors.white),
+                color: _loading
+                    ? cs.onSurface.withValues(alpha: 0.4)
+                    : Colors.white),
           ),
         ],
       ),

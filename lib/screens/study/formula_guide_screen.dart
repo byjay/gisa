@@ -13,6 +13,8 @@ class FormulaGuideScreen extends StatefulWidget {
 class _FormulaGuideScreenState extends State<FormulaGuideScreen>
     with SingleTickerProviderStateMixin {
   FormulaGuideData? _data;
+  List<BasicTerm> _commonBasics = const [];
+  List<String> _commonCats = const [];
   late final TabController _tab;
   String _subject = '전체';
 
@@ -22,6 +24,15 @@ class _FormulaGuideScreenState extends State<FormulaGuideScreen>
     _tab = TabController(length: 2, vsync: this);
     StudyData.instance.loadFormulaGuide().then((v) {
       if (mounted) setState(() => _data = v);
+    });
+    // 전 종목 공통 왕초보 기초사전(300+ 용어) 로드
+    StudyData.instance.loadBasicsDict().then((v) {
+      if (mounted) {
+        setState(() {
+          _commonBasics = v;
+          _commonCats = StudyData.instance.basicsCategories;
+        });
+      }
     });
   }
 
@@ -239,10 +250,27 @@ class _FormulaGuideScreenState extends State<FormulaGuideScreen>
 
   Widget _basicsTab(BuildContext context, FormulaGuideData data) {
     final cs = Theme.of(context).colorScheme;
+    // 트랙별 basics + 전 종목 공통 사전(312개) 병합. term 기준 중복 제거.
+    final seen = <String>{};
+    final merged = <BasicTerm>[];
+    for (final b in [...data.basics, ..._commonBasics]) {
+      final key = b.term.trim();
+      if (key.isEmpty || seen.contains(key)) continue;
+      seen.add(key);
+      merged.add(b);
+    }
     final groups = <String, List<BasicTerm>>{};
-    for (final b in data.basics) {
+    for (final b in merged) {
       groups.putIfAbsent(b.category, () => []).add(b);
     }
+    // 카테고리 정렬: 공통 사전 순서 우선, 그 외는 뒤에
+    final orderedCats = <String>[
+      ..._commonCats.where(groups.containsKey),
+      ...groups.keys.where((c) => !_commonCats.contains(c)),
+    ];
+    final orderedGroups = <String, List<BasicTerm>>{
+      for (final c in orderedCats) c: groups[c]!,
+    };
 
     return ListView(
       padding: EdgeInsets.symmetric(
@@ -255,10 +283,10 @@ class _FormulaGuideScreenState extends State<FormulaGuideScreen>
         TutorBanner(
           mood: TutorMood.happy,
           message:
-              '전기가 처음이라면 여기부터! V·A·Ω이 뭔지, ε·ω·θ는 어떻게 읽는지 — 기초가 잡히면 공식이 무섭지 않아요.',
+              '전기가 처음이라면 여기부터! 단위·기호·핵심개념 ${merged.length}개를 한 곳에 모았어요. V·A·Ω부터 ε·ω·θ 읽는 법까지 — 기초가 잡히면 공식이 무섭지 않아요.',
         ),
         const SizedBox(height: 10),
-        ...groups.entries.expand((e) => [
+        ...orderedGroups.entries.expand((e) => [
               Padding(
                 padding: const EdgeInsets.only(top: 8, bottom: 6),
                 child: Text(e.key,

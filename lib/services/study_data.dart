@@ -616,12 +616,14 @@ class SilgiItem {
   });
 
   factory SilgiItem.fromJson(Map<String, dynamic> j) => SilgiItem(
-        category: (j['category'] as String?) ?? '',
+        // 관대한 파싱: 구 스키마(topic/subject/body)도 수용
+        category: (j['category'] as String?) ?? (j['topic'] as String?) ?? '',
         title: (j['title'] as String?) ?? '',
-        linkSubject: (j['link_subject'] as String?) ?? '',
-        importance: (j['importance'] as int?) ?? 3,
+        linkSubject:
+            (j['link_subject'] as String?) ?? (j['subject'] as String?) ?? '',
+        importance: (j['importance'] as num?)?.toInt() ?? 3,
         question: (j['question'] as String?) ?? '',
-        answer: (j['answer'] as String?) ?? '',
+        answer: (j['answer'] as String?) ?? (j['body'] as String?) ?? '',
         memo: (j['memo'] as String?) ?? '',
       );
 }
@@ -642,9 +644,12 @@ class SilgiData {
   factory SilgiData.fromJson(Map<String, dynamic> j) => SilgiData(
         title: (j['title'] as String?) ?? '',
         overview: (j['overview'] as String?) ?? '',
-        strategy: ((j['strategy'] as List?) ?? const [])
-            .map((e) => e.toString())
-            .toList(),
+        // 관대한 파싱: strategy가 문자열이어도, 리스트여도 모두 수용
+        strategy: switch (j['strategy']) {
+          final List l => l.map((e) => e.toString()).toList(),
+          final String s when s.isNotEmpty => [s],
+          _ => const <String>[],
+        },
         items: ((j['items'] as List?) ?? const [])
             .map((e) => SilgiItem.fromJson(e as Map<String, dynamic>))
             .toList(),
@@ -697,7 +702,9 @@ class FormulaGuide {
         symbols: ((j['symbols'] as List?) ?? const [])
             .map((e) => FormulaSymbol.fromJson(e as Map<String, dynamic>))
             .toList(),
-        understand: (j['understand'] as String?) ?? '',
+        // 관대한 파싱: 구 스키마의 desc를 이해법으로 대체
+        understand:
+            (j['understand'] as String?) ?? (j['desc'] as String?) ?? '',
         mnemonic: (j['mnemonic'] as String?) ?? '',
         example: (j['example'] as String?) ?? '',
       );
@@ -873,6 +880,34 @@ class StudyData {
     }
     return _silgi;
   }
+
+  // ─── 왕초보 기초사전 (전 종목 공통, assets/data/common/) ───
+  List<BasicTerm>? _basicsDict;
+  List<String>? _basicsCategories;
+
+  /// 왕초보 기초사전 로드 — 300+ 필수 단위·용어·기호 (종목 공통)
+  Future<List<BasicTerm>> loadBasicsDict() async {
+    if (_basicsDict != null) return _basicsDict!;
+    try {
+      final raw = await rootBundle
+          .loadString('assets/data/common/basics_dict.json');
+      final map = jsonDecode(raw) as Map<String, dynamic>;
+      _basicsCategories = ((map['categories'] as List?) ?? const [])
+          .map((e) => e.toString())
+          .toList();
+      _basicsDict = ((map['basics'] as List?) ?? const [])
+          .map((e) => BasicTerm.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      if (kDebugMode) debugPrint('basics_dict.json 로드 실패: $e');
+      _basicsDict = <BasicTerm>[];
+      _basicsCategories = <String>[];
+    }
+    return _basicsDict!;
+  }
+
+  /// 기초사전 카테고리 순서 (loadBasicsDict 후 사용)
+  List<String> get basicsCategories => _basicsCategories ?? const [];
 
   /// 안전 JSON 리스트 로더 — 파일 하나가 깨져도 앱이 죽지 않게 방어
   Future<List<T>> _safeLoadList<T>(

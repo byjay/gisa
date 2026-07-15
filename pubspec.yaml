@@ -65,6 +65,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/data/common/
     - assets/data/electrician/
     - assets/data/elec_construction/
     - assets/data/fire_electric/
