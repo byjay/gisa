@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../services/study_data.dart';
 import '../../widgets/tutor_avatar.dart';
+import '../../widgets/persistent_nav.dart';
+import 'quiz_play_screen.dart';
 
 /// 빈출 유형변형 분석 — 반복출제 클러스터를 출제횟수순으로 보여주고
 /// 어떤 식으로 숫자·조건이 변형되는지 + 대비 포인트를 제공
@@ -299,6 +301,21 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
               ],
             ),
           ),
+          // 👉 이 유형 문제 풀기 (기존 기출·변형 재활용)
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              icon: const Icon(Icons.play_circle_fill_rounded, size: 18),
+              label: Text(
+                _solvableCount(r) >= 2
+                    ? '이 유형 문제 풀기 (${_solvableCount(r)}문항)'
+                    : '이 유형 문제 풀기',
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+              ),
+              onPressed: () => _solveCluster(context, r),
+            ),
+          ),
           // 유형 변형 히스토리
           if (r.variations.isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -377,6 +394,66 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
             fontSize: 12.5,
             fontWeight: FontWeight.w800,
             color: Theme.of(context).colorScheme.primary));
+  }
+
+  /// 클러스터에서 실제로 풀 수 있는(4지선다) 문항 수
+  int _solvableCount(RepeatCluster r) => _clusterQuestions(r).length;
+
+  /// RepeatCluster + 변형을 기존 데이터 그대로 Question 객체로 변환(재활용)
+  List<Question> _clusterQuestions(RepeatCluster r) {
+    final out = <Question>[];
+    // 대표 문제
+    if (r.options.length >= 2 && r.answer >= 1) {
+      out.add(Question(
+        no: 1,
+        subject: r.subject,
+        topic: r.topic,
+        question: r.question,
+        options: r.options,
+        answer: r.answer,
+        hasImage: false,
+        explanation: r.answerText.isNotEmpty ? '정답: ${r.answerText}' : '',
+        examLabel: r.exams.isNotEmpty ? r.exams.first : '',
+      ));
+    }
+    // 변형 문제 — 보기가 없으면 대표 보기를 재활용해 풀이 가능하게
+    var n = out.length;
+    for (final v in r.variations) {
+      if (v.question.trim().isEmpty) continue;
+      final opts = r.options.length >= 2 ? r.options : const <String>[];
+      final ans = v.answer >= 1 ? v.answer : r.answer;
+      if (opts.length < 2 || ans < 1) continue;
+      n++;
+      out.add(Question(
+        no: n,
+        subject: r.subject,
+        topic: r.topic,
+        question: v.question,
+        options: opts,
+        answer: ans,
+        hasImage: false,
+        explanation:
+            v.answerText.isNotEmpty ? '정답: ${v.answerText}' : '',
+        examLabel: v.exam,
+      ));
+    }
+    return out;
+  }
+
+  Future<void> _solveCluster(BuildContext context, RepeatCluster r) async {
+    final qs = _clusterQuestions(r);
+    if (qs.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('이 유형은 객관식 보기 데이터가 없어 풀이를 제공할 수 없어요.')),
+      );
+      return;
+    }
+    final title = '${r.topic} 유형 (${qs.length}문항)';
+    pushWithNav(
+      context,
+      QuizPlayScreen(title: title, questions: qs, examMode: false),
+      currentSection: 1,
+    );
   }
 
   /// 변형 패턴 기반 대비 팁 자동 생성

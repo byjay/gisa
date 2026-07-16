@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../services/study_data.dart';
+import '../services/exam_track.dart';
 import '../theme/app_theme.dart';
 import '../widgets/pass_prediction_card.dart';
 import '../widgets/dday_plan_card.dart';
@@ -13,6 +14,8 @@ import '../widgets/magic_effects.dart';
 import '../widgets/weekly_league_card.dart';
 import 'study/smart_review_screen.dart';
 import 'study/auto_study_screen.dart';
+import 'settings_screen.dart';
+import '../widgets/persistent_nav.dart';
 
 class HomeScreen extends StatelessWidget {
   final void Function(int) onNavigate;
@@ -39,6 +42,11 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
+                  // 📚 과목(종목) 변경 — 홈 메인에 배치(#2)
+                  FadeSlideIn(
+                      index: 0,
+                      child: _SubjectSwitcher(onNavigate: onNavigate)),
+                  const SizedBox(height: 12),
                   // 오늘 학습 진행 스트립
                   FadeSlideIn(
                       index: 0,
@@ -48,11 +56,7 @@ class HomeScreen extends StatelessWidget {
                   FadeSlideIn(
                     index: 1,
                     child: AutoStudyPreviewCard(
-                      onOpen: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const AutoStudyScreen(),
-                        ),
-                      ),
+                      onOpen: () => pushWithNav(context, const AutoStudyScreen(), currentSection: 1),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -219,28 +223,18 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // 1행: 날짜 + 액션 버튼 (좁은 화면에서도 안전)
                 Row(
                   children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            DateFormat('M월 d일 EEEE', 'ko').format(now),
-                            style: TextStyle(
-                                color:
-                                    Colors.white.withValues(alpha: 0.75),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(greeting,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.4)),
-                        ],
+                      child: Text(
+                        DateFormat('M월 d일 EEEE', 'ko').format(now),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.75),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600),
                       ),
                     ),
                     // 종목 전환 (다른 시험 고르기)
@@ -262,8 +256,27 @@ class HomeScreen extends StatelessWidget {
                       onTap: () =>
                           context.read<AppProvider>().toggleDarkMode(),
                     ),
+                    const SizedBox(width: 8),
+                    // 설정 (계정·로그인)
+                    _glassIconButton(
+                      context,
+                      icon: Icons.settings_rounded,
+                      onTap: () => pushWithNav(
+                          context, const SettingsScreen(),
+                          currentSection: 0),
+                    ),
                   ],
                 ),
+                const SizedBox(height: 8),
+                // 2행: 인사말 (전체 폭 사용 → 세로 깨짐 방지)
+                Text(greeting,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.4)),
                 const SizedBox(height: 14),
                 // 🧙 레벨 & XP 바
                 _levelStrip(context, app),
@@ -691,8 +704,7 @@ class HomeScreen extends StatelessWidget {
               _vDivider(context),
               _miniStat(context, Icons.quiz_rounded, '$pendingNotes개',
                   '복습할 오답', AppTheme.danger, () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => const SmartReviewScreen()));
+                pushWithNav(context, const SmartReviewScreen(), currentSection: 1);
               }),
             ],
           ),
@@ -872,3 +884,182 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+
+/// 📚 홈 메인 과목(종목) 변경 카드 (#2)
+///
+/// 현재 학습 중인 종목을 크게 보여주고, 가로 스크롤로 다른 종목을
+/// 즉시 전환한다. 학습 기록/XP/스트릭은 그대로 유지된다.
+class _SubjectSwitcher extends StatelessWidget {
+  final void Function(int) onNavigate;
+  const _SubjectSwitcher({required this.onNavigate});
+
+  @override
+  Widget build(BuildContext context) {
+    // provider 변경(종목 전환) 시 리빌드되도록 watch
+    context.watch<AppProvider>();
+    final current = StudyData.instance.track;
+    final cs = Theme.of(context).colorScheme;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 13, 14, 14),
+      decoration: BoxDecoration(
+        color: dark
+            ? Colors.white.withValues(alpha: 0.04)
+            : Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: dark
+              ? Colors.white.withValues(alpha: 0.06)
+              : const Color(0xFFEDEFF6),
+        ),
+        boxShadow: dark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.menu_book_rounded, size: 17, color: cs.primary),
+              const SizedBox(width: 6),
+              Text(
+                '학습 과목 변경',
+                style: TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w800,
+                  color: cs.onSurface.withValues(alpha: 0.85),
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '탭하여 전환',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: cs.onSurface.withValues(alpha: 0.45),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 92,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.zero,
+              itemCount: kExamTracks.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemBuilder: (context, i) {
+                final t = kExamTracks[i];
+                final selected = t.id == current.id;
+                return _SubjectChip(
+                  track: t,
+                  selected: selected,
+                  onTap: () async {
+                    if (selected) return;
+                    await context.read<AppProvider>().selectTrack(t.id);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${t.name}(으)로 전환했어요'),
+                          duration: const Duration(seconds: 1),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SubjectChip extends StatelessWidget {
+  final ExamTrack track;
+  final bool selected;
+  final VoidCallback onTap;
+  const _SubjectChip({
+    required this.track,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 108,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+          gradient: selected
+              ? LinearGradient(
+                  colors: [
+                    cs.primary,
+                    cs.primary.withValues(alpha: 0.78),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: selected
+              ? null
+              : (dark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : const Color(0xFFF4F5FA)),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: selected
+                ? Colors.transparent
+                : (dark
+                    ? Colors.white.withValues(alpha: 0.06)
+                    : const Color(0xFFE6E8F0)),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(track.emoji, style: const TextStyle(fontSize: 20)),
+                const Spacer(),
+                if (selected)
+                  const Icon(Icons.check_circle_rounded,
+                      color: Colors.white, size: 16),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              track.shortName,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12.5,
+                height: 1.2,
+                fontWeight: FontWeight.w800,
+                color: selected
+                    ? Colors.white
+                    : cs.onSurface.withValues(alpha: 0.85),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

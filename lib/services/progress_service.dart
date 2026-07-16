@@ -42,6 +42,11 @@ class ProgressService {
     r['last'] = correct ? 'o' : 'x';
     r['subject'] = q.subject;
     r['topic'] = q.topic;
+    // 시각적 10회 반복 합격: 문제를 만날 때마다 reps +1 (맞든 틀리든 노출 카운트)
+    r['reps'] = (r['reps'] as int? ?? 0) + 1;
+    // 연속 정답(streak): 틀리면 0으로 초기화 → "확실히 외운" 판정 기준
+    r['streak'] =
+        correct ? ((r['streak'] as int? ?? 0) + 1) : 0;
     final box = correct
         ? ((r['box'] as int? ?? 0) + 1).clamp(0, _srsIntervalDays.length - 1)
         : 0;
@@ -51,6 +56,148 @@ class ProgressService {
         .toIso8601String();
     r['updatedAt'] = DateTime.now().toIso8601String();
     await _box!.put(q.qid, r);
+  }
+
+  /// 시각적 반복 암기 전용: 카드를 1회 "봤다"고 기록(정답 여부 없이 노출만).
+  /// 플래시카드/암기모드에서 카드를 넘길 때 호출 → reps 증가.
+  Future<void> recordExposure(String qid,
+      {String subject = '', String topic = ''}) async {
+    await _ensure();
+    final r = _rec(qid);
+    r['reps'] = (r['reps'] as int? ?? 0) + 1;
+    if (subject.isNotEmpty) r['subject'] = subject;
+    if (topic.isNotEmpty) r['topic'] = topic;
+    r['updatedAt'] = DateTime.now().toIso8601String();
+    await _box!.put(qid, r);
+  }
+
+  /// 특정 문제의 반복 노출 횟수(reps) — 10회 반복 목표 진행도.
+  Future<int> repsFor(String qid) async {
+    await _ensure();
+    return (_rec(qid)['reps'] as int? ?? 0);
+  }
+
+  /// 특정 문제의 누적 오답 횟수 — 오답노트 강제 노출 판단용.
+  Future<int> wrongCountFor(String qid) async {
+    await _ensure();
+    return (_rec(qid)['wrong'] as int? ?? 0);
+  }
+
+  /// 목표 반복(기본 10회)까지의 전체 진행 요약.
+  /// - total: 전체 대상 카드 수, mastered: reps>=goal 달성 수, totalReps: 누적 노출
+  ({int total, int mastered, int totalReps}) repetitionSummary(
+      Iterable<String> qids,
+      {int goal = 10}) {
+    int total = 0, mastered = 0, totalReps = 0;
+    for (final qid in qids) {
+      total++;
+      final reps = (_rec(qid)['reps'] as int? ?? 0);
+      totalReps += reps;
+      if (reps >= goal) mastered++;
+    }
+    return (total: total, mastered: mastered, totalReps: totalReps);
+  }
+
+  /// 오답 원인 분류 — 사용자가 "왜 틀렸는지" 선택하는 표준 태그.
+  /// (교수·튜터 관점의 표준 오답 유형)
+  static const List<String> wrongReasons = [
+    '개념 부족',
+    '계산 실수',
+    '문제 잘못 읽음',
+    '함정·헷갈림',
+    '공식 암기 안됨',
+    '시간 부족·찍음',
+  ];
+
+  /// 오답 원인을 기록한다. (틀린 직후 사용자가 선택)
+  /// - 문제별 원인 히스토그램 [reasons] 에 누적
+  /// - 마지막 원인 [lastReason] 저장
+  Future<void> recordWrongReason(Question q, String reason) async {
+    await _ensure();
+    final r = _rec(q.qid);
+    final rawReasons = r['reasons'];
+    final reasons = <String, int>{};
+    if (rawReasons is Map) {
+      rawReasons.forEach((k, v) =>
+          reasons[k.toString()] = (v as num?)?.toInt() ?? 0);
+    }
+    reasons[reason] = (reasons[reason] ?? 0) + 1;
+    r['reasons'] = reasons;
+    r['lastReason'] = reason;
+    r['subject'] = q.subject;
+    r['topic'] = q.topic;
+    r['updatedAt'] = DateTime.now().toIso8601String();
+    await _box!.put(q.qid, r);
+  }
+
+  /// 오답 원인별 전체 집계 — {원인: 횟수} (약점 진단·집중 방안용)
+  Future<Map<String, int>> wrongReasonStats() async {
+    await _ensure();
+    final out = <String, int>{};
+    for (final key in _box!.keys) {
+      final r = _rec(key as String);
+      final raw = r['reasons'];
+      if (raw is Map) {
+        raw.forEach((k, v) =>
+            out[k.toString()] = (out[k.toString()] ?? 0) + ((v as num?)?.toInt() ?? 0));
+      }
+    }
+    return out;
+  }
+
+  /// 자주 틀리는 문제 랭킹 — wrong 횟수 내림차순.
+  /// 반환: [(qid, wrong, correct, subject, topic, lastReason)]
+  /// [onlyUnmastered] 이면 마지막 결과가 오답이거나 아직 완전 정답 아닌 것만.
+  Future<List<({
+    String qid,
+    int wrong,
+    int correct,
+    String subject,
+    String topic,
+    String? lastReason,
+  })>> frequentlyWrong({int limit = 100, bool onlyUnmastered = false}) async {
+    await _ensure();
+    final rows = <({
+      String qid,
+      int wrong,
+      int correct,
+      String subject,
+      String topic,
+      String? lastReason,
+    })>[];
+    for (final key in _box!.keys) {
+      final r = _rec(key as String);
+      final w = r['wrong'] as int? ?? 0;
+      if (w == 0) continue;
+      if (onlyUnmastered && r['last'] == 'o' &&
+          (r['box'] as int? ?? 0) >= _srsIntervalDays.length - 1) {
+        continue;
+      }
+      rows.add((
+        qid: key,
+        wrong: w,
+        correct: r['correct'] as int? ?? 0,
+        subject: r['subject'] as String? ?? '',
+        topic: r['topic'] as String? ?? '기타',
+        lastReason: r['lastReason'] as String?,
+      ));
+    }
+    rows.sort((a, b) => b.wrong.compareTo(a.wrong));
+    return rows.take(limit).toList();
+  }
+
+  /// 특정 원인으로 틀린 문제 qid 집합 (원인별 집중 풀기용)
+  Future<Set<String>> qidsByReason(String reason) async {
+    await _ensure();
+    final out = <String>{};
+    for (final key in _box!.keys) {
+      final r = _rec(key as String);
+      final raw = r['reasons'];
+      if (raw is Map && (raw[reason] as num? ?? 0).toInt() > 0) {
+        out.add(key);
+      }
+    }
+    return out;
   }
 
   /// 이 문제를 이전에 만난 적 있는지 조회 (문제풀이 화면 상단 "N번째 만남" 배너용)

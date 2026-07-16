@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/progress_service.dart';
 import '../screens/study/quiz_play_screen.dart';
 import '../theme/app_theme.dart';
+import 'persistent_nav.dart';
 
 /// 🔁 오늘의 복습 카드 — 간격반복(SRS) 큐에 쌓인 "지금 안 보면 잊어버릴" 문제를
 /// 홈 상단에서 숫자로 보여주고 탭 한 번에 시작.
@@ -81,15 +82,11 @@ class _DueReviewCardState extends State<DueReviewCard> {
     if (!mounted) return;
     if (qs.isEmpty) return;
     qs.shuffle();
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => QuizPlayScreen(
+    await pushWithNav(context, QuizPlayScreen(
           title: '오늘의 복습 카드 (${qs.length}문항)',
           questions: qs,
           examMode: false,
-        ),
-      ),
-    );
+        ), currentSection: 1);
     _load();
   }
 }

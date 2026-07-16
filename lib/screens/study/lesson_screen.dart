@@ -3,6 +3,7 @@ import '../../services/study_data.dart';
 import '../../widgets/lesson_view.dart';
 import '../../widgets/teacher_recipe_box.dart';
 import 'quiz_play_screen.dart';
+import '../../widgets/persistent_nav.dart';
 
 /// 1:1 강의 커리큘럼 — 과목 선택 → 빈출순 토픽 강의 목록 → 강의 뷰어
 /// 46개 토픽 전체 (기출 2,897문항 100% 커버)
@@ -117,9 +118,7 @@ class _LessonCurriculumScreenState extends State<LessonCurriculumScreen> {
           ],
         ),
         trailing: const Icon(Icons.chevron_right),
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => LessonViewerScreen(lesson: l)),
-        ),
+        onTap: () => pushWithNav(context, LessonViewerScreen(lesson: l), currentSection: 1),
       ),
     );
   }
@@ -177,12 +176,10 @@ class LessonViewerScreen extends StatelessWidget {
           const SnackBar(content: Text('이 토픽의 기출문제가 없습니다.')));
       return;
     }
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => QuizPlayScreen(
+    pushWithNav(context, QuizPlayScreen(
         title: '${lesson.topic} 기출 ${qs.length}문제',
         questions: qs,
         examMode: false,
-      ),
-    ));
+      ), currentSection: 1);
   }
 }

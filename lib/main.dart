@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'providers/app_provider.dart';
+import 'services/auth_service.dart';
+import 'services/notification_service.dart';
 import 'theme/app_theme.dart';
 import 'screens/exams_screen.dart';
 import 'screens/home_screen.dart';
@@ -10,15 +13,25 @@ import 'screens/track_select_screen.dart';
 import 'screens/stats_screen.dart';
 import 'screens/study/study_screen.dart';
 import 'screens/timer_screen.dart';
+import 'widgets/persistent_nav.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('ko');
   final provider = AppProvider();
   await provider.init();
+  // 실시간 시험일정은 백그라운드로 로드(앱 시작 지연 방지)
+  unawaited(provider.initSchedule());
+  // 인증(구글 로그인 준비) 서비스 초기화
+  await AuthService.instance.init();
+  // 🔔 로컬 알림 서비스 초기화 (시험 D-day, 학습 리마인드) — 백그라운드로 준비
+  unawaited(NotificationService.instance.init());
   runApp(
-    ChangeNotifierProvider.value(
-      value: provider,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: provider),
+        ChangeNotifierProvider.value(value: AuthService.instance),
+      ],
       child: const CertStudyApp(),
     ),
   );
@@ -34,7 +47,7 @@ class CertStudyApp extends StatelessWidget {
         context.select<AppProvider, String>((p) => p.themePaletteId);
     final palette = AppTheme.paletteById(paletteId);
     return MaterialApp(
-      title: 'Cert Study Tracker',
+      title: '자격증 학습 트래커',
       debugShowCheckedModeBanner: false,
       themeMode: dark ? ThemeMode.dark : ThemeMode.light,
       theme: AppTheme.light(palette),
@@ -78,7 +91,17 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _index = 0;
 
-  void _navigate(int i) => setState(() => _index = i);
+  void _navigate(int i) {
+    if (!mounted) return;
+    setState(() => _index = i);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // 하위 페이지에서도 탭 전환을 요청할 수 있도록 전역 등록(#6)
+    AppTabs.register(_navigate);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +115,15 @@ class _MainShellState extends State<MainShell> {
 
     final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      body: IndexedStack(index: _index, children: screens),
+      body: Column(
+        children: [
+          // 타이머가 돌아가면 최상단에 작은 진행 바 표시(#3)
+          const TimerRunningBar(),
+          Expanded(
+            child: IndexedStack(index: _index, children: screens),
+          ),
+        ],
+      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           border: Border(

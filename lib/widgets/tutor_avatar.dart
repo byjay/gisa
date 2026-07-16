@@ -32,12 +32,17 @@ class TutorAvatar extends StatefulWidget {
   final Duration interval;
   final bool animate;
 
+  /// true 면 얼굴(상단)만 원형으로 크롭해 작은 아이콘처럼 표시.
+  /// 채팅 말풍선 옆 등 좁은 자리에서 사용(전신은 너무 얇아지므로).
+  final bool headOnly;
+
   const TutorAvatar({
     super.key,
     this.mood = TutorMood.idle,
     this.size = 96,
     this.interval = const Duration(milliseconds: 2200),
     this.animate = true,
+    this.headOnly = false,
   });
 
   @override
@@ -97,31 +102,61 @@ class _TutorAvatarState extends State<TutorAvatar> {
 
   @override
   Widget build(BuildContext context) {
+    final errorIcon = Icon(
+      Icons.face_retouching_natural,
+      size: widget.size * 0.7,
+      color: Colors.orange,
+    );
+
+    if (widget.headOnly) {
+      // 얼굴(상단)만 원형 크롭 — 좁은 자리(채팅 등)용
+      final cs = Theme.of(context).colorScheme;
+      return AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: Container(
+          key: ValueKey(_asset),
+          width: widget.size,
+          height: widget.size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: cs.primaryContainer.withValues(alpha: 0.5),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Image.asset(
+            _asset,
+            fit: BoxFit.cover,
+            // 상단(머리/얼굴) 위주로 보여줌
+            alignment: const Alignment(0, -0.9),
+            errorBuilder: (_, __, ___) => errorIcon,
+          ),
+        ),
+      );
+    }
+
+    // 튜터 원본 이미지는 세로가 긴 전신(≈132×292, 비율 0.45).
+    // size 를 "높이" 기준으로 삼고, 폭은 비율에 맞춰 잡아 전신이 잘리지 않게 한다.
+    const double aspect = 132 / 292; // 폭/높이
+    final double h = widget.size;
+    final double w = h * aspect;
+
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 450),
-      switchInCurve: Curves.easeOutBack,
+      switchInCurve: Curves.easeOut,
       switchOutCurve: Curves.easeIn,
       transitionBuilder: (child, anim) => FadeTransition(
         opacity: anim,
-        child: ScaleTransition(
-          scale: Tween<double>(begin: 0.92, end: 1).animate(anim),
-          child: child,
-        ),
+        child: child,
       ),
-      child: ClipRRect(
+      child: SizedBox(
         key: ValueKey(_asset),
-        borderRadius: BorderRadius.circular(widget.size * 0.18),
+        width: w,
+        height: h,
         child: Image.asset(
           _asset,
-          width: widget.size,
-          height: widget.size,
-          fit: BoxFit.cover,
-          alignment: const Alignment(0, -0.55),
-          errorBuilder: (_, __, ___) => Icon(
-            Icons.face_retouching_natural,
-            size: widget.size * 0.7,
-            color: Colors.orange,
-          ),
+          // contain: 이미지를 잘라내지 않고 전체가 보이도록 맞춤(#1)
+          fit: BoxFit.contain,
+          alignment: Alignment.bottomCenter,
+          errorBuilder: (_, __, ___) => errorIcon,
         ),
       ),
     );
@@ -163,6 +198,7 @@ class TutorBanner extends StatelessWidget {
           border: Border.all(color: cs.primary.withValues(alpha: 0.15)),
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             TutorAvatar(mood: mood, size: avatarSize),
             const SizedBox(width: 12),

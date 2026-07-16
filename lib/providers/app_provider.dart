@@ -4,6 +4,11 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../models/models.dart';
 import '../services/exam_track.dart';
 import '../services/study_data.dart';
+import '../services/qnet_catalog.dart';
+import '../services/qnet_schedule_service.dart';
+import '../services/schedule_alerts.dart';
+import '../services/exam_registration.dart';
+import '../services/notification_service.dart';
 
 class AppProvider extends ChangeNotifier {
   late Box _examBox;
@@ -22,6 +27,9 @@ class AppProvider extends ChangeNotifier {
   bool darkMode = false;
   int weeklyGoalMinutes = 600;
   String themePaletteId = 'indigo';
+  bool notificationsEnabled = true; // 🔔 시험 일정·학습 리마인드 알림 on/off
+  bool dailyReminderEnabled = true;
+  int dailyReminderHour = 9;
 
   // Timer state
   bool timerRunning = false;
@@ -37,6 +45,7 @@ class AppProvider extends ChangeNotifier {
     _noteBox = await Hive.openBox('wrongNotes');
     _settingsBox = await Hive.openBox('settings');
     _quizBox = await Hive.openBox('quizResults');
+    await ExamRegistrationStore.instance.init();
     _load();
   }
 
@@ -63,6 +72,11 @@ class AppProvider extends ChangeNotifier {
     darkMode = (_settingsBox.get('darkMode') as bool?) ?? false;
     themePaletteId =
         (_settingsBox.get('themePalette') as String?) ?? 'indigo';
+    notificationsEnabled =
+        (_settingsBox.get('notificationsEnabled') as bool?) ?? true;
+    dailyReminderEnabled =
+        (_settingsBox.get('dailyReminderEnabled') as bool?) ?? true;
+    dailyReminderHour = (_settingsBox.get('dailyReminderHour') as int?) ?? 9;
     shieldCount = (_settingsBox.get('shieldCount') as int?) ?? 0;
     onboarded = (_settingsBox.get('onboarded_v1') as bool?) ?? false;
     selectedTrackId = _settingsBox.get('selectedTrack') as String?;
@@ -140,6 +154,8 @@ class AppProvider extends ChangeNotifier {
     required int total,
     required int correct,
     List<String> wrongQuestions = const [],
+    Map<String, int> subjectTotal = const {},
+    Map<String, int> subjectCorrect = const {},
   }) async {
     final now = DateTime.now();
     final id = now.microsecondsSinceEpoch.toString();
@@ -149,6 +165,9 @@ class AppProvider extends ChangeNotifier {
       'total': total,
       'correct': correct,
       'date': now.toIso8601String(),
+      // 과목별 정답/문항 수 (약점 진단용)
+      'subjectTotal': Map<String, int>.from(subjectTotal),
+      'subjectCorrect': Map<String, int>.from(subjectCorrect),
     });
     // 오답은 오답노트에 자동 등록 (최대 20개)
     for (var i = 0; i < wrongQuestions.length && i < 20; i++) {
@@ -181,6 +200,43 @@ class AppProvider extends ChangeNotifier {
   Future<void> setThemePalette(String id) async {
     themePaletteId = id;
     await _settingsBox.put('themePalette', id);
+    notifyListeners();
+  }
+
+  // ===== 🔔 알림 설정 =====
+  Future<void> setNotificationsEnabled(bool v) async {
+    notificationsEnabled = v;
+    await _settingsBox.put('notificationsEnabled', v);
+    if (v) {
+      await NotificationService.instance.scheduleExamAlerts(alerts);
+      if (dailyReminderEnabled) {
+        await NotificationService.instance
+            .scheduleDailyReminder(hour: dailyReminderHour);
+      }
+    } else {
+      await NotificationService.instance.cancelAll();
+    }
+    notifyListeners();
+  }
+
+  Future<void> setDailyReminderEnabled(bool v) async {
+    dailyReminderEnabled = v;
+    await _settingsBox.put('dailyReminderEnabled', v);
+    if (v && notificationsEnabled) {
+      await NotificationService.instance
+          .scheduleDailyReminder(hour: dailyReminderHour);
+    } else {
+      await NotificationService.instance.cancelDailyReminder();
+    }
+    notifyListeners();
+  }
+
+  Future<void> setDailyReminderHour(int hour) async {
+    dailyReminderHour = hour;
+    await _settingsBox.put('dailyReminderHour', hour);
+    if (dailyReminderEnabled && notificationsEnabled) {
+      await NotificationService.instance.scheduleDailyReminder(hour: hour);
+    }
     notifyListeners();
   }
 
@@ -440,6 +496,171 @@ class AppProvider extends ChangeNotifier {
         .where((r) => (r['date'] as String).startsWith(today))
         .fold<int>(0, (s, r) => s + ((r['correct'] as int?) ?? 0));
   }
+
+  // ===== 📊 약점 진단 / 회독 트래커 =====
+
+  /// 누적 푼 문제 수(전체 세션 합)
+  int get lifetimeSolved =>
+      quizResults.fold<int>(0, (s, r) => s + ((r['total'] as int?) ?? 0));
+
+  /// 누적 맞힌 문제 수
+  int get lifetimeCorrect =>
+      quizResults.fold<int>(0, (s, r) => s + ((r['correct'] as int?) ?? 0));
+
+  /// 전체 평균 정답률(%)
+  int get overallAccuracy =>
+      lifetimeSolved == 0 ? 0 : (lifetimeCorrect * 100 / lifetimeSolved).round();
+
+  /// 완료한 모의고사(세션) 수
+  int get completedQuizSessions => quizResults.length;
+
+  /// 회독 수 — 누적 푼 문제 수를 기준(문항수)으로 추정.
+  /// 종목 문제은행 전체 문항 수 [bankSize]로 나눈 몫.
+  int reviewRounds(int bankSize) {
+    if (bankSize <= 0) return 0;
+    return lifetimeSolved ~/ bankSize;
+  }
+
+  /// 현재 회독 진행률(0.0~1.0) — 다음 회독까지 얼마나 남았는지.
+  double reviewRoundProgress(int bankSize) {
+    if (bankSize <= 0) return 0;
+    return (lifetimeSolved % bankSize) / bankSize;
+  }
+
+  /// 과목별 누적 정답률 리스트 — 약점 진단용.
+  /// 반환: [{subject, total, correct, accuracy}] 정답률 오름차순(약한 과목 먼저)
+  List<Map<String, dynamic>> subjectAnalysis() {
+    final totals = <String, int>{};
+    final corrects = <String, int>{};
+    for (final r in quizResults) {
+      final st = r['subjectTotal'];
+      final sc = r['subjectCorrect'];
+      if (st is Map) {
+        st.forEach((k, v) {
+          final key = k.toString();
+          totals[key] = (totals[key] ?? 0) + ((v as num?)?.toInt() ?? 0);
+        });
+      }
+      if (sc is Map) {
+        sc.forEach((k, v) {
+          final key = k.toString();
+          corrects[key] = (corrects[key] ?? 0) + ((v as num?)?.toInt() ?? 0);
+        });
+      }
+    }
+    final list = <Map<String, dynamic>>[];
+    for (final subject in totals.keys) {
+      final t = totals[subject] ?? 0;
+      final c = corrects[subject] ?? 0;
+      if (t == 0 || subject.trim().isEmpty) continue;
+      list.add({
+        'subject': subject,
+        'total': t,
+        'correct': c,
+        'accuracy': (c * 100 / t).round(),
+      });
+    }
+    list.sort((a, b) => (a['accuracy'] as int).compareTo(b['accuracy'] as int));
+    return list;
+  }
+
+  // ===== 🌐 Q-Net 실시간 시험일정 연동 =====
+  /// 현재 화면에서 보고 있는 종목(카탈로그) id.
+  String _catalogId = kQnetCatalog.first.id;
+  String get catalogId => _catalogId;
+  CatalogItem get catalogItem => catalogItemById(_catalogId);
+
+  List<QnetExamRound> qnetRounds = [];
+  List<ScheduleAlert> alerts = [];
+  bool loadingSchedule = false;
+  String? scheduleError;
+  DateTime? scheduleFetchedAt;
+
+  /// 종목 전환 후 일정 새로고침.
+  Future<void> selectCatalog(String id, {bool refresh = true}) async {
+    _catalogId = id;
+    await _settingsBox.put('catalogId', id);
+    notifyListeners();
+    if (refresh) await refreshSchedule();
+  }
+
+  /// 저장된 카탈로그 선택 복원 + 최초 일정 로드.
+  Future<void> initSchedule() async {
+    _catalogId =
+        (_settingsBox.get('catalogId') as String?) ?? kQnetCatalog.first.id;
+    await refreshSchedule();
+  }
+
+  /// 실시간 시험일정 크롤링 후 알림 재생성.
+  Future<void> refreshSchedule({bool force = false}) async {
+    final item = catalogItem;
+    loadingSchedule = true;
+    scheduleError = null;
+    notifyListeners();
+
+    if (!item.isQnet || item.jmCd == null) {
+      // 학교 교과 등 크롤링 미지원 종목
+      qnetRounds = [];
+      alerts = [];
+      loadingSchedule = false;
+      scheduleError = '이 종목은 실시간 시험일정 연동을 지원하지 않아요.';
+      notifyListeners();
+      return;
+    }
+
+    try {
+      final rounds = await QnetScheduleService.instance.fetchSchedule(
+        item.jmCd!,
+        seriesCd: item.seriesCd,
+        catalogId: item.id,
+        forceRefresh: force,
+      );
+      qnetRounds = rounds
+        ..sort((a, b) {
+          final ad = a.anchorDate;
+          final bd = b.anchorDate;
+          if (ad == null || bd == null) return 0;
+          return ad.compareTo(bd);
+        });
+      alerts = ScheduleAlertEngine.instance.buildAlerts(item.name, rounds);
+      scheduleFetchedAt = DateTime.now();
+      if (rounds.isEmpty) {
+        scheduleError = '시험일정을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.';
+      }
+      // 🔔 앱을 꺼둬도 시험 일정을 놓치지 않도록 실제 기기 알림을 예약한다.
+      if (notificationsEnabled) {
+        unawaited(NotificationService.instance.scheduleExamAlerts(alerts));
+      }
+    } catch (e) {
+      scheduleError = '네트워크 오류로 일정을 불러오지 못했어요.';
+    } finally {
+      loadingSchedule = false;
+      notifyListeners();
+    }
+  }
+
+  // ===== 🎯 응시 등록 / 가답안 =====
+  List<ExamRegistration> get registrations =>
+      ExamRegistrationStore.instance.all();
+
+  ExamRegistration? registrationFor(
+      String jmCd, String roundLabel, ExamPhase phase) {
+    final id = ExamRegistration.makeId(jmCd, roundLabel, phase);
+    return ExamRegistrationStore.instance.byId(id);
+  }
+
+  Future<void> saveRegistration(ExamRegistration reg) async {
+    await ExamRegistrationStore.instance.save(reg);
+    notifyListeners();
+  }
+
+  Future<void> deleteRegistration(String id) async {
+    await ExamRegistrationStore.instance.delete(id);
+    notifyListeners();
+  }
+
+  /// 홈 화면 요약용: 가장 임박한 활성 알림.
+  ScheduleAlert? get topAlert => alerts.isEmpty ? null : alerts.first;
 
   @override
   void dispose() {

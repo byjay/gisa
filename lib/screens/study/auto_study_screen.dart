@@ -5,6 +5,7 @@ import '../../providers/app_provider.dart';
 import '../../services/auto_study_service.dart';
 import '../../theme/app_theme.dart';
 import 'quiz_play_screen.dart';
+import '../../widgets/persistent_nav.dart';
 
 class AutoStudyScreen extends StatefulWidget {
   const AutoStudyScreen({super.key});
@@ -50,15 +51,11 @@ class _AutoStudyScreenState extends State<AutoStudyScreen> {
   }
 
   Future<void> _startTask(AutoStudyTask task) async {
-    final completed = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => QuizPlayScreen(
+    final completed = await pushWithNav<bool>(context, QuizPlayScreen(
           title: '자동학습 · ${task.title}',
           questions: task.questions,
           examMode: false,
-        ),
-      ),
-    );
+        ), currentSection: 1);
     if (completed == true) {
       await AutoStudyService.instance.markCompleted(task.id);
     }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show HapticFeedback;
 import '../../services/study_data.dart';
 import '../../widgets/lesson_view.dart';
 
@@ -16,7 +17,7 @@ class _SpeedMemorizeScreenState extends State<SpeedMemorizeScreen> {
   List<RepeatCluster>? _all;
   String? _subjectFilter; // null = 전체
   int _idx = 0;
-  bool _revealed = false;
+  bool _showExplain = false; // 하단 설명 토글
   final Set<int> _memorized = {}; // 외운 카드 인덱스 (필터 내)
 
   @override
@@ -101,7 +102,7 @@ class _SpeedMemorizeScreenState extends State<SpeedMemorizeScreen> {
         onSelected: (_) => setState(() {
           _subjectFilter = value;
           _idx = 0;
-          _revealed = false;
+          _showExplain = false;
           _memorized.clear();
         }),
       ),
@@ -156,32 +157,46 @@ class _SpeedMemorizeScreenState extends State<SpeedMemorizeScreen> {
                         fontWeight: FontWeight.w600,
                         height: 1.55)),
                 const SizedBox(height: 12),
+                // 문제-답 외우기: 정답을 항상 표시 (녹색 강조 + 체크)
                 for (var i = 0; i < card.options.length; i++)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 6),
+                    decoration: i + 1 == card.answer
+                        ? BoxDecoration(
+                            color: Colors.green.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                                color:
+                                    Colors.green.withValues(alpha: 0.55)),
+                          )
+                        : null,
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('${i + 1}. ',
                             style: TextStyle(
-                                fontWeight: _revealed && i + 1 == card.answer
+                                fontWeight: i + 1 == card.answer
                                     ? FontWeight.bold
                                     : FontWeight.normal,
-                                color: _revealed && i + 1 == card.answer
+                                color: i + 1 == card.answer
                                     ? Colors.green[700]
                                     : null)),
                         Expanded(
                           child: Text(card.options[i],
                               style: TextStyle(
                                   height: 1.4,
-                                  fontWeight:
-                                      _revealed && i + 1 == card.answer
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                  color: _revealed && i + 1 == card.answer
+                                  fontWeight: i + 1 == card.answer
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: i + 1 == card.answer
                                       ? Colors.green[700]
                                       : null)),
                         ),
+                        if (i + 1 == card.answer)
+                          Icon(Icons.check_circle,
+                              size: 18, color: Colors.green[600]),
                       ],
                     ),
                   ),
@@ -190,21 +205,24 @@ class _SpeedMemorizeScreenState extends State<SpeedMemorizeScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        // ── 답 영역
-        if (!_revealed)
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16)),
-              onPressed: () => setState(() => _revealed = true),
-              icon: const Icon(Icons.visibility),
-              label: const Text('답 확인',
-                  style:
-                      TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-            ),
-          )
-        else ...[
+        // ── 하단: 설명 버튼 (토글) — 정답은 이미 위에 표시됨
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.tonalIcon(
+            style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14)),
+            onPressed: () =>
+                setState(() => _showExplain = !_showExplain),
+            icon: Icon(_showExplain
+                ? Icons.expand_less_rounded
+                : Icons.menu_book_rounded),
+            label: Text(_showExplain ? '설명 접기' : '설명 보기',
+                style: const TextStyle(
+                    fontSize: 15, fontWeight: FontWeight.bold)),
+          ),
+        ),
+        if (_showExplain) ...[
+          const SizedBox(height: 10),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(14),
@@ -295,7 +313,7 @@ class _SpeedMemorizeScreenState extends State<SpeedMemorizeScreen> {
             onPressed: _idx > 0
                 ? () => setState(() {
                       _idx--;
-                      _revealed = false;
+                      _showExplain = false;
                     })
                 : null,
             icon: const Icon(Icons.chevron_left),
@@ -307,11 +325,12 @@ class _SpeedMemorizeScreenState extends State<SpeedMemorizeScreen> {
           const Spacer(),
           FilledButton.icon(
             onPressed: () {
+              HapticFeedback.mediumImpact();
               setState(() {
-                if (_revealed) _memorized.add(_idx);
+                _memorized.add(_idx);
                 if (!isLast) {
                   _idx++;
-                  _revealed = false;
+                  _showExplain = false;
                 } else {
                   _showDone(total);
                 }
@@ -347,7 +366,7 @@ class _SpeedMemorizeScreenState extends State<SpeedMemorizeScreen> {
               Navigator.of(ctx).pop();
               setState(() {
                 _idx = 0;
-                _revealed = false;
+                _showExplain = false;
               });
             },
             child: const Text('처음부터 복습'),

@@ -203,6 +203,7 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: scheme,
       brightness: brightness,
+      fontFamily: 'Pretendard',
       fontFamilyFallback: const ['Noto Sans KR', 'Apple SD Gothic Neo'],
       splashFactory: InkSparkle.splashFactory,
       cardTheme: CardThemeData(

@@ -13,13 +13,20 @@ import 'slides_screen.dart';
 import 'silgi_screen.dart';
 import 'search_screen.dart';
 import 'repeat_analysis_screen.dart';
+import 'circuit_screen.dart';
+import 'calculator_hub_screen.dart';
+import 'pass_report_screen.dart';
+import 'wrong_focus_screen.dart';
+import 'visual_repeat_screen.dart';
 import 'formula_guide_screen.dart';
 import 'exam_info_screen.dart';
 import 'smart_review_screen.dart';
 import 'study_guide_screen.dart';
 import 'tutor_chat_screen.dart';
 import 'auto_study_screen.dart';
+import 'speed_memorize_screen.dart';
 import '../../widgets/tutor_avatar.dart';
+import '../../widgets/persistent_nav.dart';
 
 /// 학습 허브: 탭 구조로 직관적 분류 — 기초학습 / 문제풀이 / 모의고사 / 이력
 class StudyScreen extends StatefulWidget {
@@ -118,9 +125,7 @@ class _StudyScreenState extends State<StudyScreen>
         TutorBanner(
           mood: TutorMood.cheer,
           message: '지금은 기초를 단단히 할 때예요. 이론을 짧게 보고 쉬운 문제로 바로 확인해 보세요.',
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const SlidesHomeScreen()),
-          ),
+          onTap: () => pushWithNav(context, const SlidesHomeScreen(), currentSection: 1),
         ),
         const SizedBox(height: 12),
         _heroCards(context),
@@ -198,6 +203,18 @@ class _StudyScreenState extends State<StudyScreen>
       padding: _pagePadding,
       children: [
         SectionHeader(
+          emoji: '📚',
+          title: '연도별 기출 세트',
+          subtitle: '최근 N년치 기출을 최신 회차부터 몰아서 풀기 · 회독용 추천',
+        ),
+        _yearRangeCard(context, 5, '최근 5년치', '핵심 빈출 집중 · 빠른 1회독',
+            const Color(0xFF22C55E)),
+        _yearRangeCard(context, 7, '최근 7년치', '출제 경향 폭넓게 · 안정권 목표',
+            const Color(0xFF3B82F6)),
+        _yearRangeCard(context, 10, '최근 10년치', '모든 유형 정복 · 완전 마스터',
+            const Color(0xFF8B5CF6)),
+        const SizedBox(height: 20),
+        SectionHeader(
           emoji: '📝',
           title: '회차별 실전 모의고사',
           subtitle:
@@ -206,6 +223,93 @@ class _StudyScreenState extends State<StudyScreen>
         for (final e in exams) _examCard(context, e),
         const SizedBox(height: 24),
       ],
+    );
+  }
+
+  Widget _yearRangeCard(
+      BuildContext context, int years, String title, String desc, Color c) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return PremiumCard(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+      onTap: () => _startYearRange(years, title),
+      child: Row(
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [c, c.withValues(alpha: 0.65)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            alignment: Alignment.center,
+            child: Text('$years년',
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 13)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: const TextStyle(
+                        fontSize: 14.5, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 3),
+                Text(desc,
+                    style: TextStyle(
+                        fontSize: 11,
+                        height: 1.3,
+                        color: dark ? Colors.white54 : AppTheme.textMuted)),
+                const SizedBox(height: 5),
+                FutureBuilder<int>(
+                  future: StudyData.instance.papersInYearRange(years),
+                  builder: (context, snap) {
+                    final n = snap.data;
+                    return Text(
+                      n == null
+                          ? '집계 중…'
+                          : (n == 0
+                              ? '해당 기간 기출 데이터 없음'
+                              : '기출 $n회차 · 약 ${n * StudyData.instance.track.paperSize}문항'),
+                      style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: c),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right_rounded, color: c),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _startYearRange(int years, String title) async {
+    final qs = await StudyData.instance.questionsByYearRange(years);
+    if (!mounted) return;
+    if (qs.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('해당 기간의 기출 데이터가 없습니다.')),
+      );
+      return;
+    }
+    pushWithNav(
+      context,
+      QuizPlayScreen(
+        title: '$title 기출 (${qs.length}문제)',
+        questions: qs,
+        examMode: false,
+      ),
+      currentSection: 1,
     );
   }
 
@@ -277,11 +381,7 @@ class _StudyScreenState extends State<StudyScreen>
             icon: Icons.school_rounded,
             title: '1:1 이론 강의',
             sub: '${StudyData.instance.track.topicCount}토픽 완전 강의\n공식·암기법·함정',
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const LessonCurriculumScreen(),
-              ),
-            ),
+            onTap: () => pushWithNav(context, const LessonCurriculumScreen(), currentSection: 1),
           ),
         ),
         const SizedBox(width: 10),
@@ -410,15 +510,11 @@ class _StudyScreenState extends State<StudyScreen>
       ).showSnackBar(const SnackBar(content: Text('연결된 기초 문제가 없습니다.')));
       return;
     }
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => QuizPlayScreen(
+    pushWithNav(context, QuizPlayScreen(
           title: '$subject 기초 확인 10문제',
           questions: questions.take(10).toList(),
           examMode: false,
-        ),
-      ),
-    );
+        ), currentSection: 1);
   }
 
   /// 2026 시험 정보 센터 진입 카드
@@ -426,9 +522,7 @@ class _StudyScreenState extends State<StudyScreen>
     final dark = Theme.of(context).brightness == Brightness.dark;
     return PremiumCard(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-      onTap: () => Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => const ExamInfoScreen())),
+      onTap: () => pushWithNav(context, const ExamInfoScreen(), currentSection: 1),
       child: Row(
         children: [
           const IconBadge(
@@ -506,6 +600,8 @@ class _StudyScreenState extends State<StudyScreen>
   /// 핵심 기능 그리드 (3x3)
   Widget _featureGrid(BuildContext context) {
     final items = <(String, IconData, Color, Widget)>[
+      ('10회 반복 합격', Icons.repeat_rounded, const Color(0xFF4F46E5),
+          const VisualRepeatScreen()),
       ('자동학습', Icons.auto_awesome_rounded, const Color(0xFF7C3AED),
           const AutoStudyScreen()),
       ('AI 튜터', Icons.smart_toy_rounded, const Color(0xFF10B981),
@@ -514,9 +610,17 @@ class _StudyScreenState extends State<StudyScreen>
           const StudyGuideScreen()),
       ('30일 슬라이드', Icons.style_rounded, AppTheme.primary,
           const SlidesHomeScreen()),
+      ('집중 오답노트', Icons.psychology_alt_rounded, const Color(0xFFDC2626),
+          const WrongFocusScreen()),
+      ('합격 분석', Icons.insights_rounded, const Color(0xFF16A34A),
+          const PassReportScreen()),
       ('유형변형 분석', Icons.track_changes_rounded, const Color(0xFFF97316),
           const RepeatAnalysisScreen()),
       ('실기 대비', Icons.edit_document, AppTheme.accent, const SilgiScreen()),
+      ('회로도 마스터', Icons.schema_rounded, const Color(0xFF0891B2),
+          const CircuitScreen()),
+      ('계산기', Icons.calculate_rounded, const Color(0xFF14B8A6),
+          const CalculatorHubScreen()),
       ('이론 검색·AI', Icons.manage_search_rounded, AppTheme.electric,
           const TheorySearchScreen()),
       ('스마트 복습', Icons.auto_awesome_rounded, const Color(0xFFEC4899),
@@ -529,6 +633,8 @@ class _StudyScreenState extends State<StudyScreen>
           const MnemonicsScreen()),
       ('추천 강의', Icons.play_circle_rounded, const Color(0xFFEF4444),
           const VideosScreen()),
+      ('번개 암기', Icons.bolt_rounded, const Color(0xFF8B5CF6),
+          const SpeedMemorizeScreen()),
     ];
 
     Widget cell((String, IconData, Color, Widget) item) {
@@ -537,9 +643,7 @@ class _StudyScreenState extends State<StudyScreen>
         child: PremiumCard(
           padding: const EdgeInsets.symmetric(vertical: 13),
           radius: AppTheme.rMd,
-          onTap: () => Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (_) => screen)),
+          onTap: () => pushWithNav(context, screen, currentSection: 1),
           child: Column(
             children: [
               IconBadge(icon: icon, color: color, size: 40, iconSize: 21),
@@ -728,15 +832,11 @@ class _StudyScreenState extends State<StudyScreen>
     for (final q in qs) {
       q.examLabel = e.label;
     }
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => QuizPlayScreen(
+    pushWithNav(context, QuizPlayScreen(
           title: '${StudyData.instance.track.name} ${e.label}',
           questions: qs,
           examMode: true,
-        ),
-      ),
-    );
+        ), currentSection: 1);
   }
 
   /// 초보자 배너 — 공식 마스터 진입
@@ -744,9 +844,7 @@ class _StudyScreenState extends State<StudyScreen>
     final dark = Theme.of(context).brightness == Brightness.dark;
     return PremiumCard(
       padding: const EdgeInsets.all(14),
-      onTap: () => Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => const FormulaGuideScreen())),
+      onTap: () => pushWithNav(context, const FormulaGuideScreen(), currentSection: 1),
       child: Row(
         children: [
           const IconBadge(
@@ -790,43 +888,31 @@ class _StudyScreenState extends State<StudyScreen>
       easyFirst: true,
     );
     if (!mounted) return;
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => QuizPlayScreen(
+    pushWithNav(context, QuizPlayScreen(
           title: '$subject 쉬운순 (${qs.length}문제)',
           questions: qs,
           examMode: false,
-        ),
-      ),
-    );
+        ), currentSection: 1);
   }
 
   Future<void> _startRandom(String subject) async {
     final all = await StudyData.instance.questionsBySubject(subject);
     all.shuffle(Random());
     if (!mounted) return;
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => QuizPlayScreen(
+    pushWithNav(context, QuizPlayScreen(
           title: '$subject 랜덤 20문제',
           questions: all.take(20).toList(),
           examMode: false,
-        ),
-      ),
-    );
+        ), currentSection: 1);
   }
 
   Future<void> _startFrequency(String subject) async {
     final qs = await StudyData.instance.questionsByFrequency(subject);
     if (!mounted) return;
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => QuizPlayScreen(
+    pushWithNav(context, QuizPlayScreen(
           title: '$subject 빈출순 전체 (${qs.length}문제)',
           questions: qs,
           examMode: false,
-        ),
-      ),
-    );
+        ), currentSection: 1);
   }
 }

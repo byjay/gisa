@@ -1,11 +1,11 @@
 {
-    "name": "cert_study_tracker",
-    "short_name": "cert_study_tracker",
+    "name": "자격증 학습 트래커",
+    "short_name": "학습트래커",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#4F46E5",
+    "theme_color": "#4F46E5",
+    "description": "전기/소방 자격증 기출문제 학습과 시험 일정 관리를 한 곳에서.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

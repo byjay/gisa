@@ -49,8 +49,12 @@ class Question {
   String get difficultyLabel =>
       difficulty == 1 ? '하' : (difficulty == 3 ? '상' : '중');
 
-  /// 문제 고유 ID (오답노트·북마크 추적용)
-  String get qid => '$examLabel|$subject|$no';
+  /// 문제 고유 ID (오답노트·북마크·진척 추적용)
+  ///
+  /// ⚠️ 종목(track) 접두어를 포함한다. 향후 자격증 10종으로 확장하거나
+  /// 단일 과목 앱으로 분리 판매할 때, 서로 다른 종목의 동일 회차·과목·번호
+  /// 문제가 진척 데이터에서 충돌하지 않도록 한다.
+  String get qid => '${_currentTrack.id}|$examLabel|$subject|$no';
 
   factory Question.fromJson(Map<String, dynamic> j) => Question(
         no: j['no'] as int,
@@ -656,6 +660,128 @@ class SilgiData {
       );
 }
 
+// ─── 회로도 마스터 (모터 제어반) — 전 종목 공통 ───
+class CircuitLegend {
+  final String code;
+  final String name;
+  final String desc;
+  final String svg;
+  CircuitLegend(
+      {required this.code,
+      required this.name,
+      required this.desc,
+      required this.svg});
+  factory CircuitLegend.fromJson(Map<String, dynamic> j) => CircuitLegend(
+        code: (j['code'] as String?) ?? '',
+        name: (j['name'] as String?) ?? '',
+        desc: (j['desc'] as String?) ?? '',
+        svg: (j['svg'] as String?) ?? '',
+      );
+}
+
+class CircuitStep {
+  final String title;
+  final String body;
+  final String tip;
+  final String svg;
+  CircuitStep(
+      {required this.title,
+      required this.body,
+      required this.tip,
+      required this.svg});
+  factory CircuitStep.fromJson(Map<String, dynamic> j) => CircuitStep(
+        title: (j['title'] as String?) ?? '',
+        body: (j['body'] as String?) ?? '',
+        tip: (j['tip'] as String?) ?? '',
+        svg: (j['svg'] as String?) ?? '',
+      );
+}
+
+class CircuitRule {
+  final String title;
+  final String body;
+  CircuitRule({required this.title, required this.body});
+  factory CircuitRule.fromJson(Map<String, dynamic> j) => CircuitRule(
+        title: (j['title'] as String?) ?? '',
+        body: (j['body'] as String?) ?? '',
+      );
+}
+
+class CircuitChecklist {
+  final String item;
+  final String done;
+  CircuitChecklist({required this.item, required this.done});
+  factory CircuitChecklist.fromJson(Map<String, dynamic> j) => CircuitChecklist(
+        item: (j['item'] as String?) ?? '',
+        done: (j['done'] as String?) ?? '',
+      );
+}
+
+/// 마스터 태그표 한 행 — 분기 헤더(branch) 또는 부품 행(stage/tag/wire/ref/desc)
+class CircuitMasterRow {
+  final String branch; // 비어있지 않으면 그룹 헤더
+  final String stage;
+  final String tag;
+  final String wire;
+  final String ref;
+  final String desc;
+  bool get isHeader => branch.isNotEmpty;
+  CircuitMasterRow({
+    required this.branch,
+    required this.stage,
+    required this.tag,
+    required this.wire,
+    required this.ref,
+    required this.desc,
+  });
+  factory CircuitMasterRow.fromJson(Map<String, dynamic> j) => CircuitMasterRow(
+        branch: (j['branch'] as String?) ?? '',
+        stage: (j['stage'] as String?) ?? '',
+        tag: (j['tag'] as String?) ?? '',
+        wire: (j['wire'] as String?) ?? '',
+        ref: (j['ref'] as String?) ?? '',
+        desc: (j['desc'] as String?) ?? '',
+      );
+}
+
+class CircuitGuide {
+  final String title;
+  final String overview;
+  final List<CircuitLegend> legend;
+  final List<CircuitStep> steps;
+  final List<CircuitRule> rules;
+  final List<CircuitChecklist> checklist;
+  final List<CircuitMasterRow> master;
+  CircuitGuide({
+    required this.title,
+    required this.overview,
+    required this.legend,
+    required this.steps,
+    required this.rules,
+    required this.checklist,
+    required this.master,
+  });
+  factory CircuitGuide.fromJson(Map<String, dynamic> j) => CircuitGuide(
+        title: (j['title'] as String?) ?? '',
+        overview: (j['overview'] as String?) ?? '',
+        legend: ((j['legend'] as List?) ?? const [])
+            .map((e) => CircuitLegend.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        steps: ((j['steps'] as List?) ?? const [])
+            .map((e) => CircuitStep.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        rules: ((j['rules'] as List?) ?? const [])
+            .map((e) => CircuitRule.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        checklist: ((j['checklist'] as List?) ?? const [])
+            .map((e) => CircuitChecklist.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        master: ((j['master'] as List?) ?? const [])
+            .map((e) => CircuitMasterRow.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
 /// 공식 마스터 가이드 — 읽는법·기호뜻·이해법·암기법·예제
 class FormulaSymbol {
   final String sym;
@@ -906,6 +1032,24 @@ class StudyData {
     return _basicsDict!;
   }
 
+  // ─── 회로도 마스터 (전 종목 공통) ───
+  CircuitGuide? _circuitGuide;
+
+  /// 모터 제어반 회로도 가이드 로드 (기호·그리기 STEP·규칙·태그표)
+  Future<CircuitGuide?> loadCircuitGuide() async {
+    if (_circuitGuide != null) return _circuitGuide;
+    try {
+      final raw = await rootBundle
+          .loadString('assets/data/common/circuit_guide.json');
+      _circuitGuide =
+          CircuitGuide.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (e) {
+      if (kDebugMode) debugPrint('circuit_guide.json 로드 실패: $e');
+      _circuitGuide = null;
+    }
+    return _circuitGuide;
+  }
+
   /// 기초사전 카테고리 순서 (loadBasicsDict 후 사용)
   List<String> get basicsCategories => _basicsCategories ?? const [];
 
@@ -935,6 +1079,58 @@ class StudyData {
         return c != 0 ? c : b.session.compareTo(a.session);
       });
     return _exams!;
+  }
+
+  /// 문제은행 총 문항 수(회독 계산용) — 4지선다 유효 문항만 카운트
+  Future<int> bankQuestionCount() async {
+    final exams = await loadExams();
+    var n = 0;
+    for (final e in exams) {
+      for (final q in e.questions) {
+        if (q.options.length == 4 && q.answer >= 1) n++;
+      }
+    }
+    return n;
+  }
+
+  /// 데이터에 존재하는 가장 최근 기출 연도 (연도별 세트 기준점)
+  Future<int> latestExamYear() async {
+    final exams = await loadExams();
+    if (exams.isEmpty) return DateTime.now().year;
+    return exams.map((e) => e.year).reduce((a, b) => a > b ? a : b);
+  }
+
+  /// 최근 [years]년치 기출문제 추출 (연도 내림차순 → 회차 순).
+  /// 5/7/10년치 풀기 세트에 사용. 유효 4지선다 문항만 포함.
+  Future<List<Question>> questionsByYearRange(int years) async {
+    final exams = await loadExams();
+    if (exams.isEmpty) return [];
+    final latest = exams.map((e) => e.year).reduce((a, b) => a > b ? a : b);
+    final minYear = latest - years + 1;
+    final papers = exams.where((e) => e.year >= minYear).toList()
+      ..sort((a, b) {
+        final c = b.year.compareTo(a.year);
+        return c != 0 ? c : b.session.compareTo(a.session);
+      });
+    final out = <Question>[];
+    for (final e in papers) {
+      for (final q in e.questions) {
+        if (q.options.length == 4 && q.answer >= 1) {
+          q.examLabel = e.label;
+          out.add(q);
+        }
+      }
+    }
+    return out;
+  }
+
+  /// 특정 연도 범위에 포함되는 회차(시험지) 수 — 세트 안내 표기용
+  Future<int> papersInYearRange(int years) async {
+    final exams = await loadExams();
+    if (exams.isEmpty) return 0;
+    final latest = exams.map((e) => e.year).reduce((a, b) => a > b ? a : b);
+    final minYear = latest - years + 1;
+    return exams.where((e) => e.year >= minYear).length;
   }
 
   List<SolutionRecipe>? _recipes;

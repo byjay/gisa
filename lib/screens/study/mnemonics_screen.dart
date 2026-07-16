@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/study_data.dart';
 import '../../services/flashcard_srs.dart';
 import 'flashcard_screen.dart';
+import '../../widgets/persistent_nav.dart';
 
 /// 암기법 사전: 과목별 필터 + 검색
 class MnemonicsScreen extends StatefulWidget {
@@ -32,11 +33,9 @@ class _MnemonicsScreenState extends State<MnemonicsScreen> {
   }
 
   Future<void> _openFlashcards() async {
-    await Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => FlashcardScreen(
+    await pushWithNav(context, FlashcardScreen(
         subjectFilter: _filter == '전체' ? null : _filter,
-      ),
-    ));
+      ), currentSection: 1);
     _loadDue();
   }
 

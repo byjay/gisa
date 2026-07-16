@@ -7,6 +7,7 @@ import '../../widgets/tutor_avatar.dart';
 import '../../widgets/rich_slide_body.dart';
 import '../../widgets/teacher_recipe_box.dart';
 import 'quiz_play_screen.dart';
+import '../../widgets/persistent_nav.dart';
 
 /// 30일 슬라이드 학습 — 덱 목록 화면
 class SlidesHomeScreen extends StatefulWidget {
@@ -35,10 +36,7 @@ class _SlidesHomeScreenState extends State<SlidesHomeScreen> {
   }
 
   void _openDeck(SlideDeck d) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => SlideDeckScreen(deck: d)),
-    ).then((_) {
+    pushWithNav(context, SlideDeckScreen(deck: d), currentSection: 1).then((_) {
       if (mounted) setState(() {});
     });
   }
@@ -671,16 +669,11 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
       return;
     }
     final take = qs.take(15).toList();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => QuizPlayScreen(
+    pushWithNav(context, QuizPlayScreen(
           title: '$topic 기출 (빈출순)',
           questions: take,
           examMode: false,
-        ),
-      ),
-    );
+        ), currentSection: 1);
   }
 
   Widget _slideCard(BuildContext context, SlideCard c, _CardStyle s) {

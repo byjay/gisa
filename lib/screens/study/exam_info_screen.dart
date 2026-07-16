@@ -14,15 +14,16 @@ class ExamInfoScreen extends StatefulWidget {
 }
 
 class _ExamInfoScreenState extends State<ExamInfoScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   Map<String, dynamic>? _info;
   bool _loading = true;
-  late TabController _tab;
+  TabController? _tab;
+  // 트랙별 데이터 유무에 따라 동적으로 구성되는 탭 목록
+  List<(String, Widget Function())> _tabs = [];
 
   @override
   void initState() {
     super.initState();
-    _tab = TabController(length: 5, vsync: this);
     _load();
   }
 
@@ -32,45 +33,50 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
     setState(() {
       _info = info;
       _loading = false;
+      if (info != null) _buildTabs(info);
     });
+  }
+
+  /// 트랙 데이터에 존재하는 항목만 탭으로 노출 (없는 키 → 크래시 방지)
+  void _buildTabs(Map<String, dynamic> info) {
+    _tabs = [
+      if (info['schedule'] is List) ('시험일정', _scheduleTab),
+      if (info['criteria2026'] != null) ('출제기준 개정', _criteriaTab),
+      if (info['kecChanges2026'] is Map) ('KEC 2026 개정', _kecTab),
+      if (info['subjectStrategies'] is List) ('과목별 전략', _strategyTab),
+      if (info['cbtTips'] is List) ('CBT 실전', _cbtTab),
+    ];
+    _tab?.dispose();
+    _tab = TabController(length: _tabs.length, vsync: this);
   }
 
   @override
   void dispose() {
-    _tab.dispose();
+    _tab?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final ready = !_loading && _info != null && _tab != null;
     return Scaffold(
       appBar: AppBar(
         title: const Text('2026 시험 정보 센터'),
-        bottom: TabBar(
-          controller: _tab,
-          isScrollable: true,
-          tabs: const [
-            Tab(text: '시험일정'),
-            Tab(text: '출제기준 개정'),
-            Tab(text: 'KEC 2026 개정'),
-            Tab(text: '과목별 전략'),
-            Tab(text: 'CBT 실전'),
-          ],
-        ),
+        bottom: ready
+            ? TabBar(
+                controller: _tab,
+                isScrollable: true,
+                tabs: [for (final t in _tabs) Tab(text: t.$1)],
+              )
+            : null,
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : _info == null
+          : !ready
               ? const Center(child: Text('시험 정보를 불러오지 못했습니다.'))
               : TabBarView(
                   controller: _tab,
-                  children: [
-                    _scheduleTab(),
-                    _criteriaTab(),
-                    _kecTab(),
-                    _strategyTab(),
-                    _cbtTab(),
-                  ],
+                  children: [for (final t in _tabs) t.$2()],
                 ),
     );
   }
@@ -593,11 +599,14 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
   // ── Tab 3: KEC 2026 개정 ─────────────────────────────────────
   Widget _kecTab() {
     final kec = _info!['kecChanges2026'] as Map<String, dynamic>;
-    final areas = (kec['areas'] as List).cast<Map<String, dynamic>>();
-    final mnemonics = (kec['mnemonics'] as List).cast<String>();
-    final traps = (kec['trapPoints'] as List).cast<String>();
-    final coverage = _info!['dataCoverage'] as Map<String, dynamic>;
-    final howTo = (coverage['howToCover'] as List).cast<String>();
+    final areas =
+        ((kec['areas'] as List?) ?? const []).cast<Map<String, dynamic>>();
+    final mnemonics = ((kec['mnemonics'] as List?) ?? const []).cast<String>();
+    final traps = ((kec['trapPoints'] as List?) ?? const []).cast<String>();
+    // dataCoverage는 일부 트랙에만 존재 → null-safe 처리
+    final coverage = _info!['dataCoverage'] as Map<String, dynamic>?;
+    final howTo =
+        ((coverage?['howToCover'] as List?) ?? const []).cast<String>();
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -637,58 +646,64 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
         ),
         const SizedBox(height: 14),
         ...areas.map(_kecAreaCard),
-        const SizedBox(height: 8),
-        _noteCard('암기법 3종 세트', mnemonics, Icons.psychology, Colors.purple),
-        const SizedBox(height: 10),
-        _noteCard('시험장 함정 5포인트 (구규정 = 오답)', traps,
-            Icons.dangerous, Colors.red),
-        const SizedBox(height: 14),
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.blueGrey.shade50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blueGrey.shade200),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.fact_check,
-                      size: 18, color: Colors.blueGrey.shade700),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(coverage['title'] as String,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13.5,
-                            color: Colors.blueGrey.shade800)),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(coverage['detail'] as String,
-                  style: const TextStyle(fontSize: 12.5, height: 1.55)),
-              const SizedBox(height: 8),
-              ...howTo.map((t) => Padding(
-                    padding: const EdgeInsets.only(bottom: 5),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.check_circle,
-                            size: 14, color: Colors.blueGrey.shade600),
-                        const SizedBox(width: 6),
-                        Expanded(
-                            child: Text(t,
-                                style: const TextStyle(
-                                    fontSize: 12.5, height: 1.5))),
-                      ],
+        if (mnemonics.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          _noteCard('암기법 3종 세트', mnemonics, Icons.psychology, Colors.purple),
+        ],
+        if (traps.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          _noteCard('시험장 함정 5포인트 (구규정 = 오답)', traps,
+              Icons.dangerous, Colors.red),
+        ],
+        if (coverage != null) ...[
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.blueGrey.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blueGrey.shade200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.fact_check,
+                        size: 18, color: Colors.blueGrey.shade700),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text((coverage['title'] as String?) ?? '데이터 커버리지',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13.5,
+                              color: Colors.blueGrey.shade800)),
                     ),
-                  )),
-            ],
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text((coverage['detail'] as String?) ?? '',
+                    style: const TextStyle(fontSize: 12.5, height: 1.55)),
+                const SizedBox(height: 8),
+                ...howTo.map((t) => Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.check_circle,
+                              size: 14, color: Colors.blueGrey.shade600),
+                          const SizedBox(width: 6),
+                          Expanded(
+                              child: Text(t,
+                                  style: const TextStyle(
+                                      fontSize: 12.5, height: 1.5))),
+                        ],
+                      ),
+                    )),
+              ],
+            ),
           ),
-        ),
+        ],
       ],
     );
   }
@@ -795,13 +810,13 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
     );
   }
 
-  // ── Tab 3: 과목별 전략 ──────────────────────────────────────
+  // ── Tab 4: 과목별 전략 ──────────────────────────────────────
   Widget _strategyTab() {
-    final strategies =
-        (_info!['subjectStrategies'] as List).cast<Map<String, dynamic>>();
-    final scenarios =
-        (_info!['scoreScenarios'] as List).cast<Map<String, dynamic>>();
-    final order = _info!['studyOrder'] as Map<String, dynamic>;
+    final strategies = ((_info!['subjectStrategies'] as List?) ?? const [])
+        .cast<Map<String, dynamic>>();
+    final scenarios = ((_info!['scoreScenarios'] as List?) ?? const [])
+        .cast<Map<String, dynamic>>();
+    final order = _info!['studyOrder'] as Map<String, dynamic>?;
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -810,25 +825,33 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
           mood: TutorMood.teaching,
           message: '${StudyData.instance.track.name}은(는) 절대평가! 100점이 아니라 "평균 60 + 과목당 40 이상"을 설계하는 시험이에요.',
         ),
-        const SizedBox(height: 12),
-        const Text('합격 점수 시나리오',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-        const SizedBox(height: 8),
-        ...scenarios.map(_scenarioCard),
-        const SizedBox(height: 16),
-        const Text('과목별 공략법',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-        const SizedBox(height: 8),
-        ...strategies.map(_strategyCard),
-        const SizedBox(height: 16),
-        const Text('추천 학습 순서',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-        const SizedBox(height: 8),
-        _orderCard('전공자 루트', (order['major'] as List).cast<String>(),
-            Colors.indigo),
-        const SizedBox(height: 8),
-        _orderCard('비전공자 루트', (order['nonMajor'] as List).cast<String>(),
-            Colors.teal),
+        if (scenarios.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          const Text('합격 점수 시나리오',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          const SizedBox(height: 8),
+          ...scenarios.map(_scenarioCard),
+        ],
+        if (strategies.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          const Text('과목별 공략법',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          const SizedBox(height: 8),
+          ...strategies.map(_strategyCard),
+        ],
+        if (order != null) ...[
+          const SizedBox(height: 16),
+          const Text('추천 학습 순서',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          const SizedBox(height: 8),
+          _orderCard('전공자 루트',
+              ((order['major'] as List?) ?? const []).cast<String>(),
+              Colors.indigo),
+          const SizedBox(height: 8),
+          _orderCard('비전공자 루트',
+              ((order['nonMajor'] as List?) ?? const []).cast<String>(),
+              Colors.teal),
+        ],
       ],
     );
   }
@@ -1014,9 +1037,9 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
     );
   }
 
-  // ── Tab 4: CBT 실전 ─────────────────────────────────────────
+  // ── Tab 5: CBT 실전 ─────────────────────────────────────────
   Widget _cbtTab() {
-    final tips = (_info!['cbtTips'] as List).cast<String>();
+    final tips = ((_info!['cbtTips'] as List?) ?? const []).cast<String>();
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [

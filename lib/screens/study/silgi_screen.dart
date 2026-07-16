@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/study_data.dart';
 import '../../widgets/tutor_avatar.dart';
 import 'lesson_screen.dart';
+import '../../widgets/persistent_nav.dart';
 
 /// 실기(필답형) 대비 화면 — 카테고리별 핵심 문답 카드 + 필기 이론 연동
 class SilgiScreen extends StatefulWidget {
@@ -217,9 +218,6 @@ class _SilgiScreenState extends State<SilgiScreen> {
       }
     }
     if (!mounted) return;
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => LessonViewerScreen(lesson: best)),
-    );
+    pushWithNav(context, LessonViewerScreen(lesson: best), currentSection: 1);
   }
 }

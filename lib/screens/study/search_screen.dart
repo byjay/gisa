@@ -3,6 +3,7 @@ import '../../services/cerebras_service.dart';
 import '../../services/study_data.dart';
 import '../../widgets/tutor_avatar.dart';
 import 'lesson_screen.dart';
+import '../../widgets/persistent_nav.dart';
 
 /// 통합 검색 결과 항목
 class _SearchHit {
@@ -364,10 +365,7 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
   void _openHit(_SearchHit h) {
     final p = h.payload;
     if (p is Lesson) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => LessonViewerScreen(lesson: p)),
-      );
+      pushWithNav(context, LessonViewerScreen(lesson: p), currentSection: 1);
     } else if (p is Mnemonic) {
       _showDetailSheet(h.title, '${p.body}\n\n💡 ${p.tip}');
     } else if (p is SlideCard) {
@@ -569,6 +567,7 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
                               const TutorAvatar(
                                 mood: TutorMood.happy,
                                 size: 44,
+                                headOnly: true,
                               ),
                               const SizedBox(width: 8),
                               Text(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/flashcard_srs.dart';
 import '../screens/study/flashcard_screen.dart';
 import '../theme/app_theme.dart';
+import 'persistent_nav.dart';
 
 /// 🃏 오늘의 암기카드 — 암기법 SRS 큐에 도착한 카드 수를 보여주고 바로 시작.
 /// 디자인 시스템(PremiumCard/IconBadge) 준수 + 다크모드 대응.
@@ -75,8 +76,7 @@ class _DueFlashcardCardState extends State<DueFlashcardCard> {
   }
 
   Future<void> _start() async {
-    await Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => const FlashcardScreen()));
+    await pushWithNav(context, const FlashcardScreen(), currentSection: 1);
     _load();
   }
 }

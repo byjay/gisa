@@ -317,7 +317,7 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
             : MainAxisAlignment.start,
         children: [
           if (!isUser) ...[
-            const TutorAvatar(mood: TutorMood.happy, size: 34, animate: false),
+            const TutorAvatar(mood: TutorMood.happy, size: 34, animate: false, headOnly: true),
             const SizedBox(width: 8),
           ],
           Flexible(
@@ -426,7 +426,7 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          const TutorAvatar(mood: TutorMood.thinking, size: 34),
+          const TutorAvatar(mood: TutorMood.thinking, size: 34, headOnly: true),
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),

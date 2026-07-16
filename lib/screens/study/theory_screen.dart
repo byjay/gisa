@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/study_data.dart';
 import 'quiz_play_screen.dart';
+import '../../widgets/persistent_nav.dart';
 
 /// 핵심이론서: 과목 선택 → 마크다운 이론서 열람 (간이 렌더러)
 class TheoryScreen extends StatelessWidget {
@@ -25,11 +26,7 @@ class TheoryScreen extends StatelessWidget {
                 title: Text(kSubjects[i]),
                 subtitle: const Text('빈출 토픽 순위 · 공식 · 암기법 · 강의링크 포함'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => TheoryViewer(subject: kSubjects[i]),
-                  ),
-                ),
+                onTap: () => pushWithNav(context, TheoryViewer(subject: kSubjects[i]), currentSection: 1),
               ),
             ),
         ],
@@ -172,15 +169,11 @@ class _TheoryViewerState extends State<TheoryViewer> {
         ).showSnackBar(const SnackBar(content: Text('연결된 기초 문제가 없습니다.')));
         return;
       }
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => QuizPlayScreen(
+      await pushWithNav(context, QuizPlayScreen(
             title: '${widget.subject} 기초 확인 10문제',
             questions: questions.take(10).toList(),
             examMode: false,
-          ),
-        ),
-      );
+          ), currentSection: 1);
     } finally {
       if (mounted) setState(() => _startingQuiz = false);
     }

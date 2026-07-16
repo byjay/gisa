@@ -6634,5 +6634,4982 @@
     "freq_score": 86.0
    }
   ]
+ },
+ {
+  "id": "2020_3",
+  "label": "2020년 3회",
+  "year": 2020,
+  "session": 3,
+  "question_count": 32,
+  "questions": [
+   {
+    "no": 1,
+    "subject": "소방원론",
+    "topic": "열전달·연소생성물",
+    "question": "화재 시 연기의 수직방향 유동속도는 약 몇 m/s인가?",
+    "options": [
+     "0.5~1",
+     "1~2",
+     "2~3",
+     "5~10"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 연기 유동속도: 수평 0.5~1 m/s, 수직(계단 등) 2~3 m/s.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 2,
+    "subject": "소방원론",
+    "topic": "위험물 성상",
+    "question": "가연성 증기의 증기비중을 구하는 식은? (공기 평균분자량 29)",
+    "options": [
+     "분자량/29",
+     "29/분자량",
+     "분자량×29",
+     "분자량-29"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 증기비중=분자량/29. 1보다 크면 낮은 곳에 체류(위험).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 3,
+    "subject": "소방원론",
+    "topic": "열전달·연소생성물",
+    "question": "일산화탄소(CO)가 인체에 위험한 주된 이유는?",
+    "options": [
+     "헤모글로빈과 결합하여 산소운반을 방해",
+     "폐부종 유발",
+     "신경 마비",
+     "피부 부식"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: CO는 헤모글로빈과의 친화력이 산소의 약 210배 → 산소운반 저해.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 4,
+    "subject": "소방원론",
+    "topic": "건축방화·피난",
+    "question": "피난동선의 특성으로 옳지 않은 것은?",
+    "options": [
+     "수평동선과 수직동선으로 구분된다",
+     "가급적 단순하고 명확해야 한다",
+     "2방향 이상의 피난로를 확보한다",
+     "피난동선은 복잡할수록 안전하다"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 피난동선은 단순·명확해야 하며 막다른 통로가 없어야 함.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 5,
+    "subject": "소방원론",
+    "topic": "건축방화·피난",
+    "question": "건축물 화재 시 인간의 피난 본능으로 틀린 것은?",
+    "options": [
+     "귀소본능",
+     "지광본능",
+     "추종본능",
+     "원거리 지향본능"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 피난 본능: 귀소·지광(밝은 곳)·추종·퇴피·좌회 본능 등.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 6,
+    "subject": "소방원론",
+    "topic": "열전달·연소생성물",
+    "question": "열전달 방식이 아닌 것은?",
+    "options": [
+     "전도",
+     "대류",
+     "복사",
+     "산화"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 열전달 3방식: 전도·대류·복사. 산화는 화학반응.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 7,
+    "subject": "소방원론",
+    "topic": "위험물 성상",
+    "question": "제4류 위험물의 공통 성질은?",
+    "options": [
+     "산화성 고체",
+     "인화성 액체",
+     "자연발화성 물질",
+     "금수성 물질"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 제4류=인화성 액체(특수인화물·석유류·알코올류·동식물유류).",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 8,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "물의 증발잠열은 약 몇 cal/g인가?",
+    "options": [
+     "239",
+     "439",
+     "539",
+     "639"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 물 증발잠열 539 cal/g — 냉각소화 효과가 큰 이유.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 9,
+    "subject": "소방전기일반",
+    "topic": "반도체·다이오드",
+    "question": "제너다이오드의 주된 용도는?",
+    "options": [
+     "전압 안정(정전압)",
+     "전류 증폭",
+     "발광",
+     "정류"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 제너다이오드=역방향 항복특성을 이용한 정전압 소자.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 10,
+    "subject": "소방전기일반",
+    "topic": "계측·측정",
+    "question": "휘트스톤 브리지의 평형조건은? (대각 저항 P,Q,R,X)",
+    "options": [
+     "PX=QR",
+     "PQ=RX",
+     "P+X=Q+R",
+     "P/X=Q/R"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 브리지 평형: 마주보는 변의 곱이 같다 → PX=QR.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 11,
+    "subject": "소방전기일반",
+    "topic": "전동기·발전기",
+    "question": "변압기의 권수비 a는? (1차 N₁, 2차 N₂)",
+    "options": [
+     "N₁/N₂=V₁/V₂",
+     "N₁/N₂=V₂/V₁",
+     "N₁N₂=V₁V₂",
+     "N₁+N₂=V₁+V₂"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: a=N₁/N₂=V₁/V₂=I₂/I₁. 전압은 권수에 비례, 전류는 반비례.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 12,
+    "subject": "소방전기일반",
+    "topic": "계측·측정",
+    "question": "온도가 올라가면 저항이 감소하는 부(-)특성 소자로 온도 측정에 쓰이는 것은?",
+    "options": [
+     "서미스터(NTC)",
+     "바리스터",
+     "제너다이오드",
+     "CdS"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: NTC 서미스터=온도↑ 저항↓. 온도 감지·측정용. 바리스터는 전압 의존.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 13,
+    "subject": "소방전기일반",
+    "topic": "계측·측정",
+    "question": "전압계의 측정범위를 확대하기 위해 사용하는 것은?",
+    "options": [
+     "분류기(병렬 저항)",
+     "배율기(직렬 저항)",
+     "변류기",
+     "계기용 변압기"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 배율기=전압계에 직렬 저항, 분류기=전류계에 병렬 저항.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 14,
+    "subject": "소방전기일반",
+    "topic": "전동기·발전기",
+    "question": "유도전동기의 슬립 s의 정의는?",
+    "options": [
+     "(Ns-N)/Ns",
+     "(N-Ns)/N",
+     "Ns/N",
+     "N/Ns"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 슬립 s=(동기속도-회전속도)/동기속도. 기동 시 s=1, 무부하 시 s≈0.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 15,
+    "subject": "소방전기일반",
+    "topic": "반도체·다이오드",
+    "question": "SCR(실리콘 제어 정류기)에 대한 설명으로 틀린 것은?",
+    "options": [
+     "PNPN 4층 구조이다",
+     "게이트 신호로 턴온한다",
+     "게이트 신호로 턴오프할 수 있다",
+     "정류 및 위상제어에 사용된다"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: SCR은 게이트로 턴온만 가능. 턴오프는 전류를 유지전류 이하로 낮춰야 함(GTO는 게이트 턴오프 가능).",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 16,
+    "subject": "소방전기일반",
+    "topic": "반도체·다이오드",
+    "question": "브리지 정류회로에 다이오드는 몇 개 필요한가?",
+    "options": [
+     "1개",
+     "2개",
+     "4개",
+     "6개"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 단상 브리지 전파정류=다이오드 4개. 3상 브리지=6개.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 17,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "소방용수시설의 소화전 연결금속구 구경은?",
+    "options": [
+     "40mm",
+     "50mm",
+     "65mm",
+     "100mm"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 소화전 연결금속구 구경 65mm. 급수탑 개폐밸브는 지상 1.5~1.7m.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 18,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "소화활동설비에 해당하는 것은?",
+    "options": [
+     "옥내소화전설비",
+     "스프링클러설비",
+     "무선통신보조설비",
+     "자동화재탐지설비"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 소화활동설비: 제연·연결송수관·연결살수·비상콘센트·무선통신보조·연소방지설비.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 19,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "위험물안전관리자 해임 시 재선임 기한은?",
+    "options": [
+     "14일 이내",
+     "30일 이내",
+     "60일 이내",
+     "90일 이내"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 해임·퇴직일부터 30일 이내 재선임, 선임 후 14일 이내 신고.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 20,
+    "subject": "소방관계법규",
+    "topic": "다중이용업소법",
+    "question": "다중이용업소에 설치하는 안전시설등에 해당하지 않는 것은?",
+    "options": [
+     "소화설비",
+     "경보설비",
+     "피난설비",
+     "주차설비"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 안전시설등=소화설비·경보설비·피난설비·비상구·영업장 내부 피난통로 등.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 21,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "제1류 위험물의 공통 성질은?",
+    "options": [
+     "산화성 고체",
+     "가연성 고체",
+     "인화성 액체",
+     "자기반응성 물질"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 제1류=산화성 고체, 제2류=가연성 고체, 제3류=자연발화성·금수성, 제4류=인화성 액체, 제5류=자기반응성, 제6류=산화성 액체.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 22,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "자체소방대를 설치해야 하는 제4류 위험물 취급 제조소의 지정수량 기준은?",
+    "options": [
+     "1천배 이상",
+     "2천배 이상",
+     "3천배 이상",
+     "5천배 이상"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 제4류 위험물을 지정수량 3천배 이상 취급하는 제조소·일반취급소는 자체소방대 설치.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 23,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "위험물 제조소등의 설치허가권자는?",
+    "options": [
+     "소방서장",
+     "시·도지사",
+     "소방청장",
+     "행정안전부장관"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 제조소등의 설치·변경 허가는 시·도지사.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 24,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "피난층에 대한 정의로 옳은 것은?",
+    "options": [
+     "곧바로 지상으로 갈 수 있는 출입구가 있는 층",
+     "1층",
+     "옥상층",
+     "지하 1층"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 피난층=곧바로 지상으로 통하는 출입구가 있는 층(반드시 1층은 아님).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 25,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "비상전원·축전지",
+    "question": "축전지 용량 산출식 C=1/L×KI에서 L은 무엇인가?",
+    "options": [
+     "용량저하율(보수율)",
+     "방전전류",
+     "용량환산시간",
+     "전지 셀 수"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: C=(1/L)·K·I. L=보수율(통상 0.8), K=용량환산시간 계수, I=방전전류.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 26,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "비상전원·축전지",
+    "question": "비상콘센트설비의 전원회로 규격은?",
+    "options": [
+     "단상 100V 1kVA",
+     "단상 220V 1.5kVA 이상",
+     "3상 380V 3kVA",
+     "단상 220V 3kVA 이상"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 비상콘센트: 단상교류 220V, 공급용량 1.5kVA 이상, 접지형 2극 플러그접속기.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 27,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "유도등·비상조명",
+    "question": "복도통로유도등은 보행거리 몇 m마다 설치하는가?",
+    "options": [
+     "10m",
+     "15m",
+     "20m",
+     "25m"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 통로유도등: 구부러진 모퉁이 및 보행거리 20m마다, 바닥에서 1m 이하.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 28,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "제연·연동제어",
+    "question": "무선통신보조설비에 사용되는 케이블은?",
+    "options": [
+     "CV 케이블",
+     "누설동축케이블",
+     "HFIX 전선",
+     "MI 케이블"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 무선통신보조설비=누설동축케이블(LCX) 또는 안테나 방식.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 29,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "비상전원·축전지",
+    "question": "연축전지의 공칭전압은 셀당 몇 V인가?",
+    "options": [
+     "1.2V",
+     "1.5V",
+     "2.0V",
+     "3.0V"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 연(납)축전지 2.0V/셀, 알칼리축전지 1.2V/셀. 알칼리는 수명이 길고 온도특성 우수.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 30,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "경보설비·비상방송",
+    "question": "누전경보기에서 1급 경보기의 경계전로 정격전류 기준은?",
+    "options": [
+     "30A 초과",
+     "60A 초과",
+     "100A 초과",
+     "200A 초과"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 경계전로 60A 초과=1급, 60A 이하=2급 누전경보기 설치.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 31,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "유도등·비상조명",
+    "question": "피난구유도등의 표시 색상은?",
+    "options": [
+     "녹색 바탕에 백색 문자",
+     "백색 바탕에 녹색 문자",
+     "적색 바탕에 백색 문자",
+     "백색 바탕에 적색 문자"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 피난구유도등=녹색바탕 백색문자. 통로유도등=백색바탕 녹색문자.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 32,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "유도등·비상조명",
+    "question": "비상조명등의 바닥 조도 기준은?",
+    "options": [
+     "0.5 lx 이상",
+     "1 lx 이상",
+     "2 lx 이상",
+     "5 lx 이상"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 비상조명등: 각 부분 바닥에서 1 lx 이상. 60분(일부 대상물) 또는 20분 이상 작동.",
+    "difficulty": 3,
+    "freq_score": 3
+   }
+  ]
+ },
+ {
+  "id": "2020_2",
+  "label": "2020년 2회",
+  "year": 2020,
+  "session": 2,
+  "question_count": 32,
+  "questions": [
+   {
+    "no": 1,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "물의 증발잠열은 약 몇 cal/g인가?",
+    "options": [
+     "239",
+     "439",
+     "539",
+     "639"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 물 증발잠열 539 cal/g — 냉각소화 효과가 큰 이유.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 2,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "화재의 분류에서 C급 화재는?",
+    "options": [
+     "일반화재",
+     "유류화재",
+     "전기화재",
+     "금속화재"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: A급 일반(백색), B급 유류(황색), C급 전기(청색), D급 금속(무색).",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 3,
+    "subject": "소방원론",
+    "topic": "열전달·연소생성물",
+    "question": "열전달 방식이 아닌 것은?",
+    "options": [
+     "전도",
+     "대류",
+     "복사",
+     "산화"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 열전달 3방식: 전도·대류·복사. 산화는 화학반응.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 4,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "제3종 분말소화약제의 주성분은?",
+    "options": [
+     "탄산수소나트륨",
+     "탄산수소칼륨",
+     "제1인산암모늄",
+     "요소"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 제3종=NH₄H₂PO₄(제1인산암모늄), 담홍색, A·B·C급 적용 가능한 유일한 분말.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 5,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "할론 1301의 화학식은?",
+    "options": [
+     "CF₃Br",
+     "CF₂ClBr",
+     "C₂F₄Br₂",
+     "CCl₄"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 할론 번호=C·F·Cl·Br 순. 1301=C 1개, F 3개, Cl 0개, Br 1개 → CF₃Br.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 6,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "플래시오버(Flash Over)에 대한 설명으로 옳은 것은?",
+    "options": [
+     "실내 가연물이 일시에 폭발적으로 착화하는 현상",
+     "산소 부족 상태에서 급격히 공기가 유입되어 폭발하는 현상",
+     "가연성 액체의 증기폭발",
+     "분진의 폭발 현상"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 플래시오버=성장기→최성기 전환 시 실내 전체 가연물이 일시 착화. 급격한 공기 유입 폭발은 백드래프트.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 7,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "이산화탄소 소화약제의 주된 소화효과는?",
+    "options": [
+     "냉각효과",
+     "질식효과",
+     "부촉매효과",
+     "제거효과"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: CO₂는 산소농도를 낮추는 질식소화가 주효과(+약간의 냉각).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 8,
+    "subject": "소방원론",
+    "topic": "열전달·연소생성물",
+    "question": "일산화탄소(CO)가 인체에 위험한 주된 이유는?",
+    "options": [
+     "헤모글로빈과 결합하여 산소운반을 방해",
+     "폐부종 유발",
+     "신경 마비",
+     "피부 부식"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: CO는 헤모글로빈과의 친화력이 산소의 약 210배 → 산소운반 저해.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 9,
+    "subject": "소방전기일반",
+    "topic": "전동기·발전기",
+    "question": "변압기의 권수비 a는? (1차 N₁, 2차 N₂)",
+    "options": [
+     "N₁/N₂=V₁/V₂",
+     "N₁/N₂=V₂/V₁",
+     "N₁N₂=V₁V₂",
+     "N₁+N₂=V₁+V₂"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: a=N₁/N₂=V₁/V₂=I₂/I₁. 전압은 권수에 비례, 전류는 반비례.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 10,
+    "subject": "소방전기일반",
+    "topic": "전자기·정전기",
+    "question": "플레밍의 왼손법칙에서 엄지가 가리키는 것은?",
+    "options": [
+     "자속밀도",
+     "전류",
+     "힘(운동방향)",
+     "기전력"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 왼손(전동기): 엄지=힘, 검지=자속, 중지=전류. 오른손은 발전기.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 11,
+    "subject": "소방전기일반",
+    "topic": "전자기·정전기",
+    "question": "콘덴서 C₁, C₂를 직렬 연결한 합성 정전용량은?",
+    "options": [
+     "C₁+C₂",
+     "C₁C₂/(C₁+C₂)",
+     "(C₁+C₂)/C₁C₂",
+     "C₁C₂"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 콘덴서 직렬=곱/합(저항 병렬과 동일 형태), 병렬=합.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 12,
+    "subject": "소방전기일반",
+    "topic": "전동기·발전기",
+    "question": "유도전동기의 슬립 s의 정의는?",
+    "options": [
+     "(Ns-N)/Ns",
+     "(N-Ns)/N",
+     "Ns/N",
+     "N/Ns"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 슬립 s=(동기속도-회전속도)/동기속도. 기동 시 s=1, 무부하 시 s≈0.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 13,
+    "subject": "소방전기일반",
+    "topic": "전자기·정전기",
+    "question": "렌츠의 법칙과 관계있는 것은?",
+    "options": [
+     "유도기전력의 방향",
+     "전자력의 방향",
+     "전류의 발열작용",
+     "정전유도"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 렌츠 법칙: 유도기전력은 자속 변화를 방해하는 방향. 크기는 패러데이 법칙.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 14,
+    "subject": "소방전기일반",
+    "topic": "반도체·다이오드",
+    "question": "제너다이오드의 주된 용도는?",
+    "options": [
+     "전압 안정(정전압)",
+     "전류 증폭",
+     "발광",
+     "정류"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 제너다이오드=역방향 항복특성을 이용한 정전압 소자.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 15,
+    "subject": "소방전기일반",
+    "topic": "전동기·발전기",
+    "question": "동기속도 Ns를 나타내는 식은? (f: 주파수, P: 극수)",
+    "options": [
+     "120f/P",
+     "120P/f",
+     "60f/P",
+     "f/(120P)"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: Ns=120f/P [rpm]. 4극 60Hz → 1800rpm.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 16,
+    "subject": "소방전기일반",
+    "topic": "직류·교류회로",
+    "question": "역률(power factor)의 정의로 옳은 것은?",
+    "options": [
+     "무효전력/피상전력",
+     "유효전력/피상전력",
+     "유효전력/무효전력",
+     "피상전력/유효전력"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 역률 cosθ=유효전력 P/피상전력 S.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 17,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "소화활동설비에 해당하는 것은?",
+    "options": [
+     "옥내소화전설비",
+     "스프링클러설비",
+     "무선통신보조설비",
+     "자동화재탐지설비"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 소화활동설비: 제연·연결송수관·연결살수·비상콘센트·무선통신보조·연소방지설비.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 18,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "피난층에 대한 정의로 옳은 것은?",
+    "options": [
+     "곧바로 지상으로 갈 수 있는 출입구가 있는 층",
+     "1층",
+     "옥상층",
+     "지하 1층"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 피난층=곧바로 지상으로 통하는 출입구가 있는 층(반드시 1층은 아님).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 19,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "위험물 제조소등의 설치허가권자는?",
+    "options": [
+     "소방서장",
+     "시·도지사",
+     "소방청장",
+     "행정안전부장관"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 제조소등의 설치·변경 허가는 시·도지사.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 20,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "경보설비에 해당하지 않는 것은?",
+    "options": [
+     "자동화재탐지설비",
+     "비상방송설비",
+     "누전경보기",
+     "비상콘센트설비"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 비상콘센트설비는 소화활동설비. 경보설비: 자탐·시각경보기·비상방송·누전경보기·가스누설경보기 등.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 21,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "건축허가 동의 대상 - 일반 건축물의 연면적 기준은?",
+    "options": [
+     "200㎡ 이상",
+     "400㎡ 이상",
+     "600㎡ 이상",
+     "1000㎡ 이상"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 건축허가 동의: 연면적 400㎡ 이상(학교 100㎡, 노유자시설 200㎡, 정신의료기관 300㎡ 등 예외).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 22,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "무창층에서 개구부 면적 합계는 해당 층 바닥면적의 얼마 이하인가?",
+    "options": [
+     "1/10",
+     "1/20",
+     "1/30",
+     "1/50"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 무창층=개구부 면적 합계가 바닥면적의 1/30 이하인 층.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 23,
+    "subject": "소방관계법규",
+    "topic": "화재예방법",
+    "question": "소방안전관리자를 선임한 경우 신고 기한은?",
+    "options": [
+     "7일 이내",
+     "14일 이내",
+     "30일 이내",
+     "60일 이내"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 선임한 날부터 14일 이내에 소방본부장·소방서장에게 신고.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 24,
+    "subject": "소방관계법규",
+    "topic": "화재예방법",
+    "question": "화재예방강화지구의 지정권자는?",
+    "options": [
+     "소방서장",
+     "소방본부장",
+     "시·도지사",
+     "행정안전부장관"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 화재예방강화지구는 시·도지사가 지정.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 25,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "경보설비·비상방송",
+    "question": "비상방송설비에서 기동장치 조작 후 방송 개시까지 소요시간은?",
+    "options": [
+     "5초 이하",
+     "10초 이하",
+     "20초 이하",
+     "30초 이하"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 비상방송: 기동 후 10초 이하에 방송 개시.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 26,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "경보설비·비상방송",
+    "question": "누전경보기에서 1급 경보기의 경계전로 정격전류 기준은?",
+    "options": [
+     "30A 초과",
+     "60A 초과",
+     "100A 초과",
+     "200A 초과"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 경계전로 60A 초과=1급, 60A 이하=2급 누전경보기 설치.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 27,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "P형 1급 발신기는 수평거리 몇 m 이하마다 설치하는가?",
+    "options": [
+     "15m",
+     "20m",
+     "25m",
+     "50m"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 발신기: 층마다, 수평거리 25m 이하. 바닥에서 0.8~1.5m 높이.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 28,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "유도등·비상조명",
+    "question": "피난구유도등의 표시 색상은?",
+    "options": [
+     "녹색 바탕에 백색 문자",
+     "백색 바탕에 녹색 문자",
+     "적색 바탕에 백색 문자",
+     "백색 바탕에 적색 문자"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 피난구유도등=녹색바탕 백색문자. 통로유도등=백색바탕 녹색문자.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 29,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "R형 수신기의 특징으로 옳은 것은?",
+    "options": [
+     "각 회선마다 전용 배선 필요",
+     "중계기를 이용한 다중전송방식",
+     "소규모 건물에만 사용",
+     "고유신호 수신 불가"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: R형=다중전송(고유신호), 배선 절약, 대규모 적합. P형=회선별 공통신호.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 30,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "유도등·비상조명",
+    "question": "복도통로유도등은 보행거리 몇 m마다 설치하는가?",
+    "options": [
+     "10m",
+     "15m",
+     "20m",
+     "25m"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 통로유도등: 구부러진 모퉁이 및 보행거리 20m마다, 바닥에서 1m 이하.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 31,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "경보설비·비상방송",
+    "question": "비상방송설비 확성기의 음성입력은 실내 기준 몇 W 이상?",
+    "options": [
+     "1W",
+     "2W",
+     "3W",
+     "5W"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 확성기 음성입력: 실내 1W 이상, 실외 3W 이상. 수평거리 25m 이하.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 32,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "자동화재탐지설비 음향장치의 음량은 중심에서 1m 떨어진 곳에서 몇 dB 이상?",
+    "options": [
+     "60dB",
+     "70dB",
+     "80dB",
+     "90dB"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 음향장치: 1m 거리에서 90dB 이상. 수평거리 25m 이하마다 설치.",
+    "difficulty": 2,
+    "freq_score": 4
+   }
+  ]
+ },
+ {
+  "id": "2020_1",
+  "label": "2020년 1회",
+  "year": 2020,
+  "session": 1,
+  "question_count": 32,
+  "questions": [
+   {
+    "no": 1,
+    "subject": "소방원론",
+    "topic": "위험물 성상",
+    "question": "가연성 증기의 증기비중을 구하는 식은? (공기 평균분자량 29)",
+    "options": [
+     "분자량/29",
+     "29/분자량",
+     "분자량×29",
+     "분자량-29"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 증기비중=분자량/29. 1보다 크면 낮은 곳에 체류(위험).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 2,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "자연발화를 방지하는 방법으로 틀린 것은?",
+    "options": [
+     "통풍을 잘 시킨다",
+     "습도를 높게 유지한다",
+     "저장실 온도를 낮춘다",
+     "퇴적 시 열이 쌓이지 않게 한다"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 습도가 높으면 미생물 발열 등으로 자연발화가 촉진됨. 습도는 낮게 유지.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 3,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "연소의 4요소에 해당하지 않는 것은?",
+    "options": [
+     "가연물",
+     "산소공급원",
+     "점화원",
+     "기화열"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 연소의 4요소: 가연물·산소공급원·점화원·연쇄반응. 기화열은 해당 없음.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 4,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "인화점에 대한 설명으로 옳은 것은?",
+    "options": [
+     "외부 점화원 없이 스스로 발화하는 최저온도",
+     "점화원에 의해 인화될 수 있는 최저온도",
+     "연소가 지속되는 최저온도",
+     "증기압이 대기압과 같아지는 온도"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 인화점=점화원 존재 시 불이 붙는 최저온도. 점화원 없이 발화하면 발화점.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 5,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "화재의 분류에서 C급 화재는?",
+    "options": [
+     "일반화재",
+     "유류화재",
+     "전기화재",
+     "금속화재"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: A급 일반(백색), B급 유류(황색), C급 전기(청색), D급 금속(무색).",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 6,
+    "subject": "소방원론",
+    "topic": "위험물 성상",
+    "question": "제4류 위험물의 공통 성질은?",
+    "options": [
+     "산화성 고체",
+     "인화성 액체",
+     "자연발화성 물질",
+     "금수성 물질"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 제4류=인화성 액체(특수인화물·석유류·알코올류·동식물유류).",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 7,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "플래시오버(Flash Over)에 대한 설명으로 옳은 것은?",
+    "options": [
+     "실내 가연물이 일시에 폭발적으로 착화하는 현상",
+     "산소 부족 상태에서 급격히 공기가 유입되어 폭발하는 현상",
+     "가연성 액체의 증기폭발",
+     "분진의 폭발 현상"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 플래시오버=성장기→최성기 전환 시 실내 전체 가연물이 일시 착화. 급격한 공기 유입 폭발은 백드래프트.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 8,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "제3종 분말소화약제의 주성분은?",
+    "options": [
+     "탄산수소나트륨",
+     "탄산수소칼륨",
+     "제1인산암모늄",
+     "요소"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 제3종=NH₄H₂PO₄(제1인산암모늄), 담홍색, A·B·C급 적용 가능한 유일한 분말.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 9,
+    "subject": "소방전기일반",
+    "topic": "직류·교류회로",
+    "question": "저항 R₁, R₂를 병렬 연결한 합성저항은?",
+    "options": [
+     "R₁+R₂",
+     "R₁R₂/(R₁+R₂)",
+     "(R₁+R₂)/R₁R₂",
+     "1/(R₁+R₂)"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 병렬 합성저항=곱/합. 직렬은 그냥 합.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 10,
+    "subject": "소방전기일반",
+    "topic": "전자기·정전기",
+    "question": "렌츠의 법칙과 관계있는 것은?",
+    "options": [
+     "유도기전력의 방향",
+     "전자력의 방향",
+     "전류의 발열작용",
+     "정전유도"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 렌츠 법칙: 유도기전력은 자속 변화를 방해하는 방향. 크기는 패러데이 법칙.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 11,
+    "subject": "소방전기일반",
+    "topic": "계측·측정",
+    "question": "휘트스톤 브리지의 평형조건은? (대각 저항 P,Q,R,X)",
+    "options": [
+     "PX=QR",
+     "PQ=RX",
+     "P+X=Q+R",
+     "P/X=Q/R"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 브리지 평형: 마주보는 변의 곱이 같다 → PX=QR.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 12,
+    "subject": "소방전기일반",
+    "topic": "전자기·정전기",
+    "question": "콘덴서 C₁, C₂를 직렬 연결한 합성 정전용량은?",
+    "options": [
+     "C₁+C₂",
+     "C₁C₂/(C₁+C₂)",
+     "(C₁+C₂)/C₁C₂",
+     "C₁C₂"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 콘덴서 직렬=곱/합(저항 병렬과 동일 형태), 병렬=합.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 13,
+    "subject": "소방전기일반",
+    "topic": "직류·교류회로",
+    "question": "3상 평형회로의 유효전력 P는?",
+    "options": [
+     "VIcosθ",
+     "√3VIcosθ",
+     "3VIcosθ",
+     "√3VIsinθ"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 3상 전력 P=√3·V선간·I선·cosθ [W].",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 14,
+    "subject": "소방전기일반",
+    "topic": "직류·교류회로",
+    "question": "역률(power factor)의 정의로 옳은 것은?",
+    "options": [
+     "무효전력/피상전력",
+     "유효전력/피상전력",
+     "유효전력/무효전력",
+     "피상전력/유효전력"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 역률 cosθ=유효전력 P/피상전력 S.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 15,
+    "subject": "소방전기일반",
+    "topic": "계측·측정",
+    "question": "온도가 올라가면 저항이 감소하는 부(-)특성 소자로 온도 측정에 쓰이는 것은?",
+    "options": [
+     "서미스터(NTC)",
+     "바리스터",
+     "제너다이오드",
+     "CdS"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: NTC 서미스터=온도↑ 저항↓. 온도 감지·측정용. 바리스터는 전압 의존.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 16,
+    "subject": "소방전기일반",
+    "topic": "직류·교류회로",
+    "question": "RLC 직렬회로의 공진주파수 f₀는?",
+    "options": [
+     "1/(2π√(LC))",
+     "2π√(LC)",
+     "1/(2πLC)",
+     "√(LC)/(2π)"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 직렬공진 XL=XC → f₀=1/(2π√LC). 공진 시 임피던스 최소·전류 최대·역률 1.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 17,
+    "subject": "소방관계법규",
+    "topic": "화재예방법",
+    "question": "화재예방강화지구의 지정권자는?",
+    "options": [
+     "소방서장",
+     "소방본부장",
+     "시·도지사",
+     "행정안전부장관"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 화재예방강화지구는 시·도지사가 지정.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 18,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "소방용수시설의 소화전 연결금속구 구경은?",
+    "options": [
+     "40mm",
+     "50mm",
+     "65mm",
+     "100mm"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 소화전 연결금속구 구경 65mm. 급수탑 개폐밸브는 지상 1.5~1.7m.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 19,
+    "subject": "소방관계법규",
+    "topic": "소방기본법",
+    "question": "소방기본법의 목적으로 거리가 먼 것은?",
+    "options": [
+     "화재의 예방·경계·진압",
+     "공공의 안녕 및 질서 유지",
+     "국민의 생명·신체·재산 보호",
+     "건축물의 안전한 설계"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 소방기본법 목적: 화재 예방·경계·진압, 구조·구급, 공공 안녕질서 유지와 복리증진. 건축설계는 건축법.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 20,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "무창층에서 개구부 면적 합계는 해당 층 바닥면적의 얼마 이하인가?",
+    "options": [
+     "1/10",
+     "1/20",
+     "1/30",
+     "1/50"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 무창층=개구부 면적 합계가 바닥면적의 1/30 이하인 층.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 21,
+    "subject": "소방관계법규",
+    "topic": "화재예방법",
+    "question": "소방안전관리자를 선임한 경우 신고 기한은?",
+    "options": [
+     "7일 이내",
+     "14일 이내",
+     "30일 이내",
+     "60일 이내"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 선임한 날부터 14일 이내에 소방본부장·소방서장에게 신고.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 22,
+    "subject": "소방관계법규",
+    "topic": "다중이용업소법",
+    "question": "다중이용업소에 설치하는 안전시설등에 해당하지 않는 것은?",
+    "options": [
+     "소화설비",
+     "경보설비",
+     "피난설비",
+     "주차설비"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 안전시설등=소화설비·경보설비·피난설비·비상구·영업장 내부 피난통로 등.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 23,
+    "subject": "소방관계법규",
+    "topic": "소방기본법",
+    "question": "소방활동구역에 출입할 수 없는 사람은?",
+    "options": [
+     "구역 내 소유자·관리자·점유자",
+     "전기·가스 업무 종사자로서 원활한 소방활동에 필요한 자",
+     "의사·간호사",
+     "일반 취재 희망 시민"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 소방활동구역 출입: 관계인, 전기·가스·수도·통신 종사자, 의료인, 취재인력(허가), 수사업무 종사자 등. 일반 시민은 불가.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 24,
+    "subject": "소방관계법규",
+    "topic": "소방기본법",
+    "question": "소방자동차의 우선통행에 관한 사항은 어느 법에 따르는가?",
+    "options": [
+     "소방기본법",
+     "도로교통법",
+     "자동차관리법",
+     "소방시설법"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 소방차 우선통행은 도로교통법에 따름(소방기본법에 규정된 준용사항).",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 25,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "하나의 경계구역 면적과 한 변 길이 기준은?",
+    "options": [
+     "500㎡ 이하, 40m 이하",
+     "600㎡ 이하, 50m 이하",
+     "1000㎡ 이하, 50m 이하",
+     "1200㎡ 이하, 60m 이하"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 경계구역: 600㎡ 이하, 한 변 50m 이하(주된 출입구에서 내부 전체가 보이면 1000㎡).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 26,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "P형 1급 발신기는 수평거리 몇 m 이하마다 설치하는가?",
+    "options": [
+     "15m",
+     "20m",
+     "25m",
+     "50m"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 발신기: 층마다, 수평거리 25m 이하. 바닥에서 0.8~1.5m 높이.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 27,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "부착높이 8m 이상 15m 미만에 설치할 수 없는 감지기는?",
+    "options": [
+     "차동식 분포형",
+     "이온화식 1종",
+     "광전식 1종",
+     "정온식 스포트형"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 8~15m: 차동식 분포형, 이온화식 1·2종, 광전식 1·2종, 연기복합형, 불꽃감지기. 정온식 스포트형은 4m 미만(특종·1종은 8m 미만).",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 28,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "정온식 스포트형 감지기를 설치하기에 가장 적합한 장소는?",
+    "options": [
+     "거실",
+     "복도",
+     "보일러실",
+     "계단"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 정온식=일정 온도 도달 시 작동. 화기 취급 장소(보일러실·주방)에 적합.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 29,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "비상전원·축전지",
+    "question": "비상콘센트설비의 전원회로 규격은?",
+    "options": [
+     "단상 100V 1kVA",
+     "단상 220V 1.5kVA 이상",
+     "3상 380V 3kVA",
+     "단상 220V 3kVA 이상"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 비상콘센트: 단상교류 220V, 공급용량 1.5kVA 이상, 접지형 2극 플러그접속기.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 30,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "제연·연동제어",
+    "question": "무선통신보조설비에 사용되는 케이블은?",
+    "options": [
+     "CV 케이블",
+     "누설동축케이블",
+     "HFIX 전선",
+     "MI 케이블"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 무선통신보조설비=누설동축케이블(LCX) 또는 안테나 방식.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 31,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "자동화재탐지설비 음향장치의 음량은 중심에서 1m 떨어진 곳에서 몇 dB 이상?",
+    "options": [
+     "60dB",
+     "70dB",
+     "80dB",
+     "90dB"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 음향장치: 1m 거리에서 90dB 이상. 수평거리 25m 이하마다 설치.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 32,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "R형 수신기의 특징으로 옳은 것은?",
+    "options": [
+     "각 회선마다 전용 배선 필요",
+     "중계기를 이용한 다중전송방식",
+     "소규모 건물에만 사용",
+     "고유신호 수신 불가"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: R형=다중전송(고유신호), 배선 절약, 대규모 적합. P형=회선별 공통신호.",
+    "difficulty": 3,
+    "freq_score": 3
+   }
+  ]
+ },
+ {
+  "id": "2019_3",
+  "label": "2019년 3회",
+  "year": 2019,
+  "session": 3,
+  "question_count": 32,
+  "questions": [
+   {
+    "no": 1,
+    "subject": "소방원론",
+    "topic": "위험물 성상",
+    "question": "제4류 위험물의 공통 성질은?",
+    "options": [
+     "산화성 고체",
+     "인화성 액체",
+     "자연발화성 물질",
+     "금수성 물질"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 제4류=인화성 액체(특수인화물·석유류·알코올류·동식물유류).",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 2,
+    "subject": "소방원론",
+    "topic": "열전달·연소생성물",
+    "question": "열전달 방식이 아닌 것은?",
+    "options": [
+     "전도",
+     "대류",
+     "복사",
+     "산화"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 열전달 3방식: 전도·대류·복사. 산화는 화학반응.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 3,
+    "subject": "소방원론",
+    "topic": "건축방화·피난",
+    "question": "건축물 화재 시 인간의 피난 본능으로 틀린 것은?",
+    "options": [
+     "귀소본능",
+     "지광본능",
+     "추종본능",
+     "원거리 지향본능"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 피난 본능: 귀소·지광(밝은 곳)·추종·퇴피·좌회 본능 등.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 4,
+    "subject": "소방원론",
+    "topic": "열전달·연소생성물",
+    "question": "일산화탄소(CO)가 인체에 위험한 주된 이유는?",
+    "options": [
+     "헤모글로빈과 결합하여 산소운반을 방해",
+     "폐부종 유발",
+     "신경 마비",
+     "피부 부식"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: CO는 헤모글로빈과의 친화력이 산소의 약 210배 → 산소운반 저해.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 5,
+    "subject": "소방원론",
+    "topic": "열전달·연소생성물",
+    "question": "화재 시 연기의 수직방향 유동속도는 약 몇 m/s인가?",
+    "options": [
+     "0.5~1",
+     "1~2",
+     "2~3",
+     "5~10"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 연기 유동속도: 수평 0.5~1 m/s, 수직(계단 등) 2~3 m/s.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 6,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "연소의 4요소에 해당하지 않는 것은?",
+    "options": [
+     "가연물",
+     "산소공급원",
+     "점화원",
+     "기화열"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 연소의 4요소: 가연물·산소공급원·점화원·연쇄반응. 기화열은 해당 없음.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 7,
+    "subject": "소방원론",
+    "topic": "위험물 성상",
+    "question": "가연성 증기의 증기비중을 구하는 식은? (공기 평균분자량 29)",
+    "options": [
+     "분자량/29",
+     "29/분자량",
+     "분자량×29",
+     "분자량-29"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 증기비중=분자량/29. 1보다 크면 낮은 곳에 체류(위험).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 8,
+    "subject": "소방원론",
+    "topic": "건축방화·피난",
+    "question": "피난동선의 특성으로 옳지 않은 것은?",
+    "options": [
+     "수평동선과 수직동선으로 구분된다",
+     "가급적 단순하고 명확해야 한다",
+     "2방향 이상의 피난로를 확보한다",
+     "피난동선은 복잡할수록 안전하다"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 피난동선은 단순·명확해야 하며 막다른 통로가 없어야 함.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 9,
+    "subject": "소방전기일반",
+    "topic": "반도체·다이오드",
+    "question": "제너다이오드의 주된 용도는?",
+    "options": [
+     "전압 안정(정전압)",
+     "전류 증폭",
+     "발광",
+     "정류"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 제너다이오드=역방향 항복특성을 이용한 정전압 소자.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 10,
+    "subject": "소방전기일반",
+    "topic": "반도체·다이오드",
+    "question": "브리지 정류회로에 다이오드는 몇 개 필요한가?",
+    "options": [
+     "1개",
+     "2개",
+     "4개",
+     "6개"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 단상 브리지 전파정류=다이오드 4개. 3상 브리지=6개.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 11,
+    "subject": "소방전기일반",
+    "topic": "전동기·발전기",
+    "question": "변압기의 권수비 a는? (1차 N₁, 2차 N₂)",
+    "options": [
+     "N₁/N₂=V₁/V₂",
+     "N₁/N₂=V₂/V₁",
+     "N₁N₂=V₁V₂",
+     "N₁+N₂=V₁+V₂"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: a=N₁/N₂=V₁/V₂=I₂/I₁. 전압은 권수에 비례, 전류는 반비례.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 12,
+    "subject": "소방전기일반",
+    "topic": "반도체·다이오드",
+    "question": "SCR(실리콘 제어 정류기)에 대한 설명으로 틀린 것은?",
+    "options": [
+     "PNPN 4층 구조이다",
+     "게이트 신호로 턴온한다",
+     "게이트 신호로 턴오프할 수 있다",
+     "정류 및 위상제어에 사용된다"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: SCR은 게이트로 턴온만 가능. 턴오프는 전류를 유지전류 이하로 낮춰야 함(GTO는 게이트 턴오프 가능).",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 13,
+    "subject": "소방전기일반",
+    "topic": "계측·측정",
+    "question": "전압계의 측정범위를 확대하기 위해 사용하는 것은?",
+    "options": [
+     "분류기(병렬 저항)",
+     "배율기(직렬 저항)",
+     "변류기",
+     "계기용 변압기"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 배율기=전압계에 직렬 저항, 분류기=전류계에 병렬 저항.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 14,
+    "subject": "소방전기일반",
+    "topic": "직류·교류회로",
+    "question": "RLC 직렬회로의 공진주파수 f₀는?",
+    "options": [
+     "1/(2π√(LC))",
+     "2π√(LC)",
+     "1/(2πLC)",
+     "√(LC)/(2π)"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 직렬공진 XL=XC → f₀=1/(2π√LC). 공진 시 임피던스 최소·전류 최대·역률 1.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 15,
+    "subject": "소방전기일반",
+    "topic": "계측·측정",
+    "question": "온도가 올라가면 저항이 감소하는 부(-)특성 소자로 온도 측정에 쓰이는 것은?",
+    "options": [
+     "서미스터(NTC)",
+     "바리스터",
+     "제너다이오드",
+     "CdS"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: NTC 서미스터=온도↑ 저항↓. 온도 감지·측정용. 바리스터는 전압 의존.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 16,
+    "subject": "소방전기일반",
+    "topic": "계측·측정",
+    "question": "휘트스톤 브리지의 평형조건은? (대각 저항 P,Q,R,X)",
+    "options": [
+     "PX=QR",
+     "PQ=RX",
+     "P+X=Q+R",
+     "P/X=Q/R"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 브리지 평형: 마주보는 변의 곱이 같다 → PX=QR.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 17,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "자체소방대를 설치해야 하는 제4류 위험물 취급 제조소의 지정수량 기준은?",
+    "options": [
+     "1천배 이상",
+     "2천배 이상",
+     "3천배 이상",
+     "5천배 이상"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 제4류 위험물을 지정수량 3천배 이상 취급하는 제조소·일반취급소는 자체소방대 설치.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 18,
+    "subject": "소방관계법규",
+    "topic": "다중이용업소법",
+    "question": "다중이용업소에 설치하는 안전시설등에 해당하지 않는 것은?",
+    "options": [
+     "소화설비",
+     "경보설비",
+     "피난설비",
+     "주차설비"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 안전시설등=소화설비·경보설비·피난설비·비상구·영업장 내부 피난통로 등.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 19,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "소방용수시설의 소화전 연결금속구 구경은?",
+    "options": [
+     "40mm",
+     "50mm",
+     "65mm",
+     "100mm"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 소화전 연결금속구 구경 65mm. 급수탑 개폐밸브는 지상 1.5~1.7m.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 20,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "위험물 제조소등의 설치허가권자는?",
+    "options": [
+     "소방서장",
+     "시·도지사",
+     "소방청장",
+     "행정안전부장관"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 제조소등의 설치·변경 허가는 시·도지사.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 21,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "제1류 위험물의 공통 성질은?",
+    "options": [
+     "산화성 고체",
+     "가연성 고체",
+     "인화성 액체",
+     "자기반응성 물질"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 제1류=산화성 고체, 제2류=가연성 고체, 제3류=자연발화성·금수성, 제4류=인화성 액체, 제5류=자기반응성, 제6류=산화성 액체.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 22,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "피난층에 대한 정의로 옳은 것은?",
+    "options": [
+     "곧바로 지상으로 갈 수 있는 출입구가 있는 층",
+     "1층",
+     "옥상층",
+     "지하 1층"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 피난층=곧바로 지상으로 통하는 출입구가 있는 층(반드시 1층은 아님).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 23,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "위험물안전관리자 해임 시 재선임 기한은?",
+    "options": [
+     "14일 이내",
+     "30일 이내",
+     "60일 이내",
+     "90일 이내"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 해임·퇴직일부터 30일 이내 재선임, 선임 후 14일 이내 신고.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 24,
+    "subject": "소방관계법규",
+    "topic": "소방기본법",
+    "question": "소방기본법의 목적으로 거리가 먼 것은?",
+    "options": [
+     "화재의 예방·경계·진압",
+     "공공의 안녕 및 질서 유지",
+     "국민의 생명·신체·재산 보호",
+     "건축물의 안전한 설계"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 소방기본법 목적: 화재 예방·경계·진압, 구조·구급, 공공 안녕질서 유지와 복리증진. 건축설계는 건축법.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 25,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "유도등·비상조명",
+    "question": "비상조명등의 바닥 조도 기준은?",
+    "options": [
+     "0.5 lx 이상",
+     "1 lx 이상",
+     "2 lx 이상",
+     "5 lx 이상"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 비상조명등: 각 부분 바닥에서 1 lx 이상. 60분(일부 대상물) 또는 20분 이상 작동.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 26,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "유도등·비상조명",
+    "question": "피난구유도등의 표시 색상은?",
+    "options": [
+     "녹색 바탕에 백색 문자",
+     "백색 바탕에 녹색 문자",
+     "적색 바탕에 백색 문자",
+     "백색 바탕에 적색 문자"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 피난구유도등=녹색바탕 백색문자. 통로유도등=백색바탕 녹색문자.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 27,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "비상전원·축전지",
+    "question": "연축전지의 공칭전압은 셀당 몇 V인가?",
+    "options": [
+     "1.2V",
+     "1.5V",
+     "2.0V",
+     "3.0V"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 연(납)축전지 2.0V/셀, 알칼리축전지 1.2V/셀. 알칼리는 수명이 길고 온도특성 우수.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 28,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "제연·연동제어",
+    "question": "무선통신보조설비에 사용되는 케이블은?",
+    "options": [
+     "CV 케이블",
+     "누설동축케이블",
+     "HFIX 전선",
+     "MI 케이블"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 무선통신보조설비=누설동축케이블(LCX) 또는 안테나 방식.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 29,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "하나의 경계구역 면적과 한 변 길이 기준은?",
+    "options": [
+     "500㎡ 이하, 40m 이하",
+     "600㎡ 이하, 50m 이하",
+     "1000㎡ 이하, 50m 이하",
+     "1200㎡ 이하, 60m 이하"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 경계구역: 600㎡ 이하, 한 변 50m 이하(주된 출입구에서 내부 전체가 보이면 1000㎡).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 30,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "유도등·비상조명",
+    "question": "복도통로유도등은 보행거리 몇 m마다 설치하는가?",
+    "options": [
+     "10m",
+     "15m",
+     "20m",
+     "25m"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 통로유도등: 구부러진 모퉁이 및 보행거리 20m마다, 바닥에서 1m 이하.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 31,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "비상전원·축전지",
+    "question": "축전지 용량 산출식 C=1/L×KI에서 L은 무엇인가?",
+    "options": [
+     "용량저하율(보수율)",
+     "방전전류",
+     "용량환산시간",
+     "전지 셀 수"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: C=(1/L)·K·I. L=보수율(통상 0.8), K=용량환산시간 계수, I=방전전류.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 32,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "비상전원·축전지",
+    "question": "비상콘센트설비의 전원회로 규격은?",
+    "options": [
+     "단상 100V 1kVA",
+     "단상 220V 1.5kVA 이상",
+     "3상 380V 3kVA",
+     "단상 220V 3kVA 이상"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 비상콘센트: 단상교류 220V, 공급용량 1.5kVA 이상, 접지형 2극 플러그접속기.",
+    "difficulty": 3,
+    "freq_score": 3
+   }
+  ]
+ },
+ {
+  "id": "2019_2",
+  "label": "2019년 2회",
+  "year": 2019,
+  "session": 2,
+  "question_count": 32,
+  "questions": [
+   {
+    "no": 1,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "할론 1301의 화학식은?",
+    "options": [
+     "CF₃Br",
+     "CF₂ClBr",
+     "C₂F₄Br₂",
+     "CCl₄"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 할론 번호=C·F·Cl·Br 순. 1301=C 1개, F 3개, Cl 0개, Br 1개 → CF₃Br.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 2,
+    "subject": "소방원론",
+    "topic": "열전달·연소생성물",
+    "question": "일산화탄소(CO)가 인체에 위험한 주된 이유는?",
+    "options": [
+     "헤모글로빈과 결합하여 산소운반을 방해",
+     "폐부종 유발",
+     "신경 마비",
+     "피부 부식"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: CO는 헤모글로빈과의 친화력이 산소의 약 210배 → 산소운반 저해.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 3,
+    "subject": "소방원론",
+    "topic": "열전달·연소생성물",
+    "question": "열전달 방식이 아닌 것은?",
+    "options": [
+     "전도",
+     "대류",
+     "복사",
+     "산화"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 열전달 3방식: 전도·대류·복사. 산화는 화학반응.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 4,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "물의 증발잠열은 약 몇 cal/g인가?",
+    "options": [
+     "239",
+     "439",
+     "539",
+     "639"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 물 증발잠열 539 cal/g — 냉각소화 효과가 큰 이유.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 5,
+    "subject": "소방원론",
+    "topic": "열전달·연소생성물",
+    "question": "화재 시 연기의 수직방향 유동속도는 약 몇 m/s인가?",
+    "options": [
+     "0.5~1",
+     "1~2",
+     "2~3",
+     "5~10"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 연기 유동속도: 수평 0.5~1 m/s, 수직(계단 등) 2~3 m/s.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 6,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "이산화탄소 소화약제의 주된 소화효과는?",
+    "options": [
+     "냉각효과",
+     "질식효과",
+     "부촉매효과",
+     "제거효과"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: CO₂는 산소농도를 낮추는 질식소화가 주효과(+약간의 냉각).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 7,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "제3종 분말소화약제의 주성분은?",
+    "options": [
+     "탄산수소나트륨",
+     "탄산수소칼륨",
+     "제1인산암모늄",
+     "요소"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 제3종=NH₄H₂PO₄(제1인산암모늄), 담홍색, A·B·C급 적용 가능한 유일한 분말.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 8,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "화재의 분류에서 C급 화재는?",
+    "options": [
+     "일반화재",
+     "유류화재",
+     "전기화재",
+     "금속화재"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: A급 일반(백색), B급 유류(황색), C급 전기(청색), D급 금속(무색).",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 9,
+    "subject": "소방전기일반",
+    "topic": "전동기·발전기",
+    "question": "변압기의 권수비 a는? (1차 N₁, 2차 N₂)",
+    "options": [
+     "N₁/N₂=V₁/V₂",
+     "N₁/N₂=V₂/V₁",
+     "N₁N₂=V₁V₂",
+     "N₁+N₂=V₁+V₂"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: a=N₁/N₂=V₁/V₂=I₂/I₁. 전압은 권수에 비례, 전류는 반비례.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 10,
+    "subject": "소방전기일반",
+    "topic": "전동기·발전기",
+    "question": "동기속도 Ns를 나타내는 식은? (f: 주파수, P: 극수)",
+    "options": [
+     "120f/P",
+     "120P/f",
+     "60f/P",
+     "f/(120P)"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: Ns=120f/P [rpm]. 4극 60Hz → 1800rpm.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 11,
+    "subject": "소방전기일반",
+    "topic": "전동기·발전기",
+    "question": "유도전동기의 슬립 s의 정의는?",
+    "options": [
+     "(Ns-N)/Ns",
+     "(N-Ns)/N",
+     "Ns/N",
+     "N/Ns"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 슬립 s=(동기속도-회전속도)/동기속도. 기동 시 s=1, 무부하 시 s≈0.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 12,
+    "subject": "소방전기일반",
+    "topic": "반도체·다이오드",
+    "question": "SCR(실리콘 제어 정류기)에 대한 설명으로 틀린 것은?",
+    "options": [
+     "PNPN 4층 구조이다",
+     "게이트 신호로 턴온한다",
+     "게이트 신호로 턴오프할 수 있다",
+     "정류 및 위상제어에 사용된다"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: SCR은 게이트로 턴온만 가능. 턴오프는 전류를 유지전류 이하로 낮춰야 함(GTO는 게이트 턴오프 가능).",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 13,
+    "subject": "소방전기일반",
+    "topic": "반도체·다이오드",
+    "question": "제너다이오드의 주된 용도는?",
+    "options": [
+     "전압 안정(정전압)",
+     "전류 증폭",
+     "발광",
+     "정류"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 제너다이오드=역방향 항복특성을 이용한 정전압 소자.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 14,
+    "subject": "소방전기일반",
+    "topic": "전자기·정전기",
+    "question": "플레밍의 왼손법칙에서 엄지가 가리키는 것은?",
+    "options": [
+     "자속밀도",
+     "전류",
+     "힘(운동방향)",
+     "기전력"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 왼손(전동기): 엄지=힘, 검지=자속, 중지=전류. 오른손은 발전기.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 15,
+    "subject": "소방전기일반",
+    "topic": "전자기·정전기",
+    "question": "렌츠의 법칙과 관계있는 것은?",
+    "options": [
+     "유도기전력의 방향",
+     "전자력의 방향",
+     "전류의 발열작용",
+     "정전유도"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 렌츠 법칙: 유도기전력은 자속 변화를 방해하는 방향. 크기는 패러데이 법칙.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 16,
+    "subject": "소방전기일반",
+    "topic": "전자기·정전기",
+    "question": "콘덴서 C₁, C₂를 직렬 연결한 합성 정전용량은?",
+    "options": [
+     "C₁+C₂",
+     "C₁C₂/(C₁+C₂)",
+     "(C₁+C₂)/C₁C₂",
+     "C₁C₂"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 콘덴서 직렬=곱/합(저항 병렬과 동일 형태), 병렬=합.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 17,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "건축허가 동의 대상 - 일반 건축물의 연면적 기준은?",
+    "options": [
+     "200㎡ 이상",
+     "400㎡ 이상",
+     "600㎡ 이상",
+     "1000㎡ 이상"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 건축허가 동의: 연면적 400㎡ 이상(학교 100㎡, 노유자시설 200㎡, 정신의료기관 300㎡ 등 예외).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 18,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "소화활동설비에 해당하는 것은?",
+    "options": [
+     "옥내소화전설비",
+     "스프링클러설비",
+     "무선통신보조설비",
+     "자동화재탐지설비"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 소화활동설비: 제연·연결송수관·연결살수·비상콘센트·무선통신보조·연소방지설비.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 19,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "무창층에서 개구부 면적 합계는 해당 층 바닥면적의 얼마 이하인가?",
+    "options": [
+     "1/10",
+     "1/20",
+     "1/30",
+     "1/50"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 무창층=개구부 면적 합계가 바닥면적의 1/30 이하인 층.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 20,
+    "subject": "소방관계법규",
+    "topic": "화재예방법",
+    "question": "소방안전관리자를 선임한 경우 신고 기한은?",
+    "options": [
+     "7일 이내",
+     "14일 이내",
+     "30일 이내",
+     "60일 이내"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 선임한 날부터 14일 이내에 소방본부장·소방서장에게 신고.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 21,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "피난층에 대한 정의로 옳은 것은?",
+    "options": [
+     "곧바로 지상으로 갈 수 있는 출입구가 있는 층",
+     "1층",
+     "옥상층",
+     "지하 1층"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 피난층=곧바로 지상으로 통하는 출입구가 있는 층(반드시 1층은 아님).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 22,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "위험물안전관리자 해임 시 재선임 기한은?",
+    "options": [
+     "14일 이내",
+     "30일 이내",
+     "60일 이내",
+     "90일 이내"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 해임·퇴직일부터 30일 이내 재선임, 선임 후 14일 이내 신고.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 23,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "경보설비에 해당하지 않는 것은?",
+    "options": [
+     "자동화재탐지설비",
+     "비상방송설비",
+     "누전경보기",
+     "비상콘센트설비"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 비상콘센트설비는 소화활동설비. 경보설비: 자탐·시각경보기·비상방송·누전경보기·가스누설경보기 등.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 24,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "위험물 제조소등의 설치허가권자는?",
+    "options": [
+     "소방서장",
+     "시·도지사",
+     "소방청장",
+     "행정안전부장관"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 제조소등의 설치·변경 허가는 시·도지사.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 25,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "유도등·비상조명",
+    "question": "비상조명등의 바닥 조도 기준은?",
+    "options": [
+     "0.5 lx 이상",
+     "1 lx 이상",
+     "2 lx 이상",
+     "5 lx 이상"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 비상조명등: 각 부분 바닥에서 1 lx 이상. 60분(일부 대상물) 또는 20분 이상 작동.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 26,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "경보설비·비상방송",
+    "question": "비상방송설비 확성기의 음성입력은 실내 기준 몇 W 이상?",
+    "options": [
+     "1W",
+     "2W",
+     "3W",
+     "5W"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 확성기 음성입력: 실내 1W 이상, 실외 3W 이상. 수평거리 25m 이하.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 27,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "자동화재탐지설비 음향장치의 음량은 중심에서 1m 떨어진 곳에서 몇 dB 이상?",
+    "options": [
+     "60dB",
+     "70dB",
+     "80dB",
+     "90dB"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 음향장치: 1m 거리에서 90dB 이상. 수평거리 25m 이하마다 설치.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 28,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "경보설비·비상방송",
+    "question": "비상방송설비에서 기동장치 조작 후 방송 개시까지 소요시간은?",
+    "options": [
+     "5초 이하",
+     "10초 이하",
+     "20초 이하",
+     "30초 이하"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 비상방송: 기동 후 10초 이하에 방송 개시.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 29,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "유도등·비상조명",
+    "question": "복도통로유도등은 보행거리 몇 m마다 설치하는가?",
+    "options": [
+     "10m",
+     "15m",
+     "20m",
+     "25m"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 통로유도등: 구부러진 모퉁이 및 보행거리 20m마다, 바닥에서 1m 이하.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 30,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "유도등·비상조명",
+    "question": "피난구유도등의 표시 색상은?",
+    "options": [
+     "녹색 바탕에 백색 문자",
+     "백색 바탕에 녹색 문자",
+     "적색 바탕에 백색 문자",
+     "백색 바탕에 적색 문자"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 피난구유도등=녹색바탕 백색문자. 통로유도등=백색바탕 녹색문자.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 31,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "R형 수신기의 특징으로 옳은 것은?",
+    "options": [
+     "각 회선마다 전용 배선 필요",
+     "중계기를 이용한 다중전송방식",
+     "소규모 건물에만 사용",
+     "고유신호 수신 불가"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: R형=다중전송(고유신호), 배선 절약, 대규모 적합. P형=회선별 공통신호.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 32,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "경보설비·비상방송",
+    "question": "누전경보기에서 1급 경보기의 경계전로 정격전류 기준은?",
+    "options": [
+     "30A 초과",
+     "60A 초과",
+     "100A 초과",
+     "200A 초과"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 경계전로 60A 초과=1급, 60A 이하=2급 누전경보기 설치.",
+    "difficulty": 3,
+    "freq_score": 3
+   }
+  ]
+ },
+ {
+  "id": "2019_1",
+  "label": "2019년 1회",
+  "year": 2019,
+  "session": 1,
+  "question_count": 32,
+  "questions": [
+   {
+    "no": 1,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "연소의 4요소에 해당하지 않는 것은?",
+    "options": [
+     "가연물",
+     "산소공급원",
+     "점화원",
+     "기화열"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 연소의 4요소: 가연물·산소공급원·점화원·연쇄반응. 기화열은 해당 없음.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 2,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "인화점에 대한 설명으로 옳은 것은?",
+    "options": [
+     "외부 점화원 없이 스스로 발화하는 최저온도",
+     "점화원에 의해 인화될 수 있는 최저온도",
+     "연소가 지속되는 최저온도",
+     "증기압이 대기압과 같아지는 온도"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 인화점=점화원 존재 시 불이 붙는 최저온도. 점화원 없이 발화하면 발화점.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 3,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "이산화탄소 소화약제의 주된 소화효과는?",
+    "options": [
+     "냉각효과",
+     "질식효과",
+     "부촉매효과",
+     "제거효과"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: CO₂는 산소농도를 낮추는 질식소화가 주효과(+약간의 냉각).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 4,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "자연발화를 방지하는 방법으로 틀린 것은?",
+    "options": [
+     "통풍을 잘 시킨다",
+     "습도를 높게 유지한다",
+     "저장실 온도를 낮춘다",
+     "퇴적 시 열이 쌓이지 않게 한다"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 습도가 높으면 미생물 발열 등으로 자연발화가 촉진됨. 습도는 낮게 유지.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 5,
+    "subject": "소방원론",
+    "topic": "위험물 성상",
+    "question": "가연성 증기의 증기비중을 구하는 식은? (공기 평균분자량 29)",
+    "options": [
+     "분자량/29",
+     "29/분자량",
+     "분자량×29",
+     "분자량-29"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 증기비중=분자량/29. 1보다 크면 낮은 곳에 체류(위험).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 6,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "플래시오버(Flash Over)에 대한 설명으로 옳은 것은?",
+    "options": [
+     "실내 가연물이 일시에 폭발적으로 착화하는 현상",
+     "산소 부족 상태에서 급격히 공기가 유입되어 폭발하는 현상",
+     "가연성 액체의 증기폭발",
+     "분진의 폭발 현상"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 플래시오버=성장기→최성기 전환 시 실내 전체 가연물이 일시 착화. 급격한 공기 유입 폭발은 백드래프트.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 7,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "제3종 분말소화약제의 주성분은?",
+    "options": [
+     "탄산수소나트륨",
+     "탄산수소칼륨",
+     "제1인산암모늄",
+     "요소"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 제3종=NH₄H₂PO₄(제1인산암모늄), 담홍색, A·B·C급 적용 가능한 유일한 분말.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 8,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "화재의 분류에서 C급 화재는?",
+    "options": [
+     "일반화재",
+     "유류화재",
+     "전기화재",
+     "금속화재"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: A급 일반(백색), B급 유류(황색), C급 전기(청색), D급 금속(무색).",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 9,
+    "subject": "소방전기일반",
+    "topic": "계측·측정",
+    "question": "온도가 올라가면 저항이 감소하는 부(-)특성 소자로 온도 측정에 쓰이는 것은?",
+    "options": [
+     "서미스터(NTC)",
+     "바리스터",
+     "제너다이오드",
+     "CdS"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: NTC 서미스터=온도↑ 저항↓. 온도 감지·측정용. 바리스터는 전압 의존.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 10,
+    "subject": "소방전기일반",
+    "topic": "전자기·정전기",
+    "question": "렌츠의 법칙과 관계있는 것은?",
+    "options": [
+     "유도기전력의 방향",
+     "전자력의 방향",
+     "전류의 발열작용",
+     "정전유도"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 렌츠 법칙: 유도기전력은 자속 변화를 방해하는 방향. 크기는 패러데이 법칙.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 11,
+    "subject": "소방전기일반",
+    "topic": "직류·교류회로",
+    "question": "역률(power factor)의 정의로 옳은 것은?",
+    "options": [
+     "무효전력/피상전력",
+     "유효전력/피상전력",
+     "유효전력/무효전력",
+     "피상전력/유효전력"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 역률 cosθ=유효전력 P/피상전력 S.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 12,
+    "subject": "소방전기일반",
+    "topic": "전자기·정전기",
+    "question": "콘덴서 C₁, C₂를 직렬 연결한 합성 정전용량은?",
+    "options": [
+     "C₁+C₂",
+     "C₁C₂/(C₁+C₂)",
+     "(C₁+C₂)/C₁C₂",
+     "C₁C₂"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 콘덴서 직렬=곱/합(저항 병렬과 동일 형태), 병렬=합.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 13,
+    "subject": "소방전기일반",
+    "topic": "직류·교류회로",
+    "question": "RLC 직렬회로의 공진주파수 f₀는?",
+    "options": [
+     "1/(2π√(LC))",
+     "2π√(LC)",
+     "1/(2πLC)",
+     "√(LC)/(2π)"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 직렬공진 XL=XC → f₀=1/(2π√LC). 공진 시 임피던스 최소·전류 최대·역률 1.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 14,
+    "subject": "소방전기일반",
+    "topic": "전자기·정전기",
+    "question": "플레밍의 왼손법칙에서 엄지가 가리키는 것은?",
+    "options": [
+     "자속밀도",
+     "전류",
+     "힘(운동방향)",
+     "기전력"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 왼손(전동기): 엄지=힘, 검지=자속, 중지=전류. 오른손은 발전기.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 15,
+    "subject": "소방전기일반",
+    "topic": "직류·교류회로",
+    "question": "3상 평형회로의 유효전력 P는?",
+    "options": [
+     "VIcosθ",
+     "√3VIcosθ",
+     "3VIcosθ",
+     "√3VIsinθ"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 3상 전력 P=√3·V선간·I선·cosθ [W].",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 16,
+    "subject": "소방전기일반",
+    "topic": "직류·교류회로",
+    "question": "저항 R₁, R₂를 병렬 연결한 합성저항은?",
+    "options": [
+     "R₁+R₂",
+     "R₁R₂/(R₁+R₂)",
+     "(R₁+R₂)/R₁R₂",
+     "1/(R₁+R₂)"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 병렬 합성저항=곱/합. 직렬은 그냥 합.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 17,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "무창층에서 개구부 면적 합계는 해당 층 바닥면적의 얼마 이하인가?",
+    "options": [
+     "1/10",
+     "1/20",
+     "1/30",
+     "1/50"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 무창층=개구부 면적 합계가 바닥면적의 1/30 이하인 층.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 18,
+    "subject": "소방관계법규",
+    "topic": "소방기본법",
+    "question": "소방활동구역에 출입할 수 없는 사람은?",
+    "options": [
+     "구역 내 소유자·관리자·점유자",
+     "전기·가스 업무 종사자로서 원활한 소방활동에 필요한 자",
+     "의사·간호사",
+     "일반 취재 희망 시민"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 소방활동구역 출입: 관계인, 전기·가스·수도·통신 종사자, 의료인, 취재인력(허가), 수사업무 종사자 등. 일반 시민은 불가.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 19,
+    "subject": "소방관계법규",
+    "topic": "소방기본법",
+    "question": "소방자동차의 우선통행에 관한 사항은 어느 법에 따르는가?",
+    "options": [
+     "소방기본법",
+     "도로교통법",
+     "자동차관리법",
+     "소방시설법"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 소방차 우선통행은 도로교통법에 따름(소방기본법에 규정된 준용사항).",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 20,
+    "subject": "소방관계법규",
+    "topic": "화재예방법",
+    "question": "화재예방강화지구의 지정권자는?",
+    "options": [
+     "소방서장",
+     "소방본부장",
+     "시·도지사",
+     "행정안전부장관"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 화재예방강화지구는 시·도지사가 지정.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 21,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "소방용수시설의 소화전 연결금속구 구경은?",
+    "options": [
+     "40mm",
+     "50mm",
+     "65mm",
+     "100mm"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 소화전 연결금속구 구경 65mm. 급수탑 개폐밸브는 지상 1.5~1.7m.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 22,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "건축허가 동의 대상 - 일반 건축물의 연면적 기준은?",
+    "options": [
+     "200㎡ 이상",
+     "400㎡ 이상",
+     "600㎡ 이상",
+     "1000㎡ 이상"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 건축허가 동의: 연면적 400㎡ 이상(학교 100㎡, 노유자시설 200㎡, 정신의료기관 300㎡ 등 예외).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 23,
+    "subject": "소방관계법규",
+    "topic": "화재예방법",
+    "question": "소방안전관리자를 선임한 경우 신고 기한은?",
+    "options": [
+     "7일 이내",
+     "14일 이내",
+     "30일 이내",
+     "60일 이내"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 선임한 날부터 14일 이내에 소방본부장·소방서장에게 신고.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 24,
+    "subject": "소방관계법규",
+    "topic": "소방기본법",
+    "question": "소방기본법의 목적으로 거리가 먼 것은?",
+    "options": [
+     "화재의 예방·경계·진압",
+     "공공의 안녕 및 질서 유지",
+     "국민의 생명·신체·재산 보호",
+     "건축물의 안전한 설계"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 소방기본법 목적: 화재 예방·경계·진압, 구조·구급, 공공 안녕질서 유지와 복리증진. 건축설계는 건축법.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 25,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "정온식 스포트형 감지기를 설치하기에 가장 적합한 장소는?",
+    "options": [
+     "거실",
+     "복도",
+     "보일러실",
+     "계단"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 정온식=일정 온도 도달 시 작동. 화기 취급 장소(보일러실·주방)에 적합.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 26,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "자동화재탐지설비 음향장치의 음량은 중심에서 1m 떨어진 곳에서 몇 dB 이상?",
+    "options": [
+     "60dB",
+     "70dB",
+     "80dB",
+     "90dB"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 음향장치: 1m 거리에서 90dB 이상. 수평거리 25m 이하마다 설치.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 27,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "P형 1급 발신기는 수평거리 몇 m 이하마다 설치하는가?",
+    "options": [
+     "15m",
+     "20m",
+     "25m",
+     "50m"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 발신기: 층마다, 수평거리 25m 이하. 바닥에서 0.8~1.5m 높이.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 28,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "하나의 경계구역 면적과 한 변 길이 기준은?",
+    "options": [
+     "500㎡ 이하, 40m 이하",
+     "600㎡ 이하, 50m 이하",
+     "1000㎡ 이하, 50m 이하",
+     "1200㎡ 이하, 60m 이하"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 경계구역: 600㎡ 이하, 한 변 50m 이하(주된 출입구에서 내부 전체가 보이면 1000㎡).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 29,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "경보설비·비상방송",
+    "question": "비상방송설비 확성기의 음성입력은 실내 기준 몇 W 이상?",
+    "options": [
+     "1W",
+     "2W",
+     "3W",
+     "5W"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 확성기 음성입력: 실내 1W 이상, 실외 3W 이상. 수평거리 25m 이하.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 30,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "부착높이 8m 이상 15m 미만에 설치할 수 없는 감지기는?",
+    "options": [
+     "차동식 분포형",
+     "이온화식 1종",
+     "광전식 1종",
+     "정온식 스포트형"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 8~15m: 차동식 분포형, 이온화식 1·2종, 광전식 1·2종, 연기복합형, 불꽃감지기. 정온식 스포트형은 4m 미만(특종·1종은 8m 미만).",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 31,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "R형 수신기의 특징으로 옳은 것은?",
+    "options": [
+     "각 회선마다 전용 배선 필요",
+     "중계기를 이용한 다중전송방식",
+     "소규모 건물에만 사용",
+     "고유신호 수신 불가"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: R형=다중전송(고유신호), 배선 절약, 대규모 적합. P형=회선별 공통신호.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 32,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "제연·연동제어",
+    "question": "무선통신보조설비에 사용되는 케이블은?",
+    "options": [
+     "CV 케이블",
+     "누설동축케이블",
+     "HFIX 전선",
+     "MI 케이블"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 무선통신보조설비=누설동축케이블(LCX) 또는 안테나 방식.",
+    "difficulty": 1,
+    "freq_score": 5
+   }
+  ]
+ },
+ {
+  "id": "2018_3",
+  "label": "2018년 3회",
+  "year": 2018,
+  "session": 3,
+  "question_count": 32,
+  "questions": [
+   {
+    "no": 1,
+    "subject": "소방원론",
+    "topic": "건축방화·피난",
+    "question": "피난동선의 특성으로 옳지 않은 것은?",
+    "options": [
+     "수평동선과 수직동선으로 구분된다",
+     "가급적 단순하고 명확해야 한다",
+     "2방향 이상의 피난로를 확보한다",
+     "피난동선은 복잡할수록 안전하다"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 피난동선은 단순·명확해야 하며 막다른 통로가 없어야 함.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 2,
+    "subject": "소방원론",
+    "topic": "위험물 성상",
+    "question": "제4류 위험물의 공통 성질은?",
+    "options": [
+     "산화성 고체",
+     "인화성 액체",
+     "자연발화성 물질",
+     "금수성 물질"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 제4류=인화성 액체(특수인화물·석유류·알코올류·동식물유류).",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 3,
+    "subject": "소방원론",
+    "topic": "건축방화·피난",
+    "question": "건축물 화재 시 인간의 피난 본능으로 틀린 것은?",
+    "options": [
+     "귀소본능",
+     "지광본능",
+     "추종본능",
+     "원거리 지향본능"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 피난 본능: 귀소·지광(밝은 곳)·추종·퇴피·좌회 본능 등.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 4,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "인화점에 대한 설명으로 옳은 것은?",
+    "options": [
+     "외부 점화원 없이 스스로 발화하는 최저온도",
+     "점화원에 의해 인화될 수 있는 최저온도",
+     "연소가 지속되는 최저온도",
+     "증기압이 대기압과 같아지는 온도"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 인화점=점화원 존재 시 불이 붙는 최저온도. 점화원 없이 발화하면 발화점.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 5,
+    "subject": "소방원론",
+    "topic": "위험물 성상",
+    "question": "가연성 증기의 증기비중을 구하는 식은? (공기 평균분자량 29)",
+    "options": [
+     "분자량/29",
+     "29/분자량",
+     "분자량×29",
+     "분자량-29"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 증기비중=분자량/29. 1보다 크면 낮은 곳에 체류(위험).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 6,
+    "subject": "소방원론",
+    "topic": "열전달·연소생성물",
+    "question": "화재 시 연기의 수직방향 유동속도는 약 몇 m/s인가?",
+    "options": [
+     "0.5~1",
+     "1~2",
+     "2~3",
+     "5~10"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 연기 유동속도: 수평 0.5~1 m/s, 수직(계단 등) 2~3 m/s.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 7,
+    "subject": "소방원론",
+    "topic": "열전달·연소생성물",
+    "question": "일산화탄소(CO)가 인체에 위험한 주된 이유는?",
+    "options": [
+     "헤모글로빈과 결합하여 산소운반을 방해",
+     "폐부종 유발",
+     "신경 마비",
+     "피부 부식"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: CO는 헤모글로빈과의 친화력이 산소의 약 210배 → 산소운반 저해.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 8,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "연소의 4요소에 해당하지 않는 것은?",
+    "options": [
+     "가연물",
+     "산소공급원",
+     "점화원",
+     "기화열"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 연소의 4요소: 가연물·산소공급원·점화원·연쇄반응. 기화열은 해당 없음.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 9,
+    "subject": "소방전기일반",
+    "topic": "직류·교류회로",
+    "question": "RLC 직렬회로의 공진주파수 f₀는?",
+    "options": [
+     "1/(2π√(LC))",
+     "2π√(LC)",
+     "1/(2πLC)",
+     "√(LC)/(2π)"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 직렬공진 XL=XC → f₀=1/(2π√LC). 공진 시 임피던스 최소·전류 최대·역률 1.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 10,
+    "subject": "소방전기일반",
+    "topic": "반도체·다이오드",
+    "question": "브리지 정류회로에 다이오드는 몇 개 필요한가?",
+    "options": [
+     "1개",
+     "2개",
+     "4개",
+     "6개"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 단상 브리지 전파정류=다이오드 4개. 3상 브리지=6개.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 11,
+    "subject": "소방전기일반",
+    "topic": "반도체·다이오드",
+    "question": "SCR(실리콘 제어 정류기)에 대한 설명으로 틀린 것은?",
+    "options": [
+     "PNPN 4층 구조이다",
+     "게이트 신호로 턴온한다",
+     "게이트 신호로 턴오프할 수 있다",
+     "정류 및 위상제어에 사용된다"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: SCR은 게이트로 턴온만 가능. 턴오프는 전류를 유지전류 이하로 낮춰야 함(GTO는 게이트 턴오프 가능).",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 12,
+    "subject": "소방전기일반",
+    "topic": "계측·측정",
+    "question": "온도가 올라가면 저항이 감소하는 부(-)특성 소자로 온도 측정에 쓰이는 것은?",
+    "options": [
+     "서미스터(NTC)",
+     "바리스터",
+     "제너다이오드",
+     "CdS"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: NTC 서미스터=온도↑ 저항↓. 온도 감지·측정용. 바리스터는 전압 의존.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 13,
+    "subject": "소방전기일반",
+    "topic": "계측·측정",
+    "question": "휘트스톤 브리지의 평형조건은? (대각 저항 P,Q,R,X)",
+    "options": [
+     "PX=QR",
+     "PQ=RX",
+     "P+X=Q+R",
+     "P/X=Q/R"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 브리지 평형: 마주보는 변의 곱이 같다 → PX=QR.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 14,
+    "subject": "소방전기일반",
+    "topic": "직류·교류회로",
+    "question": "3상 평형회로의 유효전력 P는?",
+    "options": [
+     "VIcosθ",
+     "√3VIcosθ",
+     "3VIcosθ",
+     "√3VIsinθ"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 3상 전력 P=√3·V선간·I선·cosθ [W].",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 15,
+    "subject": "소방전기일반",
+    "topic": "계측·측정",
+    "question": "전압계의 측정범위를 확대하기 위해 사용하는 것은?",
+    "options": [
+     "분류기(병렬 저항)",
+     "배율기(직렬 저항)",
+     "변류기",
+     "계기용 변압기"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 배율기=전압계에 직렬 저항, 분류기=전류계에 병렬 저항.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 16,
+    "subject": "소방전기일반",
+    "topic": "반도체·다이오드",
+    "question": "제너다이오드의 주된 용도는?",
+    "options": [
+     "전압 안정(정전압)",
+     "전류 증폭",
+     "발광",
+     "정류"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 제너다이오드=역방향 항복특성을 이용한 정전압 소자.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 17,
+    "subject": "소방관계법규",
+    "topic": "다중이용업소법",
+    "question": "다중이용업소에 설치하는 안전시설등에 해당하지 않는 것은?",
+    "options": [
+     "소화설비",
+     "경보설비",
+     "피난설비",
+     "주차설비"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 안전시설등=소화설비·경보설비·피난설비·비상구·영업장 내부 피난통로 등.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 18,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "위험물 제조소등의 설치허가권자는?",
+    "options": [
+     "소방서장",
+     "시·도지사",
+     "소방청장",
+     "행정안전부장관"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 제조소등의 설치·변경 허가는 시·도지사.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 19,
+    "subject": "소방관계법규",
+    "topic": "소방기본법",
+    "question": "소방자동차의 우선통행에 관한 사항은 어느 법에 따르는가?",
+    "options": [
+     "소방기본법",
+     "도로교통법",
+     "자동차관리법",
+     "소방시설법"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 소방차 우선통행은 도로교통법에 따름(소방기본법에 규정된 준용사항).",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 20,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "제1류 위험물의 공통 성질은?",
+    "options": [
+     "산화성 고체",
+     "가연성 고체",
+     "인화성 액체",
+     "자기반응성 물질"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 제1류=산화성 고체, 제2류=가연성 고체, 제3류=자연발화성·금수성, 제4류=인화성 액체, 제5류=자기반응성, 제6류=산화성 액체.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 21,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "위험물안전관리자 해임 시 재선임 기한은?",
+    "options": [
+     "14일 이내",
+     "30일 이내",
+     "60일 이내",
+     "90일 이내"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 해임·퇴직일부터 30일 이내 재선임, 선임 후 14일 이내 신고.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 22,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "자체소방대를 설치해야 하는 제4류 위험물 취급 제조소의 지정수량 기준은?",
+    "options": [
+     "1천배 이상",
+     "2천배 이상",
+     "3천배 이상",
+     "5천배 이상"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 제4류 위험물을 지정수량 3천배 이상 취급하는 제조소·일반취급소는 자체소방대 설치.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 23,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "소방용수시설의 소화전 연결금속구 구경은?",
+    "options": [
+     "40mm",
+     "50mm",
+     "65mm",
+     "100mm"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 소화전 연결금속구 구경 65mm. 급수탑 개폐밸브는 지상 1.5~1.7m.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 24,
+    "subject": "소방관계법규",
+    "topic": "소방기본법",
+    "question": "소방기본법의 목적으로 거리가 먼 것은?",
+    "options": [
+     "화재의 예방·경계·진압",
+     "공공의 안녕 및 질서 유지",
+     "국민의 생명·신체·재산 보호",
+     "건축물의 안전한 설계"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 소방기본법 목적: 화재 예방·경계·진압, 구조·구급, 공공 안녕질서 유지와 복리증진. 건축설계는 건축법.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 25,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "제연·연동제어",
+    "question": "무선통신보조설비에 사용되는 케이블은?",
+    "options": [
+     "CV 케이블",
+     "누설동축케이블",
+     "HFIX 전선",
+     "MI 케이블"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 무선통신보조설비=누설동축케이블(LCX) 또는 안테나 방식.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 26,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "유도등·비상조명",
+    "question": "비상조명등의 바닥 조도 기준은?",
+    "options": [
+     "0.5 lx 이상",
+     "1 lx 이상",
+     "2 lx 이상",
+     "5 lx 이상"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 비상조명등: 각 부분 바닥에서 1 lx 이상. 60분(일부 대상물) 또는 20분 이상 작동.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 27,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "유도등·비상조명",
+    "question": "복도통로유도등은 보행거리 몇 m마다 설치하는가?",
+    "options": [
+     "10m",
+     "15m",
+     "20m",
+     "25m"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 통로유도등: 구부러진 모퉁이 및 보행거리 20m마다, 바닥에서 1m 이하.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 28,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "비상전원·축전지",
+    "question": "축전지 용량 산출식 C=1/L×KI에서 L은 무엇인가?",
+    "options": [
+     "용량저하율(보수율)",
+     "방전전류",
+     "용량환산시간",
+     "전지 셀 수"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: C=(1/L)·K·I. L=보수율(통상 0.8), K=용량환산시간 계수, I=방전전류.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 29,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "비상전원·축전지",
+    "question": "연축전지의 공칭전압은 셀당 몇 V인가?",
+    "options": [
+     "1.2V",
+     "1.5V",
+     "2.0V",
+     "3.0V"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 연(납)축전지 2.0V/셀, 알칼리축전지 1.2V/셀. 알칼리는 수명이 길고 온도특성 우수.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 30,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "하나의 경계구역 면적과 한 변 길이 기준은?",
+    "options": [
+     "500㎡ 이하, 40m 이하",
+     "600㎡ 이하, 50m 이하",
+     "1000㎡ 이하, 50m 이하",
+     "1200㎡ 이하, 60m 이하"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 경계구역: 600㎡ 이하, 한 변 50m 이하(주된 출입구에서 내부 전체가 보이면 1000㎡).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 31,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "비상전원·축전지",
+    "question": "비상콘센트설비의 전원회로 규격은?",
+    "options": [
+     "단상 100V 1kVA",
+     "단상 220V 1.5kVA 이상",
+     "3상 380V 3kVA",
+     "단상 220V 3kVA 이상"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 비상콘센트: 단상교류 220V, 공급용량 1.5kVA 이상, 접지형 2극 플러그접속기.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 32,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "부착높이 8m 이상 15m 미만에 설치할 수 없는 감지기는?",
+    "options": [
+     "차동식 분포형",
+     "이온화식 1종",
+     "광전식 1종",
+     "정온식 스포트형"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 8~15m: 차동식 분포형, 이온화식 1·2종, 광전식 1·2종, 연기복합형, 불꽃감지기. 정온식 스포트형은 4m 미만(특종·1종은 8m 미만).",
+    "difficulty": 2,
+    "freq_score": 4
+   }
+  ]
+ },
+ {
+  "id": "2018_2",
+  "label": "2018년 2회",
+  "year": 2018,
+  "session": 2,
+  "question_count": 32,
+  "questions": [
+   {
+    "no": 1,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "제3종 분말소화약제의 주성분은?",
+    "options": [
+     "탄산수소나트륨",
+     "탄산수소칼륨",
+     "제1인산암모늄",
+     "요소"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 제3종=NH₄H₂PO₄(제1인산암모늄), 담홍색, A·B·C급 적용 가능한 유일한 분말.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 2,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "할론 1301의 화학식은?",
+    "options": [
+     "CF₃Br",
+     "CF₂ClBr",
+     "C₂F₄Br₂",
+     "CCl₄"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 할론 번호=C·F·Cl·Br 순. 1301=C 1개, F 3개, Cl 0개, Br 1개 → CF₃Br.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 3,
+    "subject": "소방원론",
+    "topic": "열전달·연소생성물",
+    "question": "화재 시 연기의 수직방향 유동속도는 약 몇 m/s인가?",
+    "options": [
+     "0.5~1",
+     "1~2",
+     "2~3",
+     "5~10"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 연기 유동속도: 수평 0.5~1 m/s, 수직(계단 등) 2~3 m/s.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 4,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "이산화탄소 소화약제의 주된 소화효과는?",
+    "options": [
+     "냉각효과",
+     "질식효과",
+     "부촉매효과",
+     "제거효과"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: CO₂는 산소농도를 낮추는 질식소화가 주효과(+약간의 냉각).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 5,
+    "subject": "소방원론",
+    "topic": "열전달·연소생성물",
+    "question": "일산화탄소(CO)가 인체에 위험한 주된 이유는?",
+    "options": [
+     "헤모글로빈과 결합하여 산소운반을 방해",
+     "폐부종 유발",
+     "신경 마비",
+     "피부 부식"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: CO는 헤모글로빈과의 친화력이 산소의 약 210배 → 산소운반 저해.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 6,
+    "subject": "소방원론",
+    "topic": "열전달·연소생성물",
+    "question": "열전달 방식이 아닌 것은?",
+    "options": [
+     "전도",
+     "대류",
+     "복사",
+     "산화"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 열전달 3방식: 전도·대류·복사. 산화는 화학반응.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 7,
+    "subject": "소방원론",
+    "topic": "건축방화·피난",
+    "question": "피난동선의 특성으로 옳지 않은 것은?",
+    "options": [
+     "수평동선과 수직동선으로 구분된다",
+     "가급적 단순하고 명확해야 한다",
+     "2방향 이상의 피난로를 확보한다",
+     "피난동선은 복잡할수록 안전하다"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 피난동선은 단순·명확해야 하며 막다른 통로가 없어야 함.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 8,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "물의 증발잠열은 약 몇 cal/g인가?",
+    "options": [
+     "239",
+     "439",
+     "539",
+     "639"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 물 증발잠열 539 cal/g — 냉각소화 효과가 큰 이유.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 9,
+    "subject": "소방전기일반",
+    "topic": "전동기·발전기",
+    "question": "변압기의 권수비 a는? (1차 N₁, 2차 N₂)",
+    "options": [
+     "N₁/N₂=V₁/V₂",
+     "N₁/N₂=V₂/V₁",
+     "N₁N₂=V₁V₂",
+     "N₁+N₂=V₁+V₂"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: a=N₁/N₂=V₁/V₂=I₂/I₁. 전압은 권수에 비례, 전류는 반비례.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 10,
+    "subject": "소방전기일반",
+    "topic": "전동기·발전기",
+    "question": "유도전동기의 슬립 s의 정의는?",
+    "options": [
+     "(Ns-N)/Ns",
+     "(N-Ns)/N",
+     "Ns/N",
+     "N/Ns"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 슬립 s=(동기속도-회전속도)/동기속도. 기동 시 s=1, 무부하 시 s≈0.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 11,
+    "subject": "소방전기일반",
+    "topic": "전동기·발전기",
+    "question": "동기속도 Ns를 나타내는 식은? (f: 주파수, P: 극수)",
+    "options": [
+     "120f/P",
+     "120P/f",
+     "60f/P",
+     "f/(120P)"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: Ns=120f/P [rpm]. 4극 60Hz → 1800rpm.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 12,
+    "subject": "소방전기일반",
+    "topic": "전자기·정전기",
+    "question": "콘덴서 C₁, C₂를 직렬 연결한 합성 정전용량은?",
+    "options": [
+     "C₁+C₂",
+     "C₁C₂/(C₁+C₂)",
+     "(C₁+C₂)/C₁C₂",
+     "C₁C₂"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 콘덴서 직렬=곱/합(저항 병렬과 동일 형태), 병렬=합.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 13,
+    "subject": "소방전기일반",
+    "topic": "반도체·다이오드",
+    "question": "제너다이오드의 주된 용도는?",
+    "options": [
+     "전압 안정(정전압)",
+     "전류 증폭",
+     "발광",
+     "정류"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 제너다이오드=역방향 항복특성을 이용한 정전압 소자.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 14,
+    "subject": "소방전기일반",
+    "topic": "반도체·다이오드",
+    "question": "SCR(실리콘 제어 정류기)에 대한 설명으로 틀린 것은?",
+    "options": [
+     "PNPN 4층 구조이다",
+     "게이트 신호로 턴온한다",
+     "게이트 신호로 턴오프할 수 있다",
+     "정류 및 위상제어에 사용된다"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: SCR은 게이트로 턴온만 가능. 턴오프는 전류를 유지전류 이하로 낮춰야 함(GTO는 게이트 턴오프 가능).",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 15,
+    "subject": "소방전기일반",
+    "topic": "전자기·정전기",
+    "question": "플레밍의 왼손법칙에서 엄지가 가리키는 것은?",
+    "options": [
+     "자속밀도",
+     "전류",
+     "힘(운동방향)",
+     "기전력"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 왼손(전동기): 엄지=힘, 검지=자속, 중지=전류. 오른손은 발전기.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 16,
+    "subject": "소방전기일반",
+    "topic": "반도체·다이오드",
+    "question": "브리지 정류회로에 다이오드는 몇 개 필요한가?",
+    "options": [
+     "1개",
+     "2개",
+     "4개",
+     "6개"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 단상 브리지 전파정류=다이오드 4개. 3상 브리지=6개.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 17,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "무창층에서 개구부 면적 합계는 해당 층 바닥면적의 얼마 이하인가?",
+    "options": [
+     "1/10",
+     "1/20",
+     "1/30",
+     "1/50"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 무창층=개구부 면적 합계가 바닥면적의 1/30 이하인 층.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 18,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "피난층에 대한 정의로 옳은 것은?",
+    "options": [
+     "곧바로 지상으로 갈 수 있는 출입구가 있는 층",
+     "1층",
+     "옥상층",
+     "지하 1층"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 피난층=곧바로 지상으로 통하는 출입구가 있는 층(반드시 1층은 아님).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 19,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "건축허가 동의 대상 - 일반 건축물의 연면적 기준은?",
+    "options": [
+     "200㎡ 이상",
+     "400㎡ 이상",
+     "600㎡ 이상",
+     "1000㎡ 이상"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 건축허가 동의: 연면적 400㎡ 이상(학교 100㎡, 노유자시설 200㎡, 정신의료기관 300㎡ 등 예외).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 20,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "경보설비에 해당하지 않는 것은?",
+    "options": [
+     "자동화재탐지설비",
+     "비상방송설비",
+     "누전경보기",
+     "비상콘센트설비"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 비상콘센트설비는 소화활동설비. 경보설비: 자탐·시각경보기·비상방송·누전경보기·가스누설경보기 등.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 21,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "위험물 제조소등의 설치허가권자는?",
+    "options": [
+     "소방서장",
+     "시·도지사",
+     "소방청장",
+     "행정안전부장관"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 제조소등의 설치·변경 허가는 시·도지사.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 22,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "위험물안전관리자 해임 시 재선임 기한은?",
+    "options": [
+     "14일 이내",
+     "30일 이내",
+     "60일 이내",
+     "90일 이내"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 해임·퇴직일부터 30일 이내 재선임, 선임 후 14일 이내 신고.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 23,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "소화활동설비에 해당하는 것은?",
+    "options": [
+     "옥내소화전설비",
+     "스프링클러설비",
+     "무선통신보조설비",
+     "자동화재탐지설비"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 소화활동설비: 제연·연결송수관·연결살수·비상콘센트·무선통신보조·연소방지설비.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 24,
+    "subject": "소방관계법규",
+    "topic": "위험물안전관리법",
+    "question": "자체소방대를 설치해야 하는 제4류 위험물 취급 제조소의 지정수량 기준은?",
+    "options": [
+     "1천배 이상",
+     "2천배 이상",
+     "3천배 이상",
+     "5천배 이상"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 제4류 위험물을 지정수량 3천배 이상 취급하는 제조소·일반취급소는 자체소방대 설치.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 25,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "유도등·비상조명",
+    "question": "복도통로유도등은 보행거리 몇 m마다 설치하는가?",
+    "options": [
+     "10m",
+     "15m",
+     "20m",
+     "25m"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 통로유도등: 구부러진 모퉁이 및 보행거리 20m마다, 바닥에서 1m 이하.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 26,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "유도등·비상조명",
+    "question": "비상조명등의 바닥 조도 기준은?",
+    "options": [
+     "0.5 lx 이상",
+     "1 lx 이상",
+     "2 lx 이상",
+     "5 lx 이상"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 비상조명등: 각 부분 바닥에서 1 lx 이상. 60분(일부 대상물) 또는 20분 이상 작동.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 27,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "경보설비·비상방송",
+    "question": "누전경보기에서 1급 경보기의 경계전로 정격전류 기준은?",
+    "options": [
+     "30A 초과",
+     "60A 초과",
+     "100A 초과",
+     "200A 초과"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 경계전로 60A 초과=1급, 60A 이하=2급 누전경보기 설치.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 28,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "경보설비·비상방송",
+    "question": "비상방송설비에서 기동장치 조작 후 방송 개시까지 소요시간은?",
+    "options": [
+     "5초 이하",
+     "10초 이하",
+     "20초 이하",
+     "30초 이하"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 비상방송: 기동 후 10초 이하에 방송 개시.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 29,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "R형 수신기의 특징으로 옳은 것은?",
+    "options": [
+     "각 회선마다 전용 배선 필요",
+     "중계기를 이용한 다중전송방식",
+     "소규모 건물에만 사용",
+     "고유신호 수신 불가"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: R형=다중전송(고유신호), 배선 절약, 대규모 적합. P형=회선별 공통신호.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 30,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "유도등·비상조명",
+    "question": "피난구유도등의 표시 색상은?",
+    "options": [
+     "녹색 바탕에 백색 문자",
+     "백색 바탕에 녹색 문자",
+     "적색 바탕에 백색 문자",
+     "백색 바탕에 적색 문자"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 피난구유도등=녹색바탕 백색문자. 통로유도등=백색바탕 녹색문자.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 31,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "비상전원·축전지",
+    "question": "연축전지의 공칭전압은 셀당 몇 V인가?",
+    "options": [
+     "1.2V",
+     "1.5V",
+     "2.0V",
+     "3.0V"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 연(납)축전지 2.0V/셀, 알칼리축전지 1.2V/셀. 알칼리는 수명이 길고 온도특성 우수.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 32,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "경보설비·비상방송",
+    "question": "비상방송설비 확성기의 음성입력은 실내 기준 몇 W 이상?",
+    "options": [
+     "1W",
+     "2W",
+     "3W",
+     "5W"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 확성기 음성입력: 실내 1W 이상, 실외 3W 이상. 수평거리 25m 이하.",
+    "difficulty": 1,
+    "freq_score": 5
+   }
+  ]
+ },
+ {
+  "id": "2018_1",
+  "label": "2018년 1회",
+  "year": 2018,
+  "session": 1,
+  "question_count": 32,
+  "questions": [
+   {
+    "no": 1,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "연소의 4요소에 해당하지 않는 것은?",
+    "options": [
+     "가연물",
+     "산소공급원",
+     "점화원",
+     "기화열"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 연소의 4요소: 가연물·산소공급원·점화원·연쇄반응. 기화열은 해당 없음.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 2,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "자연발화를 방지하는 방법으로 틀린 것은?",
+    "options": [
+     "통풍을 잘 시킨다",
+     "습도를 높게 유지한다",
+     "저장실 온도를 낮춘다",
+     "퇴적 시 열이 쌓이지 않게 한다"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 습도가 높으면 미생물 발열 등으로 자연발화가 촉진됨. 습도는 낮게 유지.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 3,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "이산화탄소 소화약제의 주된 소화효과는?",
+    "options": [
+     "냉각효과",
+     "질식효과",
+     "부촉매효과",
+     "제거효과"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: CO₂는 산소농도를 낮추는 질식소화가 주효과(+약간의 냉각).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 4,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "인화점에 대한 설명으로 옳은 것은?",
+    "options": [
+     "외부 점화원 없이 스스로 발화하는 최저온도",
+     "점화원에 의해 인화될 수 있는 최저온도",
+     "연소가 지속되는 최저온도",
+     "증기압이 대기압과 같아지는 온도"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 인화점=점화원 존재 시 불이 붙는 최저온도. 점화원 없이 발화하면 발화점.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 5,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "화재의 분류에서 C급 화재는?",
+    "options": [
+     "일반화재",
+     "유류화재",
+     "전기화재",
+     "금속화재"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: A급 일반(백색), B급 유류(황색), C급 전기(청색), D급 금속(무색).",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 6,
+    "subject": "소방원론",
+    "topic": "연소이론·화재",
+    "question": "플래시오버(Flash Over)에 대한 설명으로 옳은 것은?",
+    "options": [
+     "실내 가연물이 일시에 폭발적으로 착화하는 현상",
+     "산소 부족 상태에서 급격히 공기가 유입되어 폭발하는 현상",
+     "가연성 액체의 증기폭발",
+     "분진의 폭발 현상"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 플래시오버=성장기→최성기 전환 시 실내 전체 가연물이 일시 착화. 급격한 공기 유입 폭발은 백드래프트.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 7,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "할론 1301의 화학식은?",
+    "options": [
+     "CF₃Br",
+     "CF₂ClBr",
+     "C₂F₄Br₂",
+     "CCl₄"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 할론 번호=C·F·Cl·Br 순. 1301=C 1개, F 3개, Cl 0개, Br 1개 → CF₃Br.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 8,
+    "subject": "소방원론",
+    "topic": "소화이론·약제",
+    "question": "제3종 분말소화약제의 주성분은?",
+    "options": [
+     "탄산수소나트륨",
+     "탄산수소칼륨",
+     "제1인산암모늄",
+     "요소"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 제3종=NH₄H₂PO₄(제1인산암모늄), 담홍색, A·B·C급 적용 가능한 유일한 분말.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 9,
+    "subject": "소방전기일반",
+    "topic": "전동기·발전기",
+    "question": "동기속도 Ns를 나타내는 식은? (f: 주파수, P: 극수)",
+    "options": [
+     "120f/P",
+     "120P/f",
+     "60f/P",
+     "f/(120P)"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: Ns=120f/P [rpm]. 4극 60Hz → 1800rpm.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 10,
+    "subject": "소방전기일반",
+    "topic": "직류·교류회로",
+    "question": "RLC 직렬회로의 공진주파수 f₀는?",
+    "options": [
+     "1/(2π√(LC))",
+     "2π√(LC)",
+     "1/(2πLC)",
+     "√(LC)/(2π)"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 직렬공진 XL=XC → f₀=1/(2π√LC). 공진 시 임피던스 최소·전류 최대·역률 1.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 11,
+    "subject": "소방전기일반",
+    "topic": "전자기·정전기",
+    "question": "플레밍의 왼손법칙에서 엄지가 가리키는 것은?",
+    "options": [
+     "자속밀도",
+     "전류",
+     "힘(운동방향)",
+     "기전력"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 왼손(전동기): 엄지=힘, 검지=자속, 중지=전류. 오른손은 발전기.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 12,
+    "subject": "소방전기일반",
+    "topic": "직류·교류회로",
+    "question": "저항 R₁, R₂를 병렬 연결한 합성저항은?",
+    "options": [
+     "R₁+R₂",
+     "R₁R₂/(R₁+R₂)",
+     "(R₁+R₂)/R₁R₂",
+     "1/(R₁+R₂)"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 병렬 합성저항=곱/합. 직렬은 그냥 합.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 13,
+    "subject": "소방전기일반",
+    "topic": "전자기·정전기",
+    "question": "렌츠의 법칙과 관계있는 것은?",
+    "options": [
+     "유도기전력의 방향",
+     "전자력의 방향",
+     "전류의 발열작용",
+     "정전유도"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 렌츠 법칙: 유도기전력은 자속 변화를 방해하는 방향. 크기는 패러데이 법칙.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 14,
+    "subject": "소방전기일반",
+    "topic": "직류·교류회로",
+    "question": "3상 평형회로의 유효전력 P는?",
+    "options": [
+     "VIcosθ",
+     "√3VIcosθ",
+     "3VIcosθ",
+     "√3VIsinθ"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 3상 전력 P=√3·V선간·I선·cosθ [W].",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 15,
+    "subject": "소방전기일반",
+    "topic": "직류·교류회로",
+    "question": "역률(power factor)의 정의로 옳은 것은?",
+    "options": [
+     "무효전력/피상전력",
+     "유효전력/피상전력",
+     "유효전력/무효전력",
+     "피상전력/유효전력"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 역률 cosθ=유효전력 P/피상전력 S.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 16,
+    "subject": "소방전기일반",
+    "topic": "전자기·정전기",
+    "question": "콘덴서 C₁, C₂를 직렬 연결한 합성 정전용량은?",
+    "options": [
+     "C₁+C₂",
+     "C₁C₂/(C₁+C₂)",
+     "(C₁+C₂)/C₁C₂",
+     "C₁C₂"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 콘덴서 직렬=곱/합(저항 병렬과 동일 형태), 병렬=합.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 17,
+    "subject": "소방관계법규",
+    "topic": "화재예방법",
+    "question": "소방안전관리자를 선임한 경우 신고 기한은?",
+    "options": [
+     "7일 이내",
+     "14일 이내",
+     "30일 이내",
+     "60일 이내"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 선임한 날부터 14일 이내에 소방본부장·소방서장에게 신고.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 18,
+    "subject": "소방관계법규",
+    "topic": "소방기본법",
+    "question": "소방자동차의 우선통행에 관한 사항은 어느 법에 따르는가?",
+    "options": [
+     "소방기본법",
+     "도로교통법",
+     "자동차관리법",
+     "소방시설법"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 소방차 우선통행은 도로교통법에 따름(소방기본법에 규정된 준용사항).",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 19,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "건축허가 동의 대상 - 일반 건축물의 연면적 기준은?",
+    "options": [
+     "200㎡ 이상",
+     "400㎡ 이상",
+     "600㎡ 이상",
+     "1000㎡ 이상"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 건축허가 동의: 연면적 400㎡ 이상(학교 100㎡, 노유자시설 200㎡, 정신의료기관 300㎡ 등 예외).",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 20,
+    "subject": "소방관계법규",
+    "topic": "소방기본법",
+    "question": "소방기본법의 목적으로 거리가 먼 것은?",
+    "options": [
+     "화재의 예방·경계·진압",
+     "공공의 안녕 및 질서 유지",
+     "국민의 생명·신체·재산 보호",
+     "건축물의 안전한 설계"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 소방기본법 목적: 화재 예방·경계·진압, 구조·구급, 공공 안녕질서 유지와 복리증진. 건축설계는 건축법.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 21,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "경보설비에 해당하지 않는 것은?",
+    "options": [
+     "자동화재탐지설비",
+     "비상방송설비",
+     "누전경보기",
+     "비상콘센트설비"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 비상콘센트설비는 소화활동설비. 경보설비: 자탐·시각경보기·비상방송·누전경보기·가스누설경보기 등.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 22,
+    "subject": "소방관계법규",
+    "topic": "소방시설법",
+    "question": "무창층에서 개구부 면적 합계는 해당 층 바닥면적의 얼마 이하인가?",
+    "options": [
+     "1/10",
+     "1/20",
+     "1/30",
+     "1/50"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 무창층=개구부 면적 합계가 바닥면적의 1/30 이하인 층.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 23,
+    "subject": "소방관계법규",
+    "topic": "화재예방법",
+    "question": "화재예방강화지구의 지정권자는?",
+    "options": [
+     "소방서장",
+     "소방본부장",
+     "시·도지사",
+     "행정안전부장관"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 화재예방강화지구는 시·도지사가 지정.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 24,
+    "subject": "소방관계법규",
+    "topic": "소방기본법",
+    "question": "소방활동구역에 출입할 수 없는 사람은?",
+    "options": [
+     "구역 내 소유자·관리자·점유자",
+     "전기·가스 업무 종사자로서 원활한 소방활동에 필요한 자",
+     "의사·간호사",
+     "일반 취재 희망 시민"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 소방활동구역 출입: 관계인, 전기·가스·수도·통신 종사자, 의료인, 취재인력(허가), 수사업무 종사자 등. 일반 시민은 불가.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 25,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "경보설비·비상방송",
+    "question": "비상방송설비에서 기동장치 조작 후 방송 개시까지 소요시간은?",
+    "options": [
+     "5초 이하",
+     "10초 이하",
+     "20초 이하",
+     "30초 이하"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 비상방송: 기동 후 10초 이하에 방송 개시.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 26,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "R형 수신기의 특징으로 옳은 것은?",
+    "options": [
+     "각 회선마다 전용 배선 필요",
+     "중계기를 이용한 다중전송방식",
+     "소규모 건물에만 사용",
+     "고유신호 수신 불가"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: R형=다중전송(고유신호), 배선 절약, 대규모 적합. P형=회선별 공통신호.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 27,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "P형 1급 발신기는 수평거리 몇 m 이하마다 설치하는가?",
+    "options": [
+     "15m",
+     "20m",
+     "25m",
+     "50m"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 발신기: 층마다, 수평거리 25m 이하. 바닥에서 0.8~1.5m 높이.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 28,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "정온식 스포트형 감지기를 설치하기에 가장 적합한 장소는?",
+    "options": [
+     "거실",
+     "복도",
+     "보일러실",
+     "계단"
+    ],
+    "answer": 3,
+    "has_image": false,
+    "explanation": "✅ 정답 3번\n\n📘 해설: 정온식=일정 온도 도달 시 작동. 화기 취급 장소(보일러실·주방)에 적합.",
+    "difficulty": 3,
+    "freq_score": 3
+   },
+   {
+    "no": 29,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "부착높이 8m 이상 15m 미만에 설치할 수 없는 감지기는?",
+    "options": [
+     "차동식 분포형",
+     "이온화식 1종",
+     "광전식 1종",
+     "정온식 스포트형"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 8~15m: 차동식 분포형, 이온화식 1·2종, 광전식 1·2종, 연기복합형, 불꽃감지기. 정온식 스포트형은 4m 미만(특종·1종은 8m 미만).",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 30,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "경보설비·비상방송",
+    "question": "비상방송설비 확성기의 음성입력은 실내 기준 몇 W 이상?",
+    "options": [
+     "1W",
+     "2W",
+     "3W",
+     "5W"
+    ],
+    "answer": 1,
+    "has_image": false,
+    "explanation": "✅ 정답 1번\n\n📘 해설: 확성기 음성입력: 실내 1W 이상, 실외 3W 이상. 수평거리 25m 이하.",
+    "difficulty": 1,
+    "freq_score": 5
+   },
+   {
+    "no": 31,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "자동화재탐지설비 음향장치의 음량은 중심에서 1m 떨어진 곳에서 몇 dB 이상?",
+    "options": [
+     "60dB",
+     "70dB",
+     "80dB",
+     "90dB"
+    ],
+    "answer": 4,
+    "has_image": false,
+    "explanation": "✅ 정답 4번\n\n📘 해설: 음향장치: 1m 거리에서 90dB 이상. 수평거리 25m 이하마다 설치.",
+    "difficulty": 2,
+    "freq_score": 4
+   },
+   {
+    "no": 32,
+    "subject": "소방전기시설의 구조 및 원리",
+    "topic": "자동화재탐지설비",
+    "question": "하나의 경계구역 면적과 한 변 길이 기준은?",
+    "options": [
+     "500㎡ 이하, 40m 이하",
+     "600㎡ 이하, 50m 이하",
+     "1000㎡ 이하, 50m 이하",
+     "1200㎡ 이하, 60m 이하"
+    ],
+    "answer": 2,
+    "has_image": false,
+    "explanation": "✅ 정답 2번\n\n📘 해설: 경계구역: 600㎡ 이하, 한 변 50m 이하(주된 출입구에서 내부 전체가 보이면 1000㎡).",
+    "difficulty": 1,
+    "freq_score": 5
+   }
+  ]
  }
 ]

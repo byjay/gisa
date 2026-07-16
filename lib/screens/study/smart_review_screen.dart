@@ -3,6 +3,7 @@ import '../../services/progress_service.dart';
 import '../../services/study_data.dart';
 import '../../widgets/tutor_avatar.dart';
 import 'quiz_play_screen.dart';
+import '../../widgets/persistent_nav.dart';
 
 /// 스마트 복습 센터 — 상위 자격증 앱(맞추다·전구앱·오르조) 핵심 기능 벤치마킹
 /// 1) 자동 오답노트: 틀린 문제만 다시 풀기
@@ -98,7 +99,7 @@ class _SmartReviewScreenState extends State<SmartReviewScreen> {
                         padding: const EdgeInsets.all(20),
                         child: Row(
                           children: [
-                            const TutorAvatar(mood: TutorMood.thinking, size: 52),
+                            const TutorAvatar(mood: TutorMood.thinking, size: 52, headOnly: true),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
@@ -312,9 +313,7 @@ class _SmartReviewScreenState extends State<SmartReviewScreen> {
   }
 
   Future<void> _push(String title, List<Question> qs) async {
-    await Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) =>
-            QuizPlayScreen(title: title, questions: qs, examMode: false)));
+    await pushWithNav(context, QuizPlayScreen(title: title, questions: qs, examMode: false), currentSection: 1);
     _load(); // 돌아오면 통계 갱신
   }
 

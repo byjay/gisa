@@ -3,6 +3,7 @@ import '../services/pass_prediction.dart';
 import '../theme/app_theme.dart';
 import '../services/study_data.dart';
 import '../screens/study/quiz_play_screen.dart';
+import 'persistent_nav.dart';
 
 /// 🎯 합격 예측 카드 — 홈 최상단 후킹.
 /// "지금 시험 보면 몇 점 = 합격/불합격" + 과락 경보 + 오늘의 처방전(점수 상승 최대 토픽 3개).
@@ -102,11 +103,10 @@ class _PassPredictionCardState extends State<PassPredictionCard> {
       qs.addAll(list.take(3));
     }
     if (!context.mounted) return;
-    await Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => QuizPlayScreen(
+    await pushWithNav(context, QuizPlayScreen(
             title: '합격 예측 진단고사 (15문제)',
             questions: qs,
-            examMode: false)));
+            examMode: false), currentSection: 2);
     _load(); // 돌아오면 예측 갱신
   }
 
@@ -325,11 +325,10 @@ class _PassPredictionCardState extends State<PassPredictionCard> {
   Future<void> _startRxQuiz(BuildContext context, Prescription rx) async {
     final qs = await StudyData.instance.questionsByTopic(rx.topic);
     if (!context.mounted) return;
-    await Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => QuizPlayScreen(
+    await pushWithNav(context, QuizPlayScreen(
             title: '처방전: ${rx.topic}',
             questions: qs.take(10).toList(),
-            examMode: false)));
+            examMode: false), currentSection: 2);
     _load();
   }
 
