@@ -262,6 +262,8 @@ assets/data/ (12 JSON)           # exams.json(29회차·2,897문항: id/label/ye
 | R42 | e9b10a8 | **적응형 데일리 자동학습 코치** — AutoStudyService(남은 목표시간→문항예산 변환, 복습·오답 우선 배치, 최소복습량 유지, 상한 캡), auto_study_screen 신설 | e9b10a8 |
 | R43 | 58fd447 | **전수 통합 커밋 (세션 재개 A0→A5 완주)** — ① 신규 화면 8종: settings(백업·알림·인증)/calculator_hub(공학계산 허브)/formula_calc(공식계산기)/unit_converter(단위변환)/circuit(회로도감)/pass_report(합격리포트)/wrong_focus(오답집중)/visual_repeat(시각화 반복분석) ② 신규 서비스 10종: notification_service(로컬 알림·D-Day 리마인더), qnet_schedule_service+qnet_catalog+schedule_alerts(큐넷 일정·알림), exam_analysis·exam_registration(시험 분석·원서접수), cbt_info_service, auth_service, formula_calculators, unit_converter ③ 데이터: qnet_schedule.json, common/circuit_guide.json, 3트랙 exam_info_2026/exams/repeat_questions/silgi 갱신 ④ 자산: 앱아이콘 mipmap 5종+adaptive icon, 스플래시, 폰트, web 아이콘 교체 ⑤ **테스트 17건 신설·전부 통과**(quiz_policy 8: 합격판정·과락·미답 / cerebras 3: 키 상태 / auto_study 5: 예산·우선순위) — placeholder 탈피(P0-2 착수) ⑥ 검증: analyze 0 + test 17/17 + web release 서빙바이트 일치(5,147,736) + APK 75.2MB 서명빌드 → releases/ 갱신 → 공개 curl 200(75,153,763 bytes) | 58fd447 |
 
+| R44 | (이번 커밋) | **경쟁력 평가 보고서 — 실제 상위 10개 앱 × 50개 항목** (docs/COMPETITIVE_BENCHMARK_50.md) — 딥리서치(맞추다 이용자 8,780명/오르조 앱스토어 1위/comcbt/다산패스/전구앱/기출넷/오늘학습/에듀윌/해커스/날먹) 기반 10카테고리 50항목 5점 채점. **총점 223/250(89.2%)**, 게이미피케이션·부가도구 100%, 유일 기능 8종 확인. 최대 갭: 오류신고(1점)·법적고지(2점)·접근성(2점)·AI변형문제(1점) — 보강 우선순위 6건 확정 | (커밋 후 기입) |
+
 > **다음 착수**: **T-4 스트릭 보호권 '마법 방패'** 또는 **T-5 CBT 문항 그리드 네비게이터** (§7 로드맵 우선순위 ★★★). 사용자 승인 후 착수.
 >
 > **참고(서버 재기동)**: 세션 재개 시 죽어있으면 web=`cd /home/user/flutter_app/build/web && nohup python3 -m http.server 5060 --bind 0.0.0.0 &`, apk다운로드=`cd /home/user/flutter_app/releases && nohup python3 -m http.server 8899 --bind 0.0.0.0 &`.
