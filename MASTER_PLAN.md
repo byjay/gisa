@@ -51,6 +51,10 @@
 5. `print()` 금지 → `debugPrint` + `kDebugMode`; `withOpacity()` 금지 → `withValues(alpha:)`.
 6. 인터럽트로 도구 호출이 끊겼으면, 재실행 전 **실제 파일/커밋 상태를 먼저 확인**한다.
 7. 서버가 죽어 있으면 `flutter build web --release` 후 `python3 -m http.server 5060 --directory build/web --bind 0.0.0.0` 백그라운드 재기동.
+8. **[사용자 절대지시 — 순서 게이트]** 개발 우선순위는 다음 2단계를 엄수한다. 순서 역전 금지.
+   - **GATE-1 (선행, 진행 중)**: 학습 DATA 완성 — **10개 과목(자격증 트랙)** 각각 ① 모의고사 응시 가능한 기출 DB ② **전기기사 트랙 수준의 해설·학습 DATA 품질**(지문/보기/정답/해설/토픽/난이도/빈도 완비). 원천은 comcbt 교사용 PDF(`/home/user/comcbt_extract/`, zip 9종목 보유). 이 게이트를 통과하기 전에는 GATE-2 착수 금지.
+   - **GATE-2 (후행)**: **3D 캐릭터 3명 × 각 행동(모션) 50개 = 150개 구현.** 대상은 튜터 페르소나 캐릭터 3인(볼트쌤 volt / 한결 han / 설빛 seol). 행동 50개는 기존 TutorCoach 27상황(CoachSituation)을 포괄·확장한 상황별 모션(인사/칭찬/오답위로/설명/필기/응원/명상/카운트다운 등)으로 정의하고, 캐릭터별 50모션 매핑표를 A2 스펙으로 먼저 확정한 뒤 구현한다.
+   - GitHub 원격: `https://github.com/byjay/gisa` (사용자 지정 저장소). 매 태스크 완료 시 커밋 후 이 저장소 푸시 시도.
 
 ---
 
@@ -300,7 +304,9 @@ curl -sI "https://8899-<sandbox>/CertStudyTracker-v1.0-release.apk" | head -1   
 
 | R46 | (이번 커밋) | **볼트쌤 리브랜딩 + 튜터 전신 코치 시스템 (사용자 지시: "얼굴 잘림" 근본수정 + "모든 상황 1:1 과외") + AI표기 브랜딩 교체** — ① **브랜드 확정**: "볼트쌤"(⚡번개+🎓학사모, indigo-violet #4F46E5→#7C3AED+gold), 메인 로고(가로 워드마크, 트림+투명배경 1264×848)+정사각 서브로고(logo_square/512) 생성 → `assets/brand/` 신설, 앱 아이콘 전량 재생성(flutter_launcher_icons: mipmap 5종+adaptive+web icons), AndroidManifest label/web manifest.json/index.html title 볼트쌤 적용 ② **'AI' 표기 → 볼트쌤 전면 교체**(법적고지 legal_screen 제외 의도적 유지): cerebras_service 시스템프롬프트(`당신 이름은 "볼트쌤"이며...`), study_screen 그리드 '볼트쌤 튜터', search_screen 검증답변 문구, tutor_chat_screen 설정타이틀, settings_screen applicationName·공유문구, beginner_roadmap AI→볼트쌤, tutor_avatar TutorBanner '푸키 튜터'→'볼트쌤' 라벨 통일 ③ **튜터 얼굴 잘림 근본 수정**(tutor_avatar.dart headOnly): `BoxFit.cover`+상단정렬 크롭 방식 → `BoxFit.contain`+패딩(size×0.08)으로 전신 표시, "크롭 금지(사용자 지시)" 주석 명기 ④ **TutorCoach 전신 1:1 과외 시스템 신설**(tutor_coach.dart): `CoachSituation` 27종(홈 시간대3+스트릭+복귀, 퀴즈 시작/정답/정답스트릭/오답/오답반복/고난도/막판, 결과 합격/불합격/만점, 로드맵 시작/진행/완료, 플래시카드, 이론, 공식, 타이머, 통계 굿/배드, D-Day 원/근, 격려) × 수준 3단계(왕초보/중급/상급) × 상황별 3멘트 = **243개 멘트 엔진**(`TutorMents.pick/moodOf`), `TutorCoach` 위젯(전신 아바타+"⚡ 볼트쌤" 라벨+말풍선+탭→채팅 연결) ⑤ **전 화면 7곳 배치**(적재적소 동적 상황판정): 홈(시간대/스트릭 분기)·퀴즈풀이(난이도/정답스트릭/오답 분기+세션 정답률 기반 수준)·결과화면(만점/합격/불합격+정답률 수준)·왕초보로드맵(단계 진행률)·플래시카드(카드별 ValueKey)·타이머(진행중만)·통계(주간학습량 60분 기준 굿/배드) ⑥ **검증(V-팀 3인)**: V1 PASS(준비중 3건은 정상 로딩상태 문구·미구현고지로 허위 아님, 빈핸들러 0) + analyze 0 issue + test 17/17 + web release 빌드 성공 + **5060 서빙바이트 로컬 일치(5,273,151, R45比 +37,775)** + **APK 재빌드 72.8MB**(볼트쌤 아이콘·라벨 반영, AndroidManifest label 되돌림 결함 발견·재수정 후 재빌드)→releases/ 갱신→로컬+공개 curl 200(72,832,079 bytes) — **V-팀 3인 전원 PASS**(V1 기능실체/V2 배포상태/V3 전달링크) | 18a41a3 |
 
-> **다음 착수**: **T-4 스트릭 보호권 '마법 방패'** 또는 **T-5 CBT 문항 그리드 네비게이터** (§7 로드맵 우선순위 ★★★). 사용자 승인 후 착수.
+| R47 | (이번 커밋) | **사용자 절대지시 페르소나 각인 + 전기기사 지문 복구 286건 커밋** — ① §1.4에 HARD RULE 8 신설: **GATE-1(10과목 학습DATA·모의고사, 전기기사 수준 품질) 완료 후에만 GATE-2(3D 캐릭터 3명×행동 50개=150모션) 착수** — 순서 역전 금지, GitHub 원격 `byjay/gisa` 지정 ② 인터럽트 복구 검증: recover_questions.py가 교사용 PDF(comcbt_extract/folder_02)에서 '그림·수식' placeholder 문항의 실제 지문 286건 복원 완료 상태 확인(무결성 게이트: 2,897문항 위반 0) ③ 원천 데이터 인벤토리 확정: comcbt_downloads.zip 9종목 압축해제 완료(comcbt_extract/folder_00~08) — GATE-1 잔여: 소방전기 실PDF 재구성, 신규 6종목 트랙 추가 | (커밋 후 기입) |
+
+> **다음 착수**: **GATE-1 계속** — ① 범용 교사용 PDF 파서(tools/pdf_exam_parser.py, 2단 컬럼·❶정답마커·그림크롭) 완성 ② 소방설비기사(전기) 실기출 재구성 ③ 정보처리·산업안전·건축·건설안전·소방기계 신규 트랙 DB 구축 → 전 트랙 전기기사 수준 해설 저술. **GATE-1 완료 후에만 GATE-2(3D 캐릭터 3인×50행동)** 착수.
 >
 > **참고(서버 재기동)**: 세션 재개 시 죽어있으면 web=`cd /home/user/flutter_app/build/web && nohup python3 -m http.server 5060 --bind 0.0.0.0 &`, apk다운로드=`cd /home/user/flutter_app/releases && nohup python3 -m http.server 8899 --bind 0.0.0.0 &`.
 > **상시 다운로드 서버**: 8899 포트가 `releases/` 디렉터리를 서빙 중. 세션 재개 시 죽어있으면 `cd /home/user/flutter_app/releases && nohup python3 -m http.server 8899 --bind 0.0.0.0 &`로 재기동.
