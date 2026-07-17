@@ -27,6 +27,7 @@ class AppProvider extends ChangeNotifier {
   bool darkMode = false;
   int weeklyGoalMinutes = 600;
   String themePaletteId = 'indigo';
+  String selectedTutorId = 'soyeon';
   bool notificationsEnabled = true; // 🔔 시험 일정·학습 리마인드 알림 on/off
   bool dailyReminderEnabled = true;
   int dailyReminderHour = 9;
@@ -50,28 +51,31 @@ class AppProvider extends ChangeNotifier {
   }
 
   void _load() {
-    exams = _examBox.values
-        .map((e) => Exam.fromMap(Map<dynamic, dynamic>.from(e)))
-        .toList()
-      ..sort((a, b) => a.examDate.compareTo(b.examDate));
-    sessions = _sessionBox.values
-        .map((e) => StudySession.fromMap(Map<dynamic, dynamic>.from(e)))
-        .toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
-    notes = _noteBox.values
-        .map((e) => WrongNote.fromMap(Map<dynamic, dynamic>.from(e)))
-        .toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    quizResults = _quizBox.values
-        .map((e) => Map<String, dynamic>.from(e))
-        .toList()
-      ..sort((a, b) =>
-          (b['date'] as String).compareTo(a['date'] as String));
+    exams =
+        _examBox.values
+            .map((e) => Exam.fromMap(Map<dynamic, dynamic>.from(e)))
+            .toList()
+          ..sort((a, b) => a.examDate.compareTo(b.examDate));
+    sessions =
+        _sessionBox.values
+            .map((e) => StudySession.fromMap(Map<dynamic, dynamic>.from(e)))
+            .toList()
+          ..sort((a, b) => b.date.compareTo(a.date));
+    notes =
+        _noteBox.values
+            .map((e) => WrongNote.fromMap(Map<dynamic, dynamic>.from(e)))
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    quizResults =
+        _quizBox.values.map((e) => Map<String, dynamic>.from(e)).toList()..sort(
+          (a, b) => (b['date'] as String).compareTo(a['date'] as String),
+        );
     dailyGoalMinutes = (_settingsBox.get('dailyGoal') as int?) ?? 120;
     weeklyGoalMinutes = (_settingsBox.get('weeklyGoal') as int?) ?? 600;
     darkMode = (_settingsBox.get('darkMode') as bool?) ?? false;
-    themePaletteId =
-        (_settingsBox.get('themePalette') as String?) ?? 'indigo';
+    themePaletteId = (_settingsBox.get('themePalette') as String?) ?? 'indigo';
+    selectedTutorId =
+        (_settingsBox.get('selectedTutor') as String?) ?? 'soyeon';
     notificationsEnabled =
         (_settingsBox.get('notificationsEnabled') as bool?) ?? true;
     dailyReminderEnabled =
@@ -101,7 +105,10 @@ class AppProvider extends ChangeNotifier {
   Future<void> deleteExam(String id) async {
     await _examBox.delete(id);
     // cascade delete sessions and notes
-    final sids = sessions.where((s) => s.examId == id).map((s) => s.id).toList();
+    final sids = sessions
+        .where((s) => s.examId == id)
+        .map((s) => s.id)
+        .toList();
     for (final sid in sids) {
       await _sessionBox.delete(sid);
     }
@@ -203,6 +210,14 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setSelectedTutor(String id) async {
+    const available = {'soyeon', 'harin', 'jiyoon'};
+    if (!available.contains(id)) return;
+    selectedTutorId = id;
+    await _settingsBox.put('selectedTutor', id);
+    notifyListeners();
+  }
+
   // ===== 🔔 알림 설정 =====
   Future<void> setNotificationsEnabled(bool v) async {
     notificationsEnabled = v;
@@ -210,8 +225,9 @@ class AppProvider extends ChangeNotifier {
     if (v) {
       await NotificationService.instance.scheduleExamAlerts(alerts);
       if (dailyReminderEnabled) {
-        await NotificationService.instance
-            .scheduleDailyReminder(hour: dailyReminderHour);
+        await NotificationService.instance.scheduleDailyReminder(
+          hour: dailyReminderHour,
+        );
       }
     } else {
       await NotificationService.instance.cancelAll();
@@ -223,8 +239,9 @@ class AppProvider extends ChangeNotifier {
     dailyReminderEnabled = v;
     await _settingsBox.put('dailyReminderEnabled', v);
     if (v && notificationsEnabled) {
-      await NotificationService.instance
-          .scheduleDailyReminder(hour: dailyReminderHour);
+      await NotificationService.instance.scheduleDailyReminder(
+        hour: dailyReminderHour,
+      );
     } else {
       await NotificationService.instance.cancelDailyReminder();
     }
@@ -269,13 +286,15 @@ class AppProvider extends ChangeNotifier {
     timerRunning = false;
     final minutes = (elapsedSeconds / 60).ceil();
     if (minutes > 0) {
-      await addSession(StudySession(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        examId: timerExamId ?? '',
-        date: DateTime.now(),
-        minutes: minutes,
-        subject: '타이머 학습',
-      ));
+      await addSession(
+        StudySession(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          examId: timerExamId ?? '',
+          date: DateTime.now(),
+          minutes: minutes,
+          subject: '타이머 학습',
+        ),
+      );
     }
     final result = elapsedSeconds;
     elapsedSeconds = 0;
@@ -296,10 +315,12 @@ class AppProvider extends ChangeNotifier {
   // ===== Stats =====
   int minutesOnDate(DateTime day) {
     return sessions
-        .where((s) =>
-            s.date.year == day.year &&
-            s.date.month == day.month &&
-            s.date.day == day.day)
+        .where(
+          (s) =>
+              s.date.year == day.year &&
+              s.date.month == day.month &&
+              s.date.day == day.day,
+        )
         .fold(0, (sum, s) => sum + s.minutes);
   }
 
@@ -307,8 +328,11 @@ class AppProvider extends ChangeNotifier {
 
   int get weekMinutes {
     final now = DateTime.now();
-    final monday = DateTime(now.year, now.month, now.day)
-        .subtract(Duration(days: now.weekday - 1));
+    final monday = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: now.weekday - 1));
     int total = 0;
     for (int i = 0; i < 7; i++) {
       total += minutesOnDate(monday.add(Duration(days: i)));
@@ -426,14 +450,17 @@ class AppProvider extends ChangeNotifier {
     });
   }
 
-  int minutesForExam(String examId) =>
-      sessions.where((s) => s.examId == examId).fold(0, (sum, s) => sum + s.minutes);
+  int minutesForExam(String examId) => sessions
+      .where((s) => s.examId == examId)
+      .fold(0, (sum, s) => sum + s.minutes);
 
   // ===== XP & 레벨 (마법사 성장 시스템) =====
   /// 학습 1분 = 2XP, 정답 1개 = 5XP
   int get xp {
     final quizXp = quizResults.fold<int>(
-        0, (s, r) => s + ((r['correct'] as int?) ?? 0) * 5);
+      0,
+      (s, r) => s + ((r['correct'] as int?) ?? 0) * 5,
+    );
     return totalMinutes * 2 + quizXp;
   }
 
@@ -471,13 +498,18 @@ class AppProvider extends ChangeNotifier {
   /// 🏆 이번 주(월~지금) 획득 XP — 위클리 리그 순위 산정용
   int get weekXp {
     final now = DateTime.now();
-    final monday = DateTime(now.year, now.month, now.day)
-        .subtract(Duration(days: now.weekday - 1));
+    final monday = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: now.weekday - 1));
     final minuteXp = weekMinutes * 2;
-    final quizXp = quizResults.where((r) {
-      final d = DateTime.tryParse(r['date'] as String? ?? '');
-      return d != null && !d.isBefore(monday);
-    }).fold<int>(0, (s, r) => s + ((r['correct'] as int?) ?? 0) * 5);
+    final quizXp = quizResults
+        .where((r) {
+          final d = DateTime.tryParse(r['date'] as String? ?? '');
+          return d != null && !d.isBefore(monday);
+        })
+        .fold<int>(0, (s, r) => s + ((r['correct'] as int?) ?? 0) * 5);
     return minuteXp + quizXp;
   }
 
@@ -508,8 +540,9 @@ class AppProvider extends ChangeNotifier {
       quizResults.fold<int>(0, (s, r) => s + ((r['correct'] as int?) ?? 0));
 
   /// 전체 평균 정답률(%)
-  int get overallAccuracy =>
-      lifetimeSolved == 0 ? 0 : (lifetimeCorrect * 100 / lifetimeSolved).round();
+  int get overallAccuracy => lifetimeSolved == 0
+      ? 0
+      : (lifetimeCorrect * 100 / lifetimeSolved).round();
 
   /// 완료한 모의고사(세션) 수
   int get completedQuizSessions => quizResults.length;
@@ -644,7 +677,10 @@ class AppProvider extends ChangeNotifier {
       ExamRegistrationStore.instance.all();
 
   ExamRegistration? registrationFor(
-      String jmCd, String roundLabel, ExamPhase phase) {
+    String jmCd,
+    String roundLabel,
+    ExamPhase phase,
+  ) {
     final id = ExamRegistration.makeId(jmCd, roundLabel, phase);
     return ExamRegistrationStore.instance.byId(id);
   }

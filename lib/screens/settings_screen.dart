@@ -6,6 +6,7 @@ import 'legal_screen.dart';
 import '../services/auth_service.dart';
 import '../services/notification_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/tutor_avatar.dart';
 
 /// 설정 화면 — 계정(구글 로그인 준비), 테마, 목표 등.
 class SettingsScreen extends StatefulWidget {
@@ -41,9 +42,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               children: [
                 SwitchListTile(
-                  secondary: Icon(app.darkMode
-                      ? Icons.dark_mode_rounded
-                      : Icons.light_mode_rounded),
+                  secondary: Icon(
+                    app.darkMode
+                        ? Icons.dark_mode_rounded
+                        : Icons.light_mode_rounded,
+                  ),
                   title: const Text('다크 모드'),
                   value: app.darkMode,
                   onChanged: (_) =>
@@ -52,6 +55,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 20),
+          _sectionTitle(cs, '나의 강사'),
+          const SizedBox(height: 8),
+          _tutorSelector(context, app),
           const SizedBox(height: 20),
           _sectionTitle(cs, '알림'),
           const SizedBox(height: 8),
@@ -77,9 +84,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: const Text('개인정보처리방침'),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const LegalScreen(initialTab: 0))),
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const LegalScreen(initialTab: 0),
+                    ),
+                  ),
                 ),
                 const Divider(height: 1),
                 ListTile(
@@ -87,9 +96,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: const Text('이용약관'),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const LegalScreen(initialTab: 1))),
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const LegalScreen(initialTab: 1),
+                    ),
+                  ),
                 ),
                 const Divider(height: 1),
                 ListTile(
@@ -97,9 +108,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: const Text('AI 생성 콘텐츠 고지'),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const LegalScreen(initialTab: 2))),
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const LegalScreen(initialTab: 2),
+                    ),
+                  ),
                 ),
                 const Divider(height: 1),
                 ListTile(
@@ -120,7 +133,94 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ── ⭐ 응원하기 카드 — 리뷰·공유·피드백 (마케팅) ──────────
+  Widget _tutorSelector(BuildContext context, AppProvider app) {
+    final cs = Theme.of(context).colorScheme;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '함께 공부할 강사를 선택하세요',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                for (final tutor in tutorProfiles)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(14),
+                        onTap: () => context
+                            .read<AppProvider>()
+                            .setSelectedTutor(tutor.id),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 220),
+                          padding: const EdgeInsets.fromLTRB(6, 8, 6, 8),
+                          decoration: BoxDecoration(
+                            color: app.selectedTutorId == tutor.id
+                                ? cs.primaryContainer
+                                : cs.surfaceContainerLow,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: app.selectedTutorId == tutor.id
+                                  ? cs.primary
+                                  : cs.outlineVariant,
+                              width: app.selectedTutorId == tutor.id ? 2 : 1,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: 112,
+                                child: Image.asset(
+                                  tutor.asset,
+                                  fit: BoxFit.contain,
+                                  alignment: Alignment.bottomCenter,
+                                  filterQuality: FilterQuality.high,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                tutor.name.replaceAll(' 선생님', ''),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              if (app.selectedTutorId == tutor.id)
+                                Icon(
+                                  Icons.check_circle,
+                                  size: 16,
+                                  color: cs.primary,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              tutorProfileById(app.selectedTutorId).role,
+              style: TextStyle(
+                fontSize: 12,
+                height: 1.4,
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── 응원하기 카드 — 리뷰·공유·피드백 (마케팅) ──────────
   Widget _supportCard(BuildContext context) {
     return Card(
       child: Column(
@@ -142,8 +242,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const Divider(height: 1),
           ListTile(
-            leading:
-                const Icon(Icons.mail_outline_rounded, color: AppTheme.accent),
+            leading: const Icon(
+              Icons.mail_outline_rounded,
+              color: AppTheme.accent,
+            ),
             title: const Text('의견 보내기 · 오류 신고'),
             subtitle: const Text('certstudytracker@gmail.com'),
             trailing: const Icon(Icons.chevron_right_rounded),
@@ -156,23 +258,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _openStore(BuildContext context) async {
     final uri = Uri.parse(
-        'https://play.google.com/store/apps/details?id=com.certstudytracker.study');
+      'https://play.google.com/store/apps/details?id=com.certstudytracker.study',
+    );
     try {
       final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
       if (!ok && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('출시 후 플레이스토어에서 리뷰를 남길 수 있어요 ⭐')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('출시 후 플레이스토어에서 리뷰를 남길 수 있어요 ⭐')),
+        );
       }
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('출시 후 플레이스토어에서 리뷰를 남길 수 있어요 ⭐')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('출시 후 플레이스토어에서 리뷰를 남길 수 있어요 ⭐')),
+        );
       }
     }
   }
 
   Future<void> _shareApp(BuildContext context) async {
-    const text = '⚡ 전기기사·소방 공부는 볼트쌤 하나로 끝!\n'
+    const text =
+        '⚡ 전기기사·소방 공부는 볼트쌤 하나로 끝!\n'
         '기출 3,700+문제 · 볼트쌤 튜터 · 암기법 · 합격 예측까지 무료.\n'
         '볼트쌤 — Google Play에서 검색!';
     await showDialog<void>(
@@ -192,29 +298,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _sendFeedback(BuildContext context) async {
     final uri = Uri.parse(
-        'mailto:certstudytracker@gmail.com?subject=${Uri.encodeComponent('[Cert Study Tracker] 의견/오류 신고')}');
+      'mailto:certstudytracker@gmail.com?subject=${Uri.encodeComponent('[Cert Study Tracker] 의견/오류 신고')}',
+    );
     try {
       final ok = await launchUrl(uri);
       if (!ok && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('certstudytracker@gmail.com 으로 보내주세요 📧')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('certstudytracker@gmail.com 으로 보내주세요 📧'),
+          ),
+        );
       }
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('certstudytracker@gmail.com 으로 보내주세요 📧')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('certstudytracker@gmail.com 으로 보내주세요 📧'),
+          ),
+        );
       }
     }
   }
 
   Widget _sectionTitle(ColorScheme cs, String t) => Padding(
-        padding: const EdgeInsets.only(left: 4),
-        child: Text(t,
-            style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w900,
-                color: cs.primary)),
-      );
+    padding: const EdgeInsets.only(left: 4),
+    child: Text(
+      t,
+      style: TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w900,
+        color: cs.primary,
+      ),
+    ),
+  );
 
   Widget _accountCard(BuildContext context) {
     final auth = context.watch<AuthService>();
@@ -230,11 +346,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Text(
                   user.name.isNotEmpty ? user.name.characters.first : '학',
                   style: const TextStyle(
-                      fontWeight: FontWeight.w900, color: AppTheme.primary),
+                    fontWeight: FontWeight.w900,
+                    color: AppTheme.primary,
+                  ),
                 ),
               ),
-              title: Text(user.name,
-                  style: const TextStyle(fontWeight: FontWeight.w800)),
+              title: Text(
+                user.name,
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
               subtitle: Text(
                 user.email.isNotEmpty
                     ? user.email
@@ -264,8 +384,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 IconBadge(icon: Icons.person_rounded, color: AppTheme.primary),
                 const SizedBox(width: 12),
                 const Expanded(
-                  child: Text('닉네임을 설정하면 학습 기록이 더 특별해져요.',
-                      style: TextStyle(fontSize: 13, height: 1.4)),
+                  child: Text(
+                    '닉네임을 설정하면 학습 기록이 더 특별해져요.',
+                    style: TextStyle(fontSize: 13, height: 1.4),
+                  ),
                 ),
               ],
             ),
@@ -295,13 +417,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             value: app.notificationsEnabled,
             onChanged: (v) async {
               if (v) {
-                final granted =
-                    await NotificationService.instance.requestPermission();
+                final granted = await NotificationService.instance
+                    .requestPermission();
                 if (!context.mounted) return;
                 if (!granted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                        content: Text('알림 권한이 꺼져 있어요. 기기 설정에서 허용해주세요.')),
+                      content: Text('알림 권한이 꺼져 있어요. 기기 설정에서 허용해주세요.'),
+                    ),
                   );
                 }
               }
@@ -352,11 +475,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('취소')),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('취소'),
+          ),
           FilledButton(
-              onPressed: () => Navigator.pop(ctx, ctrl.text),
-              child: const Text('시작')),
+            onPressed: () => Navigator.pop(ctx, ctrl.text),
+            child: const Text('시작'),
+          ),
         ],
       ),
     );

@@ -85,10 +85,14 @@ class _StudyScreenState extends State<StudyScreen>
         bottom: TabBar(
           controller: _tab,
           isScrollable: false,
-          labelStyle:
-              const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
-          unselectedLabelStyle:
-              const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          labelStyle: const TextStyle(
+            fontSize: 13.5,
+            fontWeight: FontWeight.w800,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
           tabs: const [
             Tab(text: '기초학습'),
             Tab(text: '문제풀이'),
@@ -112,11 +116,11 @@ class _StudyScreenState extends State<StudyScreen>
   }
 
   EdgeInsets get _pagePadding => EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width > 900
-            ? (MediaQuery.of(context).size.width - 800) / 2
-            : 16,
-        vertical: 12,
-      );
+    horizontal: MediaQuery.of(context).size.width > 900
+        ? (MediaQuery.of(context).size.width - 800) / 2
+        : 16,
+    vertical: 12,
+  );
 
   // ── 탭 1: 기초학습 (강의·이론·암기·도구) ─────────────
   Widget _basicsTab(BuildContext context) {
@@ -126,7 +130,8 @@ class _StudyScreenState extends State<StudyScreen>
         TutorBanner(
           mood: TutorMood.cheer,
           message: '지금은 기초를 단단히 할 때예요. 이론을 짧게 보고 쉬운 문제로 바로 확인해 보세요.',
-          onTap: () => pushWithNav(context, const SlidesHomeScreen(), currentSection: 1),
+          onTap: () =>
+              pushWithNav(context, const SlidesHomeScreen(), currentSection: 1),
         ),
         const SizedBox(height: 12),
         _heroCards(context),
@@ -186,8 +191,11 @@ class _StudyScreenState extends State<StudyScreen>
           children: [
             for (final s in kSubjects)
               ActionChip(
-                avatar: const Icon(Icons.shuffle_rounded,
-                    size: 17, color: AppTheme.electric),
+                avatar: const Icon(
+                  Icons.shuffle_rounded,
+                  size: 17,
+                  color: AppTheme.electric,
+                ),
                 label: Text(s, style: const TextStyle(fontSize: 12.5)),
                 onPressed: () => _startRandom(s),
               ),
@@ -208,12 +216,27 @@ class _StudyScreenState extends State<StudyScreen>
           title: '연도별 기출 세트',
           subtitle: '최근 N년치 기출을 최신 회차부터 몰아서 풀기 · 회독용 추천',
         ),
-        _yearRangeCard(context, 5, '최근 5년치', '핵심 빈출 집중 · 빠른 1회독',
-            const Color(0xFF22C55E)),
-        _yearRangeCard(context, 7, '최근 7년치', '출제 경향 폭넓게 · 안정권 목표',
-            const Color(0xFF3B82F6)),
-        _yearRangeCard(context, 10, '최근 10년치', '모든 유형 정복 · 완전 마스터',
-            const Color(0xFF8B5CF6)),
+        _yearRangeCard(
+          context,
+          5,
+          '최근 5년치',
+          '핵심 빈출 집중 · 빠른 1회독',
+          const Color(0xFF22C55E),
+        ),
+        _yearRangeCard(
+          context,
+          7,
+          '최근 7년치',
+          '출제 경향 폭넓게 · 안정권 목표',
+          const Color(0xFF3B82F6),
+        ),
+        _yearRangeCard(
+          context,
+          10,
+          '최근 10년치',
+          '모든 유형 정복 · 완전 마스터',
+          const Color(0xFF8B5CF6),
+        ),
         const SizedBox(height: 20),
         SectionHeader(
           emoji: '📝',
@@ -228,7 +251,12 @@ class _StudyScreenState extends State<StudyScreen>
   }
 
   Widget _yearRangeCard(
-      BuildContext context, int years, String title, String desc, Color c) {
+    BuildContext context,
+    int years,
+    String title,
+    String desc,
+    Color c,
+  ) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return PremiumCard(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
@@ -247,26 +275,36 @@ class _StudyScreenState extends State<StudyScreen>
               borderRadius: BorderRadius.circular(13),
             ),
             alignment: Alignment.center,
-            child: Text('$years년',
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 13)),
+            child: Text(
+              '$years년',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                fontSize: 13,
+              ),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style: const TextStyle(
-                        fontSize: 14.5, fontWeight: FontWeight.w800)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
                 const SizedBox(height: 3),
-                Text(desc,
-                    style: TextStyle(
-                        fontSize: 11,
-                        height: 1.3,
-                        color: dark ? Colors.white54 : AppTheme.textMuted)),
+                Text(
+                  desc,
+                  style: TextStyle(
+                    fontSize: 11,
+                    height: 1.3,
+                    color: dark ? Colors.white54 : AppTheme.textMuted,
+                  ),
+                ),
                 const SizedBox(height: 5),
                 FutureBuilder<int>(
                   future: StudyData.instance.papersInYearRange(years),
@@ -276,12 +314,13 @@ class _StudyScreenState extends State<StudyScreen>
                       n == null
                           ? '집계 중…'
                           : (n == 0
-                              ? '해당 기간 기출 데이터 없음'
-                              : '기출 $n회차 · 약 ${n * StudyData.instance.track.paperSize}문항'),
+                                ? '해당 기간 기출 데이터 없음'
+                                : '기출 $n회차 · 약 ${n * StudyData.instance.track.paperSize}문항'),
                       style: TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                          color: c),
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        color: c,
+                      ),
                     );
                   },
                 ),
@@ -298,9 +337,9 @@ class _StudyScreenState extends State<StudyScreen>
     final qs = await StudyData.instance.questionsByYearRange(years);
     if (!mounted) return;
     if (qs.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('해당 기간의 기출 데이터가 없습니다.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('해당 기간의 기출 데이터가 없습니다.')));
       return;
     }
     pushWithNav(
@@ -318,10 +357,7 @@ class _StudyScreenState extends State<StudyScreen>
   Widget _historyTab(BuildContext context) {
     return ListView(
       padding: _pagePadding,
-      children: [
-        _historySection(context),
-        const SizedBox(height: 24),
-      ],
+      children: [_historySection(context), const SizedBox(height: 24)],
     );
   }
 
@@ -340,30 +376,42 @@ class _StudyScreenState extends State<StudyScreen>
               borderRadius: BorderRadius.circular(12),
             ),
             alignment: Alignment.center,
-            child: Text("'${e.year % 100}",
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 13)),
+            child: Text(
+              "'${e.year % 100}",
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                fontSize: 13,
+              ),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${StudyData.instance.track.name} ${e.label}',
-                    style: const TextStyle(
-                        fontSize: 13.5, fontWeight: FontWeight.w700)),
+                Text(
+                  '${StudyData.instance.track.name} ${e.label}',
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text('${e.questions.length}문항 · 정답 포함',
-                    style: TextStyle(
-                        fontSize: 11,
-                        color: dark ? Colors.white54 : AppTheme.textMuted)),
+                Text(
+                  '${e.questions.length}문항 · 정답 포함',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: dark ? Colors.white54 : AppTheme.textMuted,
+                  ),
+                ),
               ],
             ),
           ),
-          Icon(Icons.chevron_right_rounded,
-              color: dark ? Colors.white38 : AppTheme.textMuted),
+          Icon(
+            Icons.chevron_right_rounded,
+            color: dark ? Colors.white38 : AppTheme.textMuted,
+          ),
         ],
       ),
     );
@@ -375,44 +423,51 @@ class _StudyScreenState extends State<StudyScreen>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-        Expanded(
-          child: _heroCard(
-            context,
-            gradient: AppTheme.heroGradient,
-            icon: Icons.school_rounded,
-            title: '1:1 이론 강의',
-            sub: '${StudyData.instance.track.topicCount}토픽 완전 강의\n공식·암기법·함정',
-            onTap: () => pushWithNav(context, const LessonCurriculumScreen(), currentSection: 1),
+          Expanded(
+            child: _heroCard(
+              context,
+              gradient: AppTheme.heroGradient,
+              icon: Icons.school_rounded,
+              title: '1:1 이론 강의',
+              sub: '${StudyData.instance.track.topicCount}토픽 완전 강의\n공식·암기법·함정',
+              onTap: () => pushWithNav(
+                context,
+                const LessonCurriculumScreen(),
+                currentSection: 1,
+              ),
+            ),
           ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _heroCard(
-            context,
-            gradient: AppTheme.electricGradient,
-            icon: Icons.quiz_rounded,
-            title: '기초 문제 확인',
-            sub: '과목 선택 후\n쉬운 문제 10개',
-            onTap: () => _showFoundationSubjects(context),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _heroCard(
+              context,
+              gradient: AppTheme.electricGradient,
+              icon: Icons.quiz_rounded,
+              title: '기초 문제 확인',
+              sub: '과목 선택 후\n쉬운 문제 10개',
+              onTap: () => _showFoundationSubjects(context),
+            ),
           ),
-        ),
         ],
       ),
     );
   }
 
-  Widget _heroCard(BuildContext context,
-      {required Gradient gradient,
-      required IconData icon,
-      required String title,
-      required String sub,
-      required VoidCallback onTap}) {
+  Widget _heroCard(
+    BuildContext context, {
+    required Gradient gradient,
+    required IconData icon,
+    required String title,
+    required String sub,
+    required VoidCallback onTap,
+  }) {
     return Container(
       decoration: BoxDecoration(
         gradient: gradient,
         borderRadius: BorderRadius.circular(AppTheme.rLg),
-        boxShadow:
-            AppTheme.glowShadow((gradient as LinearGradient).colors.first),
+        boxShadow: AppTheme.glowShadow(
+          (gradient as LinearGradient).colors.first,
+        ),
       ),
       child: Material(
         color: Colors.transparent,
@@ -434,17 +489,23 @@ class _StudyScreenState extends State<StudyScreen>
                   child: Icon(icon, size: 22, color: Colors.white),
                 ),
                 const SizedBox(height: 12),
-                Text(title,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
                 const SizedBox(height: 3),
-                Text(sub,
-                    style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        fontSize: 11,
-                        height: 1.4)),
+                Text(
+                  sub,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontSize: 11,
+                    height: 1.4,
+                  ),
+                ),
               ],
             ),
           ),
@@ -483,9 +544,13 @@ class _StudyScreenState extends State<StudyScreen>
                     size: 38,
                     iconSize: 19,
                   ),
-                  title: Text(kSubjects[i],
-                      style: const TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.w600)),
+                  title: Text(
+                    kSubjects[i],
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () {
                     Navigator.of(sheetContext).pop();
@@ -511,11 +576,15 @@ class _StudyScreenState extends State<StudyScreen>
       ).showSnackBar(const SnackBar(content: Text('연결된 기초 문제가 없습니다.')));
       return;
     }
-    pushWithNav(context, QuizPlayScreen(
-          title: '$subject 기초 확인 10문제',
-          questions: questions.take(10).toList(),
-          examMode: false,
-        ), currentSection: 1);
+    pushWithNav(
+      context,
+      QuizPlayScreen(
+        title: '$subject 기초 확인 10문제',
+        questions: questions.take(10).toList(),
+        examMode: false,
+      ),
+      currentSection: 1,
+    );
   }
 
   /// 2026 시험 정보 센터 진입 카드
@@ -523,11 +592,14 @@ class _StudyScreenState extends State<StudyScreen>
     final dark = Theme.of(context).brightness == Brightness.dark;
     return PremiumCard(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-      onTap: () => pushWithNav(context, const ExamInfoScreen(), currentSection: 1),
+      onTap: () =>
+          pushWithNav(context, const ExamInfoScreen(), currentSection: 1),
       child: Row(
         children: [
           const IconBadge(
-              icon: Icons.event_note_rounded, color: AppTheme.primary),
+            icon: Icons.event_note_rounded,
+            color: AppTheme.primary,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -535,9 +607,13 @@ class _StudyScreenState extends State<StudyScreen>
               children: [
                 const Row(
                   children: [
-                    Text('2026 시험 정보 센터',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w800, fontSize: 13.5)),
+                    Text(
+                      '2026 시험 정보 센터',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13.5,
+                      ),
+                    ),
                     SizedBox(width: 6),
                     PillBadge(text: 'NEW', color: AppTheme.danger),
                   ],
@@ -546,14 +622,17 @@ class _StudyScreenState extends State<StudyScreen>
                 Text(
                   '3회차 일정 D-Day · 출제기준 개정 · 합격률 통계 · 점수 전략',
                   style: TextStyle(
-                      fontSize: 11,
-                      color: dark ? Colors.white54 : AppTheme.textMuted),
+                    fontSize: 11,
+                    color: dark ? Colors.white54 : AppTheme.textMuted,
+                  ),
                 ),
               ],
             ),
           ),
-          Icon(Icons.chevron_right_rounded,
-              color: dark ? Colors.white38 : AppTheme.textMuted),
+          Icon(
+            Icons.chevron_right_rounded,
+            color: dark ? Colors.white38 : AppTheme.textMuted,
+          ),
         ],
       ),
     );
@@ -564,10 +643,11 @@ class _StudyScreenState extends State<StudyScreen>
       padding: EdgeInsets.zero,
       child: ExpansionTile(
         leading: const IconBadge(
-            icon: Icons.insights_rounded,
-            color: Color(0xFFF97316),
-            size: 38,
-            iconSize: 20),
+          icon: Icons.insights_rounded,
+          color: Color(0xFFF97316),
+          size: 38,
+          iconSize: 20,
+        ),
         title: const Text(
           'CBT 출제경향 · 2개월 합격 로드맵',
           style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
@@ -601,43 +681,115 @@ class _StudyScreenState extends State<StudyScreen>
   /// 핵심 기능 그리드 (3x3)
   Widget _featureGrid(BuildContext context) {
     final items = <(String, IconData, Color, Widget)>[
-      ('🐣 왕초보 로드맵', Icons.egg_alt_rounded, const Color(0xFF10B981),
-          const BeginnerRoadmapScreen()),
-      ('10회 반복 합격', Icons.repeat_rounded, const Color(0xFF4F46E5),
-          const VisualRepeatScreen()),
-      ('자동학습', Icons.auto_awesome_rounded, const Color(0xFF7C3AED),
-          const AutoStudyScreen()),
-      ('볼트쌤 튜터', Icons.smart_toy_rounded, const Color(0xFF10B981),
-          const TutorChatScreen()),
-      ('합격 공부법', Icons.emoji_events_rounded, const Color(0xFFF59E0B),
-          const StudyGuideScreen()),
-      ('30일 슬라이드', Icons.style_rounded, AppTheme.primary,
-          const SlidesHomeScreen()),
-      ('집중 오답노트', Icons.psychology_alt_rounded, const Color(0xFFDC2626),
-          const WrongFocusScreen()),
-      ('합격 분석', Icons.insights_rounded, const Color(0xFF16A34A),
-          const PassReportScreen()),
-      ('유형변형 분석', Icons.track_changes_rounded, const Color(0xFFF97316),
-          const RepeatAnalysisScreen()),
+      (
+        '🐣 왕초보 로드맵',
+        Icons.egg_alt_rounded,
+        const Color(0xFF10B981),
+        const BeginnerRoadmapScreen(),
+      ),
+      (
+        '10회 반복 합격',
+        Icons.repeat_rounded,
+        const Color(0xFF4F46E5),
+        const VisualRepeatScreen(),
+      ),
+      (
+        '자동학습',
+        Icons.auto_awesome_rounded,
+        const Color(0xFF7C3AED),
+        const AutoStudyScreen(),
+      ),
+      (
+        '볼트쌤 튜터',
+        Icons.smart_toy_rounded,
+        const Color(0xFF10B981),
+        const TutorChatScreen(),
+      ),
+      (
+        '합격 공부법',
+        Icons.emoji_events_rounded,
+        const Color(0xFFF59E0B),
+        const StudyGuideScreen(),
+      ),
+      (
+        '30일 슬라이드',
+        Icons.style_rounded,
+        AppTheme.primary,
+        const SlidesHomeScreen(),
+      ),
+      (
+        '집중 오답노트',
+        Icons.psychology_alt_rounded,
+        const Color(0xFFDC2626),
+        const WrongFocusScreen(),
+      ),
+      (
+        '합격 분석',
+        Icons.insights_rounded,
+        const Color(0xFF16A34A),
+        const PassReportScreen(),
+      ),
+      (
+        '유형변형 분석',
+        Icons.track_changes_rounded,
+        const Color(0xFFF97316),
+        const RepeatAnalysisScreen(),
+      ),
       ('실기 대비', Icons.edit_document, AppTheme.accent, const SilgiScreen()),
-      ('회로도 마스터', Icons.schema_rounded, const Color(0xFF0891B2),
-          const CircuitScreen()),
-      ('계산기', Icons.calculate_rounded, const Color(0xFF14B8A6),
-          const CalculatorHubScreen()),
-      ('이론 검색·AI', Icons.manage_search_rounded, AppTheme.electric,
-          const TheorySearchScreen()),
-      ('스마트 복습', Icons.auto_awesome_rounded, const Color(0xFFEC4899),
-          const SmartReviewScreen()),
-      ('공식 마스터', Icons.functions_rounded, AppTheme.success,
-          const FormulaGuideScreen()),
-      ('핵심이론서', Icons.menu_book_rounded, const Color(0xFF0EA5E9),
-          const TheoryScreen()),
-      ('암기법 사전', Icons.lightbulb_rounded, const Color(0xFFEAB308),
-          const MnemonicsScreen()),
-      ('추천 강의', Icons.play_circle_rounded, const Color(0xFFEF4444),
-          const VideosScreen()),
-      ('번개 암기', Icons.bolt_rounded, const Color(0xFF8B5CF6),
-          const SpeedMemorizeScreen()),
+      (
+        '회로도 마스터',
+        Icons.schema_rounded,
+        const Color(0xFF0891B2),
+        const CircuitScreen(),
+      ),
+      (
+        '계산기',
+        Icons.calculate_rounded,
+        const Color(0xFF14B8A6),
+        const CalculatorHubScreen(),
+      ),
+      (
+        '이론 검색·AI',
+        Icons.manage_search_rounded,
+        AppTheme.electric,
+        const TheorySearchScreen(),
+      ),
+      (
+        '스마트 복습',
+        Icons.auto_awesome_rounded,
+        const Color(0xFFEC4899),
+        const SmartReviewScreen(),
+      ),
+      (
+        '공식 마스터',
+        Icons.functions_rounded,
+        AppTheme.success,
+        const FormulaGuideScreen(),
+      ),
+      (
+        '핵심이론서',
+        Icons.menu_book_rounded,
+        const Color(0xFF0EA5E9),
+        const TheoryScreen(),
+      ),
+      (
+        '암기법 사전',
+        Icons.lightbulb_rounded,
+        const Color(0xFFEAB308),
+        const MnemonicsScreen(),
+      ),
+      (
+        '기초강의 TEXT',
+        Icons.play_circle_rounded,
+        const Color(0xFFEF4444),
+        const VideosScreen(),
+      ),
+      (
+        '번개 암기',
+        Icons.bolt_rounded,
+        const Color(0xFF8B5CF6),
+        const SpeedMemorizeScreen(),
+      ),
     ];
 
     Widget cell((String, IconData, Color, Widget) item) {
@@ -699,25 +851,31 @@ class _StudyScreenState extends State<StudyScreen>
       child: Row(
         children: [
           IconBadge(
-              icon: Icons.local_fire_department_rounded,
-              color: color,
-              size: 40,
-              iconSize: 20),
+            icon: Icons.local_fire_department_rounded,
+            color: color,
+            size: 40,
+            iconSize: 20,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(subject,
-                    style: const TextStyle(
-                        fontSize: 13.5, fontWeight: FontWeight.w700)),
+                Text(
+                  subject,
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 if (top.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
                     top.map((t) => '${t.topic}(${t.count})').join(' · '),
                     style: TextStyle(
-                        fontSize: 10.5,
-                        color: dark ? Colors.white54 : AppTheme.textMuted),
+                      fontSize: 10.5,
+                      color: dark ? Colors.white54 : AppTheme.textMuted,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -725,8 +883,10 @@ class _StudyScreenState extends State<StudyScreen>
               ],
             ),
           ),
-          Icon(Icons.chevron_right_rounded,
-              color: dark ? Colors.white38 : AppTheme.textMuted),
+          Icon(
+            Icons.chevron_right_rounded,
+            color: dark ? Colors.white38 : AppTheme.textMuted,
+          ),
         ],
       ),
     );
@@ -751,77 +911,91 @@ class _StudyScreenState extends State<StudyScreen>
                   children: [
                     Icon(Icons.history_rounded, color: AppTheme.textMuted),
                     SizedBox(width: 10),
-                    Text('아직 채점 기록이 없습니다. 문제를 풀어보세요!',
-                        style: TextStyle(fontSize: 13)),
+                    Text(
+                      '아직 채점 기록이 없습니다. 문제를 풀어보세요!',
+                      style: TextStyle(fontSize: 13),
+                    ),
                   ],
                 ),
               ),
             for (final r in results)
-              Builder(builder: (context) {
-                final passed =
-                    (r['correct'] as int) * 100 >= (r['total'] as int) * 60;
-                final score = ((r['correct'] as int) * 100 /
-                        (r['total'] as int))
-                    .round();
-                return PremiumCard(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: (passed ? AppTheme.success : AppTheme.warning)
-                              .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(11),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text('$score',
+              Builder(
+                builder: (context) {
+                  final passed =
+                      (r['correct'] as int) * 100 >= (r['total'] as int) * 60;
+                  final score =
+                      ((r['correct'] as int) * 100 / (r['total'] as int))
+                          .round();
+                  return PremiumCard(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 9,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color:
+                                (passed ? AppTheme.success : AppTheme.warning)
+                                    .withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(11),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '$score',
                             style: TextStyle(
-                                color: passed
-                                    ? AppTheme.success
-                                    : AppTheme.warning,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 13)),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              r['title'] as String,
-                              style: const TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w600),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                              color: passed
+                                  ? AppTheme.success
+                                  : AppTheme.warning,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 13,
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${r['correct']}/${r['total']} 정답 · '
-                              '${(r['date'] as String).substring(0, 16).replaceAll('T', ' ')}',
-                              style: TextStyle(
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                r['title'] as String,
+                                style: const TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${r['correct']}/${r['total']} 정답 · '
+                                '${(r['date'] as String).substring(0, 16).replaceAll('T', ' ')}',
+                                style: TextStyle(
                                   fontSize: 10.5,
                                   color: dark
                                       ? Colors.white54
-                                      : AppTheme.textMuted),
-                            ),
-                          ],
+                                      : AppTheme.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline_rounded,
-                            size: 18),
-                        color: dark ? Colors.white38 : AppTheme.textMuted,
-                        onPressed: () =>
-                            p.deleteQuizResult(r['id'] as String),
-                      ),
-                    ],
-                  ),
-                );
-              }),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.delete_outline_rounded,
+                            size: 18,
+                          ),
+                          color: dark ? Colors.white38 : AppTheme.textMuted,
+                          onPressed: () =>
+                              p.deleteQuizResult(r['id'] as String),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
           ],
         );
       },
@@ -835,11 +1009,15 @@ class _StudyScreenState extends State<StudyScreen>
     for (final q in qs) {
       q.examLabel = e.label;
     }
-    pushWithNav(context, QuizPlayScreen(
-          title: '${StudyData.instance.track.name} ${e.label}',
-          questions: qs,
-          examMode: true,
-        ), currentSection: 1);
+    pushWithNav(
+      context,
+      QuizPlayScreen(
+        title: '${StudyData.instance.track.name} ${e.label}',
+        questions: qs,
+        examMode: true,
+      ),
+      currentSection: 1,
+    );
   }
 
   /// 초보자 배너 — 공식 마스터 진입
@@ -847,14 +1025,16 @@ class _StudyScreenState extends State<StudyScreen>
     final dark = Theme.of(context).brightness == Brightness.dark;
     return PremiumCard(
       padding: const EdgeInsets.all(14),
-      onTap: () => pushWithNav(context, const FormulaGuideScreen(), currentSection: 1),
+      onTap: () =>
+          pushWithNav(context, const FormulaGuideScreen(), currentSection: 1),
       child: Row(
         children: [
           const IconBadge(
-              icon: Icons.functions_rounded,
-              color: AppTheme.success,
-              size: 44,
-              iconSize: 24),
+            icon: Icons.functions_rounded,
+            color: AppTheme.success,
+            size: 44,
+            iconSize: 24,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -862,18 +1042,23 @@ class _StudyScreenState extends State<StudyScreen>
               children: [
                 const Row(
                   children: [
-                    Text('공식 마스터 · 왕초보 기초사전',
-                        style: TextStyle(
-                            fontSize: 13.5, fontWeight: FontWeight.w800)),
+                    Text(
+                      '공식 마스터 · 왕초보 기초사전',
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 3),
                 Text(
                   '공식 읽는법·기호뜻·비유이해·암기법 5단계 — V·A·Ω부터',
                   style: TextStyle(
-                      fontSize: 11,
-                      height: 1.4,
-                      color: dark ? Colors.white54 : AppTheme.textMuted),
+                    fontSize: 11,
+                    height: 1.4,
+                    color: dark ? Colors.white54 : AppTheme.textMuted,
+                  ),
                 ),
               ],
             ),
@@ -891,31 +1076,43 @@ class _StudyScreenState extends State<StudyScreen>
       easyFirst: true,
     );
     if (!mounted) return;
-    pushWithNav(context, QuizPlayScreen(
-          title: '$subject 쉬운순 (${qs.length}문제)',
-          questions: qs,
-          examMode: false,
-        ), currentSection: 1);
+    pushWithNav(
+      context,
+      QuizPlayScreen(
+        title: '$subject 쉬운순 (${qs.length}문제)',
+        questions: qs,
+        examMode: false,
+      ),
+      currentSection: 1,
+    );
   }
 
   Future<void> _startRandom(String subject) async {
     final all = await StudyData.instance.questionsBySubject(subject);
     all.shuffle(Random());
     if (!mounted) return;
-    pushWithNav(context, QuizPlayScreen(
-          title: '$subject 랜덤 20문제',
-          questions: all.take(20).toList(),
-          examMode: false,
-        ), currentSection: 1);
+    pushWithNav(
+      context,
+      QuizPlayScreen(
+        title: '$subject 랜덤 20문제',
+        questions: all.take(20).toList(),
+        examMode: false,
+      ),
+      currentSection: 1,
+    );
   }
 
   Future<void> _startFrequency(String subject) async {
     final qs = await StudyData.instance.questionsByFrequency(subject);
     if (!mounted) return;
-    pushWithNav(context, QuizPlayScreen(
-          title: '$subject 빈출순 전체 (${qs.length}문제)',
-          questions: qs,
-          examMode: false,
-        ), currentSection: 1);
+    pushWithNav(
+      context,
+      QuizPlayScreen(
+        title: '$subject 빈출순 전체 (${qs.length}문제)',
+        questions: qs,
+        examMode: false,
+      ),
+      currentSection: 1,
+    );
   }
 }

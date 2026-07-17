@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/cerebras_service.dart';
 import '../../services/study_data.dart';
 import '../../services/tutor_persona.dart';
+import '../../services/tutor_speech_service.dart';
 import '../../widgets/tutor_avatar.dart';
 
 /// AI 튜터 채팅 — Cerebras gpt-oss-120b 기반 "생각하는 튜터".
@@ -28,6 +29,7 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
   final _scrollCtrl = ScrollController();
   final List<_Msg> _msgs = [];
   bool _loading = false;
+  bool _speakerOn = true;
   String _effort = 'medium'; // 사고 깊이
   TutorPersona _persona = kTutorPersonas.first;
 
@@ -42,10 +44,7 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
   List<String> get _suggestions {
     final t = StudyData.instance.track.name;
     // 페르소나 전용 추천 질문 + 종목 공통 질문 1개
-    return [
-      ..._persona.suggestions,
-      '$t 시험의 합격 기준이 어떻게 돼?',
-    ];
+    return [..._persona.suggestions, '$t 시험의 합격 기준이 어떻게 돼?'];
   }
 
   Future<void> _pickPersona() async {
@@ -66,7 +65,9 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
               '나의 수준과 취향에 맞는 선생님을 골라보세요',
               style: TextStyle(
                 fontSize: 12.5,
-                color: Theme.of(ctx).colorScheme.onSurface.withValues(alpha: 0.55),
+                color: Theme.of(
+                  ctx,
+                ).colorScheme.onSurface.withValues(alpha: 0.55),
               ),
             ),
             const SizedBox(height: 12),
@@ -85,32 +86,41 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
                     onTap: () => Navigator.pop(ctx, p),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
                       child: Row(
                         children: [
-                          Text(p.emoji,
-                              style: const TextStyle(fontSize: 26)),
+                          Text(p.emoji, style: const TextStyle(fontSize: 26)),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(p.name,
-                                    style: const TextStyle(
-                                        fontSize: 14.5,
-                                        fontWeight: FontWeight.w800)),
+                                Text(
+                                  p.name,
+                                  style: const TextStyle(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
                                 const SizedBox(height: 2),
-                                Text(p.tagline,
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        color: cs.onSurface
-                                            .withValues(alpha: 0.6))),
+                                Text(
+                                  p.tagline,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: cs.onSurface.withValues(alpha: 0.6),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                           if (selected)
-                            Icon(Icons.check_circle_rounded,
-                                color: cs.primary, size: 22),
+                            Icon(
+                              Icons.check_circle_rounded,
+                              color: cs.primary,
+                              size: 22,
+                            ),
                         ],
                       ),
                     ),
@@ -127,8 +137,12 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
       setState(() {
         _persona = picked;
         // 새 선생님 소개 메시지 (대화 이력은 유지)
-        _msgs.add(_Msg('assistant',
-            '${picked.emoji} 안녕하세요! 지금부터 『${picked.name}』이 함께할게요. ${picked.tagline}'));
+        _msgs.add(
+          _Msg(
+            'assistant',
+            '${picked.emoji} 안녕하세요! 지금부터 『${picked.name}』이 함께할게요. ${picked.tagline}',
+          ),
+        );
       });
       _scrollToBottom();
     }
@@ -183,6 +197,12 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
         _msgs.add(_Msg('assistant', reply.answer, thinking: reply.thinking));
         _loading = false;
       });
+      if (_speakerOn) {
+        await TutorSpeechService.instance.speak(
+          reply.answer,
+          rate: _persona.speechRate,
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -271,6 +291,16 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
         ),
         actions: [
           IconButton(
+            tooltip: _speakerOn ? '자동 음성 끄기' : '자동 음성 켜기',
+            icon: Icon(
+              _speakerOn ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+            ),
+            onPressed: () {
+              setState(() => _speakerOn = !_speakerOn);
+              if (!_speakerOn) TutorSpeechService.instance.stop();
+            },
+          ),
+          IconButton(
             tooltip: '튜터 선생님 변경',
             icon: const Icon(Icons.switch_account_rounded),
             onPressed: _pickPersona,
@@ -321,30 +351,37 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
       children: [
-        const Center(child: TutorAvatar(mood: TutorMood.teaching, size: 120)),
+        Center(
+          child: TutorAvatar(
+            mood: TutorMood.teaching,
+            size: 120,
+            characterId: _persona.characterId,
+          ),
+        ),
         const SizedBox(height: 10),
         Center(
           child: InkWell(
             borderRadius: BorderRadius.circular(20),
             onTap: _pickPersona,
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
               decoration: BoxDecoration(
                 color: cs.primaryContainer.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(20),
-                border:
-                    Border.all(color: cs.primary.withValues(alpha: 0.3)),
+                border: Border.all(color: cs.primary.withValues(alpha: 0.3)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('${_persona.emoji} ${_persona.name}',
-                      style: const TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.w800)),
+                  Text(
+                    '${_persona.emoji} ${_persona.name}',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                   const SizedBox(width: 4),
-                  Icon(Icons.expand_more_rounded,
-                      size: 17, color: cs.primary),
+                  Icon(Icons.expand_more_rounded, size: 17, color: cs.primary),
                 ],
               ),
             ),
@@ -448,7 +485,13 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
             : MainAxisAlignment.start,
         children: [
           if (!isUser) ...[
-            const TutorAvatar(mood: TutorMood.happy, size: 34, animate: false, headOnly: true),
+            TutorAvatar(
+              mood: TutorMood.happy,
+              size: 34,
+              animate: false,
+              headOnly: true,
+              characterId: _persona.characterId,
+            ),
             const SizedBox(width: 8),
           ],
           Flexible(
@@ -522,6 +565,19 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
                     ),
                   const SizedBox(height: 6),
                 ],
+                if (!isUser)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      visualDensity: VisualDensity.compact,
+                      tooltip: '튜터 답변 듣기',
+                      icon: const Icon(Icons.volume_up_rounded, size: 19),
+                      onPressed: () => TutorSpeechService.instance.speak(
+                        m.content,
+                        rate: _persona.speechRate,
+                      ),
+                    ),
+                  ),
                 Container(
                   padding: const EdgeInsets.all(13),
                   decoration: BoxDecoration(
@@ -557,7 +613,12 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          const TutorAvatar(mood: TutorMood.thinking, size: 34, headOnly: true),
+          TutorAvatar(
+            mood: TutorMood.thinking,
+            size: 34,
+            headOnly: true,
+            characterId: _persona.characterId,
+          ),
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/study_data.dart';
+import '../../services/tutor_speech_service.dart';
 import '../../widgets/tutor_avatar.dart';
 import 'lesson_screen.dart';
 import '../../widgets/persistent_nav.dart';
@@ -73,26 +74,36 @@ class _SilgiScreenState extends State<SilgiScreen> {
           if (data.strategy.isNotEmpty)
             ExpansionTile(
               tilePadding: EdgeInsets.zero,
-              title: Text('실기 합격 전략',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                      color: cs.primary)),
+              title: Text(
+                '실기 합격 전략',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: cs.primary,
+                ),
+              ),
               children: data.strategy
-                  .map((s) => Padding(
-                        padding:
-                            const EdgeInsets.only(left: 4, right: 4, bottom: 8),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('🎯 ', style: TextStyle(fontSize: 13)),
-                            Expanded(
-                                child: Text(s,
-                                    style: const TextStyle(
-                                        fontSize: 13, height: 1.4))),
-                          ],
-                        ),
-                      ))
+                  .map(
+                    (s) => Padding(
+                      padding: const EdgeInsets.only(
+                        left: 4,
+                        right: 4,
+                        bottom: 8,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('🎯 ', style: TextStyle(fontSize: 13)),
+                          Expanded(
+                            child: Text(
+                              s,
+                              style: const TextStyle(fontSize: 13, height: 1.4),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                   .toList(),
             ),
           const SizedBox(height: 8),
@@ -127,17 +138,25 @@ class _SilgiScreenState extends State<SilgiScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ExpansionTile(
-        leading: Icon(_catIcons[it.category] ?? Icons.bolt_rounded,
-            color: cs.primary),
-        title: Text(it.title,
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+        leading: Icon(
+          _catIcons[it.category] ?? Icons.bolt_rounded,
+          color: cs.primary,
+        ),
+        title: Text(
+          it.title,
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+        ),
         subtitle: Row(
           children: [
-            Text(it.category,
-                style: TextStyle(fontSize: 11.5, color: cs.primary)),
+            Text(
+              it.category,
+              style: TextStyle(fontSize: 11.5, color: cs.primary),
+            ),
             const SizedBox(width: 8),
-            Text(stars,
-                style: const TextStyle(fontSize: 11, color: Colors.amber)),
+            Text(
+              stars,
+              style: const TextStyle(fontSize: 11, color: Colors.amber),
+            ),
           ],
         ),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
@@ -146,6 +165,17 @@ class _SilgiScreenState extends State<SilgiScreen> {
           _labelBox(context, 'Q. 문제', it.question, cs.primary),
           const SizedBox(height: 8),
           _labelBox(context, 'A. 모범답안', it.answer, Colors.teal),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: () => TutorSpeechService.instance.speak(
+                '${it.question}. 정답은 ${it.answer}. 암기 포인트는 ${it.memo}',
+                rate: 0.42,
+              ),
+              icon: const Icon(Icons.volume_up_rounded, size: 18),
+              label: const Text('튜터에게 반복 듣기'),
+            ),
+          ),
           if (it.memo.isNotEmpty) ...[
             const SizedBox(height: 8),
             _labelBox(context, '💡 암기 포인트', it.memo, Colors.orange.shade800),
@@ -156,8 +186,10 @@ class _SilgiScreenState extends State<SilgiScreen> {
               alignment: Alignment.centerRight,
               child: OutlinedButton.icon(
                 icon: const Icon(Icons.link_rounded, size: 16),
-                label: Text('필기 이론 연동: ${it.linkSubject}',
-                    style: const TextStyle(fontSize: 12)),
+                label: Text(
+                  '필기 이론 연동: ${it.linkSubject}',
+                  style: const TextStyle(fontSize: 12),
+                ),
                 onPressed: () => _openLinkedLesson(it),
               ),
             ),
@@ -167,7 +199,11 @@ class _SilgiScreenState extends State<SilgiScreen> {
   }
 
   Widget _labelBox(
-      BuildContext context, String label, String body, Color color) {
+    BuildContext context,
+    String label,
+    String body,
+    Color color,
+  ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -179,12 +215,19 @@ class _SilgiScreenState extends State<SilgiScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label,
-              style: TextStyle(
-                  fontWeight: FontWeight.w800, fontSize: 12, color: color)),
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 12,
+              color: color,
+            ),
+          ),
           const SizedBox(height: 6),
-          SelectableText(body,
-              style: const TextStyle(fontSize: 13.5, height: 1.55)),
+          SelectableText(
+            body,
+            style: const TextStyle(fontSize: 13.5, height: 1.55),
+          ),
         ],
       ),
     );

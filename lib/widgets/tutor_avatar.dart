@@ -1,39 +1,59 @@
-import 'dart:async';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-/// 튜터 감정/상황 상태
-enum TutorMood {
-  idle, // 대기 (인사·자연스러운 동작)
-  happy, // 정답·칭찬
-  thinking, // 고민중·문제 풀이중
-  wrong, // 오답·아쉬움
-  teaching, // 설명중 (칠판·책)
-  meditate, // 집중·휴식
-  cheer, // 응원·화이팅
+import '../providers/app_provider.dart';
+
+enum TutorMood { idle, happy, thinking, wrong, teaching, meditate, cheer }
+
+class TutorProfile {
+  final String id;
+  final String name;
+  final String role;
+  final String asset;
+
+  const TutorProfile({
+    required this.id,
+    required this.name,
+    required this.role,
+    required this.asset,
+  });
 }
 
-/// 상황별 포즈 프레임 매핑 (pose_01 ~ pose_38)
-const Map<TutorMood, List<int>> _moodPoses = {
-  TutorMood.idle: [1, 7, 8, 11, 29],
-  TutorMood.happy: [4, 16, 26, 34, 30],
-  TutorMood.thinking: [5, 9, 12, 17, 27],
-  TutorMood.wrong: [10, 11, 28, 37],
-  TutorMood.teaching: [2, 3, 13, 14, 21],
-  TutorMood.meditate: [35, 36, 31],
-  TutorMood.cheer: [4, 15, 25, 33, 34],
-};
+const tutorProfiles = <TutorProfile>[
+  TutorProfile(
+    id: 'soyeon',
+    name: '소연 선생님',
+    role: '개념과 공식을 차분하게 연결하는 이론 강사',
+    asset: 'assets/tutor/teacher_soyeon.png',
+  ),
+  TutorProfile(
+    id: 'harin',
+    name: '하린 선생님',
+    role: '문제·정답을 빠르게 각인시키는 암기 코치',
+    asset: 'assets/tutor/teacher_harin.png',
+  ),
+  TutorProfile(
+    id: 'jiyoon',
+    name: '지윤 선생님',
+    role: '심화 이론과 실기 적용을 짚어주는 전문 강사',
+    asset: 'assets/tutor/teacher_jiyoon.png',
+  ),
+];
 
-/// 애니메이션 튜터 아바타 — 포즈 프레임을 부드럽게 전환
-class TutorAvatar extends StatefulWidget {
+TutorProfile tutorProfileById(String id) => tutorProfiles.firstWhere(
+  (profile) => profile.id == id,
+  orElse: () => tutorProfiles.first,
+);
+
+/// 사용자가 고른 전신 강사 이미지를 원본 비율로 표시한다.
+/// 모든 화면에서 BoxFit.contain을 사용해 머리와 발이 잘리지 않는다.
+class TutorAvatar extends StatelessWidget {
   final TutorMood mood;
   final double size;
   final Duration interval;
   final bool animate;
-
-  /// true 면 얼굴(상단)만 원형으로 크롭해 작은 아이콘처럼 표시.
-  /// 채팅 말풍선 옆 등 좁은 자리에서 사용(전신은 너무 얇아지므로).
+  final String characterId;
+  final bool rotate;
   final bool headOnly;
 
   const TutorAvatar({
@@ -43,126 +63,53 @@ class TutorAvatar extends StatefulWidget {
     this.interval = const Duration(milliseconds: 2200),
     this.animate = true,
     this.headOnly = false,
+    this.characterId = 'selected',
+    this.rotate = true,
   });
 
   @override
-  State<TutorAvatar> createState() => _TutorAvatarState();
-}
-
-class _TutorAvatarState extends State<TutorAvatar> {
-  Timer? _timer;
-  int _frameIdx = 0;
-  final _rand = Random();
-
-  List<int> get _frames => _moodPoses[widget.mood] ?? _moodPoses[TutorMood.idle]!;
-
-  @override
-  void initState() {
-    super.initState();
-    _startTimer();
-  }
-
-  @override
-  void didUpdateWidget(TutorAvatar old) {
-    super.didUpdateWidget(old);
-    if (old.mood != widget.mood) {
-      _frameIdx = 0;
-      _startTimer();
-    }
-  }
-
-  void _startTimer() {
-    _timer?.cancel();
-    if (!widget.animate) return;
-    _timer = Timer.periodic(widget.interval, (_) {
-      if (!mounted) return;
-      setState(() {
-        // 다음 프레임 (같은 프레임 반복 방지)
-        if (_frames.length > 1) {
-          int next;
-          do {
-            next = _rand.nextInt(_frames.length);
-          } while (next == _frameIdx);
-          _frameIdx = next;
-        }
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  String get _asset {
-    final pose = _frames[_frameIdx % _frames.length];
-    return 'assets/tutor/pose_${pose.toString().padLeft(2, '0')}.png';
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final errorIcon = Icon(
-      Icons.face_retouching_natural,
-      size: widget.size * 0.7,
-      color: Colors.orange,
+    final selectedId = context.select<AppProvider, String>(
+      (app) => app.selectedTutorId,
     );
+    final profile = tutorProfileById(selectedId);
+    final cs = Theme.of(context).colorScheme;
+    final width = headOnly ? size : size * 0.56;
 
-    if (widget.headOnly) {
-      // ⚠️ 크롭 금지(사용자 지시): 얼굴이 잘리지 않도록
-      // 원형 배경 안에 "전신"을 contain 으로 온전히 담는다.
-      final cs = Theme.of(context).colorScheme;
-      return AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
+    return Semantics(
+      image: true,
+      label: '${profile.name} 전신 캐릭터',
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 320),
         child: Container(
-          key: ValueKey(_asset),
-          width: widget.size,
-          height: widget.size,
-          padding: EdgeInsets.all(widget.size * 0.08),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: cs.primaryContainer.withValues(alpha: 0.5),
-          ),
+          key: ValueKey(profile.id),
+          width: width,
+          height: size,
+          padding: EdgeInsets.all(headOnly ? size * 0.05 : 0),
+          decoration: headOnly
+              ? BoxDecoration(
+                  color: cs.primaryContainer.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(size * 0.26),
+                )
+              : null,
           child: Image.asset(
-            _asset,
-            fit: BoxFit.contain, // 전신 그대로 — 잘림 없음
-            errorBuilder: (_, __, ___) => errorIcon,
+            profile.asset,
+            fit: BoxFit.contain,
+            alignment: Alignment.bottomCenter,
+            filterQuality: FilterQuality.high,
+            errorBuilder: (_, __, ___) => Icon(
+              Icons.person_rounded,
+              size: size * 0.65,
+              color: cs.primary,
+            ),
           ),
-        ),
-      );
-    }
-
-    // 튜터 원본 이미지는 세로가 긴 전신(≈132×292, 비율 0.45).
-    // size 를 "높이" 기준으로 삼고, 폭은 비율에 맞춰 잡아 전신이 잘리지 않게 한다.
-    const double aspect = 132 / 292; // 폭/높이
-    final double h = widget.size;
-    final double w = h * aspect;
-
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 450),
-      switchInCurve: Curves.easeOut,
-      switchOutCurve: Curves.easeIn,
-      transitionBuilder: (child, anim) => FadeTransition(
-        opacity: anim,
-        child: child,
-      ),
-      child: SizedBox(
-        key: ValueKey(_asset),
-        width: w,
-        height: h,
-        child: Image.asset(
-          _asset,
-          // contain: 이미지를 잘라내지 않고 전체가 보이도록 맞춤(#1)
-          fit: BoxFit.contain,
-          alignment: Alignment.bottomCenter,
-          errorBuilder: (_, __, ___) => errorIcon,
         ),
       ),
     );
   }
 }
 
-/// 말풍선 포함 튜터 배너 — 홈/슬라이드 화면용
+/// 말풍선 포함 강사 배너 — 홈/슬라이드 화면용
 class TutorBanner extends StatelessWidget {
   final TutorMood mood;
   final String message;
@@ -180,6 +127,10 @@ class TutorBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tutorId = context.select<AppProvider, String>(
+      (app) => app.selectedTutorId,
+    );
+    final tutor = tutorProfileById(tutorId);
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -205,17 +156,13 @@ class TutorBanner extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Text('볼트쌤',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 13,
-                            color: cs.primary,
-                          )),
-                      const SizedBox(width: 4),
-                      const Text('🎓', style: TextStyle(fontSize: 13)),
-                    ],
+                  Text(
+                    tutor.name,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                      color: cs.primary,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -228,7 +175,10 @@ class TutorBanner extends StatelessWidget {
               ),
             ),
             if (onTap != null)
-              Icon(Icons.chevron_right, color: cs.primary.withValues(alpha: 0.6)),
+              Icon(
+                Icons.chevron_right,
+                color: cs.primary.withValues(alpha: 0.6),
+              ),
           ],
         ),
       ),

@@ -9,6 +9,7 @@ import '../../services/study_data.dart';
 import '../../services/progress_service.dart';
 import '../../services/pass_prediction.dart';
 import '../../services/quiz_policy.dart';
+import '../../services/tutor_speech_service.dart';
 import '../../widgets/lesson_view.dart';
 import '../../widgets/rich_slide_body.dart';
 import '../../widgets/teacher_recipe_box.dart';
@@ -40,7 +41,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   final Set<int> _recorded = {}; // 진척도 중복 기록 방지
   bool _showAnswer = false;
   bool _bookmarked = false;
-  bool _easyMode = false; // 아주 쉬운 설명 토글
+  bool _easyMode = true; // 초급자 기본값: 모든 문제에 쉬운 설명 자동 노출
   bool _allowExit = false;
   ({int seenCount, String? lastResult, int box})? _history; // 다시 만난 문제 인식 배너
   final Map<int, String> _reasonPicked = {}; // 문제별 선택한 오답 원인
@@ -58,8 +59,9 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   String _easyExplanation() {
     final q = _q;
     final ansIdx = q.answer - 1;
-    final answerText =
-        (ansIdx >= 0 && ansIdx < q.options.length) ? q.options[ansIdx] : '';
+    final answerText = (ansIdx >= 0 && ansIdx < q.options.length)
+        ? q.options[ansIdx]
+        : '';
     final buf = StringBuffer();
 
     // 1) 이 문제가 뭘 묻는지 한 문장으로
@@ -238,8 +240,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
               const SizedBox(height: 6),
               Container(
                 width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                 decoration: BoxDecoration(
                   color: Colors.green.shade600,
                   borderRadius: BorderRadius.circular(6),
@@ -247,8 +248,11 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.verified_rounded,
-                        size: 13, color: Colors.white),
+                    const Icon(
+                      Icons.verified_rounded,
+                      size: 13,
+                      color: Colors.white,
+                    ),
                     const SizedBox(width: 5),
                     Expanded(
                       child: Text(
@@ -400,7 +404,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
         setState(() {
           _idx = i;
           _showAnswer = false;
-          _easyMode = false;
+          _easyMode = true;
         });
         _syncBookmark();
       },
@@ -660,13 +664,18 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.psychology_alt_rounded,
-                  size: 18, color: Colors.redAccent),
+              const Icon(
+                Icons.psychology_alt_rounded,
+                size: 18,
+                color: Colors.redAccent,
+              ),
               const SizedBox(width: 6),
               Text(
                 selected == null ? '왜 틀렸나요? (원인 기록)' : '오답 원인: $selected',
                 style: const TextStyle(
-                    fontSize: 13, fontWeight: FontWeight.w800),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ],
           ),
@@ -690,16 +699,15 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 11, vertical: 6),
+                    horizontal: 11,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
-                    color: isSel
-                        ? Colors.redAccent
-                        : scheme.surface,
+                    color: isSel ? Colors.redAccent : scheme.surface,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: isSel
-                            ? Colors.redAccent
-                            : scheme.outlineVariant),
+                      color: isSel ? Colors.redAccent : scheme.outlineVariant,
+                    ),
                   ),
                   child: Text(
                     reason,
@@ -719,8 +727,9 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
               child: Text(
                 '원인을 남기면 「집중 오답노트」에서 같은 실수를 모아 복습해드려요.',
                 style: TextStyle(
-                    fontSize: 11,
-                    color: scheme.onSurface.withValues(alpha: 0.55)),
+                  fontSize: 11,
+                  color: scheme.onSurface.withValues(alpha: 0.55),
+                ),
               ),
             ),
         ],
@@ -831,29 +840,42 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                         ),
                       ),
                       const Spacer(),
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        tooltip: '튜터 해설 듣기',
+                        icon: const Icon(Icons.volume_up_rounded, size: 19),
+                        onPressed: () => TutorSpeechService.instance.speak(
+                          _easyMode ? _easyExplanation() : _q.explanation,
+                        ),
+                      ),
                       // 🍼 아주 쉬운 설명 토글 (기존 데이터 재활용)
                       InkWell(
                         onTap: () => setState(() => _easyMode = !_easyMode),
                         borderRadius: BorderRadius.circular(20),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
                             color: _easyMode
                                 ? Colors.orange
                                 : Colors.orange.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                                color: Colors.orange.withValues(alpha: 0.5)),
+                              color: Colors.orange.withValues(alpha: 0.5),
+                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(_easyMode ? '🍼' : '💡',
-                                  style: const TextStyle(fontSize: 12)),
+                              Text(
+                                _easyMode ? '🍼' : '💡',
+                                style: const TextStyle(fontSize: 12),
+                              ),
                               const SizedBox(width: 4),
                               Text(
-                                _easyMode ? '쉬운 설명 켜짐' : '아주 쉬운 설명',
+                                _easyMode ? '초급 설명 항상 켜짐' : '일반 해설',
                                 style: TextStyle(
                                   fontSize: 11.5,
                                   fontWeight: FontWeight.w700,
@@ -877,20 +899,25 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                         color: Colors.orange.withValues(alpha: 0.07),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                            color: Colors.orange.withValues(alpha: 0.3)),
+                          color: Colors.orange.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('🍼 아주 쉽게 풀어드릴게요',
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.deepOrange)),
+                          const Text(
+                            '🍼 아주 쉽게 풀어드릴게요',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.deepOrange,
+                            ),
+                          ),
                           const SizedBox(height: 6),
-                          Text(_easyExplanation(),
-                              style: const TextStyle(
-                                  fontSize: 13.5, height: 1.6)),
+                          Text(
+                            _easyExplanation(),
+                            style: const TextStyle(fontSize: 13.5, height: 1.6),
+                          ),
                         ],
                       ),
                     )
@@ -1028,7 +1055,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                     setState(() {
                       _idx--;
                       _showAnswer = false;
-                      _easyMode = false;
+                      _easyMode = true;
                     });
                     _syncBookmark();
                     _syncHistory();
@@ -1056,7 +1083,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                 setState(() {
                   _idx++;
                   _showAnswer = false;
-                  _easyMode = false;
+                  _easyMode = true;
                 });
                 _syncBookmark();
                 _syncHistory();
@@ -1137,7 +1164,8 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     final picked = await showModalBottomSheet<String>(
       context: context,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(22))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
       builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1145,19 +1173,22 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
           children: [
             const Padding(
               padding: EdgeInsets.fromLTRB(20, 16, 20, 4),
-              child: Text('🚩 문제 오류 신고',
-                  style:
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+              child: Text(
+                '🚩 문제 오류 신고',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-              child: Text('어떤 오류인가요? 신고하면 다음 업데이트에 반영됩니다.',
-                  style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(ctx)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.6))),
+              child: Text(
+                '어떤 오류인가요? 신고하면 다음 업데이트에 반영됩니다.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(
+                    ctx,
+                  ).colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
             ),
             for (final t in types)
               ListTile(
@@ -1174,12 +1205,16 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     if (picked == null || !mounted) return;
 
     final subject = Uri.encodeComponent(
-        '[문제오류신고] ${q.subject} · ${q.examLabel} ${q.no}번');
-    final body = Uri.encodeComponent('오류 유형: $picked\n\n'
-        '과목: ${q.subject}\n토픽: ${q.topic}\n회차: ${q.examLabel}\n문항번호: ${q.no}\n\n'
-        '문제: ${q.question}\n\n상세 설명(선택):\n');
+      '[문제오류신고] ${q.subject} · ${q.examLabel} ${q.no}번',
+    );
+    final body = Uri.encodeComponent(
+      '오류 유형: $picked\n\n'
+      '과목: ${q.subject}\n토픽: ${q.topic}\n회차: ${q.examLabel}\n문항번호: ${q.no}\n\n'
+      '문제: ${q.question}\n\n상세 설명(선택):\n',
+    );
     final uri = Uri.parse(
-        'mailto:certstudytracker@gmail.com?subject=$subject&body=$body');
+      'mailto:certstudytracker@gmail.com?subject=$subject&body=$body',
+    );
     try {
       final ok = await launchUrl(uri);
       if (!ok && mounted) {
@@ -1212,10 +1247,8 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
       enableDrag: false, // 드래그로 닫기 금지
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => _ForcedWrongNoteSheet(
-        question: q,
-        wrongCount: wrongCount,
-      ),
+      builder: (ctx) =>
+          _ForcedWrongNoteSheet(question: q, wrongCount: wrongCount),
     );
   }
 
@@ -1303,17 +1336,21 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
 
     // 🏆 100문항 실전 단위(examMode) — 공유하고 싶은 합격 성적표로 진입
     if (widget.examMode && total >= 90) {
-      await pushWithNav(context, ResultCertificateScreen(
-            examLabel: widget.title.replaceFirst(
-              '${StudyData.instance.track.name} ',
-              '',
-            ),
-            correct: correct,
-            total: total,
-            subjectTotal: subjectTotal,
-            subjectCorrect: subjectCorrect,
-            prediction: pred,
-          ), currentSection: 1);
+      await pushWithNav(
+        context,
+        ResultCertificateScreen(
+          examLabel: widget.title.replaceFirst(
+            '${StudyData.instance.track.name} ',
+            '',
+          ),
+          correct: correct,
+          total: total,
+          subjectTotal: subjectTotal,
+          subjectCorrect: subjectCorrect,
+          prediction: pred,
+        ),
+        currentSection: 1,
+      );
       if (mounted) Navigator.of(context).pop(true);
       return;
     }
@@ -1457,8 +1494,7 @@ class _ForcedWrongNoteSheetState extends State<_ForcedWrongNoteSheet> {
         builder: (context, controller) => Container(
           decoration: BoxDecoration(
             color: cs.surface,
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(22)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
           ),
           child: ListView(
             controller: controller,
@@ -1470,27 +1506,33 @@ class _ForcedWrongNoteSheetState extends State<_ForcedWrongNoteSheet> {
                 decoration: BoxDecoration(
                   color: Colors.red.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(14),
-                  border:
-                      Border.all(color: Colors.red.withValues(alpha: 0.4)),
+                  border: Border.all(color: Colors.red.withValues(alpha: 0.4)),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.report_problem_rounded,
-                        color: Colors.red, size: 30),
+                    const Icon(
+                      Icons.report_problem_rounded,
+                      color: Colors.red,
+                      size: 30,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('이 문제, 벌써 ${widget.wrongCount}번째 오답!',
-                              style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.red)),
+                          Text(
+                            '이 문제, 벌써 ${widget.wrongCount}번째 오답!',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.red,
+                            ),
+                          ),
                           const SizedBox(height: 3),
-                          const Text('그냥 넘기면 시험장에서 또 틀립니다. 원인을 짚고 이론을 확인하세요.',
-                              style: TextStyle(
-                                  fontSize: 11.5, height: 1.4)),
+                          const Text(
+                            '그냥 넘기면 시험장에서 또 틀립니다. 원인을 짚고 이론을 확인하세요.',
+                            style: TextStyle(fontSize: 11.5, height: 1.4),
+                          ),
                         ],
                       ),
                     ),
@@ -1499,29 +1541,41 @@ class _ForcedWrongNoteSheetState extends State<_ForcedWrongNoteSheet> {
               ),
               const SizedBox(height: 16),
               // 문제 요약
-              Text('[${q.subject}] ${q.topic}',
-                  style: TextStyle(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
-                      color: cs.primary)),
+              Text(
+                '[${q.subject}] ${q.topic}',
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: cs.primary,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text(q.question,
-                  style: const TextStyle(fontSize: 13.5, height: 1.5)),
+              Text(
+                q.question,
+                style: const TextStyle(fontSize: 13.5, height: 1.5),
+              ),
               const SizedBox(height: 6),
-              Text('✅ 정답: ${q.answer}번  ${q.answer <= q.options.length ? q.options[q.answer - 1] : ""}',
-                  style: const TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w800,
-                      color: AppTheme.success)),
+              Text(
+                '✅ 정답: ${q.answer}번  ${q.answer <= q.options.length ? q.options[q.answer - 1] : ""}',
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.success,
+                ),
+              ),
               const Divider(height: 26),
               // 1단계: 원인 선택 (필수)
               Row(
                 children: [
                   _stepBadge('1', _reason != null),
                   const SizedBox(width: 8),
-                  const Text('왜 틀렸나요? (필수)',
-                      style: TextStyle(
-                          fontSize: 13.5, fontWeight: FontWeight.w800)),
+                  const Text(
+                    '왜 틀렸나요? (필수)',
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
@@ -1546,9 +1600,13 @@ class _ForcedWrongNoteSheetState extends State<_ForcedWrongNoteSheet> {
                 children: [
                   _stepBadge('2', _openedTheory),
                   const SizedBox(width: 8),
-                  const Text('관련 이론 확인 (필수)',
-                      style: TextStyle(
-                          fontSize: 13.5, fontWeight: FontWeight.w800)),
+                  const Text(
+                    '관련 이론 확인 (필수)',
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
@@ -1556,20 +1614,23 @@ class _ForcedWrongNoteSheetState extends State<_ForcedWrongNoteSheet> {
                 width: double.infinity,
                 child: FilledButton.icon(
                   style: FilledButton.styleFrom(
-                    backgroundColor:
-                        _openedTheory ? AppTheme.success : cs.primary,
+                    backgroundColor: _openedTheory
+                        ? AppTheme.success
+                        : cs.primary,
                     padding: const EdgeInsets.symmetric(vertical: 13),
                   ),
                   onPressed: () {
                     showLessonSheet(context, q.subject, q.topic);
                     setState(() => _openedTheory = true);
                   },
-                  icon: Icon(_openedTheory
-                      ? Icons.check_circle_rounded
-                      : Icons.menu_book_rounded),
-                  label: Text(_openedTheory
-                      ? '이론 확인 완료 — 다시 보려면 탭'
-                      : '이 주제 이론 펼쳐보기'),
+                  icon: Icon(
+                    _openedTheory
+                        ? Icons.check_circle_rounded
+                        : Icons.menu_book_rounded,
+                  ),
+                  label: Text(
+                    _openedTheory ? '이론 확인 완료 — 다시 보려면 탭' : '이 주제 이론 펼쳐보기',
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -1583,9 +1644,9 @@ class _ForcedWrongNoteSheetState extends State<_ForcedWrongNoteSheet> {
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
-                  child: Text(canClose
-                      ? '이해했어요! 계속 풀기'
-                      : '원인 선택 + 이론 확인을 완료하세요'),
+                  child: Text(
+                    canClose ? '이해했어요! 계속 풀기' : '원인 선택 + 이론 확인을 완료하세요',
+                  ),
                 ),
               ),
             ],
@@ -1601,11 +1662,14 @@ class _ForcedWrongNoteSheetState extends State<_ForcedWrongNoteSheet> {
       backgroundColor: done ? AppTheme.success : Colors.grey.shade400,
       child: done
           ? const Icon(Icons.check, size: 14, color: Colors.white)
-          : Text(n,
+          : Text(
+              n,
               style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white)),
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
     );
   }
 }
