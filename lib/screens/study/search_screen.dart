@@ -508,7 +508,7 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
                           Text(
                             '궁금한 이론·공식·암기법을 검색해보세요!\n'
                             '강의노트·암기법·슬라이드·실기자료를 한 번에 찾고,\n'
-                            'AI 튜터가 내용을 검증·보강해드려요.',
+                            '볼트쌤이 내용을 검증·보강해드려요.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 13.5,
@@ -571,7 +571,7 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'AI 튜터 검증 답변',
+                                '볼트쌤 검증 답변',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w800,
                                   fontSize: 14,

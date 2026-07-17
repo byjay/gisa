@@ -109,7 +109,8 @@ class _TutorAvatarState extends State<TutorAvatar> {
     );
 
     if (widget.headOnly) {
-      // 얼굴(상단)만 원형 크롭 — 좁은 자리(채팅 등)용
+      // ⚠️ 크롭 금지(사용자 지시): 얼굴이 잘리지 않도록
+      // 원형 배경 안에 "전신"을 contain 으로 온전히 담는다.
       final cs = Theme.of(context).colorScheme;
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
@@ -117,16 +118,14 @@ class _TutorAvatarState extends State<TutorAvatar> {
           key: ValueKey(_asset),
           width: widget.size,
           height: widget.size,
+          padding: EdgeInsets.all(widget.size * 0.08),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: cs.primaryContainer.withValues(alpha: 0.5),
           ),
-          clipBehavior: Clip.antiAlias,
           child: Image.asset(
             _asset,
-            fit: BoxFit.cover,
-            // 상단(머리/얼굴) 위주로 보여줌
-            alignment: const Alignment(0, -0.9),
+            fit: BoxFit.contain, // 전신 그대로 — 잘림 없음
             errorBuilder: (_, __, ___) => errorIcon,
           ),
         ),
@@ -208,7 +207,7 @@ class TutorBanner extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Text('푸키 튜터',
+                      Text('볼트쌤',
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 13,

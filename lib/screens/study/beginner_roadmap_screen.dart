@@ -5,6 +5,7 @@ import '../../providers/app_provider.dart';
 import '../../services/study_data.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/persistent_nav.dart';
+import '../../widgets/tutor_coach.dart';
 import 'theory_screen.dart';
 import 'quiz_play_screen.dart';
 import 'tutor_chat_screen.dart';
@@ -65,6 +66,16 @@ class _BeginnerRoadmapScreenState extends State<BeginnerRoadmapScreen> {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
         children: [
           _heroCard(context, track.name, progress),
+          const SizedBox(height: 12),
+          // 🎓 볼트쌀 로드맵 코치 — 진행도별 멘트
+          TutorCoach(
+            situation: progress >= 1.0
+                ? CoachSituation.roadmapDone
+                : (progress > 0
+                    ? CoachSituation.roadmapProgress
+                    : CoachSituation.roadmapStart),
+            height: 104,
+          ),
           const SizedBox(height: 16),
           for (var i = 0; i < steps.length; i++) ...[
             _stepCard(context, i, steps[i]),
@@ -101,13 +112,13 @@ class _BeginnerRoadmapScreenState extends State<BeginnerRoadmapScreen> {
         why: '전기 공부의 80%는 "단어 낯섦"입니다. 이론을 외우지 말고 그림책 보듯 훑어보세요. 2번째 볼 때부터 갑자기 쉬워집니다.',
         todos: [
           '기초 이론에서 $firstSubject 첫 단원만 가볍게 훑기 (외우기 금지!)',
-          '모르는 단어는 AI 튜터에게 "초등학생도 알게 설명해줘"라고 묻기',
+          '모르는 단어는 볼트쌤에게 "초등학생도 알게 설명해줘"라고 묻기',
           '하루에 이론 1개 단원 = 충분히 훌륭한 진도',
         ],
         actions: [
           _StepAction('기초 이론 보기', Icons.menu_book_rounded,
               () => pushWithNav(context, const TheoryScreen(), currentSection: 1)),
-          _StepAction('AI 튜터에게 질문', Icons.smart_toy_rounded,
+          _StepAction('볼트쌤에게 질문', Icons.smart_toy_rounded,
               () => pushWithNav(context, const TutorChatScreen(), currentSection: 1)),
         ],
       ),
@@ -157,7 +168,7 @@ class _BeginnerRoadmapScreenState extends State<BeginnerRoadmapScreen> {
         why: '이제 과목 단위로 기출을 돌릴 차례입니다. 홈에서 과목을 골라 과목별 문제를 풀고, 정답률 60%가 넘으면 다음 과목으로 넘어가세요.',
         todos: [
           for (final s in subjects.take(3)) '「$s」 과목 기출 1회독',
-          '과락(40점 미만) 위험 과목은 AI 튜터와 집중 보강',
+          '과락(40점 미만) 위험 과목은 볼트쌤과 집중 보강',
         ],
         actions: [
           _StepAction('홈에서 과목 선택', Icons.home_rounded,

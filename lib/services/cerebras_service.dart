@@ -63,7 +63,7 @@ class CerebrasService {
     final style = (personaStyle == null || personaStyle.isEmpty)
         ? '왕초보도 이해하는 쉬운 비유로 설명하세요. '
         : '캐릭터 지시(최우선 준수): $personaStyle ';
-    return '당신은 한국 "${t.name}" 자격증 시험 전문 AI 튜터입니다. '
+    return '당신 이름은 "볼트쌤"이며, 한국 "${t.name}" 자격증 시험 전문 과외 튜터입니다. '
         '담당 과목: ${t.subjects.join(", ")}. '
         '$style'
         '답변하기 전에 반드시 단계별로 깊이 생각하세요: '

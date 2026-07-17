@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/level_up_dialog.dart';
+import '../widgets/tutor_coach.dart';
 
 class TimerScreen extends StatefulWidget {
   const TimerScreen({super.key});
@@ -34,6 +35,12 @@ class _TimerScreenState extends State<TimerScreen> {
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           child: Column(
             children: [
+              // 🎓 볼트쌀 집중 코치
+              if (running) ...[
+                const TutorCoach(
+                    situation: CoachSituation.timerFocus, height: 88),
+                const SizedBox(height: 12),
+              ],
               // ── 시험 선택 카드 ──
               PremiumCard(
                 padding: const EdgeInsets.fromLTRB(16, 6, 8, 6),

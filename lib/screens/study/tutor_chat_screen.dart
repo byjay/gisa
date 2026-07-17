@@ -213,7 +213,7 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('AI 튜터 설정'),
+        title: const Text('볼트쌤 튜터 설정'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,

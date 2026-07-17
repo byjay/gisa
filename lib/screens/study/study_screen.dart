@@ -607,7 +607,7 @@ class _StudyScreenState extends State<StudyScreen>
           const VisualRepeatScreen()),
       ('자동학습', Icons.auto_awesome_rounded, const Color(0xFF7C3AED),
           const AutoStudyScreen()),
-      ('AI 튜터', Icons.smart_toy_rounded, const Color(0xFF10B981),
+      ('볼트쌤 튜터', Icons.smart_toy_rounded, const Color(0xFF10B981),
           const TutorChatScreen()),
       ('합격 공부법', Icons.emoji_events_rounded, const Color(0xFFF59E0B),
           const StudyGuideScreen()),

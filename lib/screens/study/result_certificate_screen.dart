@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../services/pass_prediction.dart';
 import '../../services/quiz_policy.dart';
 import '../../services/study_data.dart';
+import '../../widgets/tutor_coach.dart';
 
 /// 🏆 합격 성적표 — 100문항 실전 모의고사를 마치면 나오는 결과 화면.
 /// 캡처해서 자랑하고 싶은, "990원도 아깝지 않다"를 느끼게 하는 화면.
@@ -69,6 +70,21 @@ class ResultCertificateScreen extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
           child: Column(
             children: [
+              // 🎓 볼트쌀 결과 코칭 — 합격/불합격/만점 상황별 멘트
+              Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: TutorCoach(
+                  situation: correct == total
+                      ? CoachSituation.resultPerfect
+                      : (passed
+                          ? CoachSituation.resultPass
+                          : CoachSituation.resultFail),
+                  level: total > 0 && correct / total >= 0.75
+                      ? 2
+                      : (total > 0 && correct / total >= 0.45 ? 1 : 0),
+                  height: 100,
+                ),
+              ),
               // ── 등급증 카드 ──────────────────────────
               Container(
                 width: double.infinity,

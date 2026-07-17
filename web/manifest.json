@@ -1,6 +1,6 @@
 {
-    "name": "자격증 학습 트래커",
-    "short_name": "학습트래커",
+    "name": "볼트쌤 - 전기·소방 기사 합격 튜터",
+    "short_name": "볼트쌤",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#4F46E5",

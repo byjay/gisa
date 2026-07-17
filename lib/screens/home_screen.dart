@@ -20,10 +20,27 @@ import 'study/flashcard_screen.dart';
 import 'study/quiz_play_screen.dart';
 import 'settings_screen.dart';
 import '../widgets/persistent_nav.dart';
+import '../widgets/tutor_coach.dart';
 
 class HomeScreen extends StatelessWidget {
   final void Function(int) onNavigate;
   const HomeScreen({super.key, required this.onNavigate});
+
+  /// 시간대·스트릭 기반 볼트쌤 상황 결정
+  Widget _homeCoach(AppProvider app) {
+    final hour = DateTime.now().hour;
+    CoachSituation s;
+    if (app.streak >= 3) {
+      s = CoachSituation.homeStreak;
+    } else if (hour < 12) {
+      s = CoachSituation.homeMorning;
+    } else if (hour < 18) {
+      s = CoachSituation.homeAfternoon;
+    } else {
+      s = CoachSituation.homeNight;
+    }
+    return TutorCoach(situation: s);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +67,9 @@ class HomeScreen extends StatelessWidget {
                   FadeSlideIn(
                       index: 0,
                       child: _SubjectSwitcher(onNavigate: onNavigate)),
+                  const SizedBox(height: 12),
+                  // 🎓 볼트쌀 1:1 코치 — 시간대별 살아있는 멘트
+                  FadeSlideIn(index: 0, child: _homeCoach(app)),
                   const SizedBox(height: 12),
                   // 🐣 왕초보 로드맵 배너 (지식 0 시작자용)
                   const FadeSlideIn(index: 0, child: _BeginnerBanner()),

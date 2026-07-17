@@ -7,6 +7,7 @@ import '../widgets/badge_collection.dart';
 import '../widgets/study_heatmap.dart';
 import '../widgets/weekly_league_card.dart';
 import '../widgets/weekly_report_card.dart';
+import '../widgets/tutor_coach.dart';
 
 class StatsScreen extends StatelessWidget {
   const StatsScreen({super.key});
@@ -25,6 +26,14 @@ class StatsScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
           children: [
+            // 🎓 볼트쌀 통계 코칭 — 주간 학습량 기반
+            TutorCoach(
+              situation: app.weekMinutes >= 60
+                  ? CoachSituation.statsGood
+                  : CoachSituation.statsBad,
+              height: 92,
+            ),
+            const SizedBox(height: 12),
             // ── 🧙 마법사 레벨 카드 ──
             PremiumCard(
               gradient: AppTheme.heroGradient,

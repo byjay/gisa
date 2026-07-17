@@ -108,7 +108,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => showLicensePage(
                     context: context,
-                    applicationName: 'Cert Study Tracker',
+                    applicationName: '볼트쌤',
                     applicationVersion: '1.0.0',
                   ),
                 ),
@@ -172,9 +172,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _shareApp(BuildContext context) async {
-    const text = '⚡ 전기기사·소방설비기사 공부, 이 앱 하나로 끝!\n'
-        '기출 3,700+문제 · AI 튜터 · 암기법 · 합격 예측까지 무료.\n'
-        'Cert Study Tracker — Google Play에서 검색!';
+    const text = '⚡ 전기기사·소방 공부는 볼트쌤 하나로 끝!\n'
+        '기출 3,700+문제 · 볼트쌤 튜터 · 암기법 · 합격 예측까지 무료.\n'
+        '볼트쌤 — Google Play에서 검색!';
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(

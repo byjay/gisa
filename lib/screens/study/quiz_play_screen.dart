@@ -15,6 +15,7 @@ import '../../widgets/teacher_recipe_box.dart';
 import '../../widgets/level_up_dialog.dart';
 import 'result_certificate_screen.dart';
 import '../../widgets/persistent_nav.dart';
+import '../../widgets/tutor_coach.dart';
 
 /// 문제풀이 화면: 실전(examMode)/연습 모드, 문제 내 암기법·이론 연동, 채점
 class QuizPlayScreen extends StatefulWidget {
@@ -727,6 +728,42 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     );
   }
 
+  /// 해당 문항 결과에 맞는 볼트쌀 상황 결정
+  CoachSituation get _coachSituation {
+    final picked = _picked[_idx];
+    if (picked == null) {
+      return _q.difficulty == 3
+          ? CoachSituation.quizHardQuestion
+          : CoachSituation.quizStart;
+    }
+    if (picked == _q.answer) {
+      // 직전 2문항도 정답이면 연속 정답
+      var streak = 0;
+      for (var i = _idx; i >= 0; i--) {
+        if (_picked[i] == widget.questions[i].answer) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+      return streak >= 3
+          ? CoachSituation.quizCorrectStreak
+          : CoachSituation.quizCorrect;
+    }
+    return CoachSituation.quizWrong;
+  }
+
+  /// 사용자 수준(0왕초보/1중급/2상급) — 현재 세션 정답률 기반
+  int get _coachLevel {
+    if (_picked.length < 3) return 0;
+    var c = 0;
+    _picked.forEach((i, v) {
+      if (v == widget.questions[i].answer) c++;
+    });
+    final r = c / _picked.length;
+    return r >= 0.75 ? 2 : (r >= 0.45 ? 1 : 0);
+  }
+
   Widget _answerBox(ColorScheme scheme) {
     return Container(
       margin: const EdgeInsets.only(top: 8),
@@ -739,6 +776,16 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 🎓 볼트쌀 전신 코치 — 정답/오답/연속정답 상황별 1:1 멘트
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: TutorCoach(
+              key: ValueKey('coach_${_idx}_${_picked[_idx]}'),
+              situation: _coachSituation,
+              level: _coachLevel,
+              height: 96,
+            ),
+          ),
           Row(
             children: [
               Icon(Icons.check_circle, size: 20, color: Colors.green[700]),

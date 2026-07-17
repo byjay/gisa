@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../services/study_data.dart';
 import '../../services/flashcard_srs.dart';
+import '../../widgets/tutor_coach.dart';
 
 /// 🃏 플래시카드 암기 모드 — 탭으로 카드를 뒤집어 확인하고
 /// "안다/모른다" 두 버튼으로 간격반복(SRS) 스케줄링.
@@ -185,6 +186,15 @@ class _FlashcardScreenState extends State<FlashcardScreen>
     final progress = (_index) / _queue!.length;
     return Column(
       children: [
+        // 🎓 볼트쌀 암기 코치 — 카드마다 살아있는 암기 팁
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+          child: TutorCoach(
+            key: ValueKey('fc_$_index'),
+            situation: CoachSituation.flashcard,
+            height: 84,
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
           child: Column(
