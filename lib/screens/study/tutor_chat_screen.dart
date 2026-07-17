@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/cerebras_service.dart';
 import '../../services/study_data.dart';
+import '../../services/tutor_persona.dart';
 import '../../widgets/tutor_avatar.dart';
 
 /// AI 튜터 채팅 — Cerebras gpt-oss-120b 기반 "생각하는 튜터".
@@ -28,15 +29,109 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
   final List<_Msg> _msgs = [];
   bool _loading = false;
   String _effort = 'medium'; // 사고 깊이
+  TutorPersona _persona = kTutorPersonas.first;
+
+  @override
+  void initState() {
+    super.initState();
+    TutorPersonaStore.load().then((p) {
+      if (mounted) setState(() => _persona = p);
+    });
+  }
 
   List<String> get _suggestions {
     final t = StudyData.instance.track.name;
+    // 페르소나 전용 추천 질문 + 종목 공통 질문 1개
     return [
-      '$t 비전공자 공부 순서 알려줘',
-      '가장 어려운 과목과 공략법은?',
-      '시험 D-30 학습 계획 짜줘',
-      '역률개선 콘덴서 용량 공식을 쉽게 설명해줘',
+      ..._persona.suggestions,
+      '$t 시험의 합격 기준이 어떻게 돼?',
     ];
+  }
+
+  Future<void> _pickPersona() async {
+    final picked = await showModalBottomSheet<TutorPersona>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          children: [
+            const Text(
+              '튜터 선생님 선택',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '나의 수준과 취향에 맞는 선생님을 골라보세요',
+              style: TextStyle(
+                fontSize: 12.5,
+                color: Theme.of(ctx).colorScheme.onSurface.withValues(alpha: 0.55),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...kTutorPersonas.map((p) {
+              final selected = p.id == _persona.id;
+              final cs = Theme.of(ctx).colorScheme;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Material(
+                  color: selected
+                      ? cs.primaryContainer.withValues(alpha: 0.6)
+                      : cs.surfaceContainerHighest.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(14),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () => Navigator.pop(ctx, p),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 12),
+                      child: Row(
+                        children: [
+                          Text(p.emoji,
+                              style: const TextStyle(fontSize: 26)),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(p.name,
+                                    style: const TextStyle(
+                                        fontSize: 14.5,
+                                        fontWeight: FontWeight.w800)),
+                                const SizedBox(height: 2),
+                                Text(p.tagline,
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        color: cs.onSurface
+                                            .withValues(alpha: 0.6))),
+                              ],
+                            ),
+                          ),
+                          if (selected)
+                            Icon(Icons.check_circle_rounded,
+                                color: cs.primary, size: 22),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+    if (picked != null && mounted) {
+      await TutorPersonaStore.save(picked.id);
+      setState(() {
+        _persona = picked;
+        // 새 선생님 소개 메시지 (대화 이력은 유지)
+        _msgs.add(_Msg('assistant',
+            '${picked.emoji} 안녕하세요! 지금부터 『${picked.name}』이 함께할게요. ${picked.tagline}'));
+      });
+      _scrollToBottom();
+    }
   }
 
   @override
@@ -81,6 +176,7 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
       final reply = await CerebrasService.instance.chat(
         history,
         effort: _effort,
+        personaStyle: _persona.stylePrompt,
       );
       if (!mounted) return;
       setState(() {
@@ -164,14 +260,21 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.psychology_rounded, size: 22),
-            SizedBox(width: 8),
-            Text('생각하는 AI 튜터'),
+            Text(_persona.emoji, style: const TextStyle(fontSize: 20)),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(_persona.name, overflow: TextOverflow.ellipsis),
+            ),
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: '튜터 선생님 변경',
+            icon: const Icon(Icons.switch_account_rounded),
+            onPressed: _pickPersona,
+          ),
           // 사고 깊이 선택
           PopupMenuButton<String>(
             tooltip: '사고 깊이',
@@ -219,9 +322,37 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
       padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
       children: [
         const Center(child: TutorAvatar(mood: TutorMood.teaching, size: 120)),
-        const SizedBox(height: 14),
+        const SizedBox(height: 10),
+        Center(
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: _pickPersona,
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+              decoration: BoxDecoration(
+                color: cs.primaryContainer.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(20),
+                border:
+                    Border.all(color: cs.primary.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('${_persona.emoji} ${_persona.name}',
+                      style: const TextStyle(
+                          fontSize: 13, fontWeight: FontWeight.w800)),
+                  const SizedBox(width: 4),
+                  Icon(Icons.expand_more_rounded,
+                      size: 17, color: cs.primary),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
         Text(
-          'AI 튜터에게 질문해보세요.\n답변은 학습 참고용이며, 중요한 법규·수치는\n앱의 최신 시험정보와 함께 확인하세요.',
+          '${_persona.tagline}\n답변은 학습 참고용이며, 중요한 법규·수치는\n앱의 최신 시험정보와 함께 확인하세요.',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14.5,

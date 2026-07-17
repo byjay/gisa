@@ -57,20 +57,23 @@ class CerebrasService {
 
   Future<bool> hasKey() async => (await getApiKey()).isNotEmpty;
 
-  /// 튜터 시스템 프롬프트 — 현재 종목 맞춤 + 사고 지시
-  String _systemPrompt() {
+  /// 튜터 시스템 프롬프트 — 현재 종목 맞춤 + 사고 지시 + 페르소나 스타일
+  String _systemPrompt({String? personaStyle}) {
     final t = StudyData.instance.track;
+    final style = (personaStyle == null || personaStyle.isEmpty)
+        ? '왕초보도 이해하는 쉬운 비유로 설명하세요. '
+        : '캐릭터 지시(최우선 준수): $personaStyle ';
     return '당신은 한국 "${t.name}" 자격증 시험 전문 AI 튜터입니다. '
         '담당 과목: ${t.subjects.join(", ")}. '
+        '$style'
         '답변하기 전에 반드시 단계별로 깊이 생각하세요: '
         '(a) 질문의 핵심 파악 → (b) 관련 이론·공식 점검 → (c) 함정·예외 검토 → (d) 답 구성. '
         '역할: (1) 최신 시험 정보와 정확한 이론 안내, '
-        '(2) 왕초보도 이해하는 쉬운 비유로 설명, '
-        '(3) 출제 포인트·함정·고득점 전략 짚기, '
-        '(4) 공식은 명확히 표기하고 암기법(두문자·스토리·표 정리)을 제안, '
-        '(5) 학습 계획 질문에도 구체적으로 답변. '
+        '(2) 출제 포인트·함정·고득점 전략 짚기, '
+        '(3) 공식은 명확히 표기하고 암기법(두문자·스토리·표 정리)을 제안, '
+        '(4) 학습 계획 질문에도 구체적으로 답변. '
         '답변 규칙: 한국어, LaTeX 수식(\\[..\\]) 금지 — 일반 텍스트 수식 사용(예: Qc = P(tanθ1 - tanθ2)), '
-        '마크다운 헤더(#) 대신 【제목】 형식, 핵심 위주 800자 이내. '
+        '마크다운 헤더(#) 대신 【제목】 형식, 핵심 위주. '
         '확실하지 않으면 솔직히 밝히세요.';
   }
 
@@ -78,9 +81,10 @@ class CerebrasService {
   Future<TutorReply> chat(
     List<TutorTurn> history, {
     String effort = 'medium',
+    String? personaStyle,
   }) async {
     final messages = <Map<String, String>>[
-      {'role': 'system', 'content': _systemPrompt()},
+      {'role': 'system', 'content': _systemPrompt(personaStyle: personaStyle)},
       ...history.map((t) => t.toJson()),
     ];
     return _complete(

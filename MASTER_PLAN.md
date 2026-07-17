@@ -215,6 +215,39 @@ assets/data/ (12 JSON)           # exams.json(29회차·2,897문항: id/label/ye
 4. **백업 체인(A5 표준)**: commit → ProjectBackup → 사용자에게 `curl -L -o cert_study_tracker.tar.gz "<URL>"` 명령 제공 → §9 갱신.
 5. **데이터 마이그레이션**: Hive 박스 스키마 변경 시 반드시 null-safe 읽기(`as T?`)로 하위호환.
 
+### §8.5 🛡️ V-팀: 3인 상설 감시 에이전트 (매 태스크 필수 통과 — 사용자 지시로 상설화)
+
+> "모든 코드가 실제로 동작하는가? 허울뿐인 것은 없는가? 진짜 배포될 상태인가?"
+> 매 태스크(매트릭스급)마다 아래 3인의 감시를 **전원 통과**해야 A5 진입 가능.
+
+**V1 기능실체 감시관 (Reality Inspector)** — 허울 코드 적발
+```bash
+# 미결선 화면: 어디서도 push되지 않는 Screen 적발
+for f in lib/screens/**/*.dart; do c=$(basename $f .dart); grep -rq "$c" --include="*.dart" lib/ --exclude="$f" || echo "ORPHAN: $f"; done
+# 빈 핸들러/placeholder 적발
+grep -rn "onPressed: () {}\|onTap: () {}\|TODO\|UnimplementedError\|준비 중\|Coming soon" lib/ --include="*.dart"
+```
+판정: ORPHAN 0건 + 빈 핸들러 0건 + "준비 중" 문구 0건 → PASS
+
+**V2 배포상태 감시관 (Deploy Readiness Inspector)** — 진짜 배포 가능 상태 검증
+```bash
+flutter analyze                          # 0 issue
+flutter test                             # 전건 통과
+flutter build web --release              # ✓ Built
+# 서빙 바이트 == 빌드 바이트 (프리뷰가 최신 코드인지)
+diff <(curl -s localhost:5060/main.dart.js | wc -c) <(wc -c < build/web/main.dart.js)
+```
+판정: 4단계 전부 통과 → PASS. 하나라도 실패 시 수정 후 V1부터 재검.
+
+**V3 전달링크 감시관 (Link Inspector)** — 사용자가 받을 수 있는 상태 검증
+```bash
+# APK 공개 curl 링크 HTTP 200 + 크기 일치
+curl -sI "https://8899-<sandbox>/CertStudyTracker-v1.0-release.apk" | head -1   # 200
+# ProjectBackup URL 유효성 (A5에서 생성 직후 확인)
+```
+판정: APK 200 + 크기 일치 + 백업 URL 발급 → PASS.
+**모든 태스크 종료 시 사용자에게 반드시 `curl -L -o ...` 형태의 다운로드 명령을 제공한다.**
+
 ---
 
 ## §9. 변경이력 (Archivist가 매 태스크 후 갱신 — 재개 시 여기부터 읽기)

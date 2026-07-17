@@ -18,6 +18,7 @@ import 'calculator_hub_screen.dart';
 import 'pass_report_screen.dart';
 import 'wrong_focus_screen.dart';
 import 'visual_repeat_screen.dart';
+import 'beginner_roadmap_screen.dart';
 import 'formula_guide_screen.dart';
 import 'exam_info_screen.dart';
 import 'smart_review_screen.dart';
@@ -600,6 +601,8 @@ class _StudyScreenState extends State<StudyScreen>
   /// 핵심 기능 그리드 (3x3)
   Widget _featureGrid(BuildContext context) {
     final items = <(String, IconData, Color, Widget)>[
+      ('🐣 왕초보 로드맵', Icons.egg_alt_rounded, const Color(0xFF10B981),
+          const BeginnerRoadmapScreen()),
       ('10회 반복 합격', Icons.repeat_rounded, const Color(0xFF4F46E5),
           const VisualRepeatScreen()),
       ('자동학습', Icons.auto_awesome_rounded, const Color(0xFF7C3AED),

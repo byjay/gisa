@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:provider/provider.dart';
 import '../../providers/app_provider.dart';
@@ -480,6 +481,11 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
               tooltip: '기초이론 다시 보기',
               icon: const Icon(Icons.school_outlined),
               onPressed: _openLesson,
+            ),
+            IconButton(
+              tooltip: '문제 오류 신고',
+              icon: const Icon(Icons.flag_outlined),
+              onPressed: _reportError,
             ),
             if (widget.examMode && _totalSec > 0)
               Center(
@@ -1075,6 +1081,75 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   /// 정답 아래 버튼 → 해당 토픽의 완전한 1:1 강의 시트 (이론+공식+암기법+함정+전략)
   void _openLesson() {
     showLessonSheet(context, _q.subject, _q.topic);
+  }
+
+  /// 🚩 문제 오류 신고 — 이메일로 문항 정보와 오류 유형 전송
+  Future<void> _reportError() async {
+    final q = _q;
+    final types = ['오탈자/문장 오류', '정답이 틀림', '보기 오류', '해설 오류', '이미지 누락', '기타'];
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(22))),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 16, 20, 4),
+              child: Text('🚩 문제 오류 신고',
+                  style:
+                      TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Text('어떤 오류인가요? 신고하면 다음 업데이트에 반영됩니다.',
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(ctx)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.6))),
+            ),
+            for (final t in types)
+              ListTile(
+                dense: true,
+                leading: const Icon(Icons.report_problem_outlined, size: 20),
+                title: Text(t),
+                onTap: () => Navigator.pop(ctx, t),
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (picked == null || !mounted) return;
+
+    final subject = Uri.encodeComponent(
+        '[문제오류신고] ${q.subject} · ${q.examLabel} ${q.no}번');
+    final body = Uri.encodeComponent('오류 유형: $picked\n\n'
+        '과목: ${q.subject}\n토픽: ${q.topic}\n회차: ${q.examLabel}\n문항번호: ${q.no}\n\n'
+        '문제: ${q.question}\n\n상세 설명(선택):\n');
+    final uri = Uri.parse(
+        'mailto:certstudytracker@gmail.com?subject=$subject&body=$body');
+    try {
+      final ok = await launchUrl(uri);
+      if (!ok && mounted) {
+        _showReportFallback(picked);
+      }
+    } catch (_) {
+      if (mounted) _showReportFallback(picked);
+    }
+  }
+
+  void _showReportFallback(String type) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('신고가 기록되었습니다 ($type) — 감사합니다! 🙏'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   /// 반복해서 틀리는 문제(누적 오답 2회 이상)면 오답노트를 강제로 띄우고

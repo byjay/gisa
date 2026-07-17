@@ -14,6 +14,10 @@ import '../widgets/magic_effects.dart';
 import '../widgets/weekly_league_card.dart';
 import 'study/smart_review_screen.dart';
 import 'study/auto_study_screen.dart';
+import 'study/beginner_roadmap_screen.dart';
+import 'study/theory_screen.dart';
+import 'study/flashcard_screen.dart';
+import 'study/quiz_play_screen.dart';
 import 'settings_screen.dart';
 import '../widgets/persistent_nav.dart';
 
@@ -46,6 +50,12 @@ class HomeScreen extends StatelessWidget {
                   FadeSlideIn(
                       index: 0,
                       child: _SubjectSwitcher(onNavigate: onNavigate)),
+                  const SizedBox(height: 12),
+                  // 🐣 왕초보 로드맵 배너 (지식 0 시작자용)
+                  const FadeSlideIn(index: 0, child: _BeginnerBanner()),
+                  const SizedBox(height: 12),
+                  // 🎯 과목 선택 허브 — 과목별로 바로 이론/기출/암기 진입
+                  const FadeSlideIn(index: 1, child: _SubjectHub()),
                   const SizedBox(height: 12),
                   // 오늘 학습 진행 스트립
                   FadeSlideIn(
@@ -1062,4 +1072,250 @@ class _SubjectChip extends StatelessWidget {
       ),
     );
   }
+}
+
+// ── 🐣 왕초보 로드맵 배너 ─────────────────────────────────
+class _BeginnerBanner extends StatelessWidget {
+  const _BeginnerBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () => pushWithNav(context, const BeginnerRoadmapScreen(),
+            currentSection: 0),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF10B981), Color(0xFF059669)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            children: [
+              const Text('🐣', style: TextStyle(fontSize: 26)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('처음이라 뭐부터 할지 모르겠다면',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900)),
+                    const SizedBox(height: 2),
+                    Text('지식 0 → 합격, 왕초보 6단계 로드맵',
+                        style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontSize: 12)),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios_rounded,
+                  color: Colors.white, size: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── 🎯 과목 선택 허브 — 과목별로 이론/기출/암기 바로 진입 ──
+class _SubjectHub extends StatelessWidget {
+  const _SubjectHub();
+
+  static const _palette = [
+    Color(0xFF4F46E5),
+    Color(0xFF0891B2),
+    Color(0xFFDC2626),
+    Color(0xFFF59E0B),
+    Color(0xFF10B981),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    context.watch<AppProvider>();
+    final track = StudyData.instance.track;
+    final cs = Theme.of(context).colorScheme;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 13, 14, 8),
+      decoration: BoxDecoration(
+        color: dark ? Colors.white.withValues(alpha: 0.04) : Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: dark
+              ? Colors.white.withValues(alpha: 0.06)
+              : const Color(0xFFEDEFF6),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.category_rounded, size: 17, color: cs.primary),
+              const SizedBox(width: 6),
+              Text('과목별 바로 공부',
+                  style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                      color: cs.onSurface.withValues(alpha: 0.85))),
+              const Spacer(),
+              Text('과목을 탭하세요',
+                  style: TextStyle(
+                      fontSize: 11,
+                      color: cs.onSurface.withValues(alpha: 0.45))),
+            ],
+          ),
+          const SizedBox(height: 10),
+          for (var i = 0; i < track.subjects.length; i++)
+            _subjectRow(context, i, track.subjects[i],
+                _palette[i % _palette.length]),
+        ],
+      ),
+    );
+  }
+
+  Widget _subjectRow(
+      BuildContext context, int idx, String subject, Color c) {
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => _openSubjectSheet(context, subject, c),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    colors: [c, c.withValues(alpha: 0.65)]),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              alignment: Alignment.center,
+              child: Text('${idx + 1}',
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 14)),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(subject,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      fontSize: 13.5, fontWeight: FontWeight.w700)),
+            ),
+            Icon(Icons.chevron_right_rounded,
+                size: 20, color: cs.onSurface.withValues(alpha: 0.35)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openSubjectSheet(BuildContext context, String subject, Color c) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(22))),
+      builder: (sheetCtx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(subject,
+                  style: const TextStyle(
+                      fontSize: 17, fontWeight: FontWeight.w900)),
+              const SizedBox(height: 4),
+              Text('무엇부터 할까요?',
+                  style: TextStyle(
+                      fontSize: 12.5,
+                      color: Theme.of(sheetCtx)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.55))),
+              const SizedBox(height: 14),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: _sheetIcon(Icons.menu_book_rounded, c),
+                title: const Text('기초 이론 배우기',
+                    style: TextStyle(fontWeight: FontWeight.w800)),
+                subtitle: const Text('처음이라면 여기부터'),
+                onTap: () {
+                  Navigator.pop(sheetCtx);
+                  pushWithNav(context, const TheoryScreen(),
+                      currentSection: 1);
+                },
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: _sheetIcon(Icons.quiz_rounded, c),
+                title: const Text('과목 기출 풀기',
+                    style: TextStyle(fontWeight: FontWeight.w800)),
+                subtitle: const Text('이 과목 문제만 모아서'),
+                onTap: () async {
+                  Navigator.pop(sheetCtx);
+                  final qs = await StudyData.instance
+                      .questionsBySubject(subject);
+                  if (!context.mounted) return;
+                  if (qs.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('이 과목의 기출 데이터가 없습니다.')),
+                    );
+                    return;
+                  }
+                  pushWithNav(
+                      context,
+                      QuizPlayScreen(
+                          title: '$subject 기출',
+                          questions: qs,
+                          examMode: false),
+                      currentSection: 1);
+                },
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: _sheetIcon(Icons.style_rounded, c),
+                title: const Text('플래시카드 암기',
+                    style: TextStyle(fontWeight: FontWeight.w800)),
+                subtitle: const Text('핵심 개념 반복 암기'),
+                onTap: () {
+                  Navigator.pop(sheetCtx);
+                  pushWithNav(
+                      context, FlashcardScreen(subjectFilter: subject),
+                      currentSection: 1);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _sheetIcon(IconData ic, Color c) => Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: c.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(ic, color: c, size: 21),
+      );
 }

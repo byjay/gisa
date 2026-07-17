@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../providers/app_provider.dart';
+import 'legal_screen.dart';
 import '../services/auth_service.dart';
 import '../services/notification_service.dart';
 import '../theme/app_theme.dart';
@@ -55,15 +57,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 8),
           _notificationCard(context, app),
           const SizedBox(height: 20),
-          _sectionTitle(cs, '앱 정보'),
+          _sectionTitle(cs, '응원하기'),
+          const SizedBox(height: 8),
+          _supportCard(context),
+          const SizedBox(height: 20),
+          _sectionTitle(cs, '앱 정보 · 법적 고지'),
           const SizedBox(height: 8),
           Card(
             child: Column(
-              children: const [
-                ListTile(
+              children: [
+                const ListTile(
                   leading: Icon(Icons.info_outline_rounded),
                   title: Text('버전'),
                   trailing: Text('1.0.0'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.privacy_tip_outlined),
+                  title: const Text('개인정보처리방침'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const LegalScreen(initialTab: 0))),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.gavel_rounded),
+                  title: const Text('이용약관'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const LegalScreen(initialTab: 1))),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.smart_toy_outlined),
+                  title: const Text('AI 생성 콘텐츠 고지'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const LegalScreen(initialTab: 2))),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.code_rounded),
+                  title: const Text('오픈소스 라이선스'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => showLicensePage(
+                    context: context,
+                    applicationName: 'Cert Study Tracker',
+                    applicationVersion: '1.0.0',
+                  ),
                 ),
               ],
             ),
@@ -71,6 +118,93 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  // ── ⭐ 응원하기 카드 — 리뷰·공유·피드백 (마케팅) ──────────
+  Widget _supportCard(BuildContext context) {
+    return Card(
+      child: Column(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.star_rounded, color: Colors.amber),
+            title: const Text('별점으로 응원하기'),
+            subtitle: const Text('리뷰 하나가 큰 힘이 됩니다 ⭐'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _openStore(context),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.share_rounded, color: AppTheme.primary),
+            title: const Text('친구에게 공유하기'),
+            subtitle: const Text('같이 공부하면 합격률 2배'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _shareApp(context),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading:
+                const Icon(Icons.mail_outline_rounded, color: AppTheme.accent),
+            title: const Text('의견 보내기 · 오류 신고'),
+            subtitle: const Text('certstudytracker@gmail.com'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _sendFeedback(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openStore(BuildContext context) async {
+    final uri = Uri.parse(
+        'https://play.google.com/store/apps/details?id=com.certstudytracker.study');
+    try {
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!ok && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('출시 후 플레이스토어에서 리뷰를 남길 수 있어요 ⭐')));
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('출시 후 플레이스토어에서 리뷰를 남길 수 있어요 ⭐')));
+      }
+    }
+  }
+
+  Future<void> _shareApp(BuildContext context) async {
+    const text = '⚡ 전기기사·소방설비기사 공부, 이 앱 하나로 끝!\n'
+        '기출 3,700+문제 · AI 튜터 · 암기법 · 합격 예측까지 무료.\n'
+        'Cert Study Tracker — Google Play에서 검색!';
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('친구에게 공유'),
+        content: const SelectableText(text),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('닫기'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _sendFeedback(BuildContext context) async {
+    final uri = Uri.parse(
+        'mailto:certstudytracker@gmail.com?subject=${Uri.encodeComponent('[Cert Study Tracker] 의견/오류 신고')}');
+    try {
+      final ok = await launchUrl(uri);
+      if (!ok && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('certstudytracker@gmail.com 으로 보내주세요 📧')));
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('certstudytracker@gmail.com 으로 보내주세요 📧')));
+      }
+    }
   }
 
   Widget _sectionTitle(ColorScheme cs, String t) => Padding(
