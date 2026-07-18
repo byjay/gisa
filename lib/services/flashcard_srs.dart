@@ -34,8 +34,9 @@ class FlashcardSrs {
         ? ((r['box'] as int? ?? 0) + 1).clamp(0, _intervalDays.length - 1)
         : 0;
     r['box'] = box;
-    r['nextDue'] =
-        DateTime.now().add(Duration(days: _intervalDays[box])).toIso8601String();
+    r['nextDue'] = DateTime.now()
+        .add(Duration(days: _intervalDays[box]))
+        .toIso8601String();
     await _box!.put(key, r);
   }
 

@@ -31,6 +31,10 @@ class AppProvider extends ChangeNotifier {
   bool notificationsEnabled = true; // 🔔 시험 일정·학습 리마인드 알림 on/off
   bool dailyReminderEnabled = true;
   int dailyReminderHour = 9;
+  bool reduceMotion = false; // ♿ 애니메이션 감소(접근성)
+  double textScaleFactor = 1.0; // ♿ 앱 내 글자 크기 배율(접근성)
+  String? lastAutoBackupAt; // 💾 마지막 자동 백업 시각(ISO8601)
+  bool examInProgress = false; // 🔒 실전모드 진행 중 여부(런타임 전용, 저장 안 함)
 
   // Timer state
   bool timerRunning = false;
@@ -81,6 +85,9 @@ class AppProvider extends ChangeNotifier {
     dailyReminderEnabled =
         (_settingsBox.get('dailyReminderEnabled') as bool?) ?? true;
     dailyReminderHour = (_settingsBox.get('dailyReminderHour') as int?) ?? 9;
+    reduceMotion = (_settingsBox.get('reduceMotion') as bool?) ?? false;
+    textScaleFactor = (_settingsBox.get('textScaleFactor') as double?) ?? 1.0;
+    lastAutoBackupAt = _settingsBox.get('lastAutoBackupAt') as String?;
     shieldCount = (_settingsBox.get('shieldCount') as int?) ?? 0;
     onboarded = (_settingsBox.get('onboarded_v1') as bool?) ?? false;
     selectedTrackId = _settingsBox.get('selectedTrack') as String?;
@@ -254,6 +261,33 @@ class AppProvider extends ChangeNotifier {
     if (dailyReminderEnabled && notificationsEnabled) {
       await NotificationService.instance.scheduleDailyReminder(hour: hour);
     }
+    notifyListeners();
+  }
+
+  // ===== 🔒 실전모드 상태 (Q65: AI튜터 접근 제한 판단용) =====
+  void setExamInProgress(bool v) {
+    if (examInProgress == v) return;
+    examInProgress = v;
+    notifyListeners();
+  }
+
+  // ===== ♿ 접근성 설정 =====
+  Future<void> setReduceMotion(bool v) async {
+    reduceMotion = v;
+    await _settingsBox.put('reduceMotion', v);
+    notifyListeners();
+  }
+
+  Future<void> setTextScaleFactor(double v) async {
+    textScaleFactor = v.clamp(0.8, 1.6);
+    await _settingsBox.put('textScaleFactor', textScaleFactor);
+    notifyListeners();
+  }
+
+  // ===== 💾 자동 백업 시각 기록 =====
+  Future<void> markAutoBackupNow() async {
+    lastAutoBackupAt = DateTime.now().toIso8601String();
+    await _settingsBox.put('lastAutoBackupAt', lastAutoBackupAt);
     notifyListeners();
   }
 

@@ -23,9 +23,7 @@ class StudyHeatmap extends StatelessWidget {
 
     // 활동일 수 계산
     int activeDays = 0;
-    for (var d = start;
-        !d.isAfter(today);
-        d = d.add(const Duration(days: 1))) {
+    for (var d = start; !d.isAfter(today); d = d.add(const Duration(days: 1))) {
       if (app.minutesOnDate(d) > 0) activeDays++;
     }
 
@@ -48,18 +46,21 @@ class StudyHeatmap extends StatelessWidget {
           Row(
             children: [
               const IconBadge(
-                  icon: Icons.calendar_view_month_rounded,
-                  color: AppTheme.success,
-                  size: 36,
-                  iconSize: 18),
+                icon: Icons.calendar_view_month_rounded,
+                color: AppTheme.success,
+                size: 36,
+                iconSize: 18,
+              ),
               const SizedBox(width: 10),
-              const Text('학습 발자국',
-                  style:
-                      TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+              const Text(
+                '학습 발자국',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+              ),
               const Spacer(),
               PillBadge(
-                  text: '최근 12주 · $activeDays일 활동',
-                  color: AppTheme.success),
+                text: '최근 12주 · $activeDays일 활동',
+                color: AppTheme.success,
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -68,8 +69,7 @@ class StudyHeatmap extends StatelessWidget {
               // 요일 라벨 폭 20 + 셀 간격 고려
               const labelW = 22.0;
               const gap = 3.0;
-              final cellSize =
-                  ((constraints.maxWidth - labelW) / _weeks) - gap;
+              final cellSize = ((constraints.maxWidth - labelW) / _weeks) - gap;
               final size = cellSize.clamp(8.0, 22.0);
 
               return Row(
@@ -88,10 +88,11 @@ class StudyHeatmap extends StatelessWidget {
                                 ? Text(
                                     ['일', '월', '화', '수', '목', '금', '토'][d],
                                     style: TextStyle(
-                                        fontSize: 9,
-                                        color: dark
-                                            ? Colors.white38
-                                            : AppTheme.textMuted),
+                                      fontSize: 9,
+                                      color: dark
+                                          ? Colors.white38
+                                          : AppTheme.textMuted,
+                                    ),
                                   )
                                 : null,
                           ),
@@ -110,39 +111,43 @@ class StudyHeatmap extends StatelessWidget {
                                 child: Column(
                                   children: [
                                     for (var d = 0; d < 7; d++)
-                                      Builder(builder: (_) {
-                                        final date = start.add(
-                                            Duration(days: w * 7 + d));
-                                        final isFuture =
-                                            date.isAfter(today);
-                                        final min = isFuture
-                                            ? -1
-                                            : app.minutesOnDate(date);
-                                        final isToday = date == today;
-                                        return Tooltip(
-                                          message: isFuture
-                                              ? ''
-                                              : '${DateFormat('M/d').format(date)} · $min분',
-                                          child: Container(
-                                            height: size,
-                                            margin: const EdgeInsets.only(
-                                                right: gap, bottom: gap),
-                                            decoration: BoxDecoration(
-                                              color: isFuture
-                                                  ? Colors.transparent
-                                                  : cellColor(min),
-                                              borderRadius:
-                                                  BorderRadius.circular(3),
-                                              border: isToday
-                                                  ? Border.all(
-                                                      color:
-                                                          AppTheme.accent,
-                                                      width: 1.5)
-                                                  : null,
+                                      Builder(
+                                        builder: (_) {
+                                          final date = start.add(
+                                            Duration(days: w * 7 + d),
+                                          );
+                                          final isFuture = date.isAfter(today);
+                                          final min = isFuture
+                                              ? -1
+                                              : app.minutesOnDate(date);
+                                          final isToday = date == today;
+                                          return Tooltip(
+                                            message: isFuture
+                                                ? ''
+                                                : '${DateFormat('M/d').format(date)} · $min분',
+                                            child: Container(
+                                              height: size,
+                                              margin: const EdgeInsets.only(
+                                                right: gap,
+                                                bottom: gap,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: isFuture
+                                                    ? Colors.transparent
+                                                    : cellColor(min),
+                                                borderRadius:
+                                                    BorderRadius.circular(3),
+                                                border: isToday
+                                                    ? Border.all(
+                                                        color: AppTheme.accent,
+                                                        width: 1.5,
+                                                      )
+                                                    : null,
+                                              ),
                                             ),
-                                          ),
-                                        );
-                                      }),
+                                          );
+                                        },
+                                      ),
                                   ],
                                 ),
                               ),
@@ -160,10 +165,13 @@ class StudyHeatmap extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text('적음',
-                  style: TextStyle(
-                      fontSize: 9.5,
-                      color: dark ? Colors.white38 : AppTheme.textMuted)),
+              Text(
+                '적음',
+                style: TextStyle(
+                  fontSize: 9.5,
+                  color: dark ? Colors.white38 : AppTheme.textMuted,
+                ),
+              ),
               const SizedBox(width: 5),
               for (final a in [0.0, 0.25, 0.5, 0.75, 1.0])
                 Container(
@@ -173,17 +181,20 @@ class StudyHeatmap extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: a == 0
                         ? (dark
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : const Color(0xFFEDEFF5))
+                              ? Colors.white.withValues(alpha: 0.05)
+                              : const Color(0xFFEDEFF5))
                         : AppTheme.primary.withValues(alpha: a),
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
               const SizedBox(width: 2),
-              Text('많음',
-                  style: TextStyle(
-                      fontSize: 9.5,
-                      color: dark ? Colors.white38 : AppTheme.textMuted)),
+              Text(
+                '많음',
+                style: TextStyle(
+                  fontSize: 9.5,
+                  color: dark ? Colors.white38 : AppTheme.textMuted,
+                ),
+              ),
             ],
           ),
         ],

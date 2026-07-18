@@ -19,9 +19,10 @@ class ScoreSparkline extends StatelessWidget {
       return SizedBox(
         height: height,
         child: Center(
-          child: Text('데이터가 쌓이면 그래프가 나타나요',
-              style: TextStyle(
-                  fontSize: 11, color: color.withValues(alpha: 0.7))),
+          child: Text(
+            '데이터가 쌓이면 그래프가 나타나요',
+            style: TextStyle(fontSize: 11, color: color.withValues(alpha: 0.7)),
+          ),
         ),
       );
     }
@@ -94,7 +95,13 @@ class _SparklinePainter extends CustomPainter {
     final last = pt(values.length - 1);
     canvas.drawCircle(last, 4, Paint()..color = color);
     canvas.drawCircle(
-        last, 4, Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 1.5);
+      last,
+      4,
+      Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
   }
 
   @override

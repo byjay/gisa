@@ -18,26 +18,27 @@ class DDayPlan {
     required this.currentScore,
     required this.targetScore,
     required this.gainPerQuestion,
-  })  : pointsNeeded =
-            (targetScore - currentScore) < 0 ? 0 : (targetScore - currentScore),
-        questionsNeeded = (targetScore - currentScore) <= 0
-            ? 0
-            : ((targetScore - currentScore) / gainPerQuestion).ceil(),
-        onTrack = currentScore >= targetScore,
-        perDay = dDay <= 0
-            ? 0
-            : (((targetScore - currentScore) <= 0
-                    ? 0
-                    : ((targetScore - currentScore) / gainPerQuestion))
-                / dDay)
-                .ceil(),
-        feasible = dDay <= 0
-            ? false
-            : (((targetScore - currentScore) <= 0
-                        ? 0
-                        : ((targetScore - currentScore) / gainPerQuestion)) /
-                    dDay) <=
-                60;
+  }) : pointsNeeded = (targetScore - currentScore) < 0
+           ? 0
+           : (targetScore - currentScore),
+       questionsNeeded = (targetScore - currentScore) <= 0
+           ? 0
+           : ((targetScore - currentScore) / gainPerQuestion).ceil(),
+       onTrack = currentScore >= targetScore,
+       perDay = dDay <= 0
+           ? 0
+           : (((targetScore - currentScore) <= 0
+                         ? 0
+                         : ((targetScore - currentScore) / gainPerQuestion)) /
+                     dDay)
+                 .ceil(),
+       feasible = dDay <= 0
+           ? false
+           : (((targetScore - currentScore) <= 0
+                         ? 0
+                         : ((targetScore - currentScore) / gainPerQuestion)) /
+                     dDay) <=
+                 60;
 }
 
 class DDayPlannerEngine {

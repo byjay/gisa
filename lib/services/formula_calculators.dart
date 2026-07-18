@@ -183,9 +183,7 @@ class FormulaCalculators {
         final pf2 = m['pf2']!.clamp(0.01, 1).toDouble();
         double tan(double pf) => math.sqrt(1 - pf * pf) / pf;
         final qc = p * (tan(pf1) - tan(pf2));
-        return [
-          CalcResult('필요 콘덴서 용량 Qc', _f(qc), 'kVA'),
-        ];
+        return [CalcResult('필요 콘덴서 용량 Qc', _f(qc), 'kVA')];
       },
     ),
     FormulaCalc(
@@ -216,10 +214,7 @@ class FormulaCalculators {
           name = '3상 3선식';
         }
         final e = k * l * i / (1000 * a);
-        return [
-          CalcResult('방식', name, ''),
-          CalcResult('전압강하 e', _f(e), 'V'),
-        ];
+        return [CalcResult('방식', name, ''), CalcResult('전압강하 e', _f(e), 'V')];
       },
     ),
     FormulaCalc(
@@ -339,14 +334,10 @@ class FormulaCalculators {
       category: '자동화재탐지',
       formula: '하나의 경계구역 600㎡·한변 50m 이하',
       desc: '바닥면적으로 필요한 경계구역 수를 계산합니다.',
-      fields: const [
-        CalcField('area', '바닥면적', 'm²', 1500),
-      ],
+      fields: const [CalcField('area', '바닥면적', 'm²', 1500)],
       compute: (m) {
         final a = m['area']!;
-        return [
-          CalcResult('경계구역 수', (a / 600).ceil().toString(), '개'),
-        ];
+        return [CalcResult('경계구역 수', (a / 600).ceil().toString(), '개')];
       },
     ),
     FormulaCalc(

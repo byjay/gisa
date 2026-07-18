@@ -47,7 +47,10 @@ class _DueReviewCardState extends State<DueReviewCard> {
         child: Row(
           children: [
             const IconBadge(
-                icon: Icons.replay_rounded, color: purple, size: 40),
+              icon: Icons.replay_rounded,
+              color: purple,
+              size: 40,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -55,17 +58,25 @@ class _DueReviewCardState extends State<DueReviewCard> {
                 children: [
                   Row(
                     children: [
-                      const Text('오늘의 복습 카드',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w800)),
+                      const Text(
+                        '오늘의 복습 카드',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                       const SizedBox(width: 7),
                       PillBadge(text: '$_count개', color: purple, filled: true),
                     ],
                   ),
                   const SizedBox(height: 3),
-                  Text('지금 안 보면 잊어버려요 — 30초면 끝!',
-                      style: TextStyle(
-                          fontSize: 11.5, color: scheme.onSurfaceVariant)),
+                  Text(
+                    '지금 안 보면 잊어버려요 — 30초면 끝!',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -82,11 +93,15 @@ class _DueReviewCardState extends State<DueReviewCard> {
     if (!mounted) return;
     if (qs.isEmpty) return;
     qs.shuffle();
-    await pushWithNav(context, QuizPlayScreen(
-          title: '오늘의 복습 카드 (${qs.length}문항)',
-          questions: qs,
-          examMode: false,
-        ), currentSection: 1);
+    await pushWithNav(
+      context,
+      QuizPlayScreen(
+        title: '오늘의 복습 카드 (${qs.length}문항)',
+        questions: qs,
+        examMode: false,
+      ),
+      currentSection: 1,
+    );
     _load();
   }
 }

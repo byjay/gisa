@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/app_provider.dart';
 import '../../services/cerebras_service.dart';
 import '../../services/study_data.dart';
 import '../../services/tutor_persona.dart';
@@ -21,6 +23,7 @@ class _Msg {
   final String content;
   final String thinking;
   bool showThinking = false; // 사용자가 '생각 과정'을 펼치면 true
+  bool? feedback; // Q67: 사용자 피드백 — true=👍 false=👎 null=미평가
   _Msg(this.role, this.content, {this.thinking = ''});
 }
 
@@ -39,6 +42,35 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
     TutorPersonaStore.load().then((p) {
       if (mounted) setState(() => _persona = p);
     });
+    // 🔒 Q65: 실전모드 중 AI 튜터 진입 시 정답 유출 우회 경로를 차단
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final examInProgress = context.read<AppProvider>().examInProgress;
+      if (examInProgress) _showExamModeBlockedDialog();
+    });
+  }
+
+  Future<void> _showExamModeBlockedDialog() async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('🔒 실전 모의고사 진행 중'),
+        content: const Text(
+          '실전 모드에서는 채점 공정성을 위해 AI 튜터를 사용할 수 없어요.\n'
+          '시험을 마친 뒤 오답을 물어봐 주세요!',
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.of(context).pop(); // 채팅 화면 자체를 닫음
+            },
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
   }
 
   List<String> get _suggestions {
@@ -158,6 +190,11 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
   Future<void> _send(String text) async {
     final msg = text.trim();
     if (msg.isEmpty || _loading) return;
+    // 🔒 Q65: 실전모드 중에는 전송 자체를 차단(다이얼로그로 이미 안내했지만 2중 방어)
+    if (context.read<AppProvider>().examInProgress) {
+      _showExamModeBlockedDialog();
+      return;
+    }
 
     FocusScope.of(context).unfocus();
     final hasKey = await CerebrasService.instance.hasKey();
@@ -600,7 +637,76 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
                     ),
                   ),
                 ),
+                // Q63: AI 근거 표시 — 현재 학습 중인 과목/토픽과의 연관성 안내
+                if (!isUser) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    '💡 ${StudyData.instance.track.name} 학습 참고용 답변 · 중요 수치는 공식 자료로 재확인하세요',
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      color: cs.onSurface.withValues(alpha: 0.45),
+                    ),
+                  ),
+                ],
+                // Q67: AI 피드백 루프 — 답변이 도움이 됐는지 평가
+                if (!isUser) _feedbackRow(m, cs),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Q67: 👍👎 피드백 버튼 — 로컬에만 집계(사용자 개선 인식 제공)
+  Widget _feedbackRow(_Msg m, ColorScheme cs) {
+    if (m.feedback != null) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Text(
+          m.feedback == true ? '피드백 감사해요! 👍' : '더 나은 답변을 위해 참고할게요 🙏',
+          style: TextStyle(
+            fontSize: 11,
+            color: cs.onSurface.withValues(alpha: 0.5),
+          ),
+        ),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '도움이 됐나요?',
+            style: TextStyle(
+              fontSize: 11,
+              color: cs.onSurface.withValues(alpha: 0.45),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Semantics(
+            button: true,
+            label: '이 답변이 도움됨',
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () => setState(() => m.feedback = true),
+              child: const Padding(
+                padding: EdgeInsets.all(4),
+                child: Text('👍', style: TextStyle(fontSize: 14)),
+              ),
+            ),
+          ),
+          Semantics(
+            button: true,
+            label: '이 답변이 도움 안 됨',
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () => setState(() => m.feedback = false),
+              child: const Padding(
+                padding: EdgeInsets.all(4),
+                child: Text('👎', style: TextStyle(fontSize: 14)),
+              ),
             ),
           ),
         ],

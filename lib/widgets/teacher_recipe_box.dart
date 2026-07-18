@@ -47,11 +47,13 @@ class TeacherRecipeBox extends StatelessWidget {
     if (showMnemonics) {
       final all = await sd.loadMnemonics();
       mnems = all
-          .where((m) =>
-              m.subject == subject ||
-              m.subject == '공통' ||
-              m.title.contains(topic) ||
-              m.body.contains(topic))
+          .where(
+            (m) =>
+                m.subject == subject ||
+                m.subject == '공통' ||
+                m.title.contains(topic) ||
+                m.body.contains(topic),
+          )
           .toList();
       // 토픽 직접 언급 암기법 우선, 최대 3개만 (과다 노출 방지)
       mnems.sort((a, b) {
@@ -81,13 +83,18 @@ class TeacherRecipeBox extends StatelessWidget {
           tilePadding: const EdgeInsets.symmetric(horizontal: 12),
           childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
           leading: const Text('🧑‍🏫', style: TextStyle(fontSize: 22)),
-          title: Text('풀이 레시피 — $topic',
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: scheme.primary)),
-          subtitle: const Text('공식이 어떻게 적용되는지 + 풀이 순서',
-              style: TextStyle(fontSize: 11)),
+          title: Text(
+            '풀이 레시피 — $topic',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: scheme.primary,
+            ),
+          ),
+          subtitle: const Text(
+            '공식이 어떻게 적용되는지 + 풀이 순서',
+            style: TextStyle(fontSize: 11),
+          ),
           children: [
             // ✓ 유형 판별 체크
             if (r.check.isNotEmpty)
@@ -98,21 +105,22 @@ class TeacherRecipeBox extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.teal.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                      color: Colors.teal.withValues(alpha: 0.3)),
+                  border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.fact_check,
-                        size: 16, color: Colors.teal),
+                    const Icon(Icons.fact_check, size: 16, color: Colors.teal),
                     const SizedBox(width: 6),
                     Expanded(
-                      child: Text('먼저 확인: ${r.check}',
-                          style: const TextStyle(
-                              fontSize: 12.5,
-                              height: 1.45,
-                              fontWeight: FontWeight.w600)),
+                      child: Text(
+                        '먼저 확인: ${r.check}',
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          height: 1.45,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -121,11 +129,14 @@ class TeacherRecipeBox extends StatelessWidget {
             if (r.steps.isNotEmpty) ...[
               Align(
                 alignment: Alignment.centerLeft,
-                child: Text('풀이 순서',
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: scheme.primary)),
+                child: Text(
+                  '풀이 순서',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: scheme.primary,
+                  ),
+                ),
               ),
               const SizedBox(height: 6),
               for (var i = 0; i < r.steps.length; i++)
@@ -142,17 +153,21 @@ class TeacherRecipeBox extends StatelessWidget {
                           color: scheme.primary,
                           shape: BoxShape.circle,
                         ),
-                        child: Text('${i + 1}',
-                            style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: scheme.onPrimary)),
+                        child: Text(
+                          '${i + 1}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: scheme.onPrimary,
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(r.steps[i],
-                            style: const TextStyle(
-                                fontSize: 12.5, height: 1.45)),
+                        child: Text(
+                          r.steps[i],
+                          style: const TextStyle(fontSize: 12.5, height: 1.45),
+                        ),
                       ),
                     ],
                   ),
@@ -163,11 +178,14 @@ class TeacherRecipeBox extends StatelessWidget {
               const SizedBox(height: 4),
               Align(
                 alignment: Alignment.centerLeft,
-                child: Text('공식 & 적용 방법',
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: scheme.primary)),
+                child: Text(
+                  '공식 & 적용 방법',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: scheme.primary,
+                  ),
+                ),
               ),
               const SizedBox(height: 6),
               for (final f in r.formulas)
@@ -182,19 +200,25 @@ class TeacherRecipeBox extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(f.expr,
-                          style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'monospace',
-                              height: 1.4)),
+                      Text(
+                        f.expr,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'monospace',
+                          height: 1.4,
+                        ),
+                      ),
                       if (f.how.isNotEmpty) ...[
                         const SizedBox(height: 4),
-                        Text('적용: ${f.how}',
-                            style: TextStyle(
-                                fontSize: 12,
-                                height: 1.45,
-                                color: scheme.onSurfaceVariant)),
+                        Text(
+                          '적용: ${f.how}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            height: 1.45,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
                       ],
                     ],
                   ),
@@ -222,13 +246,18 @@ class TeacherRecipeBox extends StatelessWidget {
           tilePadding: const EdgeInsets.symmetric(horizontal: 12),
           childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
           leading: const Text('🔑', style: TextStyle(fontSize: 20)),
-          title: const Text('함께 외우기 — 관련 암기법',
-              style: TextStyle(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.orange)),
-          subtitle: Text('${mnems.length}개 · 이론 이해 + 암기 동시 공략',
-              style: const TextStyle(fontSize: 11)),
+          title: const Text(
+            '함께 외우기 — 관련 암기법',
+            style: TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.bold,
+              color: Colors.orange,
+            ),
+          ),
+          subtitle: Text(
+            '${mnems.length}개 · 이론 이해 + 암기 동시 공략',
+            style: const TextStyle(fontSize: 11),
+          ),
           children: [
             for (final m in mnems)
               Container(
@@ -242,19 +271,28 @@ class TeacherRecipeBox extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(m.title,
-                        style: const TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.bold)),
+                    Text(
+                      m.title,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(m.body,
-                        style: const TextStyle(fontSize: 12.5, height: 1.5)),
+                    Text(
+                      m.body,
+                      style: const TextStyle(fontSize: 12.5, height: 1.5),
+                    ),
                     if (m.tip.isNotEmpty) ...[
                       const SizedBox(height: 4),
-                      Text('💡 ${m.tip}',
-                          style: TextStyle(
-                              fontSize: 11.5,
-                              height: 1.4,
-                              color: Colors.orange.shade800)),
+                      Text(
+                        '💡 ${m.tip}',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          height: 1.4,
+                          color: Colors.orange.shade800,
+                        ),
+                      ),
                     ],
                   ],
                 ),

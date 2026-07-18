@@ -4,6 +4,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'providers/app_provider.dart';
 import 'services/auth_service.dart';
+import 'services/backup_service.dart';
 import 'services/notification_service.dart';
 import 'theme/app_theme.dart';
 import 'screens/exams_screen.dart';
@@ -26,6 +27,8 @@ Future<void> main() async {
   await AuthService.instance.init();
   // 🔔 로컬 알림 서비스 초기화 (시험 D-day, 학습 리마인드) — 백그라운드로 준비
   unawaited(NotificationService.instance.init());
+  // 💾 Q80: 7일 이상 경과 시 자동 백업 파일 생성(백그라운드, 실패해도 앱 구동에 영향 없음)
+  unawaited(_maybeAutoBackup(provider));
   runApp(
     MultiProvider(
       providers: [
@@ -37,14 +40,38 @@ Future<void> main() async {
   );
 }
 
+/// 💾 Q80: 마지막 자동 백업이 7일 이상 지났으면 로컬 파일로 새 백업을 만든다.
+Future<void> _maybeAutoBackup(AppProvider provider) async {
+  try {
+    final last = provider.lastAutoBackupAt;
+    final lastDate = last != null ? DateTime.tryParse(last) : null;
+    final due =
+        lastDate == null || DateTime.now().difference(lastDate).inDays >= 7;
+    if (!due) return;
+    final result = await BackupService.instance.autoBackupToLocalFile();
+    if (result.success) {
+      await provider.markAutoBackupNow();
+    }
+  } catch (_) {
+    // 자동 백업 실패는 앱 사용에 영향을 주지 않도록 무시(수동 백업으로 대체 가능)
+  }
+}
+
 class CertStudyApp extends StatelessWidget {
   const CertStudyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     final dark = context.select<AppProvider, bool>((p) => p.darkMode);
-    final paletteId =
-        context.select<AppProvider, String>((p) => p.themePaletteId);
+    final paletteId = context.select<AppProvider, String>(
+      (p) => p.themePaletteId,
+    );
+    final textScale = context.select<AppProvider, double>(
+      (p) => p.textScaleFactor,
+    );
+    final reduceMotion = context.select<AppProvider, bool>(
+      (p) => p.reduceMotion,
+    );
     final palette = AppTheme.paletteById(paletteId);
     return MaterialApp(
       title: '자격증 학습 트래커',
@@ -52,6 +79,17 @@ class CertStudyApp extends StatelessWidget {
       themeMode: dark ? ThemeMode.dark : ThemeMode.light,
       theme: AppTheme.light(palette),
       darkTheme: AppTheme.dark(palette),
+      // ♿ Q47/Q48: 애니메이션 감소 + 앱 내 글자 크기 배율(설정에서 조절)
+      builder: (context, child) {
+        final mq = MediaQuery.of(context);
+        return MediaQuery(
+          data: mq.copyWith(
+            textScaler: TextScaler.linear(textScale),
+            disableAnimations: reduceMotion,
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       home: const _RootGate(),
     );
   }
@@ -63,16 +101,16 @@ class _RootGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onboarded =
-        context.select<AppProvider, bool>((p) => p.onboarded);
+    final onboarded = context.select<AppProvider, bool>((p) => p.onboarded);
     if (!onboarded) {
       return OnboardingScreen(
         onDone: () => context.read<AppProvider>().completeOnboarding(),
       );
     }
     // 온보딩 후 종목 미선택이면 큰 버튼 3개 진입 화면
-    final trackId =
-        context.select<AppProvider, String?>((p) => p.selectedTrackId);
+    final trackId = context.select<AppProvider, String?>(
+      (p) => p.selectedTrackId,
+    );
     if (trackId == null) {
       return const TrackSelectScreen();
     }
@@ -139,11 +177,31 @@ class _MainShellState extends State<MainShell> {
           onDestinationSelected: _navigate,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           destinations: const [
-            NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home_rounded), label: '홈'),
-            NavigationDestination(icon: Icon(Icons.school_outlined), selectedIcon: Icon(Icons.school_rounded), label: '학습'),
-            NavigationDestination(icon: Icon(Icons.event_outlined), selectedIcon: Icon(Icons.event_rounded), label: '시험'),
-            NavigationDestination(icon: Icon(Icons.timer_outlined), selectedIcon: Icon(Icons.timer_rounded), label: '타이머'),
-            NavigationDestination(icon: Icon(Icons.insights_outlined), selectedIcon: Icon(Icons.insights_rounded), label: '통계'),
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home_rounded),
+              label: '홈',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.school_outlined),
+              selectedIcon: Icon(Icons.school_rounded),
+              label: '학습',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.event_outlined),
+              selectedIcon: Icon(Icons.event_rounded),
+              label: '시험',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.timer_outlined),
+              selectedIcon: Icon(Icons.timer_rounded),
+              label: '타이머',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.insights_outlined),
+              selectedIcon: Icon(Icons.insights_rounded),
+              label: '통계',
+            ),
           ],
         ),
       ),

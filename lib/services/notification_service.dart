@@ -42,7 +42,8 @@ class NotificationService {
     );
     await _plugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(channel);
 
     _ready = true;
@@ -52,7 +53,8 @@ class NotificationService {
   Future<bool> requestPermission() async {
     final granted = await _plugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.requestNotificationsPermission();
     return granted ?? false;
   }
@@ -60,21 +62,22 @@ class NotificationService {
   Future<bool> hasPermission() async {
     final granted = await _plugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.areNotificationsEnabled();
     return granted ?? false;
   }
 
   NotificationDetails get _details => const NotificationDetails(
-        android: AndroidNotificationDetails(
-          _channelId,
-          _channelName,
-          channelDescription: _channelDesc,
-          importance: Importance.high,
-          priority: Priority.high,
-          icon: '@mipmap/ic_launcher',
-        ),
-      );
+    android: AndroidNotificationDetails(
+      _channelId,
+      _channelName,
+      channelDescription: _channelDesc,
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+    ),
+  );
 
   /// 매일 정해진 시각(기본 오전 9시)에 학습 리마인드.
   Future<void> scheduleDailyReminder({
@@ -85,8 +88,14 @@ class NotificationService {
   }) async {
     await init();
     final now = tz.TZDateTime.now(tz.local);
-    var scheduled =
-        tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+    var scheduled = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
     }
@@ -117,8 +126,13 @@ class NotificationService {
     var id = 100000;
     for (final a in alerts) {
       final target = a.targetDate;
-      var when =
-          tz.TZDateTime(tz.local, target.year, target.month, target.day, 9);
+      var when = tz.TZDateTime(
+        tz.local,
+        target.year,
+        target.month,
+        target.day,
+        9,
+      );
       if (when.isBefore(now)) continue;
       await _plugin.zonedSchedule(
         id++,

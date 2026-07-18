@@ -70,9 +70,13 @@ class _LessonCurriculumScreenState extends State<LessonCurriculumScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(subject,
-                    style: const TextStyle(
-                        fontSize: 17, fontWeight: FontWeight.bold)),
+                Text(
+                  subject,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 4),
                 Text(
                   '토픽 ${lessons.length}개 · 기출 $total문항 전체 커버\n'
@@ -96,29 +100,42 @@ class _LessonCurriculumScreenState extends State<LessonCurriculumScreen> {
       child: ListTile(
         leading: CircleAvatar(
           radius: 17,
-          backgroundColor:
-              order <= 3 ? Colors.deepOrange : scheme.surfaceContainerHighest,
-          child: Text('$order',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: order <= 3 ? Colors.white : scheme.onSurface)),
+          backgroundColor: order <= 3
+              ? Colors.deepOrange
+              : scheme.surfaceContainerHighest,
+          child: Text(
+            '$order',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: order <= 3 ? Colors.white : scheme.onSurface,
+            ),
+          ),
         ),
-        title: Text(l.topic,
-            style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600)),
+        title: Text(
+          l.topic,
+          style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
+        ),
         subtitle: Row(
           children: [
             Text('기출 ${l.freq}문항', style: const TextStyle(fontSize: 11.5)),
             const SizedBox(width: 8),
             ...List.generate(
               5,
-              (i) => Icon(i < l.importance ? Icons.star : Icons.star_border,
-                  size: 12, color: Colors.amber[700]),
+              (i) => Icon(
+                i < l.importance ? Icons.star : Icons.star_border,
+                size: 12,
+                color: Colors.amber[700],
+              ),
             ),
           ],
         ),
         trailing: const Icon(Icons.chevron_right),
-        onTap: () => pushWithNav(context, LessonViewerScreen(lesson: l), currentSection: 1),
+        onTap: () => pushWithNav(
+          context,
+          LessonViewerScreen(lesson: l),
+          currentSection: 1,
+        ),
       ),
     );
   }
@@ -136,9 +153,11 @@ class LessonViewerScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(lesson.topic,
-            style: const TextStyle(fontSize: 15),
-            overflow: TextOverflow.ellipsis),
+        title: Text(
+          lesson.topic,
+          style: const TextStyle(fontSize: 15),
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
       body: SafeArea(
         child: ListView(
@@ -147,19 +166,25 @@ class LessonViewerScreen extends StatelessWidget {
             LessonView(lesson: lesson),
             // 🧑‍🏫 풀이 레시피 — 공식 적용 순서까지 완성 (암기·이론 공존)
             TeacherRecipeBox(
-                topic: lesson.topic,
-                subject: lesson.subject,
-                initiallyExpanded: false),
+              topic: lesson.topic,
+              subject: lesson.subject,
+              initiallyExpanded: false,
+            ),
             const SizedBox(height: 24),
             // 강의 → 바로 문제풀이 연결 (이론-문제 완전 연동)
             FilledButton.icon(
               style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 15)),
+                padding: const EdgeInsets.symmetric(vertical: 15),
+              ),
               onPressed: () => _startTopicQuiz(context),
               icon: const Icon(Icons.quiz),
-              label: Text('이 토픽 기출문제 풀기 (${lesson.freq}문항)',
-                  style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.bold)),
+              label: Text(
+                '이 토픽 기출문제 풀기 (${lesson.freq}문항)',
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         ),
@@ -172,14 +197,19 @@ class LessonViewerScreen extends StatelessWidget {
     final qs = all.where((q) => q.topic == lesson.topic).toList();
     if (!context.mounted) return;
     if (qs.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('이 토픽의 기출문제가 없습니다.')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('이 토픽의 기출문제가 없습니다.')));
       return;
     }
-    pushWithNav(context, QuizPlayScreen(
+    pushWithNav(
+      context,
+      QuizPlayScreen(
         title: '${lesson.topic} 기출 ${qs.length}문제',
         questions: qs,
         examMode: false,
-      ), currentSection: 1);
+      ),
+      currentSection: 1,
+    );
   }
 }

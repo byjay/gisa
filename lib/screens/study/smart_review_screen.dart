@@ -69,7 +69,8 @@ class _SmartReviewScreenState extends State<SmartReviewScreen> {
                     icon: Icons.close_rounded,
                     color: Colors.red,
                     title: '오답 다시 풀기',
-                    subtitle: '마지막에 틀린 문제 ${_sum?.wrong ?? 0}개 — 정답 처리되면 자동으로 빠져요',
+                    subtitle:
+                        '마지막에 틀린 문제 ${_sum?.wrong ?? 0}개 — 정답 처리되면 자동으로 빠져요',
                     onTap: _startWrongReview,
                   ),
                   _actionCard(
@@ -87,11 +88,15 @@ class _SmartReviewScreenState extends State<SmartReviewScreen> {
                     onTap: _startSmartSet,
                   ),
                   const SizedBox(height: 18),
-                  Text('약점 토픽 리포트',
-                      style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    '약점 토픽 리포트',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 4),
-                  Text('정답률이 낮은 토픽부터 표시됩니다. (2회 이상 푼 토픽 기준)',
-                      style: Theme.of(context).textTheme.bodySmall),
+                  Text(
+                    '정답률이 낮은 토픽부터 표시됩니다. (2회 이상 푼 토픽 기준)',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                   const SizedBox(height: 8),
                   if (_weak.isEmpty)
                     Card(
@@ -99,13 +104,19 @@ class _SmartReviewScreenState extends State<SmartReviewScreen> {
                         padding: const EdgeInsets.all(20),
                         child: Row(
                           children: [
-                            const TutorAvatar(mood: TutorMood.thinking, size: 52, headOnly: true),
+                            const TutorAvatar(
+                              mood: TutorMood.thinking,
+                              size: 52,
+                              headOnly: true,
+                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
                                 '아직 데이터가 부족해요.\n문제를 풀면 토픽별 정답률이 자동으로 분석됩니다!',
                                 style: TextStyle(
-                                    fontSize: 13, color: Colors.grey.shade700),
+                                  fontSize: 13,
+                                  color: Colors.grey.shade700,
+                                ),
                               ),
                             ),
                           ],
@@ -142,11 +153,14 @@ class _SmartReviewScreenState extends State<SmartReviewScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('나의 학습 데이터',
-                    style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600)),
+                const Text(
+                  '나의 학습 데이터',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 Wrap(
                   spacing: 14,
@@ -171,13 +185,18 @@ class _SmartReviewScreenState extends State<SmartReviewScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(value,
-            style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold)),
-        Text(label,
-            style: const TextStyle(color: Colors.white70, fontSize: 11)),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white70, fontSize: 11),
+        ),
       ],
     );
   }
@@ -197,8 +216,10 @@ class _SmartReviewScreenState extends State<SmartReviewScreen> {
           backgroundColor: color.withValues(alpha: 0.12),
           child: Icon(icon, color: color),
         ),
-        title: Text(title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
         subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
         trailing: const Icon(Icons.chevron_right),
         onTap: onTap,
@@ -211,21 +232,25 @@ class _SmartReviewScreenState extends State<SmartReviewScreen> {
     final color = acc < 40
         ? Colors.red
         : acc < 60
-            ? Colors.orange
-            : Colors.green;
+        ? Colors.orange
+        : Colors.green;
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         dense: true,
-        title: Text(topic,
-            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
+        title: Text(
+          topic,
+          style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+        ),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 4),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('$subject · $attempts회 풀이',
-                  style: const TextStyle(fontSize: 11)),
+              Text(
+                '$subject · $attempts회 풀이',
+                style: const TextStyle(fontSize: 11),
+              ),
               const SizedBox(height: 4),
               ClipRRect(
                 borderRadius: BorderRadius.circular(4),
@@ -239,9 +264,14 @@ class _SmartReviewScreenState extends State<SmartReviewScreen> {
             ],
           ),
         ),
-        trailing: Text('$acc%',
-            style: TextStyle(
-                fontSize: 15, fontWeight: FontWeight.bold, color: color)),
+        trailing: Text(
+          '$acc%',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
         onTap: () => _startTopicDrill(subject, topic),
       ),
     );
@@ -313,12 +343,15 @@ class _SmartReviewScreenState extends State<SmartReviewScreen> {
   }
 
   Future<void> _push(String title, List<Question> qs) async {
-    await pushWithNav(context, QuizPlayScreen(title: title, questions: qs, examMode: false), currentSection: 1);
+    await pushWithNav(
+      context,
+      QuizPlayScreen(title: title, questions: qs, examMode: false),
+      currentSection: 1,
+    );
     _load(); // 돌아오면 통계 갱신
   }
 
   void _toast(String msg) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 }

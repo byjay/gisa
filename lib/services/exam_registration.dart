@@ -36,9 +36,10 @@ extension RegStatusLabel on RegStatus {
   }
 
   String get key => name;
-  static RegStatus fromKey(String k) =>
-      RegStatus.values.firstWhere((e) => e.name == k,
-          orElse: () => RegStatus.planned);
+  static RegStatus fromKey(String k) => RegStatus.values.firstWhere(
+    (e) => e.name == k,
+    orElse: () => RegStatus.planned,
+  );
 }
 
 /// 한 회차·단계(필기/실기)에 대한 응시 등록 + 가답안 채점 결과.
@@ -91,34 +92,34 @@ class ExamRegistration {
       '${jmCd}__${roundLabel}__${phase.key}'.replaceAll(RegExp(r'\s+'), '_');
 
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'jmCd': jmCd,
-        'catalogId': catalogId,
-        'certName': certName,
-        'roundLabel': roundLabel,
-        'phase': phase.key,
-        'status': status.key,
-        'scoredTotal': scoredTotal,
-        'scoredCorrect': scoredCorrect,
-        'subjectFails': subjectFails,
-        'scoredAt': scoredAt?.toIso8601String(),
-      };
+    'id': id,
+    'jmCd': jmCd,
+    'catalogId': catalogId,
+    'certName': certName,
+    'roundLabel': roundLabel,
+    'phase': phase.key,
+    'status': status.key,
+    'scoredTotal': scoredTotal,
+    'scoredCorrect': scoredCorrect,
+    'subjectFails': subjectFails,
+    'scoredAt': scoredAt?.toIso8601String(),
+  };
 
   factory ExamRegistration.fromMap(Map<dynamic, dynamic> m) => ExamRegistration(
-        id: m['id'] as String,
-        jmCd: (m['jmCd'] as String?) ?? '',
-        catalogId: (m['catalogId'] as String?) ?? '',
-        certName: (m['certName'] as String?) ?? '',
-        roundLabel: (m['roundLabel'] as String?) ?? '',
-        phase: ExamPhaseLabel.fromKey((m['phase'] as String?) ?? 'written'),
-        status: RegStatusLabel.fromKey((m['status'] as String?) ?? 'planned'),
-        scoredTotal: m['scoredTotal'] as int?,
-        scoredCorrect: m['scoredCorrect'] as int?,
-        subjectFails: m['subjectFails'] as int?,
-        scoredAt: (m['scoredAt'] as String?) != null
-            ? DateTime.tryParse(m['scoredAt'] as String)
-            : null,
-      );
+    id: m['id'] as String,
+    jmCd: (m['jmCd'] as String?) ?? '',
+    catalogId: (m['catalogId'] as String?) ?? '',
+    certName: (m['certName'] as String?) ?? '',
+    roundLabel: (m['roundLabel'] as String?) ?? '',
+    phase: ExamPhaseLabel.fromKey((m['phase'] as String?) ?? 'written'),
+    status: RegStatusLabel.fromKey((m['status'] as String?) ?? 'planned'),
+    scoredTotal: m['scoredTotal'] as int?,
+    scoredCorrect: m['scoredCorrect'] as int?,
+    subjectFails: m['subjectFails'] as int?,
+    scoredAt: (m['scoredAt'] as String?) != null
+        ? DateTime.tryParse(m['scoredAt'] as String)
+        : null,
+  );
 }
 
 /// 응시 등록/가답안 데이터를 Hive 로 저장하는 저장소.

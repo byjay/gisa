@@ -29,8 +29,10 @@ class UnitConverterHomeScreen extends StatelessWidget {
             child: InkWell(
               borderRadius: BorderRadius.circular(14),
               onTap: () => pushWithNav(
-                  context, UnitConverterDetailScreen(category: c),
-                  currentSection: 1),
+                context,
+                UnitConverterDetailScreen(category: c),
+                currentSection: 1,
+              ),
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -48,20 +50,29 @@ class UnitConverterHomeScreen extends StatelessWidget {
                         color: cs.primaryContainer.withValues(alpha: 0.5),
                         border: Border.all(color: cs.primary, width: 1.5),
                       ),
-                      child: Text(c.iconText,
-                          style: TextStyle(
-                              fontSize: c.iconText.length > 2 ? 12 : 17,
-                              fontWeight: FontWeight.w900,
-                              color: cs.primary)),
+                      child: Text(
+                        c.iconText,
+                        style: TextStyle(
+                          fontSize: c.iconText.length > 2 ? 12 : 17,
+                          fontWeight: FontWeight.w900,
+                          color: cs.primary,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
-                      child: Text(c.title,
-                          style: const TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.w700)),
+                      child: Text(
+                        c.title,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
-                    Icon(Icons.chevron_right_rounded,
-                        color: cs.onSurface.withValues(alpha: 0.4)),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: cs.onSurface.withValues(alpha: 0.4),
+                    ),
                   ],
                 ),
               ),
@@ -134,8 +145,8 @@ class _UnitConverterDetailScreenState extends State<UnitConverterDetailScreen> {
             label: cat.id == 'temperature'
                 ? '온도'
                 : cat.id == 'area'
-                    ? '면적'
-                    : '입력값',
+                ? '면적'
+                : '입력값',
             controller: _ctrl,
             unitIndex: _from,
             onUnitChange: (v) => setState(() => _from = v),
@@ -158,11 +169,14 @@ class _UnitConverterDetailScreenState extends State<UnitConverterDetailScreen> {
               color: const Color(0xFF445544),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Text('Results :',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800)),
+            child: const Text(
+              'Results :',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
           const SizedBox(height: 4),
           ...List.generate(cat.units.length, (i) {
@@ -176,26 +190,33 @@ class _UnitConverterDetailScreenState extends State<UnitConverterDetailScreen> {
                 color: highlight
                     ? cs.primary.withValues(alpha: 0.12)
                     : (i.isEven
-                        ? cs.surfaceContainerHighest.withValues(alpha: 0.4)
-                        : Colors.transparent),
+                          ? cs.surfaceContainerHighest.withValues(alpha: 0.4)
+                          : Colors.transparent),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(UnitConverter.fmt(v),
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: cs.primary)),
+                    child: Text(
+                      UnitConverter.fmt(v),
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: cs.primary,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 12),
                   SizedBox(
                     width: 96,
-                    child: Text('${u.symbol}  ',
-                        style: const TextStyle(
-                            fontSize: 13.5, fontWeight: FontWeight.w600)),
+                    child: Text(
+                      '${u.symbol}  ',
+                      style: const TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -203,10 +224,13 @@ class _UnitConverterDetailScreenState extends State<UnitConverterDetailScreen> {
           }),
           if (cat.id == 'fuel') ...[
             const SizedBox(height: 10),
-            Text('※ L/100km는 역수 관계로 환산됩니다.',
-                style: TextStyle(
-                    fontSize: 11.5,
-                    color: cs.onSurface.withValues(alpha: 0.6))),
+            Text(
+              '※ L/100km는 역수 관계로 환산됩니다.',
+              style: TextStyle(
+                fontSize: 11.5,
+                color: cs.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
           ],
           const SizedBox(height: 20),
         ],
@@ -214,11 +238,13 @@ class _UnitConverterDetailScreenState extends State<UnitConverterDetailScreen> {
     );
   }
 
-  Widget _inputRow(BuildContext context,
-      {required String label,
-      required TextEditingController controller,
-      required int unitIndex,
-      required ValueChanged<int> onUnitChange}) {
+  Widget _inputRow(
+    BuildContext context, {
+    required String label,
+    required TextEditingController controller,
+    required int unitIndex,
+    required ValueChanged<int> onUnitChange,
+  }) {
     final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(12),
@@ -232,14 +258,17 @@ class _UnitConverterDetailScreenState extends State<UnitConverterDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
-                    style: TextStyle(fontSize: 12, color: cs.primary)),
+                Text(label, style: TextStyle(fontSize: 12, color: cs.primary)),
                 TextField(
                   controller: controller,
                   keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true, signed: true),
+                    decimal: true,
+                    signed: true,
+                  ),
                   style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w700),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
                   decoration: const InputDecoration(
                     isDense: true,
                     border: InputBorder.none,
@@ -255,11 +284,13 @@ class _UnitConverterDetailScreenState extends State<UnitConverterDetailScreen> {
     );
   }
 
-  Widget _resultRow(BuildContext context,
-      {required String label,
-      required String value,
-      required int unitIndex,
-      required ValueChanged<int> onUnitChange}) {
+  Widget _resultRow(
+    BuildContext context, {
+    required String label,
+    required String value,
+    required int unitIndex,
+    required ValueChanged<int> onUnitChange,
+  }) {
     final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(12),
@@ -273,12 +304,15 @@ class _UnitConverterDetailScreenState extends State<UnitConverterDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
-                    style: TextStyle(fontSize: 12, color: cs.primary)),
+                Text(label, style: TextStyle(fontSize: 12, color: cs.primary)),
                 const SizedBox(height: 4),
-                Text(value,
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.w700)),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ],
             ),
           ),
@@ -289,7 +323,10 @@ class _UnitConverterDetailScreenState extends State<UnitConverterDetailScreen> {
   }
 
   Widget _unitDropdown(
-      BuildContext context, int index, ValueChanged<int> onChange) {
+    BuildContext context,
+    int index,
+    ValueChanged<int> onChange,
+  ) {
     final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -307,9 +344,13 @@ class _UnitConverterDetailScreenState extends State<UnitConverterDetailScreen> {
             final u = widget.category.units[i];
             return DropdownMenuItem(
               value: i,
-              child: Text(u.symbol,
-                  style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w700)),
+              child: Text(
+                u.symbol,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             );
           }),
           onChanged: (v) {

@@ -7,15 +7,15 @@ class LevelUpDialog extends StatefulWidget {
   final int newLevel;
   final String title;
 
-  const LevelUpDialog({
-    super.key,
-    required this.newLevel,
-    required this.title,
-  });
+  const LevelUpDialog({super.key, required this.newLevel, required this.title});
 
   /// 레벨업 감지 후 표시 (이전 레벨 < 새 레벨일 때만)
   static Future<void> showIfLevelUp(
-      BuildContext context, int before, int after, String title) async {
+    BuildContext context,
+    int before,
+    int after,
+    String title,
+  ) async {
     if (after > before && context.mounted) {
       await showDialog<void>(
         context: context,
@@ -37,8 +37,9 @@ class _LevelUpDialogState extends State<LevelUpDialog>
   void initState() {
     super.initState();
     _c = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 2200))
-      ..forward();
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    )..forward();
   }
 
   @override
@@ -77,9 +78,9 @@ class _LevelUpDialogState extends State<LevelUpDialog>
                 // 회전+확대 등장하는 레벨 배지
                 ScaleTransition(
                   scale: CurvedAnimation(
-                      parent: _c,
-                      curve: const Interval(0, 0.45,
-                          curve: Curves.elasticOut)),
+                    parent: _c,
+                    curve: const Interval(0, 0.45, curve: Curves.elasticOut),
+                  ),
                   child: Container(
                     width: 84,
                     height: 84,
@@ -92,38 +93,49 @@ class _LevelUpDialogState extends State<LevelUpDialog>
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFF59E0B)
-                              .withValues(alpha: 0.6),
+                          color: const Color(0xFFF59E0B).withValues(alpha: 0.6),
                           blurRadius: 24,
                         ),
                       ],
                     ),
                     alignment: Alignment.center,
-                    child: Text('Lv${widget.newLevel}',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900)),
+                    child: Text(
+                      'Lv${widget.newLevel}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text('🎉 레벨 업!',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 21,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.5)),
+                const Text(
+                  '🎉 레벨 업!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 21,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                  ),
+                ),
                 const SizedBox(height: 6),
-                Text('🧙 ${widget.title}',
-                    style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w700)),
+                Text(
+                  '🧙 ${widget.title}',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text('꾸준한 학습이 마법을 만들어요',
-                    style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.65),
-                        fontSize: 11.5)),
+                Text(
+                  '꾸준한 학습이 마법을 만들어요',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.65),
+                    fontSize: 11.5,
+                  ),
+                ),
                 const SizedBox(height: 18),
                 SizedBox(
                   width: double.infinity,
@@ -134,9 +146,13 @@ class _LevelUpDialogState extends State<LevelUpDialog>
                       foregroundColor: AppTheme.primaryDark,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text('계속 성장하기 ✨',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w800, fontSize: 14)),
+                    child: const Text(
+                      '계속 성장하기 ✨',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -154,7 +170,7 @@ class _BurstPainter extends CustomPainter {
 
   static final _rand = math.Random(11);
   static final List<({double angle, double speed, double size, Color color})>
-      _particles = List.generate(26, (i) {
+  _particles = List.generate(26, (i) {
     const colors = [
       Color(0xFFFBBF24),
       Color(0xFFF472B6),
@@ -182,8 +198,7 @@ class _BurstPainter extends CustomPainter {
       final dist = p.speed * progress;
       final x = cx + math.cos(p.angle) * dist;
       final y = cy + math.sin(p.angle) * dist + 20 * progress * progress;
-      final paint = Paint()
-        ..color = p.color.withValues(alpha: 0.9 * fade);
+      final paint = Paint()..color = p.color.withValues(alpha: 0.9 * fade);
       canvas.drawCircle(Offset(x, y), p.size * (1 - progress * 0.4), paint);
     }
   }

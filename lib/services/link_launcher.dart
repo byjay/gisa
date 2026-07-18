@@ -56,8 +56,10 @@ Uri? _youtubeDeepLink(String url) {
 
   // 검색·채널·재생목록 등 영상 ID가 없는 링크는 vnd.youtube 로 원본 URL 전달
   // (유튜브 앱이 검색/채널 화면을 처리한다)
-  return Uri.parse('vnd.youtube://${u.host}${u.path}'
-      '${u.hasQuery ? '?${u.query}' : ''}');
+  return Uri.parse(
+    'vnd.youtube://${u.host}${u.path}'
+    '${u.hasQuery ? '?${u.query}' : ''}',
+  );
 }
 
 Future<bool> _tryLaunch(Uri uri, LaunchMode mode) async {

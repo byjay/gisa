@@ -51,11 +51,15 @@ class _AutoStudyScreenState extends State<AutoStudyScreen> {
   }
 
   Future<void> _startTask(AutoStudyTask task) async {
-    final completed = await pushWithNav<bool>(context, QuizPlayScreen(
-          title: '자동학습 · ${task.title}',
-          questions: task.questions,
-          examMode: false,
-        ), currentSection: 1);
+    final completed = await pushWithNav<bool>(
+      context,
+      QuizPlayScreen(
+        title: '자동학습 · ${task.title}',
+        questions: task.questions,
+        examMode: false,
+      ),
+      currentSection: 1,
+    );
     if (completed == true) {
       await AutoStudyService.instance.markCompleted(task.id);
     }

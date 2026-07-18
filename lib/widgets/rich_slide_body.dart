@@ -34,11 +34,15 @@ class RichSlideBody extends StatelessWidget {
       final para = buffer.join('\n').trim();
       buffer.clear();
       if (para.isEmpty) return;
-      widgets.add(Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: _styledText(para,
-            const TextStyle(fontSize: 14.5, height: 1.65)),
-      ));
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: _styledText(
+            para,
+            const TextStyle(fontSize: 14.5, height: 1.65),
+          ),
+        ),
+      );
     }
 
     while (i < lines.length) {
@@ -123,9 +127,14 @@ class RichSlideBody extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border(left: BorderSide(color: accent, width: 3)),
       ),
-      child: Text(title,
-          style: TextStyle(
-              fontWeight: FontWeight.w800, fontSize: 14, color: accent)),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.w800,
+          fontSize: 14,
+          color: accent,
+        ),
+      ),
     );
   }
 
@@ -146,7 +155,9 @@ class RichSlideBody extends StatelessWidget {
           ),
           Expanded(
             child: _styledText(
-                text, const TextStyle(fontSize: 14, height: 1.55)),
+              text,
+              const TextStyle(fontSize: 14, height: 1.55),
+            ),
           ),
         ],
       ),
@@ -167,9 +178,13 @@ class RichSlideBody extends StatelessWidget {
           const Text('💡 ', style: TextStyle(fontSize: 13)),
           Expanded(
             child: _styledText(
-                text,
-                const TextStyle(
-                    fontSize: 13.5, height: 1.5, fontWeight: FontWeight.w600)),
+              text,
+              const TextStyle(
+                fontSize: 13.5,
+                height: 1.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -181,13 +196,16 @@ class RichSlideBody extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 7),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [
-          const Color(0xFFE65100).withValues(alpha: 0.14),
-          const Color(0xFFE65100).withValues(alpha: 0.05),
-        ]),
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFFE65100).withValues(alpha: 0.14),
+            const Color(0xFFE65100).withValues(alpha: 0.05),
+          ],
+        ),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-            color: const Color(0xFFE65100).withValues(alpha: 0.35)),
+          color: const Color(0xFFE65100).withValues(alpha: 0.35),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,12 +213,14 @@ class RichSlideBody extends StatelessWidget {
           const Text('🔑 ', style: TextStyle(fontSize: 14)),
           Expanded(
             child: _styledText(
-                text,
-                const TextStyle(
-                    fontSize: 14.5,
-                    height: 1.5,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFFBF360C))),
+              text,
+              const TextStyle(
+                fontSize: 14.5,
+                height: 1.5,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFFBF360C),
+              ),
+            ),
           ),
         ],
       ),
@@ -228,16 +248,20 @@ class RichSlideBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: parts
-            .map((p) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: _styledText(
-                      p,
-                      TextStyle(
-                          fontSize: 13.5,
-                          height: 1.5,
-                          fontWeight: FontWeight.w600,
-                          color: accent.withValues(alpha: 0.95))),
-                ))
+            .map(
+              (p) => Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: _styledText(
+                  p,
+                  TextStyle(
+                    fontSize: 13.5,
+                    height: 1.5,
+                    fontWeight: FontWeight.w600,
+                    color: accent.withValues(alpha: 0.95),
+                  ),
+                ),
+              ),
+            )
             .toList(),
       ),
     );
@@ -248,16 +272,16 @@ class RichSlideBody extends StatelessWidget {
     final rows = tableLines
         .where((l) => !RegExp(r'^\|[\s\-:|]+\|$').hasMatch(l))
         .map((l) {
-      final cells = l.split('|');
-      return cells
-          .sublist(1, cells.length - 1)
-          .map((c) => c.trim())
-          .toList();
-    }).toList();
+          final cells = l.split('|');
+          return cells
+              .sublist(1, cells.length - 1)
+              .map((c) => c.trim())
+              .toList();
+        })
+        .toList();
     if (rows.isEmpty) return const SizedBox.shrink();
 
-    final colCount =
-        rows.map((r) => r.length).reduce((a, b) => a > b ? a : b);
+    final colCount = rows.map((r) => r.length).reduce((a, b) => a > b ? a : b);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -270,10 +294,8 @@ class RichSlideBody extends StatelessWidget {
         child: Table(
           columnWidths: const {0: FlexColumnWidth(1.2)},
           border: TableBorder(
-            horizontalInside:
-                BorderSide(color: accent.withValues(alpha: 0.15)),
-            verticalInside:
-                BorderSide(color: accent.withValues(alpha: 0.15)),
+            horizontalInside: BorderSide(color: accent.withValues(alpha: 0.15)),
+            verticalInside: BorderSide(color: accent.withValues(alpha: 0.15)),
           ),
           children: List.generate(rows.length, (r) {
             final isHeader = r == 0;
@@ -283,23 +305,25 @@ class RichSlideBody extends StatelessWidget {
                 color: isHeader
                     ? accent.withValues(alpha: 0.14)
                     : (r.isEven
-                        ? accent.withValues(alpha: 0.03)
-                        : Colors.transparent),
+                          ? accent.withValues(alpha: 0.03)
+                          : Colors.transparent),
               ),
               children: List.generate(colCount, (c) {
                 final cell = c < row.length ? row[c] : '';
                 return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
+                  ),
                   child: _styledText(
-                      cell,
-                      TextStyle(
-                        fontSize: 13,
-                        height: 1.4,
-                        fontWeight:
-                            isHeader ? FontWeight.w800 : FontWeight.w500,
-                        color: isHeader ? accent : null,
-                      )),
+                    cell,
+                    TextStyle(
+                      fontSize: 13,
+                      height: 1.4,
+                      fontWeight: isHeader ? FontWeight.w800 : FontWeight.w500,
+                      color: isHeader ? accent : null,
+                    ),
+                  ),
                 );
               }),
             );
@@ -321,9 +345,12 @@ class RichSlideBody extends StatelessWidget {
       if (m.start > last) {
         spans.add(TextSpan(text: text.substring(last, m.start)));
       }
-      spans.add(TextSpan(
+      spans.add(
+        TextSpan(
           text: m.group(1),
-          style: TextStyle(fontWeight: FontWeight.w800, color: accent)));
+          style: TextStyle(fontWeight: FontWeight.w800, color: accent),
+        ),
+      );
       last = m.end;
     }
     if (last < text.length) {

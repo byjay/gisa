@@ -46,10 +46,8 @@ Future<T?> pushWithNav<T>(
 }) {
   return Navigator.of(context).push<T>(
     MaterialPageRoute(
-      builder: (_) => PersistentChromeScaffold(
-        currentSection: currentSection,
-        child: page,
-      ),
+      builder: (_) =>
+          PersistentChromeScaffold(currentSection: currentSection, child: page),
     ),
   );
 }
@@ -99,11 +97,9 @@ class TimerRunningBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final running =
-        context.select<AppProvider, bool>((p) => p.timerRunning);
+    final running = context.select<AppProvider, bool>((p) => p.timerRunning);
     if (!running) return const SizedBox.shrink();
-    final seconds =
-        context.select<AppProvider, int>((p) => p.elapsedSeconds);
+    final seconds = context.select<AppProvider, int>((p) => p.elapsedSeconds);
     final scheme = Theme.of(context).colorScheme;
 
     return Material(
@@ -139,8 +135,11 @@ class TimerRunningBar extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 6),
-                Icon(Icons.chevron_right_rounded,
-                    size: 18, color: scheme.onPrimary.withValues(alpha: 0.9)),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: scheme.onPrimary.withValues(alpha: 0.9),
+                ),
               ],
             ),
           ),
@@ -213,25 +212,30 @@ class SubPageNavBar extends StatelessWidget {
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         destinations: const [
           NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home_rounded),
-              label: '홈'),
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home_rounded),
+            label: '홈',
+          ),
           NavigationDestination(
-              icon: Icon(Icons.school_outlined),
-              selectedIcon: Icon(Icons.school_rounded),
-              label: '학습'),
+            icon: Icon(Icons.school_outlined),
+            selectedIcon: Icon(Icons.school_rounded),
+            label: '학습',
+          ),
           NavigationDestination(
-              icon: Icon(Icons.event_outlined),
-              selectedIcon: Icon(Icons.event_rounded),
-              label: '시험'),
+            icon: Icon(Icons.event_outlined),
+            selectedIcon: Icon(Icons.event_rounded),
+            label: '시험',
+          ),
           NavigationDestination(
-              icon: Icon(Icons.timer_outlined),
-              selectedIcon: Icon(Icons.timer_rounded),
-              label: '타이머'),
+            icon: Icon(Icons.timer_outlined),
+            selectedIcon: Icon(Icons.timer_rounded),
+            label: '타이머',
+          ),
           NavigationDestination(
-              icon: Icon(Icons.insights_outlined),
-              selectedIcon: Icon(Icons.insights_rounded),
-              label: '통계'),
+            icon: Icon(Icons.insights_outlined),
+            selectedIcon: Icon(Icons.insights_rounded),
+            label: '통계',
+          ),
         ],
       ),
     );

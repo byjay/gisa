@@ -50,46 +50,54 @@ class StatsScreen extends StatelessWidget {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFF59E0B)
-                              .withValues(alpha: 0.5),
+                          color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
                           blurRadius: 12,
                         ),
                       ],
                     ),
                     alignment: Alignment.center,
-                    child: Text('Lv${app.level}',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w900)),
+                    child: Text(
+                      'Lv${app.level}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('🧙 ${app.levelTitle}',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w800)),
+                        Text(
+                          '🧙 ${app.levelTitle}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                         const SizedBox(height: 3),
                         Text(
-                            '총 ${app.xp} XP · 다음 레벨까지 ${app.xpToNextLevel} XP',
-                            style: TextStyle(
-                                color:
-                                    Colors.white.withValues(alpha: 0.75),
-                                fontSize: 11.5)),
+                          '총 ${app.xp} XP · 다음 레벨까지 ${app.xpToNextLevel} XP',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.75),
+                            fontSize: 11.5,
+                          ),
+                        ),
                         const SizedBox(height: 8),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(5),
                           child: LinearProgressIndicator(
                             value: app.levelProgress,
                             minHeight: 7,
-                            backgroundColor:
-                                Colors.white.withValues(alpha: 0.2),
+                            backgroundColor: Colors.white.withValues(
+                              alpha: 0.2,
+                            ),
                             valueColor: const AlwaysStoppedAnimation(
-                                Color(0xFFFBBF24)),
+                              Color(0xFFFBBF24),
+                            ),
                           ),
                         ),
                       ],
@@ -100,15 +108,17 @@ class StatsScreen extends StatelessWidget {
             ),
             // ── ⚔️ 경쟁 섹션 ──
             const SectionHeader(
-                emoji: '⚔️',
-                title: '이번 주 경쟁',
-                subtitle: '라이벌과 XP를 겨루고 승급하세요'),
+              emoji: '⚔️',
+              title: '이번 주 경쟁',
+              subtitle: '라이벌과 XP를 겨루고 승급하세요',
+            ),
             const WeeklyLeagueCard(),
             // ── 📊 성찰 섹션 ──
             const SectionHeader(
-                emoji: '📊',
-                title: '나의 성장 기록',
-                subtitle: '숫자로 확인하는 학습의 증거'),
+              emoji: '📊',
+              title: '나의 성장 기록',
+              subtitle: '숫자로 확인하는 학습의 증거',
+            ),
             const WeeklyReportCard(),
             const SizedBox(height: 12),
             // ── 🟩 12주 학습 히트맵 ──
@@ -125,25 +135,32 @@ class StatsScreen extends StatelessWidget {
                   Row(
                     children: [
                       const IconBadge(
-                          icon: Icons.flag_rounded,
-                          color: AppTheme.primary,
-                          size: 36,
-                          iconSize: 18),
+                        icon: Icons.flag_rounded,
+                        color: AppTheme.primary,
+                        size: 36,
+                        iconSize: 18,
+                      ),
                       const SizedBox(width: 10),
-                      const Text('학습 목표',
-                          style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.w800)),
+                      const Text(
+                        '학습 목표',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                       const Spacer(),
                       TextButton.icon(
                         onPressed: () => _showGoalDialog(context),
                         icon: const Icon(Icons.edit_rounded, size: 15),
-                        label: const Text('수정',
-                            style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w700)),
+                        label: const Text(
+                          '수정',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                         style: TextButton.styleFrom(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
@@ -151,11 +168,21 @@ class StatsScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 14),
-                  _goalRow(context, '오늘', app.todayMinutes,
-                      app.dailyGoalMinutes, AppTheme.primary),
+                  _goalRow(
+                    context,
+                    '오늘',
+                    app.todayMinutes,
+                    app.dailyGoalMinutes,
+                    AppTheme.primary,
+                  ),
                   const SizedBox(height: 14),
-                  _goalRow(context, '이번 주', app.weekMinutes,
-                      app.weeklyGoalMinutes, AppTheme.electric),
+                  _goalRow(
+                    context,
+                    '이번 주',
+                    app.weekMinutes,
+                    app.weeklyGoalMinutes,
+                    AppTheme.electric,
+                  ),
                 ],
               ),
             ),
@@ -165,14 +192,24 @@ class StatsScreen extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                    child: _summaryCard(context, '총 학습',
-                        _fmtMin(app.totalMinutes),
-                        Icons.timer_rounded, AppTheme.primary)),
+                  child: _summaryCard(
+                    context,
+                    '총 학습',
+                    _fmtMin(app.totalMinutes),
+                    Icons.timer_rounded,
+                    AppTheme.primary,
+                  ),
+                ),
                 const SizedBox(width: 10),
                 Expanded(
-                    child: _summaryCard(context, '연속 학습', '${app.streak}일',
-                        Icons.local_fire_department_rounded,
-                        const Color(0xFFF97316))),
+                  child: _summaryCard(
+                    context,
+                    '연속 학습',
+                    '${app.streak}일',
+                    Icons.local_fire_department_rounded,
+                    const Color(0xFFF97316),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -185,14 +222,19 @@ class StatsScreen extends StatelessWidget {
                   const Row(
                     children: [
                       IconBadge(
-                          icon: Icons.bar_chart_rounded,
-                          color: AppTheme.electric,
-                          size: 36,
-                          iconSize: 18),
+                        icon: Icons.bar_chart_rounded,
+                        color: AppTheme.electric,
+                        size: 36,
+                        iconSize: 18,
+                      ),
                       SizedBox(width: 10),
-                      Text('최근 7일 학습 시간',
-                          style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.w800)),
+                      Text(
+                        '최근 7일 학습 시간',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 18),
@@ -209,27 +251,31 @@ class StatsScreen extends StatelessWidget {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Text(val > 0 ? '$val' : '',
-                                  style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700,
-                                      color: isToday
-                                          ? AppTheme.primary
-                                          : (dark
-                                              ? Colors.white54
-                                              : AppTheme.textMuted))),
+                              Text(
+                                val > 0 ? '$val' : '',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: isToday
+                                      ? AppTheme.primary
+                                      : (dark
+                                            ? Colors.white54
+                                            : AppTheme.textMuted),
+                                ),
+                              ),
                               const SizedBox(height: 4),
                               TweenAnimationBuilder<double>(
                                 tween: Tween(
-                                    begin: 0,
-                                    end: h < 4 && val > 0 ? 4 : h),
-                                duration:
-                                    const Duration(milliseconds: 700),
+                                  begin: 0,
+                                  end: h < 4 && val > 0 ? 4 : h,
+                                ),
+                                duration: const Duration(milliseconds: 700),
                                 curve: Curves.easeOutCubic,
                                 builder: (_, v, __) => Container(
                                   height: v,
                                   margin: const EdgeInsets.symmetric(
-                                      horizontal: 6),
+                                    horizontal: 6,
+                                  ),
                                   decoration: BoxDecoration(
                                     gradient: isToday
                                         ? AppTheme.heroGradient
@@ -237,25 +283,29 @@ class StatsScreen extends StatelessWidget {
                                     color: isToday
                                         ? null
                                         : AppTheme.primary.withValues(
-                                            alpha: dark ? 0.35 : 0.25),
-                                    borderRadius:
-                                        const BorderRadius.vertical(
-                                            top: Radius.circular(6)),
+                                            alpha: dark ? 0.35 : 0.25,
+                                          ),
+                                    borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(6),
+                                    ),
                                   ),
                                 ),
                               ),
                               const SizedBox(height: 6),
-                              Text(DateFormat('E', 'ko').format(day),
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: isToday
-                                          ? FontWeight.w800
-                                          : FontWeight.w500,
-                                      color: isToday
-                                          ? AppTheme.primary
-                                          : (dark
-                                              ? Colors.white54
-                                              : AppTheme.textMuted))),
+                              Text(
+                                DateFormat('E', 'ko').format(day),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: isToday
+                                      ? FontWeight.w800
+                                      : FontWeight.w500,
+                                  color: isToday
+                                      ? AppTheme.primary
+                                      : (dark
+                                            ? Colors.white54
+                                            : AppTheme.textMuted),
+                                ),
+                              ),
                             ],
                           ),
                         );
@@ -276,14 +326,19 @@ class StatsScreen extends StatelessWidget {
                     const Row(
                       children: [
                         IconBadge(
-                            icon: Icons.pie_chart_rounded,
-                            color: AppTheme.accent,
-                            size: 36,
-                            iconSize: 18),
+                          icon: Icons.pie_chart_rounded,
+                          color: AppTheme.accent,
+                          size: 36,
+                          iconSize: 18,
+                        ),
                         SizedBox(width: 10),
-                        Text('시험별 학습 시간',
-                            style: TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.w800)),
+                        Text(
+                          '시험별 학습 시간',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 14),
@@ -297,20 +352,25 @@ class StatsScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(e.name,
-                                    style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w700)),
-                                Text(_fmtMin(min),
-                                    style: TextStyle(
-                                        color: dark
-                                            ? Colors.white54
-                                            : AppTheme.textMuted,
-                                        fontSize: 11.5,
-                                        fontWeight: FontWeight.w600)),
+                                Text(
+                                  e.name,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                Text(
+                                  _fmtMin(min),
+                                  style: TextStyle(
+                                    color: dark
+                                        ? Colors.white54
+                                        : AppTheme.textMuted,
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ],
                             ),
                             const SizedBox(height: 6),
@@ -340,8 +400,13 @@ class StatsScreen extends StatelessWidget {
 
   String _fmtMin(int m) => m >= 60 ? '${m ~/ 60}시간 ${m % 60}분' : '$m분';
 
-  Widget _goalRow(BuildContext context, String label, int current, int goal,
-      Color color) {
+  Widget _goalRow(
+    BuildContext context,
+    String label,
+    int current,
+    int goal,
+    Color color,
+  ) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final ratio = goal > 0 ? (current / goal).clamp(0.0, 1.0) : 0.0;
     final done = ratio >= 1.0;
@@ -350,22 +415,29 @@ class StatsScreen extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text(label,
-                style: const TextStyle(
-                    fontSize: 13, fontWeight: FontWeight.w700)),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+            ),
             const SizedBox(width: 8),
             if (done) const PillBadge(text: '달성!', color: AppTheme.success),
             const Spacer(),
-            Text('$current',
-                style: TextStyle(
-                    color: done ? AppTheme.success : color,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 14)),
-            Text(' / $goal분  ·  ${(ratio * 100).toInt()}%',
-                style: TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w600,
-                    color: dark ? Colors.white54 : AppTheme.textMuted)),
+            Text(
+              '$current',
+              style: TextStyle(
+                color: done ? AppTheme.success : color,
+                fontWeight: FontWeight.w900,
+                fontSize: 14,
+              ),
+            ),
+            Text(
+              ' / $goal분  ·  ${(ratio * 100).toInt()}%',
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                color: dark ? Colors.white54 : AppTheme.textMuted,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -389,8 +461,13 @@ class StatsScreen extends StatelessWidget {
     );
   }
 
-  Widget _summaryCard(BuildContext context, String label, String value,
-      IconData icon, Color color) {
+  Widget _summaryCard(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return PremiumCard(
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -398,14 +475,18 @@ class StatsScreen extends StatelessWidget {
         children: [
           IconBadge(icon: icon, color: color, size: 40, iconSize: 21),
           const SizedBox(height: 8),
-          Text(value,
-              style: const TextStyle(
-                  fontSize: 17, fontWeight: FontWeight.w900)),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 2),
-          Text(label,
-              style: TextStyle(
-                  color: dark ? Colors.white54 : AppTheme.textMuted,
-                  fontSize: 11.5)),
+          Text(
+            label,
+            style: TextStyle(
+              color: dark ? Colors.white54 : AppTheme.textMuted,
+              fontSize: 11.5,
+            ),
+          ),
         ],
       ),
     );
@@ -413,10 +494,12 @@ class StatsScreen extends StatelessWidget {
 
   void _showGoalDialog(BuildContext context) {
     final app = context.read<AppProvider>();
-    final dailyCtrl =
-        TextEditingController(text: app.dailyGoalMinutes.toString());
-    final weeklyCtrl =
-        TextEditingController(text: app.weeklyGoalMinutes.toString());
+    final dailyCtrl = TextEditingController(
+      text: app.dailyGoalMinutes.toString(),
+    );
+    final weeklyCtrl = TextEditingController(
+      text: app.weeklyGoalMinutes.toString(),
+    );
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -439,7 +522,9 @@ class StatsScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('취소')),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('취소'),
+          ),
           FilledButton(
             onPressed: () {
               app.setGoals(

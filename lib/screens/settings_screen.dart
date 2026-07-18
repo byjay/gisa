@@ -1,9 +1,16 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart' show Share, XFile;
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/app_provider.dart';
 import 'legal_screen.dart';
 import '../services/auth_service.dart';
+import '../services/backup_service.dart';
 import '../services/notification_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/tutor_avatar.dart';
@@ -56,6 +63,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           const SizedBox(height: 20),
+          _sectionTitle(cs, '접근성'),
+          const SizedBox(height: 8),
+          _accessibilityCard(context, app),
+          const SizedBox(height: 20),
           _sectionTitle(cs, '나의 강사'),
           const SizedBox(height: 8),
           _tutorSelector(context, app),
@@ -63,6 +74,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _sectionTitle(cs, '알림'),
           const SizedBox(height: 8),
           _notificationCard(context, app),
+          const SizedBox(height: 20),
+          _sectionTitle(cs, '데이터 백업 · 복원'),
+          const SizedBox(height: 8),
+          _backupCard(context),
           const SizedBox(height: 20),
           _sectionTitle(cs, '응원하기'),
           const SizedBox(height: 8),
@@ -458,6 +473,197 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
         ],
+      ),
+    );
+  }
+
+  // ── ♿ 접근성 카드 (Q47 애니메이션 감소 · Q48 글자 크기) ─────
+  Widget _accessibilityCard(BuildContext context, AppProvider app) {
+    return Card(
+      child: Column(
+        children: [
+          SwitchListTile(
+            secondary: const Icon(Icons.motion_photos_off_outlined),
+            title: const Text('애니메이션 줄이기'),
+            subtitle: const Text('화면 전환·효과 애니메이션을 최소화해요'),
+            value: app.reduceMotion,
+            onChanged: (v) => context.read<AppProvider>().setReduceMotion(v),
+          ),
+          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.format_size_rounded,
+                      color: AppTheme.primary,
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(child: Text('앱 글자 크기')),
+                    Text(
+                      '${(app.textScaleFactor * 100).round()}%',
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                  ],
+                ),
+                Semantics(
+                  label:
+                      '앱 글자 크기 조절 슬라이더, 현재 ${(app.textScaleFactor * 100).round()}퍼센트',
+                  slider: true,
+                  child: Slider(
+                    value: app.textScaleFactor,
+                    min: 0.8,
+                    max: 1.6,
+                    divisions: 8,
+                    label: '${(app.textScaleFactor * 100).round()}%',
+                    onChanged: (v) =>
+                        context.read<AppProvider>().setTextScaleFactor(v),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── 데이터 백업/복원 카드 (H2 갭 해소) ─────────────────
+  Widget _backupCard(BuildContext context) {
+    return Card(
+      child: Column(
+        children: [
+          ListTile(
+            leading: const Icon(
+              Icons.upload_file_rounded,
+              color: AppTheme.primary,
+            ),
+            title: const Text('내보내기 (백업 파일 만들기)'),
+            subtitle: const Text('학습기록·오답·설정을 파일 하나로 저장해요'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _exportBackup(context),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.download_rounded, color: AppTheme.accent),
+            title: const Text('가져오기 (백업 파일 복원)'),
+            subtitle: const Text('기기를 바꿔도 학습기록을 그대로 이어가요'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _importBackup(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _exportBackup(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(const SnackBar(content: Text('백업 파일을 만들고 있어요…')));
+    final result = await BackupService.instance.exportAll();
+    if (!result.success) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(result.errorMessage ?? '백업 실패')),
+      );
+      return;
+    }
+    try {
+      final dir = await getTemporaryDirectory();
+      final stamp = DateTime.now()
+          .toIso8601String()
+          .replaceAll(':', '-')
+          .split('.')
+          .first;
+      final file = File('${dir.path}/voltssam_backup_$stamp.json');
+      await file.writeAsString(result.data!);
+      await Share.shareXFiles([XFile(file.path)], text: '볼트쌤 학습 데이터 백업 파일입니다.');
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('파일 공유 중 오류: $e')));
+    }
+  }
+
+  Future<void> _importBackup(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    FilePickerResult? picked;
+    try {
+      picked = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('파일 선택 중 오류: $e')));
+      return;
+    }
+    if (picked == null || picked.files.isEmpty) return;
+
+    String rawJson;
+    try {
+      final path = picked.files.single.path;
+      if (path != null) {
+        rawJson = await File(path).readAsString();
+      } else {
+        final bytes = picked.files.single.bytes;
+        if (bytes == null) {
+          messenger.showSnackBar(
+            const SnackBar(content: Text('파일을 읽을 수 없어요.')),
+          );
+          return;
+        }
+        rawJson = utf8.decode(bytes);
+      }
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('파일을 읽는 중 오류: $e')));
+      return;
+    }
+
+    final peek = await BackupService.instance.peek(rawJson);
+    if (!peek.success) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(peek.errorMessage ?? '백업 파일을 확인할 수 없어요.')),
+      );
+      return;
+    }
+    final summary = peek.data!;
+    if (!context.mounted) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('백업 복원 확인'),
+        content: Text(
+          '이 백업은 ${summary.createdAt.toLocal().toString().split('.').first}에 만들어졌어요.\n'
+          '(퀴즈 기록 ${summary.quizResultCount}건 · 오답노트 ${summary.wrongNoteCount}건)\n\n'
+          '지금 기기의 데이터는 이 백업으로 완전히 교체됩니다. 계속할까요?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('취소'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('복원하기'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    if (!context.mounted) return;
+
+    messenger.showSnackBar(const SnackBar(content: Text('복원하고 있어요…')));
+    final result = await BackupService.instance.importAll(rawJson);
+    if (!context.mounted) return;
+    if (!result.success) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(result.errorMessage ?? '복원 실패')),
+      );
+      return;
+    }
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text('복원 완료! ${result.data}개 데이터 항목이 반영됐어요. 앱을 다시 시작해주세요.'),
       ),
     );
   }

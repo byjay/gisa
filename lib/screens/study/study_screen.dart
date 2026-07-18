@@ -987,6 +987,7 @@ class _StudyScreenState extends State<StudyScreen>
                             Icons.delete_outline_rounded,
                             size: 18,
                           ),
+                          tooltip: '이 기록 삭제',
                           color: dark ? Colors.white38 : AppTheme.textMuted,
                           onPressed: () =>
                               p.deleteQuizResult(r['id'] as String),

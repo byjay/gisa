@@ -33,9 +33,11 @@ class _MnemonicsScreenState extends State<MnemonicsScreen> {
   }
 
   Future<void> _openFlashcards() async {
-    await pushWithNav(context, FlashcardScreen(
-        subjectFilter: _filter == '전체' ? null : _filter,
-      ), currentSection: 1);
+    await pushWithNav(
+      context,
+      FlashcardScreen(subjectFilter: _filter == '전체' ? null : _filter),
+      currentSection: 1,
+    );
     _loadDue();
   }
 
@@ -47,7 +49,8 @@ class _MnemonicsScreenState extends State<MnemonicsScreen> {
         ? <Mnemonic>[]
         : all.where((m) {
             final okSubject = _filter == '전체' || m.subject == _filter;
-            final okSearch = _search.isEmpty ||
+            final okSearch =
+                _search.isEmpty ||
                 m.title.contains(_search) ||
                 m.body.contains(_search);
             return okSubject && okSearch;
@@ -76,11 +79,14 @@ class _MnemonicsScreenState extends State<MnemonicsScreen> {
                       onTap: _openFlashcards,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 14),
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                              color: Colors.deepPurple.withValues(alpha: 0.3)),
+                            color: Colors.deepPurple.withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Row(
                           children: [
@@ -89,11 +95,15 @@ class _MnemonicsScreenState extends State<MnemonicsScreen> {
                               height: 44,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: Colors.deepPurple.withValues(alpha: 0.15),
+                                color: Colors.deepPurple.withValues(
+                                  alpha: 0.15,
+                                ),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Text('🃏',
-                                  style: TextStyle(fontSize: 20)),
+                              child: const Text(
+                                '🃏',
+                                style: TextStyle(fontSize: 20),
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -105,21 +115,27 @@ class _MnemonicsScreenState extends State<MnemonicsScreen> {
                                         ? '플래시카드 암기 모드 · 오늘 $_dueCount개 복습'
                                         : '플래시카드 암기 모드로 쏙쏙 외우기',
                                     style: const TextStyle(
-                                        fontSize: 14.5,
-                                        fontWeight: FontWeight.w800,
-                                        color: Colors.deepPurple),
+                                      fontSize: 14.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.deepPurple,
+                                    ),
                                   ),
                                   const SizedBox(height: 2),
                                   const Text(
                                     '탭해서 뒤집기 → 안다/모른다 → 자동 복습 스케줄링',
                                     style: TextStyle(
-                                        fontSize: 11.5, color: Colors.grey),
+                                      fontSize: 11.5,
+                                      color: Colors.grey,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                            const Icon(Icons.play_circle_fill,
-                                color: Colors.deepPurple, size: 30),
+                            const Icon(
+                              Icons.play_circle_fill,
+                              color: Colors.deepPurple,
+                              size: 30,
+                            ),
                           ],
                         ),
                       ),
@@ -142,14 +158,19 @@ class _MnemonicsScreenState extends State<MnemonicsScreen> {
                   height: 52,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     children: [
                       for (final f in filters)
                         Padding(
                           padding: const EdgeInsets.only(right: 6),
                           child: ChoiceChip(
-                            label: Text(f, style: const TextStyle(fontSize: 12)),
+                            label: Text(
+                              f,
+                              style: const TextStyle(fontSize: 12),
+                            ),
                             selected: _filter == f,
                             onSelected: (_) => setState(() => _filter = f),
                           ),
@@ -169,31 +190,35 @@ class _MnemonicsScreenState extends State<MnemonicsScreen> {
                               child: Padding(
                                 padding: const EdgeInsets.all(12),
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
                                       children: [
                                         Expanded(
-                                          child: Text(m.title,
-                                              style: const TextStyle(
-                                                  fontWeight:
-                                                      FontWeight.bold)),
+                                          child: Text(
+                                            m.title,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
                                         ),
                                         Chip(
-                                          label: Text(m.subject,
-                                              style: const TextStyle(
-                                                  fontSize: 10)),
-                                          visualDensity:
-                                              VisualDensity.compact,
+                                          label: Text(
+                                            m.subject,
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                            ),
+                                          ),
+                                          visualDensity: VisualDensity.compact,
                                           padding: EdgeInsets.zero,
                                         ),
                                       ],
                                     ),
                                     const SizedBox(height: 6),
-                                    Text(m.body,
-                                        style:
-                                            const TextStyle(height: 1.55)),
+                                    Text(
+                                      m.body,
+                                      style: const TextStyle(height: 1.55),
+                                    ),
                                     if (m.tip.isNotEmpty) ...[
                                       const SizedBox(height: 6),
                                       Container(
@@ -204,13 +229,17 @@ class _MnemonicsScreenState extends State<MnemonicsScreen> {
                                               .colorScheme
                                               .primaryContainer
                                               .withValues(alpha: 0.5),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
-                                        child: Text('💡 ${m.tip}',
-                                            style: const TextStyle(
-                                                fontSize: 12.5,
-                                                height: 1.4)),
+                                        child: Text(
+                                          '💡 ${m.tip}',
+                                          style: const TextStyle(
+                                            fontSize: 12.5,
+                                            height: 1.4,
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ],

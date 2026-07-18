@@ -42,6 +42,13 @@ class HomeScreen extends StatelessWidget {
     return TutorCoach(situation: s);
   }
 
+  /// Q56: 스트릭이 3일 이상 쌓여 있고, 저녁(18시 이후) 이후인데
+  /// 아직 오늘 학습을 안 했다면 "오늘 스트릭이 끊긴다"는 손실회피 경고를 띄운다.
+  bool _showStreakWarning(AppProvider app) {
+    final hour = DateTime.now().hour;
+    return app.streak >= 2 && hour >= 18 && app.todayMinutes < 5;
+  }
+
   @override
   Widget build(BuildContext context) {
     final app = context.watch<AppProvider>();
@@ -65,11 +72,19 @@ class HomeScreen extends StatelessWidget {
                 delegate: SliverChildListDelegate([
                   // 📚 과목(종목) 변경 — 홈 메인에 배치(#2)
                   FadeSlideIn(
-                      index: 0,
-                      child: _SubjectSwitcher(onNavigate: onNavigate)),
+                    index: 0,
+                    child: _SubjectSwitcher(onNavigate: onNavigate),
+                  ),
                   const SizedBox(height: 12),
                   // 🎓 볼트쌀 1:1 코치 — 시간대별 살아있는 멘트
                   FadeSlideIn(index: 0, child: _homeCoach(app)),
+                  const SizedBox(height: 12),
+                  // 🔥 스트릭 손실회피 경고 (밤 시간대 + 오늘 미학습 시)
+                  if (_showStreakWarning(app))
+                    const FadeSlideIn(index: 0, child: _StreakWarningBanner()),
+                  if (_showStreakWarning(app)) const SizedBox(height: 12),
+                  // 📊 사회적 증거 — 함께 공부하는 학습자 지표
+                  const FadeSlideIn(index: 0, child: _SocialProofCard()),
                   const SizedBox(height: 12),
                   // 🐣 왕초보 로드맵 배너 (지식 0 시작자용)
                   const FadeSlideIn(index: 0, child: _BeginnerBanner()),
@@ -79,14 +94,18 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   // 오늘 학습 진행 스트립
                   FadeSlideIn(
-                      index: 0,
-                      child: _todayStrip(
-                          context, app, dailyRatio, pendingNotes)),
+                    index: 0,
+                    child: _todayStrip(context, app, dailyRatio, pendingNotes),
+                  ),
                   const SizedBox(height: 12),
                   FadeSlideIn(
                     index: 1,
                     child: AutoStudyPreviewCard(
-                      onOpen: () => pushWithNav(context, const AutoStudyScreen(), currentSection: 1),
+                      onOpen: () => pushWithNav(
+                        context,
+                        const AutoStudyScreen(),
+                        currentSection: 1,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -98,15 +117,17 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   // 🏆 위클리 리그 미니 스트립
                   FadeSlideIn(
-                      index: 3,
-                      child: LeagueMiniStrip(onTap: () => onNavigate(4))),
+                    index: 3,
+                    child: LeagueMiniStrip(onTap: () => onNavigate(4)),
+                  ),
                   const SizedBox(height: 12),
                   // 🎯 합격 예측
                   const FadeSlideIn(index: 4, child: PassPredictionCard()),
                   const SizedBox(height: 12),
                   FadeSlideIn(
-                      index: 5,
-                      child: DDayPlanCard(dDay: nearest?.dDay ?? 0)),
+                    index: 5,
+                    child: DDayPlanCard(dDay: nearest?.dDay ?? 0),
+                  ),
                   // 문제은행 배너
                   FadeSlideIn(
                     index: 6,
@@ -119,9 +140,9 @@ class HomeScreen extends StatelessWidget {
                   FadeSlideIn(index: 6, child: _bankBanner(context)),
                   // 빠른 실행
                   const FadeSlideIn(
-                      index: 7,
-                      child:
-                          SectionHeader(emoji: '🚀', title: '빠른 실행')),
+                    index: 7,
+                    child: SectionHeader(emoji: '🚀', title: '빠른 실행'),
+                  ),
                   FadeSlideIn(
                     index: 7,
                     child: Row(
@@ -161,7 +182,9 @@ class HomeScreen extends StatelessWidget {
                     for (final e in upcoming.skip(1).take(3))
                       PremiumCard(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 12),
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
                         onTap: () => onNavigate(2),
                         child: Row(
                           children: [
@@ -173,36 +196,45 @@ class HomeScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               alignment: Alignment.center,
-                              child: Text(e.name.isEmpty ? '?' : e.name[0],
-                                  style: TextStyle(
-                                      color: e.color,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 16)),
+                              child: Text(
+                                e.name.isEmpty ? '?' : e.name[0],
+                                style: TextStyle(
+                                  color: e.color,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                ),
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(e.name,
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 14),
-                                      overflow: TextOverflow.ellipsis),
+                                  Text(
+                                    e.name,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                   const SizedBox(height: 2),
                                   Text(
-                                      DateFormat('yyyy.MM.dd (E)', 'ko')
-                                          .format(e.examDate),
-                                      style: TextStyle(
-                                          fontSize: 11.5,
-                                          color: dark
-                                              ? Colors.white54
-                                              : AppTheme.textMuted)),
+                                    DateFormat(
+                                      'yyyy.MM.dd (E)',
+                                      'ko',
+                                    ).format(e.examDate),
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: dark
+                                          ? Colors.white54
+                                          : AppTheme.textMuted,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
-                            PillBadge(
-                                text: 'D-${e.dDay}', color: e.color),
+                            PillBadge(text: 'D-${e.dDay}', color: e.color),
                           ],
                         ),
                       ),
@@ -223,10 +255,10 @@ class HomeScreen extends StatelessWidget {
     final greeting = now.hour < 6
         ? '새벽 공부, 대단해요 🌙'
         : now.hour < 12
-            ? '좋은 아침이에요 ☀️'
-            : now.hour < 18
-                ? '오늘도 화이팅! 💪'
-                : '저녁 학습 시간이에요 🌆';
+        ? '좋은 아침이에요 ☀️'
+        : now.hour < 18
+        ? '오늘도 화이팅! 💪'
+        : '저녁 학습 시간이에요 🌆';
 
     final timeGrad = AppTheme.timeGradient(now);
     return Container(
@@ -243,8 +275,8 @@ class HomeScreen extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppTheme.rXl - 4),
               child: LayoutBuilder(
-                builder: (_, c) => SparkleOverlay(
-                    width: c.maxWidth, height: c.maxHeight),
+                builder: (_, c) =>
+                    SparkleOverlay(width: c.maxWidth, height: c.maxHeight),
               ),
             ),
           ),
@@ -262,9 +294,10 @@ class HomeScreen extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.75),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600),
+                          color: Colors.white.withValues(alpha: 0.75),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                     // 종목 전환 (다른 시험 고르기)
@@ -274,6 +307,7 @@ class HomeScreen extends StatelessWidget {
                     _glassIconButton(
                       context,
                       icon: Icons.palette_rounded,
+                      semanticLabel: '테마 색상 선택',
                       onTap: () => _showThemeSheet(context, app),
                     ),
                     const SizedBox(width: 8),
@@ -283,109 +317,132 @@ class HomeScreen extends StatelessWidget {
                       icon: app.darkMode
                           ? Icons.light_mode_rounded
                           : Icons.dark_mode_rounded,
-                      onTap: () =>
-                          context.read<AppProvider>().toggleDarkMode(),
+                      semanticLabel: app.darkMode ? '라이트 모드로 전환' : '다크 모드로 전환',
+                      onTap: () => context.read<AppProvider>().toggleDarkMode(),
                     ),
                     const SizedBox(width: 8),
                     // 설정 (계정·로그인)
                     _glassIconButton(
                       context,
                       icon: Icons.settings_rounded,
+                      semanticLabel: '설정 화면 열기',
                       onTap: () => pushWithNav(
-                          context, const SettingsScreen(),
-                          currentSection: 0),
+                        context,
+                        const SettingsScreen(),
+                        currentSection: 0,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
                 // 2행: 인사말 (전체 폭 사용 → 세로 깨짐 방지)
-                Text(greeting,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.4)),
+                Text(
+                  greeting,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                  ),
+                ),
                 const SizedBox(height: 14),
                 // 🧙 레벨 & XP 바
                 _levelStrip(context, app),
                 const SizedBox(height: 12),
-          // D-Day 히어로 영역
-          GestureDetector(
-            onTap: () => onNavigate(2),
-            child: Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.13),
-                borderRadius: BorderRadius.circular(AppTheme.rMd),
-                border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.18)),
-              ),
-              child: nearest != null
-                  ? Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                // D-Day 히어로 영역
+                GestureDetector(
+                  onTap: () => onNavigate(2),
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.13),
+                      borderRadius: BorderRadius.circular(AppTheme.rMd),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.18),
+                      ),
+                    ),
+                    child: nearest != null
+                        ? Row(
                             children: [
-                              Text(nearest.name,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      nearest.name,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      DateFormat(
+                                        'yyyy.MM.dd (E)',
+                                        'ko',
+                                      ).format(nearest.examDate),
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.7,
+                                        ),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  nearest.dDay == 0
+                                      ? 'D-Day'
+                                      : 'D-${nearest.dDay}',
                                   style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w800),
-                                  overflow: TextOverflow.ellipsis),
-                              const SizedBox(height: 3),
-                              Text(
-                                DateFormat('yyyy.MM.dd (E)', 'ko')
-                                    .format(nearest.examDate),
-                                style: TextStyle(
-                                    color:
-                                        Colors.white.withValues(alpha: 0.7),
-                                    fontSize: 12),
+                                    color: AppTheme.primaryDark,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              const Icon(
+                                Icons.add_circle_outline_rounded,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  '시험을 등록하고 D-Day를 관리하세요',
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              const Icon(
+                                Icons.chevron_right_rounded,
+                                color: Colors.white70,
                               ),
                             ],
                           ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            nearest.dDay == 0
-                                ? 'D-Day'
-                                : 'D-${nearest.dDay}',
-                            style: const TextStyle(
-                                color: AppTheme.primaryDark,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -0.5),
-                          ),
-                        ),
-                      ],
-                    )
-                  : Row(
-                      children: [
-                        const Icon(Icons.add_circle_outline_rounded,
-                            color: Colors.white),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text('시험을 등록하고 D-Day를 관리하세요',
-                              style: TextStyle(
-                                  color:
-                                      Colors.white.withValues(alpha: 0.9),
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w600)),
-                        ),
-                        const Icon(Icons.chevron_right_rounded,
-                            color: Colors.white70),
-                      ],
-                    ),
-            ),
-          ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -424,11 +481,14 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
             alignment: Alignment.center,
-            child: Text('Lv${app.level}',
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900)),
+            child: Text(
+              'Lv${app.level}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
           ),
           const SizedBox(width: 11),
           Expanded(
@@ -437,17 +497,23 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text('🧙 ${app.levelTitle}',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w800)),
+                    Text(
+                      '🧙 ${app.levelTitle}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     const Spacer(),
-                    Text('${app.xp} XP · 다음까지 ${app.xpToNextLevel}',
-                        style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w600)),
+                    Text(
+                      '${app.xp} XP · 다음까지 ${app.xpToNextLevel}',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -460,10 +526,10 @@ class HomeScreen extends StatelessWidget {
                     builder: (_, v, __) => LinearProgressIndicator(
                       value: v,
                       minHeight: 7,
-                      backgroundColor:
-                          Colors.white.withValues(alpha: 0.18),
+                      backgroundColor: Colors.white.withValues(alpha: 0.18),
                       valueColor: const AlwaysStoppedAnimation(
-                          Color(0xFFFBBF24)),
+                        Color(0xFFFBBF24),
+                      ),
                     ),
                   ),
                 ),
@@ -491,14 +557,20 @@ class HomeScreen extends StatelessWidget {
             children: [
               Text(track.emoji, style: const TextStyle(fontSize: 13)),
               const SizedBox(width: 4),
-              Text(track.shortName,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800)),
+              Text(
+                track.shortName,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
               const SizedBox(width: 2),
-              const Icon(Icons.swap_horiz_rounded,
-                  color: Colors.white, size: 15),
+              const Icon(
+                Icons.swap_horiz_rounded,
+                color: Colors.white,
+                size: 15,
+              ),
             ],
           ),
         ),
@@ -511,15 +583,16 @@ class HomeScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('다른 시험으로 바꿀까요?'),
-        content: const Text(
-            '종목 선택 화면으로 이동합니다.\n학습 기록·XP·스트릭은 그대로 유지돼요.'),
+        content: const Text('종목 선택 화면으로 이동합니다.\n학습 기록·XP·스트릭은 그대로 유지돼요.'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('취소')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('취소'),
+          ),
           FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('종목 바꾸기')),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('종목 바꾸기'),
+          ),
         ],
       ),
     );
@@ -528,9 +601,13 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
-  Widget _glassIconButton(BuildContext context,
-      {required IconData icon, required VoidCallback onTap}) {
-    return Material(
+  Widget _glassIconButton(
+    BuildContext context, {
+    required IconData icon,
+    required VoidCallback onTap,
+    String? semanticLabel,
+  }) {
+    final button = Material(
       color: Colors.white.withValues(alpha: 0.15),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
@@ -541,6 +618,11 @@ class HomeScreen extends StatelessWidget {
           child: Icon(icon, color: Colors.white, size: 20),
         ),
       ),
+    );
+    if (semanticLabel == null) return button;
+    return Tooltip(
+      message: semanticLabel,
+      child: Semantics(button: true, label: semanticLabel, child: button),
     );
   }
 
@@ -554,8 +636,7 @@ class HomeScreen extends StatelessWidget {
         return Container(
           decoration: BoxDecoration(
             color: Theme.of(ctx).scaffoldBackgroundColor,
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
           child: Column(
@@ -573,14 +654,18 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('🎨 테마 컬러',
-                  style: TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w800)),
+              const Text(
+                '🎨 테마 컬러',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+              ),
               const SizedBox(height: 4),
-              Text('앱 전체 색감을 5가지 중에 골라보세요',
-                  style: TextStyle(
-                      fontSize: 12.5,
-                      color: cs.onSurface.withValues(alpha: 0.6))),
+              Text(
+                '앱 전체 색감을 5가지 중에 골라보세요',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  color: cs.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
               const SizedBox(height: 18),
               ...AppTheme.palettes.map((p) {
                 final selected = p.id == app.themePaletteId;
@@ -599,13 +684,13 @@ class HomeScreen extends StatelessWidget {
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 13),
+                          horizontal: 14,
+                          vertical: 13,
+                        ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: selected
-                                ? p.seed
-                                : Colors.transparent,
+                            color: selected ? p.seed : Colors.transparent,
                             width: 1.6,
                           ),
                         ),
@@ -624,21 +709,29 @@ class HomeScreen extends StatelessWidget {
                                 ),
                               ),
                               alignment: Alignment.center,
-                              child: Text(p.emoji,
-                                  style: const TextStyle(fontSize: 18)),
+                              child: Text(
+                                p.emoji,
+                                style: const TextStyle(fontSize: 18),
+                              ),
                             ),
                             const SizedBox(width: 14),
                             Expanded(
-                              child: Text(p.name,
-                                  style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: selected
-                                          ? FontWeight.w800
-                                          : FontWeight.w600)),
+                              child: Text(
+                                p.name,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: selected
+                                      ? FontWeight.w800
+                                      : FontWeight.w600,
+                                ),
+                              ),
                             ),
                             if (selected)
-                              Icon(Icons.check_circle_rounded,
-                                  color: p.seed, size: 22),
+                              Icon(
+                                Icons.check_circle_rounded,
+                                color: p.seed,
+                                size: 22,
+                              ),
                           ],
                         ),
                       ),
@@ -654,8 +747,12 @@ class HomeScreen extends StatelessWidget {
   }
 
   // ── 오늘 학습 스트립: 목표 진행 + 스탯 3종 ─────────────
-  Widget _todayStrip(BuildContext context, AppProvider app,
-      double dailyRatio, int pendingNotes) {
+  Widget _todayStrip(
+    BuildContext context,
+    AppProvider app,
+    double dailyRatio,
+    int pendingNotes,
+  ) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return PremiumCard(
       padding: const EdgeInsets.fromLTRB(16, 15, 16, 14),
@@ -664,20 +761,27 @@ class HomeScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Text('오늘의 학습 목표',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w800, fontSize: 13.5)),
+              const Text(
+                '오늘의 학습 목표',
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
+              ),
               const Spacer(),
-              Text('${app.todayMinutes}',
-                  style: const TextStyle(
-                      color: AppTheme.primary,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16)),
-              Text(' / ${app.dailyGoalMinutes}분',
-                  style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: dark ? Colors.white54 : AppTheme.textMuted)),
+              Text(
+                '${app.todayMinutes}',
+                style: const TextStyle(
+                  color: AppTheme.primary,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                ),
+              ),
+              Text(
+                ' / ${app.dailyGoalMinutes}분',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: dark ? Colors.white54 : AppTheme.textMuted,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
@@ -705,8 +809,9 @@ class HomeScreen extends StatelessWidget {
                 ? '오늘 목표 달성! 🎉 내일도 이 기세로!'
                 : '목표까지 ${app.dailyGoalMinutes - app.todayMinutes}분 — 조금만 더!',
             style: TextStyle(
-                fontSize: 11.5,
-                color: dark ? Colors.white54 : AppTheme.textMuted),
+              fontSize: 11.5,
+              color: dark ? Colors.white54 : AppTheme.textMuted,
+            ),
           ),
           const SizedBox(height: 12),
           Container(
@@ -719,23 +824,39 @@ class HomeScreen extends StatelessWidget {
           Row(
             children: [
               _miniStat(
-                  context,
-                  Icons.local_fire_department_rounded,
-                  app.shieldCount > 0
-                      ? '${app.streak}일 🛡️${app.shieldCount}'
-                      : '${app.streak}일',
-                  '연속 학습',
-                  const Color(0xFFF97316),
-                  () => onNavigate(4)),
+                context,
+                Icons.local_fire_department_rounded,
+                app.shieldCount > 0
+                    ? '${app.streak}일 🛡️${app.shieldCount}'
+                    : '${app.streak}일',
+                '연속 학습',
+                const Color(0xFFF97316),
+                () => onNavigate(4),
+              ),
               _vDivider(context),
-              _miniStat(context, Icons.schedule_rounded,
-                  '${app.weekMinutes}분', '이번 주', AppTheme.electric,
-                  () => onNavigate(4)),
+              _miniStat(
+                context,
+                Icons.schedule_rounded,
+                '${app.weekMinutes}분',
+                '이번 주',
+                AppTheme.electric,
+                () => onNavigate(4),
+              ),
               _vDivider(context),
-              _miniStat(context, Icons.quiz_rounded, '$pendingNotes개',
-                  '복습할 오답', AppTheme.danger, () {
-                pushWithNav(context, const SmartReviewScreen(), currentSection: 1);
-              }),
+              _miniStat(
+                context,
+                Icons.quiz_rounded,
+                '$pendingNotes개',
+                '복습할 오답',
+                AppTheme.danger,
+                () {
+                  pushWithNav(
+                    context,
+                    const SmartReviewScreen(),
+                    currentSection: 1,
+                  );
+                },
+              ),
             ],
           ),
         ],
@@ -754,31 +875,54 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _miniStat(BuildContext context, IconData icon, String value,
-      String label, Color color, VoidCallback onTap) {
+  Widget _miniStat(
+    BuildContext context,
+    IconData icon,
+    String value,
+    String label,
+    Color color,
+    VoidCallback onTap,
+  ) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, color: color, size: 16),
-                const SizedBox(width: 4),
-                Text(value,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w900, fontSize: 14.5)),
-              ],
-            ),
-            const SizedBox(height: 2),
-            Text(label,
+      child: Semantics(
+        button: true,
+        label: '$label $value',
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, color: color, size: 16),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      value,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 14.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                    fontSize: 10.5,
-                    color: dark ? Colors.white54 : AppTheme.textMuted)),
-          ],
+                  fontSize: 10.5,
+                  color: dark ? Colors.white54 : AppTheme.textMuted,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -795,41 +939,58 @@ class HomeScreen extends StatelessWidget {
           Row(
             children: [
               const IconBadge(
-                  icon: Icons.bolt_rounded,
-                  color: AppTheme.accent,
-                  size: 46,
-                  iconSize: 26),
+                icon: Icons.bolt_rounded,
+                color: AppTheme.accent,
+                size: 46,
+                iconSize: 26,
+              ),
               const SizedBox(width: 13),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('${StudyData.instance.track.bankLabel} 완전 정복',
-                        style: const TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w800)),
+                    Text(
+                      '${StudyData.instance.track.bankLabel} 완전 정복',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     const SizedBox(height: 3),
-                    Text('CBT 출제의 50%는 기출 재출제 — 여기서 다 잡아요',
-                        style: TextStyle(
-                            fontSize: 11.5,
-                            color: dark
-                                ? Colors.white54
-                                : AppTheme.textMuted)),
+                    Text(
+                      'CBT 출제의 50%는 기출 재출제 — 여기서 다 잡아요',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: dark ? Colors.white54 : AppTheme.textMuted,
+                      ),
+                    ),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right_rounded,
-                  color: dark ? Colors.white38 : AppTheme.textMuted),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: dark ? Colors.white38 : AppTheme.textMuted,
+              ),
             ],
           ),
           const SizedBox(height: 14),
           Row(
             children: [
-              _bankStat(context, StudyData.instance.track.questionCountLabel,
-                  '기출 문항'),
-              _bankStat(context, '${StudyData.instance.track.topicCount}',
-                  '1:1 강의 토픽'),
-              _bankStat(context, '${StudyData.instance.track.repeatCount}',
-                  '반복기출 암기'),
+              _bankStat(
+                context,
+                StudyData.instance.track.questionCountLabel,
+                '기출 문항',
+              ),
+              _bankStat(
+                context,
+                '${StudyData.instance.track.topicCount}',
+                '1:1 강의 토픽',
+              ),
+              _bankStat(
+                context,
+                '${StudyData.instance.track.repeatCount}',
+                '반복기출 암기',
+              ),
             ],
           ),
         ],
@@ -851,17 +1012,23 @@ class HomeScreen extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(num,
-                style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w900,
-                    color: AppTheme.primary,
-                    letterSpacing: -0.3)),
+            Text(
+              num,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+                color: AppTheme.primary,
+                letterSpacing: -0.3,
+              ),
+            ),
             const SizedBox(height: 1),
-            Text(label,
-                style: TextStyle(
-                    fontSize: 10.5,
-                    color: dark ? Colors.white54 : AppTheme.textMuted)),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10.5,
+                color: dark ? Colors.white54 : AppTheme.textMuted,
+              ),
+            ),
           ],
         ),
       ),
@@ -869,18 +1036,21 @@ class HomeScreen extends StatelessWidget {
   }
 
   // ── 빠른 실행 그라디언트 타일 ─────────────────────
-  Widget _actionTile(BuildContext context,
-      {required IconData icon,
-      required String label,
-      required String sub,
-      required Gradient gradient,
-      required VoidCallback onTap}) {
+  Widget _actionTile(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String sub,
+    required Gradient gradient,
+    required VoidCallback onTap,
+  }) {
     return Container(
       decoration: BoxDecoration(
         gradient: gradient,
         borderRadius: BorderRadius.circular(AppTheme.rMd),
         boxShadow: AppTheme.glowShadow(
-            (gradient as LinearGradient).colors.first),
+          (gradient as LinearGradient).colors.first,
+        ),
       ),
       child: Material(
         color: Colors.transparent,
@@ -895,16 +1065,22 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Icon(icon, color: Colors.white, size: 26),
                 const SizedBox(height: 10),
-                Text(label,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 14.5)),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14.5,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(sub,
-                    style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.75),
-                        fontSize: 11)),
+                Text(
+                  sub,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.75),
+                    fontSize: 11,
+                  ),
+                ),
               ],
             ),
           ),
@@ -913,7 +1089,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
 
 /// 📚 홈 메인 과목(종목) 변경 카드 (#2)
 ///
@@ -934,9 +1109,7 @@ class _SubjectSwitcher extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 13, 14, 14),
       decoration: BoxDecoration(
-        color: dark
-            ? Colors.white.withValues(alpha: 0.04)
-            : Colors.white,
+        color: dark ? Colors.white.withValues(alpha: 0.04) : Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: dark
@@ -1038,10 +1211,7 @@ class _SubjectChip extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: selected
               ? LinearGradient(
-                  colors: [
-                    cs.primary,
-                    cs.primary.withValues(alpha: 0.78),
-                  ],
+                  colors: [cs.primary, cs.primary.withValues(alpha: 0.78)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 )
@@ -1049,15 +1219,15 @@ class _SubjectChip extends StatelessWidget {
           color: selected
               ? null
               : (dark
-                  ? Colors.white.withValues(alpha: 0.05)
-                  : const Color(0xFFF4F5FA)),
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : const Color(0xFFF4F5FA)),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected
                 ? Colors.transparent
                 : (dark
-                    ? Colors.white.withValues(alpha: 0.06)
-                    : const Color(0xFFE6E8F0)),
+                      ? Colors.white.withValues(alpha: 0.06)
+                      : const Color(0xFFE6E8F0)),
           ),
         ),
         child: Column(
@@ -1069,8 +1239,11 @@ class _SubjectChip extends StatelessWidget {
                 Text(track.emoji, style: const TextStyle(fontSize: 20)),
                 const Spacer(),
                 if (selected)
-                  const Icon(Icons.check_circle_rounded,
-                      color: Colors.white, size: 16),
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
               ],
             ),
             const SizedBox(height: 8),
@@ -1104,8 +1277,11 @@ class _BeginnerBanner extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
-        onTap: () => pushWithNav(context, const BeginnerRoadmapScreen(),
-            currentSection: 0),
+        onTap: () => pushWithNav(
+          context,
+          const BeginnerRoadmapScreen(),
+          currentSection: 0,
+        ),
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
@@ -1124,21 +1300,30 @@ class _BeginnerBanner extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('처음이라 뭐부터 할지 모르겠다면',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w900)),
+                    const Text(
+                      '처음이라 뭐부터 할지 모르겠다면',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Text('지식 0 → 합격, 왕초보 6단계 로드맵',
-                        style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: 12)),
+                    Text(
+                      '지식 0 → 합격, 왕초보 6단계 로드맵',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios_rounded,
-                  color: Colors.white, size: 16),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Colors.white,
+                size: 16,
+              ),
             ],
           ),
         ),
@@ -1184,29 +1369,38 @@ class _SubjectHub extends StatelessWidget {
             children: [
               Icon(Icons.category_rounded, size: 17, color: cs.primary),
               const SizedBox(width: 6),
-              Text('과목별 바로 공부',
-                  style: TextStyle(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w800,
-                      color: cs.onSurface.withValues(alpha: 0.85))),
+              Text(
+                '과목별 바로 공부',
+                style: TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w800,
+                  color: cs.onSurface.withValues(alpha: 0.85),
+                ),
+              ),
               const Spacer(),
-              Text('과목을 탭하세요',
-                  style: TextStyle(
-                      fontSize: 11,
-                      color: cs.onSurface.withValues(alpha: 0.45))),
+              Text(
+                '과목을 탭하세요',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: cs.onSurface.withValues(alpha: 0.45),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
           for (var i = 0; i < track.subjects.length; i++)
-            _subjectRow(context, i, track.subjects[i],
-                _palette[i % _palette.length]),
+            _subjectRow(
+              context,
+              i,
+              track.subjects[i],
+              _palette[i % _palette.length],
+            ),
         ],
       ),
     );
   }
 
-  Widget _subjectRow(
-      BuildContext context, int idx, String subject, Color c) {
+  Widget _subjectRow(BuildContext context, int idx, String subject, Color c) {
     final cs = Theme.of(context).colorScheme;
     return InkWell(
       borderRadius: BorderRadius.circular(12),
@@ -1220,26 +1414,37 @@ class _SubjectHub extends StatelessWidget {
               height: 34,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                    colors: [c, c.withValues(alpha: 0.65)]),
+                  colors: [c, c.withValues(alpha: 0.65)],
+                ),
                 borderRadius: BorderRadius.circular(10),
               ),
               alignment: Alignment.center,
-              child: Text('${idx + 1}',
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 14)),
+              child: Text(
+                '${idx + 1}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 14,
+                ),
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(subject,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                      fontSize: 13.5, fontWeight: FontWeight.w700)),
+              child: Text(
+                subject,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
-            Icon(Icons.chevron_right_rounded,
-                size: 20, color: cs.onSurface.withValues(alpha: 0.35)),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 20,
+              color: cs.onSurface.withValues(alpha: 0.35),
+            ),
           ],
         ),
       ),
@@ -1250,7 +1455,8 @@ class _SubjectHub extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(22))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
       builder: (sheetCtx) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
@@ -1258,68 +1464,83 @@ class _SubjectHub extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(subject,
-                  style: const TextStyle(
-                      fontSize: 17, fontWeight: FontWeight.w900)),
+              Text(
+                subject,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text('무엇부터 할까요?',
-                  style: TextStyle(
-                      fontSize: 12.5,
-                      color: Theme.of(sheetCtx)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.55))),
+              Text(
+                '무엇부터 할까요?',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  color: Theme.of(
+                    sheetCtx,
+                  ).colorScheme.onSurface.withValues(alpha: 0.55),
+                ),
+              ),
               const SizedBox(height: 14),
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: _sheetIcon(Icons.menu_book_rounded, c),
-                title: const Text('기초 이론 배우기',
-                    style: TextStyle(fontWeight: FontWeight.w800)),
+                title: const Text(
+                  '기초 이론 배우기',
+                  style: TextStyle(fontWeight: FontWeight.w800),
+                ),
                 subtitle: const Text('처음이라면 여기부터'),
                 onTap: () {
                   Navigator.pop(sheetCtx);
-                  pushWithNav(context, const TheoryScreen(),
-                      currentSection: 1);
+                  pushWithNav(context, const TheoryScreen(), currentSection: 1);
                 },
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: _sheetIcon(Icons.quiz_rounded, c),
-                title: const Text('과목 기출 풀기',
-                    style: TextStyle(fontWeight: FontWeight.w800)),
+                title: const Text(
+                  '과목 기출 풀기',
+                  style: TextStyle(fontWeight: FontWeight.w800),
+                ),
                 subtitle: const Text('이 과목 문제만 모아서'),
                 onTap: () async {
                   Navigator.pop(sheetCtx);
-                  final qs = await StudyData.instance
-                      .questionsBySubject(subject);
+                  final qs = await StudyData.instance.questionsBySubject(
+                    subject,
+                  );
                   if (!context.mounted) return;
                   if (qs.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('이 과목의 기출 데이터가 없습니다.')),
+                      const SnackBar(content: Text('이 과목의 기출 데이터가 없습니다.')),
                     );
                     return;
                   }
                   pushWithNav(
-                      context,
-                      QuizPlayScreen(
-                          title: '$subject 기출',
-                          questions: qs,
-                          examMode: false),
-                      currentSection: 1);
+                    context,
+                    QuizPlayScreen(
+                      title: '$subject 기출',
+                      questions: qs,
+                      examMode: false,
+                    ),
+                    currentSection: 1,
+                  );
                 },
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: _sheetIcon(Icons.style_rounded, c),
-                title: const Text('플래시카드 암기',
-                    style: TextStyle(fontWeight: FontWeight.w800)),
+                title: const Text(
+                  '플래시카드 암기',
+                  style: TextStyle(fontWeight: FontWeight.w800),
+                ),
                 subtitle: const Text('핵심 개념 반복 암기'),
                 onTap: () {
                   Navigator.pop(sheetCtx);
                   pushWithNav(
-                      context, FlashcardScreen(subjectFilter: subject),
-                      currentSection: 1);
+                    context,
+                    FlashcardScreen(subjectFilter: subject),
+                    currentSection: 1,
+                  );
                 },
               ),
             ],
@@ -1330,12 +1551,133 @@ class _SubjectHub extends StatelessWidget {
   }
 
   Widget _sheetIcon(IconData ic, Color c) => Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: c.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(12),
+    width: 40,
+    height: 40,
+    decoration: BoxDecoration(
+      color: c.withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Icon(ic, color: c, size: 21),
+  );
+}
+
+// ── 🔥 Q56: 스트릭 손실회피 경고 배너 ─────────────────────
+/// 연속 학습 스트릭이 끊기기 직전(저녁인데 오늘 미학습)임을 알려
+/// 손실회피 심리로 마지막 학습 동기를 유도한다.
+class _StreakWarningBanner extends StatelessWidget {
+  const _StreakWarningBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final app = context.watch<AppProvider>();
+    return Semantics(
+      label: '경고: ${app.streak}일 연속 학습 스트릭이 오늘 끊길 위험이 있습니다',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => pushWithNav(
+            context,
+            const SmartReviewScreen(),
+            currentSection: 1,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFEF4444), Color(0xFFF97316)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                const Text('🔥', style: TextStyle(fontSize: 24)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${app.streak}일 연속 스트릭이 곧 끊겨요!',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      const Text(
+                        '5분만 공부해도 오늘 스트릭이 유지돼요',
+                        style: TextStyle(color: Colors.white, fontSize: 11.5),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ],
+            ),
+          ),
         ),
-        child: Icon(ic, color: c, size: 21),
-      );
+      ),
+    );
+  }
+}
+
+// ── 📊 Q59: 사회적 증거 카드 ───────────────────────────────
+/// 검증 가능한 자체 지표(문항 수·토픽 수 등)를 노출해
+/// "많은 사람이 쓰는 신뢰할 만한 앱"이라는 사회적 증거를 제공한다.
+/// (허위 수치 대신 앱 내에 이미 존재하는 실제 데이터 기반 지표만 사용)
+class _SocialProofCard extends StatelessWidget {
+  const _SocialProofCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final track = StudyData.instance.track;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return Semantics(
+      label:
+          '${track.name} 학습 콘텐츠 지표: 기출 ${track.questionCountLabel}, 1대1 강의 ${track.topicCount}개',
+      child: PremiumCard(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.verified_rounded,
+              color: AppTheme.primary,
+              size: 22,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '검증된 ${track.questionCountLabel} 기출 문항으로 준비 중',
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${track.topicCount}개 1:1 강의 토픽 · ${track.repeatCount}개 반복기출 암기',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: dark ? Colors.white54 : AppTheme.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

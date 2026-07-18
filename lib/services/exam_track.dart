@@ -45,7 +45,9 @@ class ExamTrack {
   /// 3자리 콤마 표기 (예: 2897 → 2,897)
   String get questionCountLabel {
     final s = questionCount.toString();
-    return s.length > 3 ? '${s.substring(0, s.length - 3)},${s.substring(s.length - 3)}' : s;
+    return s.length > 3
+        ? '${s.substring(0, s.length - 3)},${s.substring(s.length - 3)}'
+        : s;
   }
 }
 
@@ -63,13 +65,7 @@ const List<ExamTrack> kExamTracks = [
     color: Color(0xFF4F46E5),
     accent: Color(0xFF7C3AED),
     dir: 'electrician',
-    subjects: [
-      '전자기학',
-      '전력공학',
-      '전기기기',
-      '회로이론 및 제어공학',
-      '전기설비기술기준',
-    ],
+    subjects: ['전자기학', '전력공학', '전기기기', '회로이론 및 제어공학', '전기설비기술기준'],
     theoryFiles: {
       '전자기학': 'assets/theory/electrician/01.md',
       '전력공학': 'assets/theory/electrician/02.md',
@@ -93,13 +89,7 @@ const List<ExamTrack> kExamTracks = [
     color: Color(0xFF0891B2),
     accent: Color(0xFF06B6D4),
     dir: 'elec_construction',
-    subjects: [
-      '전기응용 및 공사재료',
-      '전력공학',
-      '전기기기',
-      '회로이론 및 제어공학',
-      '전기설비기술기준',
-    ],
+    subjects: ['전기응용 및 공사재료', '전력공학', '전기기기', '회로이론 및 제어공학', '전기설비기술기준'],
     theoryFiles: {
       '전기응용 및 공사재료': 'assets/theory/elec_construction/01.md',
       '전력공학': 'assets/theory/elec_construction/02.md',
@@ -123,12 +113,7 @@ const List<ExamTrack> kExamTracks = [
     color: Color(0xFFDC2626),
     accent: Color(0xFFF97316),
     dir: 'fire_electric',
-    subjects: [
-      '소방원론',
-      '소방전기일반',
-      '소방관계법규',
-      '소방전기시설의 구조 및 원리',
-    ],
+    subjects: ['소방원론', '소방전기일반', '소방관계법규', '소방전기시설의 구조 및 원리'],
     theoryFiles: {
       '소방원론': 'assets/theory/fire_electric/01.md',
       '소방전기일반': 'assets/theory/fire_electric/02.md',
@@ -151,12 +136,7 @@ const List<ExamTrack> kExamTracks = [
     color: Color(0xFFB91C1C),
     accent: Color(0xFFEF4444),
     dir: 'fire_mechanical',
-    subjects: [
-      '소방원론',
-      '소방유체역학',
-      '소방관계법규',
-      '소방기계시설의 구조 및 원리',
-    ],
+    subjects: ['소방원론', '소방유체역학', '소방관계법규', '소방기계시설의 구조 및 원리'],
     theoryFiles: {
       '소방원론': 'assets/theory/fire_mechanical/01.md',
       '소방유체역학': 'assets/theory/fire_mechanical/02.md',
@@ -241,13 +221,7 @@ const List<ExamTrack> kExamTracks = [
     color: Color(0xFF9333EA),
     accent: Color(0xFFC084FC),
     dir: 'architecture',
-    subjects: [
-      '건축계획',
-      '건축시공',
-      '건축구조',
-      '건축설비',
-      '건축법규',
-    ],
+    subjects: ['건축계획', '건축시공', '건축구조', '건축설비', '건축법규'],
     theoryFiles: {
       '건축계획': 'assets/theory/architecture/01.md',
       '건축시공': 'assets/theory/architecture/02.md',
@@ -303,13 +277,7 @@ const List<ExamTrack> kExamTracks = [
     color: Color(0xFF0D9488),
     accent: Color(0xFF2DD4BF),
     dir: 'elec_industrial',
-    subjects: [
-      '전기자기학',
-      '전력공학',
-      '전기기기',
-      '회로이론',
-      '전기설비기술기준',
-    ],
+    subjects: ['전기자기학', '전력공학', '전기기기', '회로이론', '전기설비기술기준'],
     theoryFiles: {
       '전기자기학': 'assets/theory/elec_industrial/01.md',
       '전력공학': 'assets/theory/elec_industrial/02.md',
@@ -333,11 +301,7 @@ const List<ExamTrack> kExamTracks = [
     color: Color(0xFFE11D48),
     accent: Color(0xFFFB7185),
     dir: 'hazmat_industrial',
-    subjects: [
-      '일반화학',
-      '화재예방과 소화방법',
-      '위험물의 성질과 취급',
-    ],
+    subjects: ['일반화학', '화재예방과 소화방법', '위험물의 성질과 취급'],
     theoryFiles: {
       '일반화학': 'assets/theory/hazmat_industrial/01.md',
       '화재예방과 소화방법': 'assets/theory/hazmat_industrial/02.md',

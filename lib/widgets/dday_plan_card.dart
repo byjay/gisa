@@ -64,18 +64,27 @@ class _DDayPlanCardState extends State<DDayPlanCard> {
               Row(
                 children: [
                   const IconBadge(
-                      icon: Icons.show_chart_rounded,
-                      color: AppTheme.electric,
-                      size: 34,
-                      iconSize: 18),
+                    icon: Icons.show_chart_rounded,
+                    color: AppTheme.electric,
+                    size: 34,
+                    iconSize: 18,
+                  ),
                   const SizedBox(width: 8),
-                  const Text('내 성장 그래프',
-                      style: TextStyle(
-                          fontSize: 13.5, fontWeight: FontWeight.w800)),
+                  const Text(
+                    '내 성장 그래프',
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                   const SizedBox(width: 6),
-                  Text('최근 14일',
-                      style: TextStyle(
-                          fontSize: 11, color: scheme.onSurfaceVariant)),
+                  Text(
+                    '최근 14일',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
                   const Spacer(),
                   if (_history.length >= 2)
                     _trendBadge(_history.first.$2, _history.last.$2),
@@ -91,14 +100,20 @@ class _DDayPlanCardState extends State<DDayPlanCard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('${_history.first.$1.month}/${_history.first.$1.day}',
-                        style: TextStyle(
-                            fontSize: 10.5,
-                            color: scheme.onSurfaceVariant)),
-                    Text('오늘',
-                        style: TextStyle(
-                            fontSize: 10.5,
-                            color: scheme.onSurfaceVariant)),
+                    Text(
+                      '${_history.first.$1.month}/${_history.first.$1.day}',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                    Text(
+                      '오늘',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -114,14 +129,16 @@ class _DDayPlanCardState extends State<DDayPlanCard> {
               color: plan.onTrack
                   ? Colors.green.withValues(alpha: 0.08)
                   : (plan.feasible
-                      ? scheme.primaryContainer.withValues(alpha: 0.5)
-                      : Colors.red.withValues(alpha: 0.08)),
+                        ? scheme.primaryContainer.withValues(alpha: 0.5)
+                        : Colors.red.withValues(alpha: 0.08)),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                  color: (plan.onTrack
-                          ? Colors.green
-                          : (plan.feasible ? scheme.primary : Colors.red))
-                      .withValues(alpha: 0.3)),
+                color:
+                    (plan.onTrack
+                            ? Colors.green
+                            : (plan.feasible ? scheme.primary : Colors.red))
+                        .withValues(alpha: 0.3),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,47 +147,63 @@ class _DDayPlanCardState extends State<DDayPlanCard> {
                   children: [
                     const Text('🗓', style: TextStyle(fontSize: 16)),
                     const SizedBox(width: 6),
-                    const Text('합격 역산 플랜',
-                        style: TextStyle(
-                            fontSize: 13.5, fontWeight: FontWeight.w800)),
+                    const Text(
+                      '합격 역산 플랜',
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     const Spacer(),
-                    Text('D-${widget.dDay}',
-                        style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w900,
-                            color: scheme.primary)),
+                    Text(
+                      'D-${widget.dDay}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w900,
+                        color: scheme.primary,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10),
                 if (plan.onTrack)
-                  const Text('🎉 이미 목표 60점을 넘었습니다! 실전 모의고사로 감각을 유지하세요.',
-                      style: TextStyle(fontSize: 13, height: 1.5))
+                  const Text(
+                    '🎉 이미 목표 60점을 넘었습니다! 실전 모의고사로 감각을 유지하세요.',
+                    style: TextStyle(fontSize: 13, height: 1.5),
+                  )
                 else
                   RichText(
                     text: TextSpan(
                       style: TextStyle(
-                          fontSize: 13.5,
-                          height: 1.6,
-                          color: scheme.onSurface),
+                        fontSize: 13.5,
+                        height: 1.6,
+                        color: scheme.onSurface,
+                      ),
                       children: [
                         const TextSpan(text: '목표 60점까지 '),
                         TextSpan(
-                            text: '${plan.pointsNeeded.toStringAsFixed(1)}점',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                color: scheme.primary)),
+                          text: '${plan.pointsNeeded.toStringAsFixed(1)}점',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: scheme.primary,
+                          ),
+                        ),
                         const TextSpan(text: ' 남음 → 앞으로 '),
                         TextSpan(
-                            text: '${plan.questionsNeeded}문제',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                color: scheme.primary)),
+                          text: '${plan.questionsNeeded}문제',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: scheme.primary,
+                          ),
+                        ),
                         const TextSpan(text: ' 더 풀면 도달 가능\n하루 '),
                         TextSpan(
-                            text: '${plan.perDay}문제',
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w900,
-                                color: Colors.deepOrange)),
+                          text: '${plan.perDay}문제',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: Colors.deepOrange,
+                          ),
+                        ),
                         const TextSpan(text: '씩 풀면 D-Day 전에 합격권입니다'),
                       ],
                     ),
@@ -181,7 +214,10 @@ class _DDayPlanCardState extends State<DDayPlanCard> {
                     '⚠ 현재 페이스로는 하루 ${plan.perDay}문제가 필요해 다소 빡빡합니다. '
                     '지금부터 오늘의 처방전을 매일 실행하면 격차를 줄일 수 있어요.',
                     style: TextStyle(
-                        fontSize: 12, color: Colors.red.shade800, height: 1.4),
+                      fontSize: 12,
+                      color: Colors.red.shade800,
+                      height: 1.4,
+                    ),
                   ),
                 ],
               ],
@@ -206,12 +242,22 @@ class _DDayPlanCardState extends State<DDayPlanCard> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(up ? Icons.trending_up : (down ? Icons.trending_down : Icons.trending_flat),
-              size: 13, color: color),
+          Icon(
+            up
+                ? Icons.trending_up
+                : (down ? Icons.trending_down : Icons.trending_flat),
+            size: 13,
+            color: color,
+          ),
           const SizedBox(width: 3),
-          Text('$sign${diff.toStringAsFixed(1)}점',
-              style: TextStyle(
-                  fontSize: 11, fontWeight: FontWeight.w800, color: color)),
+          Text(
+            '$sign${diff.toStringAsFixed(1)}점',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+          ),
         ],
       ),
     );

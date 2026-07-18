@@ -38,7 +38,9 @@ class _TimerScreenState extends State<TimerScreen> {
               // 🎓 볼트쌀 집중 코치
               if (running) ...[
                 const TutorCoach(
-                    situation: CoachSituation.timerFocus, height: 88),
+                  situation: CoachSituation.timerFocus,
+                  height: 88,
+                ),
                 const SizedBox(height: 12),
               ],
               // ── 시험 선택 카드 ──
@@ -47,18 +49,21 @@ class _TimerScreenState extends State<TimerScreen> {
                 child: Row(
                   children: [
                     const IconBadge(
-                        icon: Icons.flag_rounded,
-                        color: AppTheme.primary,
-                        size: 36,
-                        iconSize: 18),
+                      icon: Icons.flag_rounded,
+                      color: AppTheme.primary,
+                      size: 36,
+                      iconSize: 18,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: _selectedExamId,
                           isExpanded: true,
-                          hint: const Text('학습할 시험 선택 (선택사항)',
-                              style: TextStyle(fontSize: 13.5)),
+                          hint: const Text(
+                            '학습할 시험 선택 (선택사항)',
+                            style: TextStyle(fontSize: 13.5),
+                          ),
                           style: TextStyle(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w700,
@@ -66,12 +71,18 @@ class _TimerScreenState extends State<TimerScreen> {
                           ),
                           items: [
                             const DropdownMenuItem<String>(
-                                value: null, child: Text('일반 학습')),
-                            ...app.exams.map((e) => DropdownMenuItem(
-                                  value: e.id,
-                                  child: Text(e.name,
-                                      overflow: TextOverflow.ellipsis),
-                                )),
+                              value: null,
+                              child: Text('일반 학습'),
+                            ),
+                            ...app.exams.map(
+                              (e) => DropdownMenuItem(
+                                value: e.id,
+                                child: Text(
+                                  e.name,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
                           ],
                           onChanged: running
                               ? null
@@ -100,7 +111,8 @@ class _TimerScreenState extends State<TimerScreen> {
                           color: dark
                               ? Colors.white.withValues(alpha: 0.08)
                               : const Color(0xFFE8EAF2),
-                          width: 2),
+                          width: 2,
+                        ),
                   boxShadow: running
                       ? AppTheme.glowShadow(AppTheme.primary)
                       : AppTheme.softShadow(context),
@@ -134,13 +146,15 @@ class _TimerScreenState extends State<TimerScreen> {
                       const SizedBox(height: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 4),
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: running
                               ? Colors.white.withValues(alpha: 0.18)
                               : (dark
-                                  ? Colors.white.withValues(alpha: 0.06)
-                                  : const Color(0xFFF0F1F7)),
+                                    ? Colors.white.withValues(alpha: 0.06)
+                                    : const Color(0xFFF0F1F7)),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -150,9 +164,7 @@ class _TimerScreenState extends State<TimerScreen> {
                             fontWeight: FontWeight.w700,
                             color: running
                                 ? Colors.white
-                                : (dark
-                                    ? Colors.white54
-                                    : AppTheme.textMuted),
+                                : (dark ? Colors.white54 : AppTheme.textMuted),
                           ),
                         ),
                       ),
@@ -187,8 +199,12 @@ class _TimerScreenState extends State<TimerScreen> {
                           final sec = await app.stopTimer();
                           final min = (sec / 60).ceil();
                           if (context.mounted) {
-                            await LevelUpDialog.showIfLevelUp(context,
-                                levelBefore, app.level, app.levelTitle);
+                            await LevelUpDialog.showIfLevelUp(
+                              context,
+                              levelBefore,
+                              app.level,
+                              app.levelTitle,
+                            );
                           }
                           // 🛡️ 미션 올클리어 시 마법 방패 지급
                           final earnedShield = await app.maybeEarnShield();
@@ -196,7 +212,8 @@ class _TimerScreenState extends State<TimerScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(
-                                    '🛡️ 마법 방패 획득! 하루 건너뛰어도 스트릭이 유지돼요'),
+                                  '🛡️ 마법 방패 획득! 하루 건너뛰어도 스트릭이 유지돼요',
+                                ),
                                 backgroundColor: Color(0xFF4F46E5),
                               ),
                             );
@@ -206,12 +223,15 @@ class _TimerScreenState extends State<TimerScreen> {
                               SnackBar(
                                 content: Row(
                                   children: [
-                                    const Text('✨',
-                                        style: TextStyle(fontSize: 16)),
+                                    const Text(
+                                      '✨',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                          '$min분 학습 완료! +${min * 2} XP 획득'),
+                                        '$min분 학습 완료! +${min * 2} XP 획득',
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -236,8 +256,9 @@ class _TimerScreenState extends State<TimerScreen> {
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(AppTheme.rSm + 2),
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.rSm + 2,
+                            ),
                           ),
                         ),
                         child: const Text('취소'),
@@ -252,14 +273,29 @@ class _TimerScreenState extends State<TimerScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Row(
                   children: [
-                    _stat(context, Icons.today_rounded, '오늘',
-                        '${app.todayMinutes}분', AppTheme.primary),
+                    _stat(
+                      context,
+                      Icons.today_rounded,
+                      '오늘',
+                      '${app.todayMinutes}분',
+                      AppTheme.primary,
+                    ),
                     _divider(dark),
-                    _stat(context, Icons.date_range_rounded, '이번 주',
-                        '${app.weekMinutes}분', AppTheme.electric),
+                    _stat(
+                      context,
+                      Icons.date_range_rounded,
+                      '이번 주',
+                      '${app.weekMinutes}분',
+                      AppTheme.electric,
+                    ),
                     _divider(dark),
-                    _stat(context, Icons.local_fire_department_rounded, '연속',
-                        '${app.streak}일', const Color(0xFFF97316)),
+                    _stat(
+                      context,
+                      Icons.local_fire_department_rounded,
+                      '연속',
+                      '${app.streak}일',
+                      const Color(0xFFF97316),
+                    ),
                   ],
                 ),
               ),
@@ -293,29 +329,38 @@ class _TimerScreenState extends State<TimerScreen> {
   }
 
   Widget _divider(bool dark) => Container(
-        width: 1,
-        height: 40,
-        color: dark
-            ? Colors.white.withValues(alpha: 0.06)
-            : const Color(0xFFEEF0F7),
-      );
+    width: 1,
+    height: 40,
+    color: dark
+        ? Colors.white.withValues(alpha: 0.06)
+        : const Color(0xFFEEF0F7),
+  );
 
-  Widget _stat(BuildContext context, IconData icon, String label,
-      String value, Color color) {
+  Widget _stat(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+    Color color,
+  ) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return Expanded(
       child: Column(
         children: [
           Icon(icon, color: color, size: 20),
           const SizedBox(height: 6),
-          Text(value,
-              style: const TextStyle(
-                  fontSize: 16, fontWeight: FontWeight.w900)),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 2),
-          Text(label,
-              style: TextStyle(
-                  fontSize: 11,
-                  color: dark ? Colors.white54 : AppTheme.textMuted)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: dark ? Colors.white54 : AppTheme.textMuted,
+            ),
+          ),
         ],
       ),
     );

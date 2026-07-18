@@ -12,14 +12,20 @@ class BadgeCollection extends StatelessWidget {
     final app = context.watch<AppProvider>();
     final dark = Theme.of(context).brightness == Brightness.dark;
 
-    final totalCorrect = app.quizResults
-        .fold<int>(0, (s, r) => s + ((r['correct'] as int?) ?? 0));
-    final totalSolved = app.quizResults
-        .fold<int>(0, (s, r) => s + ((r['total'] as int?) ?? 0));
+    final totalCorrect = app.quizResults.fold<int>(
+      0,
+      (s, r) => s + ((r['correct'] as int?) ?? 0),
+    );
+    final totalSolved = app.quizResults.fold<int>(
+      0,
+      (s, r) => s + ((r['total'] as int?) ?? 0),
+    );
     final passCount = app.quizResults
-        .where((r) =>
-            ((r['correct'] as int?) ?? 0) * 100 >=
-            ((r['total'] as int?) ?? 1) * 60)
+        .where(
+          (r) =>
+              ((r['correct'] as int?) ?? 0) * 100 >=
+              ((r['total'] as int?) ?? 1) * 60,
+        )
         .length;
 
     final badges = <({String emoji, String name, String desc, bool earned})>[
@@ -41,18 +47,8 @@ class BadgeCollection extends StatelessWidget {
         desc: '정답 100개',
         earned: totalCorrect >= 100,
       ),
-      (
-        emoji: '🌙',
-        name: '3일 연속',
-        desc: '3일 연속 학습',
-        earned: app.streak >= 3,
-      ),
-      (
-        emoji: '☀️',
-        name: '7일 연속',
-        desc: '일주일 개근',
-        earned: app.streak >= 7,
-      ),
+      (emoji: '🌙', name: '3일 연속', desc: '3일 연속 학습', earned: app.streak >= 3),
+      (emoji: '☀️', name: '7일 연속', desc: '일주일 개근', earned: app.streak >= 7),
       (
         emoji: '⏳',
         name: '시간의 마법사',
@@ -65,24 +61,9 @@ class BadgeCollection extends StatelessWidget {
         desc: '모의고사 합격권 1회',
         earned: passCount >= 1,
       ),
-      (
-        emoji: '💎',
-        name: '다이아 멘탈',
-        desc: '합격권 5회 달성',
-        earned: passCount >= 5,
-      ),
-      (
-        emoji: '🧙',
-        name: '정식 마법사',
-        desc: '레벨 5 도달',
-        earned: app.level >= 5,
-      ),
-      (
-        emoji: '👑',
-        name: '대마법사',
-        desc: '레벨 10 도달',
-        earned: app.level >= 10,
-      ),
+      (emoji: '💎', name: '다이아 멘탈', desc: '합격권 5회 달성', earned: passCount >= 5),
+      (emoji: '🧙', name: '정식 마법사', desc: '레벨 5 도달', earned: app.level >= 5),
+      (emoji: '👑', name: '대마법사', desc: '레벨 10 도달', earned: app.level >= 10),
     ];
     final earnedCount = badges.where((b) => b.earned).length;
 
@@ -93,14 +74,16 @@ class BadgeCollection extends StatelessWidget {
           Row(
             children: [
               const IconBadge(
-                  icon: Icons.military_tech_rounded,
-                  color: Color(0xFFF59E0B),
-                  size: 36,
-                  iconSize: 18),
+                icon: Icons.military_tech_rounded,
+                color: Color(0xFFF59E0B),
+                size: 36,
+                iconSize: 18,
+              ),
               const SizedBox(width: 10),
-              const Text('마법 배지 도감',
-                  style:
-                      TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+              const Text(
+                '마법 배지 도감',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+              ),
               const Spacer(),
               PillBadge(
                 text: '$earnedCount / ${badges.length}',
@@ -112,9 +95,7 @@ class BadgeCollection extends StatelessWidget {
           Wrap(
             spacing: 10,
             runSpacing: 12,
-            children: [
-              for (final b in badges) _badge(context, b, dark),
-            ],
+            children: [for (final b in badges) _badge(context, b, dark)],
           ),
         ],
       ),
@@ -122,9 +103,10 @@ class BadgeCollection extends StatelessWidget {
   }
 
   Widget _badge(
-      BuildContext context,
-      ({String emoji, String name, String desc, bool earned}) b,
-      bool dark) {
+    BuildContext context,
+    ({String emoji, String name, String desc, bool earned}) b,
+    bool dark,
+  ) {
     return Tooltip(
       message: '${b.name} — ${b.desc}',
       triggerMode: TooltipTriggerMode.tap,
@@ -147,22 +129,23 @@ class BadgeCollection extends StatelessWidget {
                 color: b.earned
                     ? null
                     : (dark
-                        ? Colors.white.withValues(alpha: 0.05)
-                        : const Color(0xFFF0F1F7)),
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : const Color(0xFFF0F1F7)),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: b.earned
                       ? const Color(0xFFF59E0B)
                       : (dark
-                          ? Colors.white.withValues(alpha: 0.08)
-                          : const Color(0xFFE0E2EC)),
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : const Color(0xFFE0E2EC)),
                   width: b.earned ? 2 : 1,
                 ),
                 boxShadow: b.earned
                     ? [
                         BoxShadow(
-                          color: const Color(0xFFF59E0B)
-                              .withValues(alpha: 0.35),
+                          color: const Color(
+                            0xFFF59E0B,
+                          ).withValues(alpha: 0.35),
                           blurRadius: 10,
                         ),
                       ]

@@ -25,7 +25,12 @@ class LeagueMiniStrip extends StatelessWidget {
     final app = context.watch<AppProvider>();
     final s = leagueStanding(app);
     final promoted = s.rank <= 3;
-    final medal = switch (s.rank) { 1 => '🥇', 2 => '🥈', 3 => '🥉', _ => '🏆' };
+    final medal = switch (s.rank) {
+      1 => '🥇',
+      2 => '🥈',
+      3 => '🥉',
+      _ => '🏆',
+    };
     return PremiumCard(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       onTap: onTap,
@@ -40,7 +45,9 @@ class LeagueMiniStrip extends StatelessWidget {
                 Text(
                   '위클리 리그 ${s.rank}위 / ${s.total}명',
                   style: const TextStyle(
-                      fontWeight: FontWeight.w800, fontSize: 13.5),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13.5,
+                  ),
                 ),
                 Text(
                   promoted
@@ -60,8 +67,10 @@ class LeagueMiniStrip extends StatelessWidget {
             filled: promoted,
           ),
           const SizedBox(width: 4),
-          Icon(Icons.chevron_right_rounded,
-              color: Theme.of(context).colorScheme.onSurfaceVariant),
+          Icon(
+            Icons.chevron_right_rounded,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ],
       ),
     );
@@ -75,15 +84,27 @@ class WeeklyLeagueCard extends StatelessWidget {
   const WeeklyLeagueCard({super.key});
 
   static const _rivalNames = [
-    '번개술사 김도윤', '회로마녀 이서연', '자기장기사 박지호', '전압술사 최하은',
-    '옴의현자 정시우', '주파수요정 강민서', '변압마스터 조은우', '플럭스몽크 윤지아',
-    '키르히호프 한결', '테슬라도제 오유진', '패러데이 신아린', '맥스웰견습 임준서',
+    '번개술사 김도윤',
+    '회로마녀 이서연',
+    '자기장기사 박지호',
+    '전압술사 최하은',
+    '옴의현자 정시우',
+    '주파수요정 강민서',
+    '변압마스터 조은우',
+    '플럭스몽크 윤지아',
+    '키르히호프 한결',
+    '테슬라도제 오유진',
+    '패러데이 신아린',
+    '맥스웰견습 임준서',
   ];
 
   /// 주차 시드 → 이번 주 내내 같은 라이벌·같은 성장 곡선 (결정적)
   static List<({String name, int xp})> rivalsFor(DateTime now) {
-    final monday = DateTime(now.year, now.month, now.day)
-        .subtract(Duration(days: now.weekday - 1));
+    final monday = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: now.weekday - 1));
     final seed = monday.year * 10000 + monday.month * 100 + monday.day;
     final rng = Random(seed);
 
@@ -120,8 +141,7 @@ class WeeklyLeagueCard extends StatelessWidget {
 
     // 다음 순위까지 필요한 XP
     final myIdx = myRank - 1;
-    final gapToNext =
-        myIdx > 0 ? entries[myIdx - 1].xp - myXp + 1 : 0;
+    final gapToNext = myIdx > 0 ? entries[myIdx - 1].xp - myXp + 1 : 0;
 
     return PremiumCard(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
@@ -132,8 +152,10 @@ class WeeklyLeagueCard extends StatelessWidget {
             children: [
               const Text('🏆', style: TextStyle(fontSize: 18)),
               const SizedBox(width: 7),
-              const Text('위클리 마법 리그',
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+              const Text(
+                '위클리 마법 리그',
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+              ),
               const Spacer(),
               PillBadge(
                 text: promoted ? '승급권 🎉' : '$myRank위',
@@ -147,8 +169,8 @@ class WeeklyLeagueCard extends StatelessWidget {
             daysLeft <= 1
                 ? '오늘 밤 마감! ${promoted ? "승급권을 지켜내세요" : "막판 스퍼트 찬스"}'
                 : gapToNext > 0
-                    ? '마감까지 $daysLeft일 · ${gapToNext}XP 더 모으면 ${myRank - 1}위'
-                    : '마감까지 $daysLeft일 · 1위 수성 중!',
+                ? '마감까지 $daysLeft일 · ${gapToNext}XP 더 모으면 ${myRank - 1}위'
+                : '마감까지 $daysLeft일 · 1위 수성 중!',
             style: TextStyle(
               fontSize: 12,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -161,10 +183,12 @@ class WeeklyLeagueCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 2),
               child: Center(
-                child: Text('⋯',
-                    style: TextStyle(
-                        color:
-                            Theme.of(context).colorScheme.onSurfaceVariant)),
+                child: Text(
+                  '⋯',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ),
             ),
             _row(context, myRank, entries[myIdx], dark),
@@ -174,8 +198,12 @@ class WeeklyLeagueCard extends StatelessWidget {
     );
   }
 
-  Widget _row(BuildContext context, int rank,
-      ({String name, int xp, bool me}) e, bool dark) {
+  Widget _row(
+    BuildContext context,
+    int rank,
+    ({String name, int xp, bool me}) e,
+    bool dark,
+  ) {
     final scheme = Theme.of(context).colorScheme;
     final medal = switch (rank) {
       1 => '🥇',
@@ -190,8 +218,8 @@ class WeeklyLeagueCard extends StatelessWidget {
         color: e.me
             ? AppTheme.primary.withValues(alpha: dark ? 0.22 : 0.09)
             : (dark
-                ? Colors.white.withValues(alpha: 0.03)
-                : const Color(0xFFF7F8FC)),
+                  ? Colors.white.withValues(alpha: 0.03)
+                  : const Color(0xFFF7F8FC)),
         borderRadius: BorderRadius.circular(11),
         border: e.me
             ? Border.all(color: AppTheme.primary.withValues(alpha: 0.5))

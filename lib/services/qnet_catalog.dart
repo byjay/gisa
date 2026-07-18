@@ -200,9 +200,9 @@ List<CatalogItem> get kFullCatalog => [...kQnetCatalog, ...kSchoolCatalog];
 
 /// id 로 카탈로그 항목 조회. 없으면 전기기사(기본) 반환.
 CatalogItem catalogItemById(String id) => kFullCatalog.firstWhere(
-      (e) => e.id == id,
-      orElse: () => kQnetCatalog.first,
-    );
+  (e) => e.id == id,
+  orElse: () => kQnetCatalog.first,
+);
 
 /// jmCd 로 Q-Net 카탈로그 항목 조회. 없으면 null.
 CatalogItem? catalogItemByJmCd(String jmCd) {

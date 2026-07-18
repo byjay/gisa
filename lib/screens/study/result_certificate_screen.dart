@@ -77,8 +77,8 @@ class ResultCertificateScreen extends StatelessWidget {
                   situation: correct == total
                       ? CoachSituation.resultPerfect
                       : (passed
-                          ? CoachSituation.resultPass
-                          : CoachSituation.resultFail),
+                            ? CoachSituation.resultPass
+                            : CoachSituation.resultFail),
                   level: total > 0 && correct / total >= 0.75
                       ? 2
                       : (total > 0 && correct / total >= 0.45 ? 1 : 0),

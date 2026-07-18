@@ -54,15 +54,17 @@ class _VisualRepeatScreenState extends State<VisualRepeatScreen> {
   }
 
   ({int total, int mastered, int totalReps}) get _summary =>
-      ProgressService.instance
-          .repetitionSummary(_cards.map(_qid), goal: kGoal);
+      ProgressService.instance.repetitionSummary(_cards.map(_qid), goal: kGoal);
 
   Future<void> _markSeen() async {
     final c = _card;
     if (c == null) return;
     final qid = _qid(c);
-    await ProgressService.instance
-        .recordExposure(qid, subject: c.subject, topic: c.topic);
+    await ProgressService.instance.recordExposure(
+      qid,
+      subject: c.subject,
+      topic: c.topic,
+    );
     setState(() {
       _reps[qid] = (_reps[qid] ?? 0) + 1;
     });
@@ -88,21 +90,19 @@ class _VisualRepeatScreenState extends State<VisualRepeatScreen> {
     final all = _all;
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('🎯 10회 반복 합격 트레이너'),
-      ),
+      appBar: AppBar(title: const Text('🎯 10회 반복 합격 트레이너')),
       body: all == null
           ? const Center(child: CircularProgressIndicator())
           : all.isEmpty
-              ? const Center(child: Text('반복 출제 문제 데이터가 없습니다.'))
-              : Column(
-                  children: [
-                    _headerProgress(cs),
-                    _subjectChips(),
-                    Expanded(child: _cardView(cs)),
-                    _controls(cs),
-                  ],
-                ),
+          ? const Center(child: Text('반복 출제 문제 데이터가 없습니다.'))
+          : Column(
+              children: [
+                _headerProgress(cs),
+                _subjectChips(),
+                Expanded(child: _cardView(cs)),
+                _controls(cs),
+              ],
+            ),
     );
   }
 
@@ -122,17 +122,21 @@ class _VisualRepeatScreenState extends State<VisualRepeatScreen> {
                 value: pct,
                 minHeight: 8,
                 backgroundColor: AppTheme.primary.withValues(alpha: 0.15),
-                valueColor:
-                    const AlwaysStoppedAnimation<Color>(AppTheme.primary),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppTheme.primary,
+                ),
               ),
             ),
           ),
           const SizedBox(width: 8),
-          Text('${s.mastered}/${s.total} 완성 · 누적 ${s.totalReps}회',
-              style: const TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w800,
-                  color: AppTheme.primary)),
+          Text(
+            '${s.mastered}/${s.total} 완성 · 누적 ${s.totalReps}회',
+            style: const TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w800,
+              color: AppTheme.primary,
+            ),
+          ),
         ],
       ),
     );
@@ -152,8 +156,7 @@ class _VisualRepeatScreenState extends State<VisualRepeatScreen> {
           final s = subjects[i];
           final sel = _subjectFilter == s;
           return ChoiceChip(
-            label: Text(s ?? '전체',
-                style: const TextStyle(fontSize: 12)),
+            label: Text(s ?? '전체', style: const TextStyle(fontSize: 12)),
             selected: sel,
             onSelected: (_) => setState(() {
               _subjectFilter = s;
@@ -201,37 +204,53 @@ class _VisualRepeatScreenState extends State<VisualRepeatScreen> {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.primary.withValues(alpha: 0.14),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text('${c.subject} · ${c.count}회 출제',
-                          style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: AppTheme.primary)),
+                      child: Text(
+                        '${c.subject} · ${c.count}회 출제',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.primary,
+                        ),
+                      ),
                     ),
                     const Spacer(),
                     if (done)
-                      const Row(children: [
-                        Icon(Icons.verified_rounded,
-                            size: 16, color: AppTheme.success),
-                        SizedBox(width: 3),
-                        Text('합격 확정',
+                      const Row(
+                        children: [
+                          Icon(
+                            Icons.verified_rounded,
+                            size: 16,
+                            color: AppTheme.success,
+                          ),
+                          SizedBox(width: 3),
+                          Text(
+                            '합격 확정',
                             style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: AppTheme.success)),
-                      ]),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: AppTheme.success,
+                            ),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(c.question,
-                    style: const TextStyle(
-                        fontSize: 14,
-                        height: 1.4,
-                        fontWeight: FontWeight.w700)),
+                Text(
+                  c.question,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    height: 1.4,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 // 보기
                 for (int i = 0; i < c.options.length; i++)
@@ -256,9 +275,7 @@ class _VisualRepeatScreenState extends State<VisualRepeatScreen> {
         color: isAns ? AppTheme.success.withValues(alpha: 0.13) : null,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: isAns
-              ? AppTheme.success
-              : Colors.grey.withValues(alpha: 0.3),
+          color: isAns ? AppTheme.success : Colors.grey.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -268,23 +285,28 @@ class _VisualRepeatScreenState extends State<VisualRepeatScreen> {
             backgroundColor: isAns
                 ? AppTheme.success
                 : Colors.grey.withValues(alpha: 0.3),
-            child: Text('$n',
-                style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: isAns ? Colors.white : Colors.black54)),
+            child: Text(
+              '$n',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: isAns ? Colors.white : Colors.black54,
+              ),
+            ),
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(text,
-                style: TextStyle(
-                    fontSize: 12.5,
-                    height: 1.3,
-                    fontWeight: isAns ? FontWeight.w800 : FontWeight.w500)),
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 12.5,
+                height: 1.3,
+                fontWeight: isAns ? FontWeight.w800 : FontWeight.w500,
+              ),
+            ),
           ),
           if (isAns)
-            const Icon(Icons.check_circle,
-                size: 18, color: AppTheme.success),
+            const Icon(Icons.check_circle, size: 18, color: AppTheme.success),
         ],
       ),
     );
@@ -305,20 +327,28 @@ class _VisualRepeatScreenState extends State<VisualRepeatScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.lightbulb_rounded,
-                  size: 16, color: AppTheme.success),
+              const Icon(
+                Icons.lightbulb_rounded,
+                size: 16,
+                color: AppTheme.success,
+              ),
               const SizedBox(width: 5),
-              Text('정답: ${c.answer}번',
-                  style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w900,
-                      color: AppTheme.success)),
+              Text(
+                '정답: ${c.answer}번',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                  color: AppTheme.success,
+                ),
+              ),
             ],
           ),
           if (c.answerText.isNotEmpty) ...[
             const SizedBox(height: 6),
-            Text(c.answerText,
-                style: const TextStyle(fontSize: 12.5, height: 1.5)),
+            Text(
+              c.answerText,
+              style: const TextStyle(fontSize: 12.5, height: 1.5),
+            ),
           ],
         ],
       ),
@@ -330,11 +360,14 @@ class _VisualRepeatScreenState extends State<VisualRepeatScreen> {
     // 한 줄 컴팩트: 라벨 + 도트 나란히
     return Row(
       children: [
-        Text('반복 $reps/$kGoal',
-            style: TextStyle(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w800,
-                color: done ? AppTheme.success : AppTheme.primary)),
+        Text(
+          '반복 $reps/$kGoal',
+          style: TextStyle(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w800,
+            color: done ? AppTheme.success : AppTheme.primary,
+          ),
+        ),
         const SizedBox(width: 8),
         Expanded(
           child: Row(
@@ -391,12 +424,13 @@ class _VisualRepeatScreenState extends State<VisualRepeatScreen> {
                   }
                 },
                 icon: Icon(
-                    _revealed
-                        ? Icons.done_all_rounded
-                        : Icons.visibility_rounded,
-                    size: 18),
-                label: Text(_revealed ? '외웠어요! 다음 (+1)' : '정답 확인하기',
-                    style: const TextStyle(fontSize: 13.5)),
+                  _revealed ? Icons.done_all_rounded : Icons.visibility_rounded,
+                  size: 18,
+                ),
+                label: Text(
+                  _revealed ? '외웠어요! 다음 (+1)' : '정답 확인하기',
+                  style: const TextStyle(fontSize: 13.5),
+                ),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),

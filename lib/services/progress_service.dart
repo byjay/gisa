@@ -21,7 +21,9 @@ class ProgressService {
 
   Map<String, dynamic> _rec(String qid) {
     final raw = _box?.get(qid);
-    if (raw == null) return {'wrong': 0, 'correct': 0, 'last': '', 'bookmarked': false};
+    if (raw == null) {
+      return {'wrong': 0, 'correct': 0, 'last': '', 'bookmarked': false};
+    }
     return Map<String, dynamic>.from(raw);
   }
 
@@ -45,8 +47,7 @@ class ProgressService {
     // 시각적 10회 반복 합격: 문제를 만날 때마다 reps +1 (맞든 틀리든 노출 카운트)
     r['reps'] = (r['reps'] as int? ?? 0) + 1;
     // 연속 정답(streak): 틀리면 0으로 초기화 → "확실히 외운" 판정 기준
-    r['streak'] =
-        correct ? ((r['streak'] as int? ?? 0) + 1) : 0;
+    r['streak'] = correct ? ((r['streak'] as int? ?? 0) + 1) : 0;
     final box = correct
         ? ((r['box'] as int? ?? 0) + 1).clamp(0, _srsIntervalDays.length - 1)
         : 0;
@@ -60,8 +61,11 @@ class ProgressService {
 
   /// 시각적 반복 암기 전용: 카드를 1회 "봤다"고 기록(정답 여부 없이 노출만).
   /// 플래시카드/암기모드에서 카드를 넘길 때 호출 → reps 증가.
-  Future<void> recordExposure(String qid,
-      {String subject = '', String topic = ''}) async {
+  Future<void> recordExposure(
+    String qid, {
+    String subject = '',
+    String topic = '',
+  }) async {
     await _ensure();
     final r = _rec(qid);
     r['reps'] = (r['reps'] as int? ?? 0) + 1;
@@ -86,8 +90,9 @@ class ProgressService {
   /// 목표 반복(기본 10회)까지의 전체 진행 요약.
   /// - total: 전체 대상 카드 수, mastered: reps>=goal 달성 수, totalReps: 누적 노출
   ({int total, int mastered, int totalReps}) repetitionSummary(
-      Iterable<String> qids,
-      {int goal = 10}) {
+    Iterable<String> qids, {
+    int goal = 10,
+  }) {
     int total = 0, mastered = 0, totalReps = 0;
     for (final qid in qids) {
       total++;
@@ -118,8 +123,9 @@ class ProgressService {
     final rawReasons = r['reasons'];
     final reasons = <String, int>{};
     if (rawReasons is Map) {
-      rawReasons.forEach((k, v) =>
-          reasons[k.toString()] = (v as num?)?.toInt() ?? 0);
+      rawReasons.forEach(
+        (k, v) => reasons[k.toString()] = (v as num?)?.toInt() ?? 0,
+      );
     }
     reasons[reason] = (reasons[reason] ?? 0) + 1;
     r['reasons'] = reasons;
@@ -138,8 +144,10 @@ class ProgressService {
       final r = _rec(key as String);
       final raw = r['reasons'];
       if (raw is Map) {
-        raw.forEach((k, v) =>
-            out[k.toString()] = (out[k.toString()] ?? 0) + ((v as num?)?.toInt() ?? 0));
+        raw.forEach(
+          (k, v) => out[k.toString()] =
+              (out[k.toString()] ?? 0) + ((v as num?)?.toInt() ?? 0),
+        );
       }
     }
     return out;
@@ -148,28 +156,37 @@ class ProgressService {
   /// 자주 틀리는 문제 랭킹 — wrong 횟수 내림차순.
   /// 반환: [(qid, wrong, correct, subject, topic, lastReason)]
   /// [onlyUnmastered] 이면 마지막 결과가 오답이거나 아직 완전 정답 아닌 것만.
-  Future<List<({
-    String qid,
-    int wrong,
-    int correct,
-    String subject,
-    String topic,
-    String? lastReason,
-  })>> frequentlyWrong({int limit = 100, bool onlyUnmastered = false}) async {
+  Future<
+    List<
+      ({
+        String qid,
+        int wrong,
+        int correct,
+        String subject,
+        String topic,
+        String? lastReason,
+      })
+    >
+  >
+  frequentlyWrong({int limit = 100, bool onlyUnmastered = false}) async {
     await _ensure();
-    final rows = <({
-      String qid,
-      int wrong,
-      int correct,
-      String subject,
-      String topic,
-      String? lastReason,
-    })>[];
+    final rows =
+        <
+          ({
+            String qid,
+            int wrong,
+            int correct,
+            String subject,
+            String topic,
+            String? lastReason,
+          })
+        >[];
     for (final key in _box!.keys) {
       final r = _rec(key as String);
       final w = r['wrong'] as int? ?? 0;
       if (w == 0) continue;
-      if (onlyUnmastered && r['last'] == 'o' &&
+      if (onlyUnmastered &&
+          r['last'] == 'o' &&
           (r['box'] as int? ?? 0) >= _srsIntervalDays.length - 1) {
         continue;
       }
@@ -203,7 +220,8 @@ class ProgressService {
   /// 이 문제를 이전에 만난 적 있는지 조회 (문제풀이 화면 상단 "N번째 만남" 배너용)
   /// null이면 첫 만남
   Future<({int seenCount, String? lastResult, int box})?> historyFor(
-      String qid) async {
+    String qid,
+  ) async {
     await _ensure();
     final raw = _box!.get(qid);
     if (raw == null) return null;
@@ -312,7 +330,7 @@ class ProgressService {
 
   /// 전체 요약: (푼 문제 수, 총 정답, 총 시도, 오답 수, 북마크 수)
   Future<({int solved, int correct, int attempts, int wrong, int bookmarks})>
-      summary() async {
+  summary() async {
     await _ensure();
     var solved = 0, correct = 0, attempts = 0, wrong = 0, bookmarks = 0;
     for (final key in _box!.keys) {
@@ -330,13 +348,16 @@ class ProgressService {
       correct: correct,
       attempts: attempts,
       wrong: wrong,
-      bookmarks: bookmarks
+      bookmarks: bookmarks,
     );
   }
 
   /// AI 맞춤 문제집 생성 — 약점 토픽(정답률 낮음) + 빈출도(freqScore) 가중 샘플링
   /// 풀이 이력이 없으면 빈출도 상위에서 추출
-  Future<List<Question>> buildSmartSet({int count = 20, String? subject}) async {
+  Future<List<Question>> buildSmartSet({
+    int count = 20,
+    String? subject,
+  }) async {
     await _ensure();
     final stats = await topicStats();
     // 토픽 정답률 맵
@@ -385,7 +406,9 @@ class ProgressService {
         }
       }
       final q = weighted.removeAt(idx).$1;
-      final sig = q.question.length > 40 ? q.question.substring(0, 40) : q.question;
+      final sig = q.question.length > 40
+          ? q.question.substring(0, 40)
+          : q.question;
       if (seen.add(sig)) picked.add(q);
     }
     return picked;

@@ -19,14 +19,17 @@ class WrongFocusScreen extends StatefulWidget {
 class _WrongFocusScreenState extends State<WrongFocusScreen> {
   bool _loading = true;
   Map<String, int> _reasonStats = {};
-  List<({
-    String qid,
-    int wrong,
-    int correct,
-    String subject,
-    String topic,
-    String? lastReason,
-  })> _frequent = [];
+  List<
+    ({
+      String qid,
+      int wrong,
+      int correct,
+      String subject,
+      String topic,
+      String? lastReason,
+    })
+  >
+  _frequent = [];
 
   @override
   void initState() {
@@ -37,8 +40,10 @@ class _WrongFocusScreenState extends State<WrongFocusScreen> {
   Future<void> _load() async {
     try {
       final reasons = await ProgressService.instance.wrongReasonStats();
-      final freq = await ProgressService.instance
-          .frequentlyWrong(limit: 50, onlyUnmastered: false);
+      final freq = await ProgressService.instance.frequentlyWrong(
+        limit: 50,
+        onlyUnmastered: false,
+      );
       if (!mounted) return;
       setState(() {
         _reasonStats = reasons;
@@ -58,8 +63,8 @@ class _WrongFocusScreenState extends State<WrongFocusScreen> {
     final topReason = _reasonStats.entries.isEmpty
         ? null
         : (_reasonStats.entries.toList()
-              ..sort((a, b) => b.value.compareTo(a.value)))
-            .first;
+                ..sort((a, b) => b.value.compareTo(a.value)))
+              .first;
 
     return Scaffold(
       appBar: AppBar(
@@ -90,10 +95,10 @@ class _WrongFocusScreenState extends State<WrongFocusScreen> {
                         : TutorMood.teaching,
                     message: _frequent.isEmpty
                         ? '아직 오답이 없어요! 문제를 풀다 틀리면 여기에서 '
-                            '"왜 틀렸는지"까지 모아 집중 복습할 수 있어요. 🎯'
+                              '"왜 틀렸는지"까지 모아 집중 복습할 수 있어요. 🎯'
                         : '틀린 문제 ${_frequent.length}개(총 $totalWrong회 오답)를 모았어요. '
-                            '${topReason != null ? '특히 「${topReason.key}」 실수가 가장 많아요. ' : ''}'
-                            '같은 실수를 반복하지 않도록 원인부터 잡아봐요! 💪',
+                              '${topReason != null ? '특히 「${topReason.key}」 실수가 가장 많아요. ' : ''}'
+                              '같은 실수를 반복하지 않도록 원인부터 잡아봐요! 💪',
                   ),
                   const SizedBox(height: 16),
 
@@ -128,15 +133,20 @@ class _WrongFocusScreenState extends State<WrongFocusScreen> {
                     child: Text(
                       '틀린 횟수가 많은 문제부터 표시됩니다.',
                       style: TextStyle(
-                          fontSize: 12,
-                          color: cs.onSurface.withValues(alpha: 0.6)),
+                        fontSize: 12,
+                        color: cs.onSurface.withValues(alpha: 0.6),
+                      ),
                     ),
                   ),
                   if (_frequent.isEmpty)
                     _empty(cs)
                   else
-                    ..._frequent.take(30).toList().asMap().entries.map(
-                        (e) => _wrongRow(cs, e.key + 1, e.value)),
+                    ..._frequent
+                        .take(30)
+                        .toList()
+                        .asMap()
+                        .entries
+                        .map((e) => _wrongRow(cs, e.key + 1, e.value)),
                   const SizedBox(height: 24),
                 ],
               ),
@@ -145,19 +155,22 @@ class _WrongFocusScreenState extends State<WrongFocusScreen> {
   }
 
   Widget _sectionTitle(ColorScheme cs, IconData icon, String t) => Padding(
-        padding: const EdgeInsets.only(left: 4),
-        child: Row(
-          children: [
-            Icon(icon, color: cs.primary, size: 20),
-            const SizedBox(width: 6),
-            Text(t,
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w900,
-                    color: cs.primary)),
-          ],
+    padding: const EdgeInsets.only(left: 4),
+    child: Row(
+      children: [
+        Icon(icon, color: cs.primary, size: 20),
+        const SizedBox(width: 6),
+        Text(
+          t,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+            color: cs.primary,
+          ),
         ),
-      );
+      ],
+    ),
+  );
 
   List<Widget> _reasonRows(ColorScheme cs) {
     final entries = _reasonStats.entries.toList()
@@ -177,21 +190,29 @@ class _WrongFocusScreenState extends State<WrongFocusScreen> {
             Row(
               children: [
                 Expanded(
-                  child: Text(e.key,
-                      style: const TextStyle(
-                          fontSize: 13.5, fontWeight: FontWeight.w800)),
+                  child: Text(
+                    e.key,
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
-                Text('${e.value}회',
-                    style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                        color: AppTheme.danger)),
+                Text(
+                  '${e.value}회',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    color: AppTheme.danger,
+                  ),
+                ),
                 const SizedBox(width: 8),
                 TextButton(
                   onPressed: () => _solveReason(e.key),
                   style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      visualDensity: VisualDensity.compact),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    visualDensity: VisualDensity.compact,
+                  ),
                   child: const Text('집중 풀기'),
                 ),
               ],
@@ -204,7 +225,8 @@ class _WrongFocusScreenState extends State<WrongFocusScreen> {
                 minHeight: 7,
                 backgroundColor: AppTheme.danger.withValues(alpha: 0.12),
                 valueColor: const AlwaysStoppedAnimation<Color>(
-                    AppTheme.danger),
+                  AppTheme.danger,
+                ),
               ),
             ),
           ],
@@ -214,16 +236,18 @@ class _WrongFocusScreenState extends State<WrongFocusScreen> {
   }
 
   Widget _wrongRow(
-      ColorScheme cs,
-      int rank,
-      ({
-        String qid,
-        int wrong,
-        int correct,
-        String subject,
-        String topic,
-        String? lastReason,
-      }) r) {
+    ColorScheme cs,
+    int rank,
+    ({
+      String qid,
+      int wrong,
+      int correct,
+      String subject,
+      String topic,
+      String? lastReason,
+    })
+    r,
+  ) {
     // qid = trackId|examLabel|subject|no  → 마지막 조각이 번호
     final parts = r.qid.split('|');
     final label = parts.length >= 2 ? parts[1] : '';
@@ -243,11 +267,14 @@ class _WrongFocusScreenState extends State<WrongFocusScreen> {
             backgroundColor: rank <= 3
                 ? AppTheme.danger.withValues(alpha: 0.15)
                 : cs.surfaceContainerHighest,
-            child: Text('$rank',
-                style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                    color: rank <= 3 ? AppTheme.danger : cs.onSurface)),
+            child: Text(
+              '$rank',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                color: rank <= 3 ? AppTheme.danger : cs.onSurface,
+              ),
+            ),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -257,7 +284,9 @@ class _WrongFocusScreenState extends State<WrongFocusScreen> {
                 Text(
                   '${r.subject.isEmpty ? '문제' : r.subject} · ${r.topic}',
                   style: const TextStyle(
-                      fontSize: 13, fontWeight: FontWeight.w700),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -266,8 +295,10 @@ class _WrongFocusScreenState extends State<WrongFocusScreen> {
                   spacing: 6,
                   runSpacing: 2,
                   children: [
-                    _miniTag('${label.isEmpty ? '' : '$label '}$no번',
-                        cs.onSurface.withValues(alpha: 0.55)),
+                    _miniTag(
+                      '${label.isEmpty ? '' : '$label '}$no번',
+                      cs.onSurface.withValues(alpha: 0.55),
+                    ),
                     _miniTag('틀림 ${r.wrong}회', AppTheme.danger),
                     if (r.correct > 0)
                       _miniTag('맞힘 ${r.correct}회', AppTheme.success),
@@ -289,22 +320,29 @@ class _WrongFocusScreenState extends State<WrongFocusScreen> {
   }
 
   Widget _miniTag(String text, Color color) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Text(text,
-            style: TextStyle(
-                fontSize: 10.5, fontWeight: FontWeight.w700, color: color)),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(6),
+    ),
+    child: Text(
+      text,
+      style: TextStyle(
+        fontSize: 10.5,
+        fontWeight: FontWeight.w700,
+        color: color,
+      ),
+    ),
+  );
 
-  Widget _actionCard(ColorScheme cs,
-      {required IconData icon,
-      required Color color,
-      required String title,
-      required String subtitle,
-      required VoidCallback onTap}) {
+  Widget _actionCard(
+    ColorScheme cs, {
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
     return Card(
       margin: EdgeInsets.zero,
       child: InkWell(
@@ -328,19 +366,28 @@ class _WrongFocusScreenState extends State<WrongFocusScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title,
-                        style: const TextStyle(
-                            fontSize: 14.5, fontWeight: FontWeight.w800)),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     const SizedBox(height: 3),
-                    Text(subtitle,
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: cs.onSurface.withValues(alpha: 0.6))),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: cs.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right_rounded,
-                  color: cs.onSurface.withValues(alpha: 0.4)),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: cs.onSurface.withValues(alpha: 0.4),
+              ),
             ],
           ),
         ),
@@ -349,30 +396,39 @@ class _WrongFocusScreenState extends State<WrongFocusScreen> {
   }
 
   Widget _empty(ColorScheme cs) => Container(
-        padding: const EdgeInsets.all(22),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerHighest.withValues(alpha: 0.4),
-          borderRadius: BorderRadius.circular(14),
+    padding: const EdgeInsets.all(22),
+    decoration: BoxDecoration(
+      color: cs.surfaceContainerHighest.withValues(alpha: 0.4),
+      borderRadius: BorderRadius.circular(14),
+    ),
+    child: Column(
+      children: [
+        Icon(
+          Icons.emoji_events_rounded,
+          size: 40,
+          color: cs.onSurface.withValues(alpha: 0.3),
         ),
-        child: Column(
-          children: [
-            Icon(Icons.emoji_events_rounded,
-                size: 40, color: cs.onSurface.withValues(alpha: 0.3)),
-            const SizedBox(height: 10),
-            Text('아직 틀린 문제가 없어요!',
-                style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface.withValues(alpha: 0.7))),
-            const SizedBox(height: 6),
-            Text('문제를 풀다 틀리면 이곳에 자동으로 쌓이고\n원인별로 집중 복습할 수 있어요.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 12.5,
-                    height: 1.5,
-                    color: cs.onSurface.withValues(alpha: 0.6))),
-          ],
+        const SizedBox(height: 10),
+        Text(
+          '아직 틀린 문제가 없어요!',
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: cs.onSurface.withValues(alpha: 0.7),
+          ),
         ),
-      );
+        const SizedBox(height: 6),
+        Text(
+          '문제를 풀다 틀리면 이곳에 자동으로 쌓이고\n원인별로 집중 복습할 수 있어요.',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12.5,
+            height: 1.5,
+            color: cs.onSurface.withValues(alpha: 0.6),
+          ),
+        ),
+      ],
+    ),
+  );
 
   Future<void> _solveReason(String reason) async {
     final qids = await ProgressService.instance.qidsByReason(reason);
@@ -383,14 +439,11 @@ class _WrongFocusScreenState extends State<WrongFocusScreen> {
   Future<void> _solveQids(Set<String> qids, String title) async {
     final messenger = ScaffoldMessenger.of(context);
     if (qids.isEmpty) {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('풀 문제가 없습니다.')),
-      );
+      messenger.showSnackBar(const SnackBar(content: Text('풀 문제가 없습니다.')));
       return;
     }
     try {
-      final questions =
-          await ProgressService.instance.resolveQuestions(qids);
+      final questions = await ProgressService.instance.resolveQuestions(qids);
       if (!mounted) return;
       if (questions.isEmpty) {
         messenger.showSnackBar(

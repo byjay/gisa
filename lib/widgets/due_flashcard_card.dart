@@ -45,8 +45,7 @@ class _DueFlashcardCardState extends State<DueFlashcardCard> {
         onTap: _start,
         child: Row(
           children: [
-            const IconBadge(
-                icon: Icons.style_rounded, color: orange, size: 40),
+            const IconBadge(icon: Icons.style_rounded, color: orange, size: 40),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -54,17 +53,25 @@ class _DueFlashcardCardState extends State<DueFlashcardCard> {
                 children: [
                   Row(
                     children: [
-                      const Text('오늘의 암기카드',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w800)),
+                      const Text(
+                        '오늘의 암기카드',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                       const SizedBox(width: 7),
                       PillBadge(text: '$_count개', color: orange, filled: true),
                     ],
                   ),
                   const SizedBox(height: 3),
-                  Text('암기법을 잊기 전에 한 번 더 확인해요',
-                      style: TextStyle(
-                          fontSize: 11.5, color: scheme.onSurfaceVariant)),
+                  Text(
+                    '암기법을 잊기 전에 한 번 더 확인해요',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
                 ],
               ),
             ),

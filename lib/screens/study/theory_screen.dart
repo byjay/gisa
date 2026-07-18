@@ -26,7 +26,11 @@ class TheoryScreen extends StatelessWidget {
                 title: Text(kSubjects[i]),
                 subtitle: const Text('빈출 토픽 순위 · 공식 · 암기법 · 강의링크 포함'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => pushWithNav(context, TheoryViewer(subject: kSubjects[i]), currentSection: 1),
+                onTap: () => pushWithNav(
+                  context,
+                  TheoryViewer(subject: kSubjects[i]),
+                  currentSection: 1,
+                ),
               ),
             ),
         ],
@@ -169,11 +173,15 @@ class _TheoryViewerState extends State<TheoryViewer> {
         ).showSnackBar(const SnackBar(content: Text('연결된 기초 문제가 없습니다.')));
         return;
       }
-      await pushWithNav(context, QuizPlayScreen(
-            title: '${widget.subject} 기초 확인 10문제',
-            questions: questions.take(10).toList(),
-            examMode: false,
-          ), currentSection: 1);
+      await pushWithNav(
+        context,
+        QuizPlayScreen(
+          title: '${widget.subject} 기초 확인 10문제',
+          questions: questions.take(10).toList(),
+          examMode: false,
+        ),
+        currentSection: 1,
+      );
     } finally {
       if (mounted) setState(() => _startingQuiz = false);
     }

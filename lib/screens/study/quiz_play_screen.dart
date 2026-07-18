@@ -280,6 +280,13 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     super.initState();
     _syncBookmark();
     _syncHistory();
+    // 🔒 Q65: 실전모드 진행 중에는 AI 튜터를 통한 정답 유출 우회를 막기 위해
+    // 전역 플래그를 세운다. 화면 종료 시(dispose) 반드시 해제한다.
+    if (widget.examMode) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.read<AppProvider>().setExamInProgress(true);
+      });
+    }
     if (widget.examMode && widget.questions.isNotEmpty) {
       _totalSec = widget.questions.length * 90; // 실전 페이스 1문당 1분 30초
       _remainSec = _totalSec;
@@ -300,6 +307,14 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    // 🔒 Q65: 실전모드 종료 시 AI 튜터 접근 제한 플래그 해제
+    if (widget.examMode) {
+      try {
+        context.read<AppProvider>().setExamInProgress(false);
+      } catch (_) {
+        // context가 이미 트리에서 분리된 경우 무시(다음 진입 시 재설정됨)
+      }
+    }
     super.dispose();
   }
 
@@ -1128,11 +1143,17 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
 
   Future<void> _requestExit() async {
     if (_finished) return;
+    final answeredCount = _picked.length;
     final leave = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('문제풀이를 종료할까요?'),
-        content: const Text('아직 제출하지 않은 답안과 현재 진행 위치는 저장되지 않습니다.'),
+        title: Text(widget.examMode ? '⚠️ 실전 모의고사를 종료할까요?' : '문제풀이를 종료할까요?'),
+        content: Text(
+          widget.examMode
+              ? '지금까지 푼 $answeredCount / ${widget.questions.length}문항의 답안이'
+                    ' 저장되지 않고 사라집니다.\n실전 모드는 중간 저장을 지원하지 않습니다.'
+              : '아직 제출하지 않은 답안과 현재 진행 위치는 저장되지 않습니다.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

@@ -8,10 +8,10 @@ ExamTrack _currentTrack = kExamTracks.first;
 
 /// JSON 값을 문자열 리스트로 안전 변환 (top-level 헬퍼).
 List<String> _strList(dynamic v) => switch (v) {
-      final List l => l.map((e) => e.toString()).toList(),
-      final String s when s.isNotEmpty => [s],
-      _ => const <String>[],
-    };
+  final List l => l.map((e) => e.toString()).toList(),
+  final String s when s.isNotEmpty => [s],
+  _ => const <String>[],
+};
 
 /// 현재 종목의 과목 목록 (순서 고정) — 전 화면에서 이 상수처럼 사용.
 List<String> get kSubjects => _currentTrack.subjects;
@@ -57,19 +57,19 @@ class Question {
   String get qid => '${_currentTrack.id}|$examLabel|$subject|$no';
 
   factory Question.fromJson(Map<String, dynamic> j) => Question(
-        no: j['no'] as int,
-        subject: (j['subject'] as String?) ?? '',
-        topic: (j['topic'] as String?) ?? '기타',
-        question: (j['question'] as String?) ?? '',
-        options: ((j['options'] as List?) ?? const [])
-            .map((e) => e.toString())
-            .toList(),
-        answer: (j['answer'] as int?) ?? 0,
-        hasImage: (j['has_image'] as bool?) ?? false,
-        explanation: (j['explanation'] as String?) ?? '',
-        difficulty: (j['difficulty'] as int?) ?? 2,
-        freqScore: ((j['freq_score'] as num?) ?? 0).toDouble(),
-      );
+    no: j['no'] as int,
+    subject: (j['subject'] as String?) ?? '',
+    topic: (j['topic'] as String?) ?? '기타',
+    question: (j['question'] as String?) ?? '',
+    options: ((j['options'] as List?) ?? const [])
+        .map((e) => e.toString())
+        .toList(),
+    answer: (j['answer'] as int?) ?? 0,
+    hasImage: (j['has_image'] as bool?) ?? false,
+    explanation: (j['explanation'] as String?) ?? '',
+    difficulty: (j['difficulty'] as int?) ?? 2,
+    freqScore: ((j['freq_score'] as num?) ?? 0).toDouble(),
+  );
 }
 
 class TopicFreq {
@@ -78,10 +78,10 @@ class TopicFreq {
   final int rank;
   TopicFreq({required this.topic, required this.count, required this.rank});
   factory TopicFreq.fromJson(Map<String, dynamic> j) => TopicFreq(
-        topic: (j['topic'] as String?) ?? '',
-        count: (j['count'] as int?) ?? 0,
-        rank: (j['rank'] as int?) ?? 0,
-      );
+    topic: (j['topic'] as String?) ?? '',
+    count: (j['count'] as int?) ?? 0,
+    rank: (j['rank'] as int?) ?? 0,
+  );
 }
 
 class ExamPaper {
@@ -100,14 +100,14 @@ class ExamPaper {
   });
 
   factory ExamPaper.fromJson(Map<String, dynamic> j) => ExamPaper(
-        id: (j['id'] as String?) ?? '',
-        label: (j['label'] as String?) ?? '',
-        year: (j['year'] as int?) ?? 0,
-        session: (j['session'] as String?)?.toString() ?? '',
-        questions: ((j['questions'] as List?) ?? const [])
-            .map((e) => Question.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    id: (j['id'] as String?) ?? '',
+    label: (j['label'] as String?) ?? '',
+    year: (j['year'] as int?) ?? 0,
+    session: (j['session'] as String?)?.toString() ?? '',
+    questions: ((j['questions'] as List?) ?? const [])
+        .map((e) => Question.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }
 
 class Mnemonic {
@@ -124,11 +124,11 @@ class Mnemonic {
   });
 
   factory Mnemonic.fromJson(Map<String, dynamic> j) => Mnemonic(
-        subject: (j['subject'] as String?) ?? '',
-        title: (j['title'] as String?) ?? '',
-        body: (j['body'] as String?) ?? '',
-        tip: (j['tip'] as String?) ?? '',
-      );
+    subject: (j['subject'] as String?) ?? '',
+    title: (j['title'] as String?) ?? '',
+    body: (j['body'] as String?) ?? '',
+    tip: (j['tip'] as String?) ?? '',
+  );
 }
 
 /// 풀이 레시피 — 토픽별 문제 풀이 순서 + 공식 적용법 (만능 선생님)
@@ -137,9 +137,9 @@ class RecipeFormula {
   final String how; // 적용 방법
   RecipeFormula({required this.expr, required this.how});
   factory RecipeFormula.fromJson(Map<String, dynamic> j) => RecipeFormula(
-        expr: (j['expr'] as String?) ?? '',
-        how: (j['how'] as String?) ?? '',
-      );
+    expr: (j['expr'] as String?) ?? '',
+    how: (j['how'] as String?) ?? '',
+  );
 }
 
 class SolutionRecipe {
@@ -154,15 +154,15 @@ class SolutionRecipe {
     required this.formulas,
   });
   factory SolutionRecipe.fromJson(Map<String, dynamic> j) => SolutionRecipe(
-        topic: (j['topic'] as String?) ?? '',
-        check: (j['check'] as String?) ?? '',
-        steps: ((j['steps'] as List?) ?? const [])
-            .map((e) => e.toString())
-            .toList(),
-        formulas: ((j['formulas'] as List?) ?? const [])
-            .map((e) => RecipeFormula.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    topic: (j['topic'] as String?) ?? '',
+    check: (j['check'] as String?) ?? '',
+    steps: ((j['steps'] as List?) ?? const [])
+        .map((e) => e.toString())
+        .toList(),
+    formulas: ((j['formulas'] as List?) ?? const [])
+        .map((e) => RecipeFormula.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }
 
 /// 1:1 강의 노트 (토픽별 완전 강의)
@@ -171,9 +171,9 @@ class LessonSection {
   final String body;
   LessonSection({required this.title, required this.body});
   factory LessonSection.fromJson(Map<String, dynamic> j) => LessonSection(
-        title: (j['title'] as String?) ?? '',
-        body: (j['body'] as String?) ?? '',
-      );
+    title: (j['title'] as String?) ?? '',
+    body: (j['body'] as String?) ?? '',
+  );
 }
 
 class LessonFormula {
@@ -182,10 +182,10 @@ class LessonFormula {
   final String note;
   LessonFormula({required this.name, required this.expr, required this.note});
   factory LessonFormula.fromJson(Map<String, dynamic> j) => LessonFormula(
-        name: (j['name'] as String?) ?? '',
-        expr: (j['expr'] as String?) ?? '',
-        note: (j['note'] as String?) ?? '',
-      );
+    name: (j['name'] as String?) ?? '',
+    expr: (j['expr'] as String?) ?? '',
+    note: (j['note'] as String?) ?? '',
+  );
 }
 
 class Lesson {
@@ -235,36 +235,36 @@ class Lesson {
   });
 
   static List<String> _strList(dynamic v) => switch (v) {
-        final List l => l.map((e) => e.toString()).toList(),
-        final String s when s.isNotEmpty => [s],
-        _ => const <String>[],
-      };
+    final List l => l.map((e) => e.toString()).toList(),
+    final String s when s.isNotEmpty => [s],
+    _ => const <String>[],
+  };
 
   factory Lesson.fromJson(Map<String, dynamic> j) => Lesson(
-        subject: (j['subject'] as String?) ?? '',
-        topic: (j['topic'] as String?) ?? '',
-        freq: (j['freq'] as int?) ?? 0,
-        importance: (j['importance'] as int?) ?? 3,
-        intro: (j['intro'] as String?) ?? '',
-        sections: ((j['sections'] as List?) ?? const [])
-            .map((e) => LessonSection.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        formulas: ((j['formulas'] as List?) ?? const [])
-            .map((e) => LessonFormula.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        mnemonics: ((j['mnemonics'] as List?) ?? const [])
-            .map((e) => e.toString())
-            .toList(),
-        strategy: (j['strategy'] as String?) ?? '',
-        traps: ((j['traps'] as List?) ?? const [])
-            .map((e) => e.toString())
-            .toList(),
-        basicExplain: (j['basic_explain'] as String?) ?? '',
-        examHow: _strList(j['exam_how']),
-        must: _strList(j['must']),
-        advanced: _strList(j['advanced']),
-        silgi: (j['silgi'] as String?) ?? '',
-      );
+    subject: (j['subject'] as String?) ?? '',
+    topic: (j['topic'] as String?) ?? '',
+    freq: (j['freq'] as int?) ?? 0,
+    importance: (j['importance'] as int?) ?? 3,
+    intro: (j['intro'] as String?) ?? '',
+    sections: ((j['sections'] as List?) ?? const [])
+        .map((e) => LessonSection.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    formulas: ((j['formulas'] as List?) ?? const [])
+        .map((e) => LessonFormula.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    mnemonics: ((j['mnemonics'] as List?) ?? const [])
+        .map((e) => e.toString())
+        .toList(),
+    strategy: (j['strategy'] as String?) ?? '',
+    traps: ((j['traps'] as List?) ?? const [])
+        .map((e) => e.toString())
+        .toList(),
+    basicExplain: (j['basic_explain'] as String?) ?? '',
+    examHow: _strList(j['exam_how']),
+    must: _strList(j['must']),
+    advanced: _strList(j['advanced']),
+    silgi: (j['silgi'] as String?) ?? '',
+  );
 }
 
 /// 반복 출제 문제 클러스터 (문제-답 암기용)
@@ -280,11 +280,11 @@ class RepeatVariation {
     required this.answerText,
   });
   factory RepeatVariation.fromJson(Map<String, dynamic> j) => RepeatVariation(
-        exam: (j['exam'] as String?) ?? '',
-        question: (j['question'] as String?) ?? '',
-        answer: (j['answer'] as int?) ?? 0,
-        answerText: (j['answer_text'] as String?) ?? '',
-      );
+    exam: (j['exam'] as String?) ?? '',
+    question: (j['question'] as String?) ?? '',
+    answer: (j['answer'] as int?) ?? 0,
+    answerText: (j['answer_text'] as String?) ?? '',
+  );
 }
 
 class RepeatCluster {
@@ -313,23 +313,23 @@ class RepeatCluster {
   });
 
   factory RepeatCluster.fromJson(Map<String, dynamic> j) => RepeatCluster(
-        subject: (j['subject'] as String?) ?? '',
-        topic: (j['topic'] as String?) ?? '',
-        count: (j['count'] as int?) ?? 0,
-        exams: ((j['exams'] as List?) ?? const [])
-            .map((e) => e.toString())
-            .toList(),
-        question: (j['question'] as String?) ?? '',
-        options: ((j['options'] as List?) ?? const [])
-            .map((e) => e.toString())
-            .toList(),
-        answer: (j['answer'] as int?) ?? 0,
-        answerText: (j['answer_text'] as String?) ?? '',
-        isVariation: (j['is_variation'] as bool?) ?? false,
-        variations: ((j['variations'] as List?) ?? const [])
-            .map((e) => RepeatVariation.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    subject: (j['subject'] as String?) ?? '',
+    topic: (j['topic'] as String?) ?? '',
+    count: (j['count'] as int?) ?? 0,
+    exams: ((j['exams'] as List?) ?? const [])
+        .map((e) => e.toString())
+        .toList(),
+    question: (j['question'] as String?) ?? '',
+    options: ((j['options'] as List?) ?? const [])
+        .map((e) => e.toString())
+        .toList(),
+    answer: (j['answer'] as int?) ?? 0,
+    answerText: (j['answer_text'] as String?) ?? '',
+    isVariation: (j['is_variation'] as bool?) ?? false,
+    variations: ((j['variations'] as List?) ?? const [])
+        .map((e) => RepeatVariation.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }
 
 class VideoLink {
@@ -348,12 +348,12 @@ class VideoLink {
   });
 
   factory VideoLink.fromJson(Map<String, dynamic> j) => VideoLink(
-        subject: (j['subject'] as String?) ?? '',
-        title: (j['title'] as String?) ?? '',
-        channel: (j['channel'] as String?) ?? '',
-        url: (j['url'] as String?) ?? '',
-        desc: (j['desc'] as String?) ?? '',
-      );
+    subject: (j['subject'] as String?) ?? '',
+    title: (j['title'] as String?) ?? '',
+    channel: (j['channel'] as String?) ?? '',
+    url: (j['url'] as String?) ?? '',
+    desc: (j['desc'] as String?) ?? '',
+  );
 }
 
 /// 30일 학습 플랜
@@ -379,17 +379,19 @@ class PlanDay {
   });
 
   factory PlanDay.fromJson(Map<String, dynamic> j) => PlanDay(
-        day: (j['day'] as int?) ?? 0,
-        week: (j['week'] as int?) ?? 0,
-        phase: (j['phase'] as String?) ?? '',
-        subject: (j['subject'] as String?) ?? '',
-        title: (j['title'] as String?) ?? '',
-        topics:
-            ((j['topics'] as List?) ?? const []).map((e) => e.toString()).toList(),
-        goalQuestions: (j['goal_questions'] as int?) ?? 0,
-        tasks:
-            ((j['tasks'] as List?) ?? const []).map((e) => e.toString()).toList(),
-      );
+    day: (j['day'] as int?) ?? 0,
+    week: (j['week'] as int?) ?? 0,
+    phase: (j['phase'] as String?) ?? '',
+    subject: (j['subject'] as String?) ?? '',
+    title: (j['title'] as String?) ?? '',
+    topics: ((j['topics'] as List?) ?? const [])
+        .map((e) => e.toString())
+        .toList(),
+    goalQuestions: (j['goal_questions'] as int?) ?? 0,
+    tasks: ((j['tasks'] as List?) ?? const [])
+        .map((e) => e.toString())
+        .toList(),
+  );
 }
 
 class StudyPlan {
@@ -406,19 +408,19 @@ class StudyPlan {
   });
 
   factory StudyPlan.fromJson(Map<String, dynamic> j) => StudyPlan(
-        title: (j['title'] as String?) ?? '',
-        description: (j['description'] as String?) ?? '',
-        // strategy 는 트랙별 JSON 에 따라 List<String> 또는 String 이 올 수 있어
-        // 두 형식 모두 허용한다 (String 이면 단일 항목 리스트로 변환).
-        strategy: switch (j['strategy']) {
-          final List l => l.map((e) => e.toString()).toList(),
-          final String s when s.isNotEmpty => [s],
-          _ => const <String>[],
-        },
-        days: ((j['days'] as List?) ?? const [])
-            .map((e) => PlanDay.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    title: (j['title'] as String?) ?? '',
+    description: (j['description'] as String?) ?? '',
+    // strategy 는 트랙별 JSON 에 따라 List<String> 또는 String 이 올 수 있어
+    // 두 형식 모두 허용한다 (String 이면 단일 항목 리스트로 변환).
+    strategy: switch (j['strategy']) {
+      final List l => l.map((e) => e.toString()).toList(),
+      final String s when s.isNotEmpty => [s],
+      _ => const <String>[],
+    },
+    days: ((j['days'] as List?) ?? const [])
+        .map((e) => PlanDay.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }
 
 /// 합격 공부법 가이드 — 딥리서치(합격후기·기출현황) 기반 학습 전략
@@ -442,37 +444,40 @@ class StudyGuide {
   });
 
   factory StudyGuide.fromJson(Map<String, dynamic> j) => StudyGuide(
-        title: (j['title'] as String?) ?? '합격 공부법',
-        intro: (j['intro'] as String?) ?? '',
-        examNote: j['exam_data_note'] is Map
-            ? GuideNote.fromJson(j['exam_data_note'] as Map<String, dynamic>)
-            : null,
-        order: j['order'] is Map
-            ? GuideOrder.fromJson(j['order'] as Map<String, dynamic>)
-            : null,
-        subjects: ((j['subjects'] as List?) ?? const [])
-            .map((e) => GuideSubject.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        principles: j['principles'] is Map
-            ? GuideList.fromJson(j['principles'] as Map<String, dynamic>)
-            : null,
-        period: j['period'] is Map
-            ? GuidePeriod.fromJson(j['period'] as Map<String, dynamic>)
-            : null,
-      );
+    title: (j['title'] as String?) ?? '합격 공부법',
+    intro: (j['intro'] as String?) ?? '',
+    examNote: j['exam_data_note'] is Map
+        ? GuideNote.fromJson(j['exam_data_note'] as Map<String, dynamic>)
+        : null,
+    order: j['order'] is Map
+        ? GuideOrder.fromJson(j['order'] as Map<String, dynamic>)
+        : null,
+    subjects: ((j['subjects'] as List?) ?? const [])
+        .map((e) => GuideSubject.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    principles: j['principles'] is Map
+        ? GuideList.fromJson(j['principles'] as Map<String, dynamic>)
+        : null,
+    period: j['period'] is Map
+        ? GuidePeriod.fromJson(j['period'] as Map<String, dynamic>)
+        : null,
+  );
 }
 
 class GuideNote {
   final String title;
   final String body;
   final List<String> highlights;
-  GuideNote(
-      {required this.title, required this.body, required this.highlights});
+  GuideNote({
+    required this.title,
+    required this.body,
+    required this.highlights,
+  });
   factory GuideNote.fromJson(Map<String, dynamic> j) => GuideNote(
-        title: (j['title'] as String?) ?? '',
-        body: (j['body'] as String?) ?? '',
-        highlights: _strList(j['highlights']),
-      );
+    title: (j['title'] as String?) ?? '',
+    body: (j['body'] as String?) ?? '',
+    highlights: _strList(j['highlights']),
+  );
 }
 
 class GuideOrder {
@@ -480,21 +485,22 @@ class GuideOrder {
   final String body;
   final OrderPath? nonMajor;
   final OrderPath? major;
-  GuideOrder(
-      {required this.title,
-      required this.body,
-      required this.nonMajor,
-      required this.major});
+  GuideOrder({
+    required this.title,
+    required this.body,
+    required this.nonMajor,
+    required this.major,
+  });
   factory GuideOrder.fromJson(Map<String, dynamic> j) => GuideOrder(
-        title: (j['title'] as String?) ?? '',
-        body: (j['body'] as String?) ?? '',
-        nonMajor: j['non_major'] is Map
-            ? OrderPath.fromJson(j['non_major'] as Map<String, dynamic>)
-            : null,
-        major: j['major'] is Map
-            ? OrderPath.fromJson(j['major'] as Map<String, dynamic>)
-            : null,
-      );
+    title: (j['title'] as String?) ?? '',
+    body: (j['body'] as String?) ?? '',
+    nonMajor: j['non_major'] is Map
+        ? OrderPath.fromJson(j['non_major'] as Map<String, dynamic>)
+        : null,
+    major: j['major'] is Map
+        ? OrderPath.fromJson(j['major'] as Map<String, dynamic>)
+        : null,
+  );
 }
 
 class OrderPath {
@@ -503,10 +509,10 @@ class OrderPath {
   final List<String> steps;
   OrderPath({required this.label, required this.reason, required this.steps});
   factory OrderPath.fromJson(Map<String, dynamic> j) => OrderPath(
-        label: (j['label'] as String?) ?? '',
-        reason: (j['reason'] as String?) ?? '',
-        steps: _strList(j['steps']),
-      );
+    label: (j['label'] as String?) ?? '',
+    reason: (j['reason'] as String?) ?? '',
+    steps: _strList(j['steps']),
+  );
 }
 
 class GuideSubject {
@@ -514,17 +520,18 @@ class GuideSubject {
   final String role;
   final String method;
   final List<String> tips;
-  GuideSubject(
-      {required this.name,
-      required this.role,
-      required this.method,
-      required this.tips});
+  GuideSubject({
+    required this.name,
+    required this.role,
+    required this.method,
+    required this.tips,
+  });
   factory GuideSubject.fromJson(Map<String, dynamic> j) => GuideSubject(
-        name: (j['name'] as String?) ?? '',
-        role: (j['role'] as String?) ?? '',
-        method: (j['method'] as String?) ?? '',
-        tips: _strList(j['tips']),
-      );
+    name: (j['name'] as String?) ?? '',
+    role: (j['role'] as String?) ?? '',
+    method: (j['method'] as String?) ?? '',
+    tips: _strList(j['tips']),
+  );
 }
 
 class GuideList {
@@ -532,9 +539,9 @@ class GuideList {
   final List<String> items;
   GuideList({required this.title, required this.items});
   factory GuideList.fromJson(Map<String, dynamic> j) => GuideList(
-        title: (j['title'] as String?) ?? '',
-        items: _strList(j['items']),
-      );
+    title: (j['title'] as String?) ?? '',
+    items: _strList(j['items']),
+  );
 }
 
 class GuidePeriod {
@@ -543,17 +550,18 @@ class GuidePeriod {
   final List<List<String>> table; // [라벨, 시간, 기간]
   GuidePeriod({required this.title, required this.body, required this.table});
   factory GuidePeriod.fromJson(Map<String, dynamic> j) => GuidePeriod(
-        title: (j['title'] as String?) ?? '',
-        body: (j['body'] as String?) ?? '',
-        table: ((j['table'] as List?) ?? const [])
-            .map<List<String>>((row) => _strList(row))
-            .toList(),
-      );
+    title: (j['title'] as String?) ?? '',
+    body: (j['body'] as String?) ?? '',
+    table: ((j['table'] as List?) ?? const [])
+        .map<List<String>>((row) => _strList(row))
+        .toList(),
+  );
 }
 
 /// 슬라이드 카드 (30일 이론 덱)
 class SlideCard {
-  final String type; // mission/concept/core/formula/mnemonic/trap/strategy/recap
+  final String
+  type; // mission/concept/core/formula/mnemonic/trap/strategy/recap
   final String topic;
   final String title;
   final String body;
@@ -566,11 +574,11 @@ class SlideCard {
   });
 
   factory SlideCard.fromJson(Map<String, dynamic> j) => SlideCard(
-        type: (j['type'] as String?) ?? 'core',
-        topic: (j['topic'] as String?) ?? '',
-        title: (j['title'] as String?) ?? '',
-        body: (j['body'] as String?) ?? '',
-      );
+    type: (j['type'] as String?) ?? 'core',
+    topic: (j['topic'] as String?) ?? '',
+    title: (j['title'] as String?) ?? '',
+    body: (j['body'] as String?) ?? '',
+  );
 }
 
 class SlideDeck {
@@ -589,14 +597,14 @@ class SlideDeck {
   });
 
   factory SlideDeck.fromJson(Map<String, dynamic> j) => SlideDeck(
-        day: (j['day'] as int?) ?? 0,
-        subject: (j['subject'] as String?) ?? '',
-        title: (j['title'] as String?) ?? '',
-        phase: (j['phase'] as String?) ?? '',
-        cards: ((j['cards'] as List?) ?? const [])
-            .map((e) => SlideCard.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    day: (j['day'] as int?) ?? 0,
+    subject: (j['subject'] as String?) ?? '',
+    title: (j['title'] as String?) ?? '',
+    phase: (j['phase'] as String?) ?? '',
+    cards: ((j['cards'] as List?) ?? const [])
+        .map((e) => SlideCard.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }
 
 /// 실기 대비 카드
@@ -620,16 +628,16 @@ class SilgiItem {
   });
 
   factory SilgiItem.fromJson(Map<String, dynamic> j) => SilgiItem(
-        // 관대한 파싱: 구 스키마(topic/subject/body)도 수용
-        category: (j['category'] as String?) ?? (j['topic'] as String?) ?? '',
-        title: (j['title'] as String?) ?? '',
-        linkSubject:
-            (j['link_subject'] as String?) ?? (j['subject'] as String?) ?? '',
-        importance: (j['importance'] as num?)?.toInt() ?? 3,
-        question: (j['question'] as String?) ?? '',
-        answer: (j['answer'] as String?) ?? (j['body'] as String?) ?? '',
-        memo: (j['memo'] as String?) ?? '',
-      );
+    // 관대한 파싱: 구 스키마(topic/subject/body)도 수용
+    category: (j['category'] as String?) ?? (j['topic'] as String?) ?? '',
+    title: (j['title'] as String?) ?? '',
+    linkSubject:
+        (j['link_subject'] as String?) ?? (j['subject'] as String?) ?? '',
+    importance: (j['importance'] as num?)?.toInt() ?? 3,
+    question: (j['question'] as String?) ?? '',
+    answer: (j['answer'] as String?) ?? (j['body'] as String?) ?? '',
+    memo: (j['memo'] as String?) ?? '',
+  );
 }
 
 class SilgiData {
@@ -646,18 +654,18 @@ class SilgiData {
   });
 
   factory SilgiData.fromJson(Map<String, dynamic> j) => SilgiData(
-        title: (j['title'] as String?) ?? '',
-        overview: (j['overview'] as String?) ?? '',
-        // 관대한 파싱: strategy가 문자열이어도, 리스트여도 모두 수용
-        strategy: switch (j['strategy']) {
-          final List l => l.map((e) => e.toString()).toList(),
-          final String s when s.isNotEmpty => [s],
-          _ => const <String>[],
-        },
-        items: ((j['items'] as List?) ?? const [])
-            .map((e) => SilgiItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    title: (j['title'] as String?) ?? '',
+    overview: (j['overview'] as String?) ?? '',
+    // 관대한 파싱: strategy가 문자열이어도, 리스트여도 모두 수용
+    strategy: switch (j['strategy']) {
+      final List l => l.map((e) => e.toString()).toList(),
+      final String s when s.isNotEmpty => [s],
+      _ => const <String>[],
+    },
+    items: ((j['items'] as List?) ?? const [])
+        .map((e) => SilgiItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }
 
 // ─── 회로도 마스터 (모터 제어반) — 전 종목 공통 ───
@@ -666,17 +674,18 @@ class CircuitLegend {
   final String name;
   final String desc;
   final String svg;
-  CircuitLegend(
-      {required this.code,
-      required this.name,
-      required this.desc,
-      required this.svg});
+  CircuitLegend({
+    required this.code,
+    required this.name,
+    required this.desc,
+    required this.svg,
+  });
   factory CircuitLegend.fromJson(Map<String, dynamic> j) => CircuitLegend(
-        code: (j['code'] as String?) ?? '',
-        name: (j['name'] as String?) ?? '',
-        desc: (j['desc'] as String?) ?? '',
-        svg: (j['svg'] as String?) ?? '',
-      );
+    code: (j['code'] as String?) ?? '',
+    name: (j['name'] as String?) ?? '',
+    desc: (j['desc'] as String?) ?? '',
+    svg: (j['svg'] as String?) ?? '',
+  );
 }
 
 class CircuitStep {
@@ -684,17 +693,18 @@ class CircuitStep {
   final String body;
   final String tip;
   final String svg;
-  CircuitStep(
-      {required this.title,
-      required this.body,
-      required this.tip,
-      required this.svg});
+  CircuitStep({
+    required this.title,
+    required this.body,
+    required this.tip,
+    required this.svg,
+  });
   factory CircuitStep.fromJson(Map<String, dynamic> j) => CircuitStep(
-        title: (j['title'] as String?) ?? '',
-        body: (j['body'] as String?) ?? '',
-        tip: (j['tip'] as String?) ?? '',
-        svg: (j['svg'] as String?) ?? '',
-      );
+    title: (j['title'] as String?) ?? '',
+    body: (j['body'] as String?) ?? '',
+    tip: (j['tip'] as String?) ?? '',
+    svg: (j['svg'] as String?) ?? '',
+  );
 }
 
 class CircuitRule {
@@ -702,9 +712,9 @@ class CircuitRule {
   final String body;
   CircuitRule({required this.title, required this.body});
   factory CircuitRule.fromJson(Map<String, dynamic> j) => CircuitRule(
-        title: (j['title'] as String?) ?? '',
-        body: (j['body'] as String?) ?? '',
-      );
+    title: (j['title'] as String?) ?? '',
+    body: (j['body'] as String?) ?? '',
+  );
 }
 
 class CircuitChecklist {
@@ -712,9 +722,9 @@ class CircuitChecklist {
   final String done;
   CircuitChecklist({required this.item, required this.done});
   factory CircuitChecklist.fromJson(Map<String, dynamic> j) => CircuitChecklist(
-        item: (j['item'] as String?) ?? '',
-        done: (j['done'] as String?) ?? '',
-      );
+    item: (j['item'] as String?) ?? '',
+    done: (j['done'] as String?) ?? '',
+  );
 }
 
 /// 마스터 태그표 한 행 — 분기 헤더(branch) 또는 부품 행(stage/tag/wire/ref/desc)
@@ -735,13 +745,13 @@ class CircuitMasterRow {
     required this.desc,
   });
   factory CircuitMasterRow.fromJson(Map<String, dynamic> j) => CircuitMasterRow(
-        branch: (j['branch'] as String?) ?? '',
-        stage: (j['stage'] as String?) ?? '',
-        tag: (j['tag'] as String?) ?? '',
-        wire: (j['wire'] as String?) ?? '',
-        ref: (j['ref'] as String?) ?? '',
-        desc: (j['desc'] as String?) ?? '',
-      );
+    branch: (j['branch'] as String?) ?? '',
+    stage: (j['stage'] as String?) ?? '',
+    tag: (j['tag'] as String?) ?? '',
+    wire: (j['wire'] as String?) ?? '',
+    ref: (j['ref'] as String?) ?? '',
+    desc: (j['desc'] as String?) ?? '',
+  );
 }
 
 class CircuitGuide {
@@ -762,24 +772,24 @@ class CircuitGuide {
     required this.master,
   });
   factory CircuitGuide.fromJson(Map<String, dynamic> j) => CircuitGuide(
-        title: (j['title'] as String?) ?? '',
-        overview: (j['overview'] as String?) ?? '',
-        legend: ((j['legend'] as List?) ?? const [])
-            .map((e) => CircuitLegend.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        steps: ((j['steps'] as List?) ?? const [])
-            .map((e) => CircuitStep.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        rules: ((j['rules'] as List?) ?? const [])
-            .map((e) => CircuitRule.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        checklist: ((j['checklist'] as List?) ?? const [])
-            .map((e) => CircuitChecklist.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        master: ((j['master'] as List?) ?? const [])
-            .map((e) => CircuitMasterRow.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    title: (j['title'] as String?) ?? '',
+    overview: (j['overview'] as String?) ?? '',
+    legend: ((j['legend'] as List?) ?? const [])
+        .map((e) => CircuitLegend.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    steps: ((j['steps'] as List?) ?? const [])
+        .map((e) => CircuitStep.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    rules: ((j['rules'] as List?) ?? const [])
+        .map((e) => CircuitRule.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    checklist: ((j['checklist'] as List?) ?? const [])
+        .map((e) => CircuitChecklist.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    master: ((j['master'] as List?) ?? const [])
+        .map((e) => CircuitMasterRow.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }
 
 /// 공식 마스터 가이드 — 읽는법·기호뜻·이해법·암기법·예제
@@ -788,9 +798,9 @@ class FormulaSymbol {
   final String meaning;
   FormulaSymbol({required this.sym, required this.meaning});
   factory FormulaSymbol.fromJson(Map<String, dynamic> j) => FormulaSymbol(
-        sym: (j['sym'] as String?) ?? '',
-        meaning: (j['meaning'] as String?) ?? '',
-      );
+    sym: (j['sym'] as String?) ?? '',
+    meaning: (j['meaning'] as String?) ?? '',
+  );
 }
 
 class FormulaGuide {
@@ -819,21 +829,20 @@ class FormulaGuide {
   });
 
   factory FormulaGuide.fromJson(Map<String, dynamic> j) => FormulaGuide(
-        subject: (j['subject'] as String?) ?? '',
-        topic: (j['topic'] as String?) ?? '',
-        importance: (j['importance'] as int?) ?? 3,
-        name: (j['name'] as String?) ?? '',
-        expr: (j['expr'] as String?) ?? '',
-        read: (j['read'] as String?) ?? '',
-        symbols: ((j['symbols'] as List?) ?? const [])
-            .map((e) => FormulaSymbol.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        // 관대한 파싱: 구 스키마의 desc를 이해법으로 대체
-        understand:
-            (j['understand'] as String?) ?? (j['desc'] as String?) ?? '',
-        mnemonic: (j['mnemonic'] as String?) ?? '',
-        example: (j['example'] as String?) ?? '',
-      );
+    subject: (j['subject'] as String?) ?? '',
+    topic: (j['topic'] as String?) ?? '',
+    importance: (j['importance'] as int?) ?? 3,
+    name: (j['name'] as String?) ?? '',
+    expr: (j['expr'] as String?) ?? '',
+    read: (j['read'] as String?) ?? '',
+    symbols: ((j['symbols'] as List?) ?? const [])
+        .map((e) => FormulaSymbol.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    // 관대한 파싱: 구 스키마의 desc를 이해법으로 대체
+    understand: (j['understand'] as String?) ?? (j['desc'] as String?) ?? '',
+    mnemonic: (j['mnemonic'] as String?) ?? '',
+    example: (j['example'] as String?) ?? '',
+  );
 }
 
 /// 초보자 기초 사전 (단위·기호·핵심 개념)
@@ -851,11 +860,11 @@ class BasicTerm {
   });
 
   factory BasicTerm.fromJson(Map<String, dynamic> j) => BasicTerm(
-        category: (j['category'] as String?) ?? '',
-        term: (j['term'] as String?) ?? '',
-        easy: (j['easy'] as String?) ?? '',
-        detail: (j['detail'] as String?) ?? '',
-      );
+    category: (j['category'] as String?) ?? '',
+    term: (j['term'] as String?) ?? '',
+    easy: (j['easy'] as String?) ?? '',
+    detail: (j['detail'] as String?) ?? '',
+  );
 }
 
 class FormulaGuideData {
@@ -872,15 +881,15 @@ class FormulaGuideData {
   });
 
   factory FormulaGuideData.fromJson(Map<String, dynamic> j) => FormulaGuideData(
-        title: (j['title'] as String?) ?? '',
-        intro: (j['intro'] as String?) ?? '',
-        formulas: ((j['formulas'] as List?) ?? const [])
-            .map((e) => FormulaGuide.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        basics: ((j['basics'] as List?) ?? const [])
-            .map((e) => BasicTerm.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    title: (j['title'] as String?) ?? '',
+    intro: (j['intro'] as String?) ?? '',
+    formulas: ((j['formulas'] as List?) ?? const [])
+        .map((e) => FormulaGuide.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    basics: ((j['basics'] as List?) ?? const [])
+        .map((e) => BasicTerm.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }
 
 /// 학습 데이터 로더 (싱글턴 캐시)
@@ -961,7 +970,9 @@ class StudyData {
   Future<List<SlideDeck>> loadSlideDecks() async {
     if (_slideDecks != null) return _slideDecks!;
     _slideDecks = await _safeLoadList(
-        _p('theory_slides.json'), SlideDeck.fromJson);
+      _p('theory_slides.json'),
+      SlideDeck.fromJson,
+    );
     return _slideDecks!;
   }
 
@@ -972,8 +983,7 @@ class StudyData {
   Future<Map<String, dynamic>?> loadExamInfo() async {
     if (_examInfo != null) return _examInfo;
     try {
-      final raw =
-          await rootBundle.loadString(_p('exam_info_2026.json'));
+      final raw = await rootBundle.loadString(_p('exam_info_2026.json'));
       _examInfo = jsonDecode(raw) as Map<String, dynamic>;
     } catch (e) {
       if (kDebugMode) debugPrint('exam_info_2026.json 로드 실패: $e');
@@ -985,10 +995,10 @@ class StudyData {
   Future<FormulaGuideData?> loadFormulaGuide() async {
     if (_formulaGuide != null) return _formulaGuide;
     try {
-      final raw =
-          await rootBundle.loadString(_p('formula_guide.json'));
-      _formulaGuide =
-          FormulaGuideData.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+      final raw = await rootBundle.loadString(_p('formula_guide.json'));
+      _formulaGuide = FormulaGuideData.fromJson(
+        jsonDecode(raw) as Map<String, dynamic>,
+      );
     } catch (e) {
       if (kDebugMode) debugPrint('formula_guide.json 로드 실패: $e');
     }
@@ -1015,8 +1025,9 @@ class StudyData {
   Future<List<BasicTerm>> loadBasicsDict() async {
     if (_basicsDict != null) return _basicsDict!;
     try {
-      final raw = await rootBundle
-          .loadString('assets/data/common/basics_dict.json');
+      final raw = await rootBundle.loadString(
+        'assets/data/common/basics_dict.json',
+      );
       final map = jsonDecode(raw) as Map<String, dynamic>;
       _basicsCategories = ((map['categories'] as List?) ?? const [])
           .map((e) => e.toString())
@@ -1039,10 +1050,12 @@ class StudyData {
   Future<CircuitGuide?> loadCircuitGuide() async {
     if (_circuitGuide != null) return _circuitGuide;
     try {
-      final raw = await rootBundle
-          .loadString('assets/data/common/circuit_guide.json');
-      _circuitGuide =
-          CircuitGuide.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+      final raw = await rootBundle.loadString(
+        'assets/data/common/circuit_guide.json',
+      );
+      _circuitGuide = CircuitGuide.fromJson(
+        jsonDecode(raw) as Map<String, dynamic>,
+      );
     } catch (e) {
       if (kDebugMode) debugPrint('circuit_guide.json 로드 실패: $e');
       _circuitGuide = null;
@@ -1055,13 +1068,13 @@ class StudyData {
 
   /// 안전 JSON 리스트 로더 — 파일 하나가 깨져도 앱이 죽지 않게 방어
   Future<List<T>> _safeLoadList<T>(
-      String path, T Function(Map<String, dynamic>) fromJson) async {
+    String path,
+    T Function(Map<String, dynamic>) fromJson,
+  ) async {
     try {
       final raw = await rootBundle.loadString(path);
       final list = jsonDecode(raw) as List;
-      return list
-          .map((e) => fromJson(e as Map<String, dynamic>))
-          .toList();
+      return list.map((e) => fromJson(e as Map<String, dynamic>)).toList();
     } catch (e) {
       if (kDebugMode) {
         debugPrint('$path 로드 실패: $e');
@@ -1072,8 +1085,7 @@ class StudyData {
 
   Future<List<ExamPaper>> loadExams() async {
     if (_exams != null) return _exams!;
-    _exams = await _safeLoadList(
-        _p('exams.json'), ExamPaper.fromJson)
+    _exams = await _safeLoadList(_p('exams.json'), ExamPaper.fromJson)
       ..sort((a, b) {
         final c = b.year.compareTo(a.year);
         return c != 0 ? c : b.session.compareTo(a.session);
@@ -1140,7 +1152,9 @@ class StudyData {
   Future<List<SolutionRecipe>> loadRecipes() async {
     if (_recipes != null) return _recipes!;
     _recipes = await _safeLoadList(
-        _p('solution_recipes.json'), SolutionRecipe.fromJson);
+      _p('solution_recipes.json'),
+      SolutionRecipe.fromJson,
+    );
     _recipeByTopic = {for (final r in _recipes!) r.topic: r};
     return _recipes!;
   }
@@ -1150,15 +1164,13 @@ class StudyData {
 
   Future<List<Mnemonic>> loadMnemonics() async {
     if (_mnemonics != null) return _mnemonics!;
-    _mnemonics = await _safeLoadList(
-        _p('mnemonics.json'), Mnemonic.fromJson);
+    _mnemonics = await _safeLoadList(_p('mnemonics.json'), Mnemonic.fromJson);
     return _mnemonics!;
   }
 
   Future<List<VideoLink>> loadVideos() async {
     if (_videos != null) return _videos!;
-    _videos = await _safeLoadList(
-        _p('videos.json'), VideoLink.fromJson);
+    _videos = await _safeLoadList(_p('videos.json'), VideoLink.fromJson);
     return _videos!;
   }
 
@@ -1167,11 +1179,14 @@ class StudyData {
     try {
       final raw = await rootBundle.loadString(_p('topic_freq.json'));
       final map = jsonDecode(raw) as Map<String, dynamic>;
-      _topicFreq = map.map((k, v) => MapEntry(
+      _topicFreq = map.map(
+        (k, v) => MapEntry(
           k,
           (v as List)
               .map((e) => TopicFreq.fromJson(e as Map<String, dynamic>))
-              .toList()));
+              .toList(),
+        ),
+      );
     } catch (_) {
       _topicFreq = {};
     }
@@ -1231,8 +1246,10 @@ class StudyData {
   }
 
   /// 난이도 순 정렬: 쉬운 문제부터 (단계별 학습용)
-  Future<List<Question>> questionsByDifficulty(String subject,
-      {bool easyFirst = true}) async {
+  Future<List<Question>> questionsByDifficulty(
+    String subject, {
+    bool easyFirst = true,
+  }) async {
     final qs = await questionsBySubject(subject);
     qs.sort((a, b) {
       final c = easyFirst
@@ -1246,8 +1263,7 @@ class StudyData {
   /// 1:1 강의 노트 로드
   Future<List<Lesson>> loadLessons() async {
     if (_lessons != null) return _lessons!;
-    _lessons = await _safeLoadList(
-        _p('lessons.json'), Lesson.fromJson);
+    _lessons = await _safeLoadList(_p('lessons.json'), Lesson.fromJson);
     return _lessons!;
   }
 
@@ -1276,7 +1292,9 @@ class StudyData {
   Future<List<RepeatCluster>> loadRepeats() async {
     if (_repeats != null) return _repeats!;
     _repeats = await _safeLoadList(
-        _p('repeat_questions.json'), RepeatCluster.fromJson);
+      _p('repeat_questions.json'),
+      RepeatCluster.fromJson,
+    );
     return _repeats!;
   }
 
@@ -1290,8 +1308,9 @@ class StudyData {
   /// 과목+토픽 관련 암기법 찾기
   Future<List<Mnemonic>> mnemonicsFor(String subject, String topic) async {
     final all = await loadMnemonics();
-    final subjectMatch =
-        all.where((m) => m.subject == subject || m.subject == '공통').toList();
+    final subjectMatch = all
+        .where((m) => m.subject == subject || m.subject == '공통')
+        .toList();
     // 토픽 키워드가 제목/본문에 포함되면 우선순위
     final kw = topic.split(RegExp(r'[·\s]')).where((s) => s.length >= 2);
     subjectMatch.sort((a, b) {
@@ -1302,6 +1321,7 @@ class StudyData {
         }
         return -s;
       }
+
       return score(a).compareTo(score(b));
     });
     return subjectMatch;

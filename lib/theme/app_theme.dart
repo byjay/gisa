@@ -112,12 +112,12 @@ class AppTheme {
   }
 
   static List<BoxShadow> glowShadow(Color color) => [
-        BoxShadow(
-          color: color.withValues(alpha: 0.35),
-          blurRadius: 20,
-          offset: const Offset(0, 8),
-        ),
-      ];
+    BoxShadow(
+      color: color.withValues(alpha: 0.35),
+      blurRadius: 20,
+      offset: const Offset(0, 8),
+    ),
+  ];
 
   // ── Radius ──────────────────────────────────────
   static const double rSm = 12;
@@ -166,22 +166,19 @@ class AppTheme {
     ),
   ];
 
-  static ThemePalette paletteById(String? id) => palettes.firstWhere(
-        (p) => p.id == id,
-        orElse: () => palettes.first,
-      );
+  static ThemePalette paletteById(String? id) =>
+      palettes.firstWhere((p) => p.id == id, orElse: () => palettes.first);
 
   // ── ThemeData ───────────────────────────────────
   static ThemeData light([ThemePalette? palette]) {
     final p = palette ?? palettes.first;
-    final scheme = ColorScheme.fromSeed(seedColor: p.seed).copyWith(
-      primary: p.seed,
-      secondary: p.accent,
-      surface: cardLight,
-    );
-    return _base(scheme, Brightness.light).copyWith(
-      scaffoldBackgroundColor: bgLight,
-    );
+    final scheme = ColorScheme.fromSeed(
+      seedColor: p.seed,
+    ).copyWith(primary: p.seed, secondary: p.accent, surface: cardLight);
+    return _base(
+      scheme,
+      Brightness.light,
+    ).copyWith(scaffoldBackgroundColor: bgLight);
   }
 
   static ThemeData dark([ThemePalette? palette]) {
@@ -189,12 +186,11 @@ class AppTheme {
     final scheme = ColorScheme.fromSeed(
       seedColor: p.seed,
       brightness: Brightness.dark,
-    ).copyWith(
-      surface: cardDark,
-    );
-    return _base(scheme, Brightness.dark).copyWith(
-      scaffoldBackgroundColor: bgDark,
-    );
+    ).copyWith(surface: cardDark);
+    return _base(
+      scheme,
+      Brightness.dark,
+    ).copyWith(scaffoldBackgroundColor: bgDark);
   }
 
   static ThemeData _base(ColorScheme scheme, Brightness brightness) {
@@ -303,9 +299,7 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(rSm),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(rSm)),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
         surfaceTintColor: Colors.transparent,
@@ -392,7 +386,9 @@ class SectionHeader extends StatelessWidget {
               child: Text(
                 actionLabel!,
                 style: const TextStyle(
-                    fontSize: 12.5, fontWeight: FontWeight.w700),
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
         ],
@@ -438,8 +434,7 @@ class PremiumCard extends StatelessWidget {
               )
             : null,
         boxShadow: gradient != null
-            ? AppTheme.glowShadow(
-                (gradient as LinearGradient).colors.first)
+            ? AppTheme.glowShadow((gradient as LinearGradient).colors.first)
             : AppTheme.softShadow(context),
       ),
       child: Material(
@@ -480,7 +475,7 @@ class IconBadge extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             color.withValues(alpha: 0.16),
-            color.withValues(alpha: 0.08)
+            color.withValues(alpha: 0.08),
           ],
           stops: const [0.0, 1.0],
           begin: Alignment.topLeft,

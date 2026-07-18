@@ -60,10 +60,7 @@ class _FormulaGuideScreenState extends State<FormulaGuideScreen>
           ? const Center(child: CircularProgressIndicator())
           : TabBarView(
               controller: _tab,
-              children: [
-                _formulaTab(context, data),
-                _basicsTab(context, data),
-              ],
+              children: [_formulaTab(context, data), _basicsTab(context, data)],
             ),
     );
   }
@@ -98,8 +95,10 @@ class _FormulaGuideScreenState extends State<FormulaGuideScreen>
             itemBuilder: (context, i) {
               final s = subjects[i];
               return ChoiceChip(
-                label: Text(s == '전체' ? s : s.substring(0, 4),
-                    style: const TextStyle(fontSize: 12)),
+                label: Text(
+                  s == '전체' ? s : s.substring(0, 4),
+                  style: const TextStyle(fontSize: 12),
+                ),
                 selected: s == _subject,
                 onSelected: (_) => setState(() => _subject = s),
               );
@@ -119,24 +118,31 @@ class _FormulaGuideScreenState extends State<FormulaGuideScreen>
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ExpansionTile(
-        title: Text(f.name,
-            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+        title: Text(
+          f.name,
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+        ),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 4),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(f.expr,
-                  style: TextStyle(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w700,
-                      color: cs.primary)),
+              Text(
+                f.expr,
+                style: TextStyle(
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w700,
+                  color: cs.primary,
+                ),
+              ),
               const SizedBox(height: 2),
               Text(
-                  '${f.subject.length > 4 ? f.subject.substring(0, 4) : f.subject} · ${f.topic}  $stars',
-                  style: TextStyle(
-                      fontSize: 11,
-                      color: cs.onSurface.withValues(alpha: 0.6))),
+                '${f.subject.length > 4 ? f.subject.substring(0, 4) : f.subject} · ${f.topic}  $stars',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: cs.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
             ],
           ),
         ),
@@ -154,40 +160,47 @@ class _FormulaGuideScreenState extends State<FormulaGuideScreen>
               decoration: BoxDecoration(
                 color: Colors.indigo.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(10),
-                border:
-                    Border.all(color: Colors.indigo.withValues(alpha: 0.2)),
+                border: Border.all(color: Colors.indigo.withValues(alpha: 0.2)),
               ),
               child: Column(
                 children: f.symbols
-                    .map((s) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 3),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: 56,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: Colors.indigo.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(6),
+                    .map(
+                      (s) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 3),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 56,
+                              padding: const EdgeInsets.symmetric(vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.indigo.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                s.sym,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.indigo,
                                 ),
-                                alignment: Alignment.center,
-                                child: Text(s.sym,
-                                    style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w800,
-                                        color: Colors.indigo)),
                               ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(s.meaning,
-                                    style: const TextStyle(
-                                        fontSize: 12.5, height: 1.4)),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                s.meaning,
+                                style: const TextStyle(
+                                  fontSize: 12.5,
+                                  height: 1.4,
+                                ),
                               ),
-                            ],
-                          ),
-                        ))
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
                     .toList(),
               ),
             ),
@@ -204,7 +217,11 @@ class _FormulaGuideScreenState extends State<FormulaGuideScreen>
   }
 
   Widget _stepHeader(
-      BuildContext context, String num, String title, Color color) {
+    BuildContext context,
+    String num,
+    String title,
+    Color color,
+  ) {
     return Row(
       children: [
         Container(
@@ -212,22 +229,35 @@ class _FormulaGuideScreenState extends State<FormulaGuideScreen>
           height: 20,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           alignment: Alignment.center,
-          child: Text(num,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800)),
+          child: Text(
+            num,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
         ),
         const SizedBox(width: 6),
-        Text(title,
-            style: TextStyle(
-                fontSize: 12.5, fontWeight: FontWeight.w800, color: color)),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w800,
+            color: color,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _step(BuildContext context, String num, String title, String body,
-      Color color) {
+  Widget _step(
+    BuildContext context,
+    String num,
+    String title,
+    String body,
+    Color color,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -241,8 +271,10 @@ class _FormulaGuideScreenState extends State<FormulaGuideScreen>
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: color.withValues(alpha: 0.2)),
           ),
-          child: SelectableText(body,
-              style: const TextStyle(fontSize: 13, height: 1.55)),
+          child: SelectableText(
+            body,
+            style: const TextStyle(fontSize: 13, height: 1.55),
+          ),
         ),
       ],
     );
@@ -286,43 +318,55 @@ class _FormulaGuideScreenState extends State<FormulaGuideScreen>
               '전기가 처음이라면 여기부터! 단위·기호·핵심개념 ${merged.length}개를 한 곳에 모았어요. V·A·Ω부터 ε·ω·θ 읽는 법까지 — 기초가 잡히면 공식이 무섭지 않아요.',
         ),
         const SizedBox(height: 10),
-        ...orderedGroups.entries.expand((e) => [
-              Padding(
-                padding: const EdgeInsets.only(top: 8, bottom: 6),
-                child: Text(e.key,
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: cs.primary)),
+        ...orderedGroups.entries.expand(
+          (e) => [
+            Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 6),
+              child: Text(
+                e.key,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: cs.primary,
+                ),
               ),
-              ...e.value.map((b) => Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: ExpansionTile(
-                      title: Text(b.term,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w800, fontSize: 14)),
-                      subtitle: Text(b.easy,
-                          style: const TextStyle(fontSize: 12.5, height: 1.4)),
-                      childrenPadding:
-                          const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                      expandedCrossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: cs.secondaryContainer
-                                .withValues(alpha: 0.4),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: SelectableText(b.detail,
-                              style: const TextStyle(
-                                  fontSize: 13, height: 1.55)),
-                        ),
-                      ],
+            ),
+            ...e.value.map(
+              (b) => Card(
+                margin: const EdgeInsets.only(bottom: 8),
+                child: ExpansionTile(
+                  title: Text(
+                    b.term,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
                     ),
-                  )),
-            ]),
+                  ),
+                  subtitle: Text(
+                    b.easy,
+                    style: const TextStyle(fontSize: 12.5, height: 1.4),
+                  ),
+                  childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: cs.secondaryContainer.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: SelectableText(
+                        b.detail,
+                        style: const TextStyle(fontSize: 13, height: 1.55),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 16),
       ],
     );

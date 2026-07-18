@@ -24,8 +24,7 @@ class CbtInfo {
   });
 
   /// CBT 체험(Q-Net 공식 웹 체험) 링크.
-  static const cbtTrialUrl =
-      'https://www.q-net.or.kr/cst006.do?id=cst00601';
+  static const cbtTrialUrl = 'https://www.q-net.or.kr/cst006.do?id=cst00601';
 
   /// 가답안(확정답안) 공개 게시판 링크.
   static const answerBoardUrl =
@@ -56,7 +55,8 @@ class CbtInfoService {
   }) async {
     if (!forceRefresh && _cache.containsKey(jmCd)) return _cache[jmCd];
 
-    final url = '$_base?id=crf00503s02&gSite=Q&gId='
+    final url =
+        '$_base?id=crf00503s02&gSite=Q&gId='
         '&jmCd=$jmCd&jmInfoDivCcd=B0&seriesCd=$seriesCd';
     final html = await _fetchWithFallback(url);
     if (html != null) {
@@ -119,8 +119,10 @@ class CbtInfoService {
 
     // 안내 문구(txtList dot li) 파싱
     final notes = <String>[];
-    for (final m in RegExp(r'<li[^>]*>(.*?)</li>', dotAll: true)
-        .allMatches(html)) {
+    for (final m in RegExp(
+      r'<li[^>]*>(.*?)</li>',
+      dotAll: true,
+    ).allMatches(html)) {
       final t = _clean(m.group(1) ?? '');
       if (t.isNotEmpty && t.length < 120) notes.add(t);
       if (notes.length >= 6) break;
@@ -128,7 +130,8 @@ class CbtInfoService {
 
     // CBT 시행 여부: 기사/산업기사 필기는 전면 CBT 시행.
     // 안내 문구/본문에 CBT 키워드가 있거나, 기사/산업기사면 true 로 판단.
-    final cbtEnabled = html.contains('CBT') ||
+    final cbtEnabled =
+        html.contains('CBT') ||
         html.contains('컴퓨터') ||
         certName.contains('기사') ||
         certName.contains('산업기사');
@@ -168,11 +171,17 @@ class CbtInfoService {
 
   Future<String?> _tryGet(String url) async {
     try {
-      final res = await http.get(Uri.parse(url), headers: {
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36',
-        'Accept': 'text/html,application/xhtml+xml',
-        'x-cors-api-key': 'temp_qnet_cert_tracker',
-      }).timeout(const Duration(seconds: 12));
+      final res = await http
+          .get(
+            Uri.parse(url),
+            headers: {
+              'User-Agent':
+                  'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36',
+              'Accept': 'text/html,application/xhtml+xml',
+              'x-cors-api-key': 'temp_qnet_cert_tracker',
+            },
+          )
+          .timeout(const Duration(seconds: 12));
       if (res.statusCode == 200) {
         try {
           return utf8.decode(res.bodyBytes);

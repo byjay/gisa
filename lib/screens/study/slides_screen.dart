@@ -65,18 +65,25 @@ class _SlidesHomeScreenState extends State<SlidesHomeScreen> {
           children: [
             Row(
               children: [
-                const Icon(Icons.trending_up_rounded,
-                    color: Colors.indigo, size: 20),
+                const Icon(
+                  Icons.trending_up_rounded,
+                  color: Colors.indigo,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
-                const Text('이론 정복 진도',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w800, fontSize: 14)),
+                const Text(
+                  '이론 정복 진도',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                ),
                 const Spacer(),
-                Text('$doneDecks/${decks.length}일 완료 · ${(pct * 100).toStringAsFixed(0)}%',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                        color: Colors.indigo)),
+                Text(
+                  '$doneDecks/${decks.length}일 완료 · ${(pct * 100).toStringAsFixed(0)}%',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    color: Colors.indigo,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -118,14 +125,19 @@ class _SlidesHomeScreenState extends State<SlidesHomeScreen> {
     return Card(
       color: Colors.indigo.withValues(alpha: 0.06),
       child: ListTile(
-        leading: const Icon(Icons.play_circle_fill,
-            color: Colors.indigo, size: 36),
+        leading: const Icon(
+          Icons.play_circle_fill,
+          color: Colors.indigo,
+          size: 36,
+        ),
         title: Text(
-            seen > 0 ? '이어서 학습: Day ${t.day}' : '오늘의 학습: Day ${t.day}',
-            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+          seen > 0 ? '이어서 학습: Day ${t.day}' : '오늘의 학습: Day ${t.day}',
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+        ),
         subtitle: Text(
-            seen > 0 ? '${t.title} · ${seen + 1}장부터 계속' : t.title,
-            style: const TextStyle(fontSize: 12.5)),
+          seen > 0 ? '${t.title} · ${seen + 1}장부터 계속' : t.title,
+          style: const TextStyle(fontSize: 12.5),
+        ),
         trailing: const Icon(Icons.arrow_forward_rounded, color: Colors.indigo),
         onTap: () => _openDeck(t),
       ),
@@ -158,27 +170,42 @@ class _SlidesHomeScreenState extends State<SlidesHomeScreen> {
                 if (_plan != null && _plan!.strategy.isNotEmpty)
                   ExpansionTile(
                     tilePadding: EdgeInsets.zero,
-                    title: Text('합격 전략 5계명',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                            color: cs.primary)),
+                    title: Text(
+                      '합격 전략 5계명',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: cs.primary,
+                      ),
+                    ),
                     children: _plan!.strategy
-                        .map((s) => Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 4, right: 4, bottom: 8),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('⚡ ',
-                                      style: TextStyle(fontSize: 13)),
-                                  Expanded(
-                                      child: Text(s,
-                                          style: const TextStyle(
-                                              fontSize: 13, height: 1.4))),
-                                ],
-                              ),
-                            ))
+                        .map(
+                          (s) => Padding(
+                            padding: const EdgeInsets.only(
+                              left: 4,
+                              right: 4,
+                              bottom: 8,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  '⚡ ',
+                                  style: TextStyle(fontSize: 13),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    s,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
                         .toList(),
                   ),
                 const SizedBox(height: 8),
@@ -213,27 +240,39 @@ class _SlidesHomeScreenState extends State<SlidesHomeScreen> {
                               ),
                             ),
                             done
-                                ? const Icon(Icons.check_rounded,
-                                    color: Colors.green, size: 22)
-                                : Text('D${d.day}',
+                                ? const Icon(
+                                    Icons.check_rounded,
+                                    color: Colors.green,
+                                    size: 22,
+                                  )
+                                : Text(
+                                    'D${d.day}',
                                     style: TextStyle(
-                                        color: pc,
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 13)),
+                                      color: pc,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 13,
+                                    ),
+                                  ),
                           ],
                         ),
                       ),
-                      title: Text(d.title,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w600, fontSize: 14)),
+                      title: Text(
+                        d.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
                       subtitle: Text(
                         done
                             ? '✅ 완료 · ${d.cards.length}장'
                             : seen > 0
-                                ? '${d.phase} · $seen/$total장 진행 중'
-                                : '${d.phase} · ${d.cards.length}장 카드',
+                            ? '${d.phase} · $seen/$total장 진행 중'
+                            : '${d.phase} · ${d.cards.length}장 카드',
                         style: TextStyle(
-                            fontSize: 12, color: done ? Colors.green : pc),
+                          fontSize: 12,
+                          color: done ? Colors.green : pc,
+                        ),
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => _openDeck(d),
@@ -261,14 +300,19 @@ const Map<String, _CardStyle> _cardStyles = {
   'formula': _CardStyle(Color(0xFF6A1B9A), Icons.functions_rounded, '공식'),
   'mnemonic': _CardStyle(Color(0xFFE65100), Icons.psychology_rounded, '암기법'),
   'trap': _CardStyle(Color(0xFFC62828), Icons.warning_amber_rounded, '함정 주의'),
-  'strategy':
-      _CardStyle(Color(0xFF2E7D32), Icons.military_tech_rounded, '출제 전략'),
+  'strategy': _CardStyle(
+    Color(0xFF2E7D32),
+    Icons.military_tech_rounded,
+    '출제 전략',
+  ),
   'recap': _CardStyle(Color(0xFF00695C), Icons.check_circle_rounded, '오늘 정리'),
 };
 
 /// 유튜브 딥링크: "전기기사 <토픽>" 검색 — 단원별 강의가 매우 많음
 String topicYoutubeUrl(String topic) {
-  final q = Uri.encodeComponent('${StudyData.instance.track.name} ${topic.replaceAll('·', ' ')}');
+  final q = Uri.encodeComponent(
+    '${StudyData.instance.track.name} ${topic.replaceAll('·', ' ')}',
+  );
   return 'https://www.youtube.com/results?search_query=$q';
 }
 
@@ -314,14 +358,16 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
       default:
         _level = StudyLevel.standard;
     }
-    SlideProgress.instance
-        .markSeen(widget.deck.day, start, widget.deck.cards.length);
+    SlideProgress.instance.markSeen(
+      widget.deck.day,
+      start,
+      widget.deck.cards.length,
+    );
     StudyData.instance.loadMnemonics().then((all) {
       if (!mounted) return;
       setState(() {
         _subjectMnemonics = all
-            .where(
-                (m) => m.subject == widget.deck.subject || m.subject == '공통')
+            .where((m) => m.subject == widget.deck.subject || m.subject == '공통')
             .toList();
       });
     });
@@ -381,14 +427,18 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
               child: Row(
                 children: [
-                  const Icon(Icons.psychology_rounded,
-                      color: Color(0xFFE65100)),
+                  const Icon(
+                    Icons.psychology_rounded,
+                    color: Color(0xFFE65100),
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       '${widget.deck.subject} 암기법 노트 (${_subjectMnemonics.length}개)',
                       style: const TextStyle(
-                          fontWeight: FontWeight.w800, fontSize: 16),
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ],
@@ -409,22 +459,29 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(m.title,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 14,
-                                  color: Color(0xFFBF360C))),
+                          Text(
+                            m.title,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14,
+                              color: Color(0xFFBF360C),
+                            ),
+                          ),
                           const SizedBox(height: 6),
-                          Text(m.body,
-                              style: const TextStyle(
-                                  fontSize: 13.5, height: 1.5)),
+                          Text(
+                            m.body,
+                            style: const TextStyle(fontSize: 13.5, height: 1.5),
+                          ),
                           if (m.tip.isNotEmpty) ...[
                             const SizedBox(height: 6),
-                            Text('💡 ${m.tip}',
-                                style: TextStyle(
-                                    fontSize: 12.5,
-                                    color: Colors.grey.shade700,
-                                    height: 1.4)),
+                            Text(
+                              '💡 ${m.tip}',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                color: Colors.grey.shade700,
+                                height: 1.4,
+                              ),
+                            ),
                           ],
                         ],
                       ),
@@ -448,8 +505,10 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Day ${widget.deck.day} · ${widget.deck.subject}',
-            style: const TextStyle(fontSize: 16)),
+        title: Text(
+          'Day ${widget.deck.day} · ${widget.deck.subject}',
+          style: const TextStyle(fontSize: 16),
+        ),
         actions: [
           IconButton(
             tooltip: '이 과목 유튜브 강의 검색',
@@ -458,7 +517,10 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
           ),
           IconButton(
             tooltip: '과목 암기법 노트',
-            icon: const Icon(Icons.psychology_rounded, color: Color(0xFFE65100)),
+            icon: const Icon(
+              Icons.psychology_rounded,
+              color: Color(0xFFE65100),
+            ),
             onPressed: _subjectMnemonics.isEmpty ? null : _showMnemonicSheet,
           ),
         ],
@@ -475,21 +537,26 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
                   style: SegmentedButton.styleFrom(
                     visualDensity: VisualDensity.compact,
                     textStyle: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w700),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   segments: const [
                     ButtonSegment(
-                        value: StudyLevel.baby,
-                        label: Text('🐣 왕초보'),
-                        tooltip: '기초체력 0부터 시작 — 비유 + 오늘 딱 1개 미션'),
+                      value: StudyLevel.baby,
+                      label: Text('🐣 왕초보'),
+                      tooltip: '기초체력 0부터 시작 — 비유 + 오늘 딱 1개 미션',
+                    ),
                     ButtonSegment(
-                        value: StudyLevel.standard,
-                        label: Text('📘 표준'),
-                        tooltip: '정의→핵심 원리→시험 포인트 전체 학습'),
+                      value: StudyLevel.standard,
+                      label: Text('📘 표준'),
+                      tooltip: '정의→핵심 원리→시험 포인트 전체 학습',
+                    ),
                     ButtonSegment(
-                        value: StudyLevel.fast,
-                        label: Text('⚡ 속성 즉답'),
-                        tooltip: '숙달자용 — 패턴 보면 답 바로 나오게 체계 암기'),
+                      value: StudyLevel.fast,
+                      label: Text('⚡ 속성 즉답'),
+                      tooltip: '숙달자용 — 패턴 보면 답 바로 나오게 체계 암기',
+                    ),
                   ],
                   selected: {_level},
                   onSelectionChanged: (s) {
@@ -520,11 +587,14 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Text('${_page + 1} / $total',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
-                          color: style.color)),
+                  Text(
+                    '${_page + 1} / $total',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: style.color,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -535,15 +605,16 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
                 itemCount: total,
                 onPageChanged: (p) {
                   setState(() => _page = p);
-                  SlideProgress.instance
-                      .markSeen(widget.deck.day, p, total);
+                  SlideProgress.instance.markSeen(widget.deck.day, p, total);
                 },
                 itemBuilder: (context, i) {
                   final c = cards[i];
                   final s = _cardStyles[c.type] ?? _cardStyles['core']!;
                   return Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     child: _slideCard(context, c, s),
                   );
                 },
@@ -560,11 +631,11 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
                     child: Text(
                       _tutorTip(cur.type),
                       style: TextStyle(
-                          fontSize: 12.5,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.75)),
+                        fontSize: 12.5,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.75),
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -573,7 +644,8 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
                     onPressed: _page > 0
                         ? () => _pc.previousPage(
                             duration: const Duration(milliseconds: 280),
-                            curve: Curves.easeOut)
+                            curve: Curves.easeOut,
+                          )
                         : null,
                     icon: const Icon(Icons.arrow_back_rounded),
                   ),
@@ -582,11 +654,14 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
                     onPressed: _page < total - 1
                         ? () => _pc.nextPage(
                             duration: const Duration(milliseconds: 280),
-                            curve: Curves.easeOut)
+                            curve: Curves.easeOut,
+                          )
                         : () => Navigator.pop(context),
-                    icon: Icon(_page < total - 1
-                        ? Icons.arrow_forward_rounded
-                        : Icons.done_all_rounded),
+                    icon: Icon(
+                      _page < total - 1
+                          ? Icons.arrow_forward_rounded
+                          : Icons.done_all_rounded,
+                    ),
                   ),
                 ],
               ),
@@ -664,16 +739,21 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
     final qs = await StudyData.instance.questionsByTopic(topic);
     if (!mounted) return;
     if (qs.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('‘$topic’ 태그된 기출이 아직 없어요.')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('‘$topic’ 태그된 기출이 아직 없어요.')));
       return;
     }
     final take = qs.take(15).toList();
-    pushWithNav(context, QuizPlayScreen(
-          title: '$topic 기출 (빈출순)',
-          questions: take,
-          examMode: false,
-        ), currentSection: 1);
+    pushWithNav(
+      context,
+      QuizPlayScreen(
+        title: '$topic 기출 (빈출순)',
+        questions: take,
+        examMode: false,
+      ),
+      currentSection: 1,
+    );
   }
 
   Widget _slideCard(BuildContext context, SlideCard c, _CardStyle s) {
@@ -681,7 +761,8 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
         c.topic.isNotEmpty && (c.type == 'concept' || c.type == 'core');
     final showMnemonicMore =
         c.type == 'mnemonic' && _subjectMnemonics.isNotEmpty;
-    final showQuiz = c.topic.isNotEmpty &&
+    final showQuiz =
+        c.topic.isNotEmpty &&
         c.topic != '전과목' &&
         (c.type == 'concept' ||
             c.type == 'core' ||
@@ -716,32 +797,42 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
             decoration: BoxDecoration(
               color: s.color,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(22)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(22),
+              ),
             ),
             child: Row(
               children: [
                 Icon(s.icon, color: Colors.white, size: 20),
                 const SizedBox(width: 8),
-                Text(s.label,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13)),
+                Text(
+                  s.label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                  ),
+                ),
                 const Spacer(),
                 if (c.topic.isNotEmpty)
                   Flexible(
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Text(c.topic,
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 11.5),
-                          overflow: TextOverflow.ellipsis),
+                      child: Text(
+                        c.topic,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11.5,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
               ],
@@ -754,12 +845,15 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(c.title,
-                      style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          color: s.color,
-                          height: 1.3)),
+                  Text(
+                    c.title,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      color: s.color,
+                      height: 1.3,
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   RichSlideBody(body: _bodyForLevel(c), accent: s.color),
                   // 🧑‍🏫 풀이 레시피 — 공식·풀이순서를 이론 옆에 나란히 (암기·이론 공존)
@@ -767,10 +861,11 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
                       c.topic != '전과목' &&
                       (c.type == 'formula' || c.type == 'core'))
                     TeacherRecipeBox(
-                        topic: c.topic,
-                        subject: widget.deck.subject,
-                        initiallyExpanded: false,
-                        showMnemonics: false),
+                      topic: c.topic,
+                      subject: widget.deck.subject,
+                      initiallyExpanded: false,
+                      showMnemonics: false,
+                    ),
                   if (showQuiz) ...[
                     const SizedBox(height: 14),
                     SizedBox(
@@ -781,9 +876,13 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                         icon: const Icon(Icons.quiz_rounded, size: 18),
-                        label: Text('이 단원 기출 바로 풀기 (빈출순 15문제)',
-                            style: const TextStyle(
-                                fontSize: 13.5, fontWeight: FontWeight.w700)),
+                        label: Text(
+                          '이 단원 기출 바로 풀기 (빈출순 15문제)',
+                          style: const TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                         onPressed: () => _openTopicQuiz(c.topic),
                       ),
                     ),
@@ -822,11 +921,14 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
             children: [
               Icon(Icons.ondemand_video_rounded, color: Colors.red, size: 18),
               SizedBox(width: 6),
-              Text('이 단원 유튜브로 보강하기',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 13,
-                      color: Colors.red)),
+              Text(
+                '이 단원 유튜브로 보강하기',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                  color: Colors.red,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -836,16 +938,23 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
             children: [
               ActionChip(
                 avatar: const Icon(Icons.search, size: 16, color: Colors.red),
-                label: Text('${StudyData.instance.track.shortName} ${topic.replaceAll('·', ' ')} 검색',
-                    style: const TextStyle(fontSize: 12)),
+                label: Text(
+                  '${StudyData.instance.track.shortName} ${topic.replaceAll('·', ' ')} 검색',
+                  style: const TextStyle(fontSize: 12),
+                ),
                 onPressed: () => _openUrl(topicYoutubeUrl(topic)),
               ),
-              ...kYoutubeChannels.map((ch) => ActionChip(
-                    avatar: const Icon(Icons.play_circle_fill,
-                        size: 16, color: Colors.red),
-                    label: Text(ch.$1, style: const TextStyle(fontSize: 12)),
-                    onPressed: () => _openUrl(ch.$2),
-                  )),
+              ...kYoutubeChannels.map(
+                (ch) => ActionChip(
+                  avatar: const Icon(
+                    Icons.play_circle_fill,
+                    size: 16,
+                    color: Colors.red,
+                  ),
+                  label: Text(ch.$1, style: const TextStyle(fontSize: 12)),
+                  onPressed: () => _openUrl(ch.$2),
+                ),
+              ),
             ],
           ),
         ],
@@ -864,7 +973,8 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
         ),
         icon: const Icon(Icons.psychology_rounded),
         label: Text(
-            '${widget.deck.subject} 암기법 ${_subjectMnemonics.length}개 전부 보기'),
+          '${widget.deck.subject} 암기법 ${_subjectMnemonics.length}개 전부 보기',
+        ),
         onPressed: _showMnemonicSheet,
       ),
     );

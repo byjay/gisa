@@ -18,20 +18,20 @@ class UserProfile {
   });
 
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'name': name,
-        'email': email,
-        'photoUrl': photoUrl,
-        'provider': provider,
-      };
+    'id': id,
+    'name': name,
+    'email': email,
+    'photoUrl': photoUrl,
+    'provider': provider,
+  };
 
   factory UserProfile.fromMap(Map<dynamic, dynamic> m) => UserProfile(
-        id: (m['id'] ?? '') as String,
-        name: (m['name'] ?? '') as String,
-        email: (m['email'] ?? '') as String,
-        photoUrl: m['photoUrl'] as String?,
-        provider: (m['provider'] ?? 'local') as String,
-      );
+    id: (m['id'] ?? '') as String,
+    name: (m['name'] ?? '') as String,
+    email: (m['email'] ?? '') as String,
+    photoUrl: m['photoUrl'] as String?,
+    provider: (m['provider'] ?? 'local') as String,
+  );
 }
 
 /// 인증 서비스 — 현재는 준비(스캐폴딩) 단계.

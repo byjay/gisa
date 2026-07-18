@@ -104,8 +104,9 @@ class ExamAnalysisEngine {
     double targetScore = 60,
   }) async {
     // 1) 실제 시험일 → D-Day
-    final examRange =
-        phase == ExamPhase.written ? round.writtenExam : round.practicalExam;
+    final examRange = phase == ExamPhase.written
+        ? round.writtenExam
+        : round.practicalExam;
     final examDate = examRange?.start;
     final dDay = _dDay(examDate);
 

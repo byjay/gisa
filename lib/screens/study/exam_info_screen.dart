@@ -73,11 +73,11 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : !ready
-              ? const Center(child: Text('시험 정보를 불러오지 못했습니다.'))
-              : TabBarView(
-                  controller: _tab,
-                  children: [for (final t in _tabs) t.$2()],
-                ),
+          ? const Center(child: Text('시험 정보를 불러오지 못했습니다.'))
+          : TabBarView(
+              controller: _tab,
+              children: [for (final t in _tabs) t.$2()],
+            ),
     );
   }
 
@@ -90,17 +90,19 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
     } catch (_) {
       await Clipboard.setData(ClipboardData(text: url));
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('브라우저를 열 수 없어 링크를 복사했습니다. 주소창에 붙여넣으세요.'),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('브라우저를 열 수 없어 링크를 복사했습니다. 주소창에 붙여넣으세요.')),
+      );
     }
   }
 
   Widget _scheduleTab() {
     final schedule = (_info!['schedule'] as List).cast<Map<String, dynamic>>();
     final notes = (_info!['scheduleNotes'] as List).cast<String>();
-    final target = schedule.firstWhere((s) => s['status'] == 'target',
-        orElse: () => schedule.last);
+    final target = schedule.firstWhere(
+      (s) => s['status'] == 'target',
+      orElse: () => schedule.last,
+    );
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -139,9 +141,10 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
             ),
             onPressed: () => _openUrl(apply['url'] as String),
             icon: const Icon(Icons.open_in_new, size: 18),
-            label: Text(apply['label'] as String,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 15)),
+            label: Text(
+              apply['label'] as String,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            ),
           ),
         ),
         const SizedBox(height: 8),
@@ -151,8 +154,7 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
               child: OutlinedButton.icon(
                 onPressed: () => _openUrl(status['url'] as String),
                 icon: const Icon(Icons.event_seat, size: 16),
-                label: const Text('접수현황 조회',
-                    style: TextStyle(fontSize: 12.5)),
+                label: const Text('접수현황 조회', style: TextStyle(fontSize: 12.5)),
               ),
             ),
             const SizedBox(width: 8),
@@ -160,8 +162,7 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
               child: OutlinedButton.icon(
                 onPressed: () => _openUrl(detail['url'] as String),
                 icon: const Icon(Icons.description, size: 16),
-                label: const Text('종목 상세정보',
-                    style: TextStyle(fontSize: 12.5)),
+                label: const Text('종목 상세정보', style: TextStyle(fontSize: 12.5)),
               ),
             ),
           ],
@@ -176,38 +177,60 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('함께 노릴 수 있는 자격증 (2026 접수·필기 일정 공유)',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+        const Text(
+          '함께 노릴 수 있는 자격증 (2026 접수·필기 일정 공유)',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
         const SizedBox(height: 6),
-        Text(rel['note'] as String,
-            style: TextStyle(
-                fontSize: 12, height: 1.5, color: Colors.grey.shade700)),
+        Text(
+          rel['note'] as String,
+          style: TextStyle(
+            fontSize: 12,
+            height: 1.5,
+            color: Colors.grey.shade700,
+          ),
+        ),
         const SizedBox(height: 8),
-        ...certs.map((c) => Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              child: ListTile(
-                dense: true,
-                leading: CircleAvatar(
-                  radius: 16,
-                  backgroundColor: Colors.teal.shade50,
-                  child: Text((c['name'] as String)[0],
-                      style: TextStyle(
-                          color: Colors.teal.shade700,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13)),
+        ...certs.map(
+          (c) => Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ListTile(
+              dense: true,
+              leading: CircleAvatar(
+                radius: 16,
+                backgroundColor: Colors.teal.shade50,
+                child: Text(
+                  (c['name'] as String)[0],
+                  style: TextStyle(
+                    color: Colors.teal.shade700,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
                 ),
-                title: Text(c['name'] as String,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 13.5)),
-                subtitle: Text(c['tip'] as String,
-                    style: const TextStyle(fontSize: 11.5, height: 1.4)),
-                trailing: const Icon(Icons.open_in_new,
-                    size: 16, color: Colors.teal),
-                onTap: () => _openUrl(c['url'] as String),
               ),
-            )),
+              title: Text(
+                c['name'] as String,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13.5,
+                ),
+              ),
+              subtitle: Text(
+                c['tip'] as String,
+                style: const TextStyle(fontSize: 11.5, height: 1.4),
+              ),
+              trailing: const Icon(
+                Icons.open_in_new,
+                size: 16,
+                color: Colors.teal,
+              ),
+              onTap: () => _openUrl(c['url'] as String),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -242,11 +265,14 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${target['round']}회차가 올해 마지막 기회!',
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16)),
+                Text(
+                  '${target['round']}회차가 올해 마지막 기회!',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 if (dFiling != null)
                   Text(
@@ -256,14 +282,19 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
                     style: const TextStyle(color: Colors.white, fontSize: 14),
                   ),
                 if (dExam != null && dExam >= 0)
-                  Text('필기시험 시작까지 D-$dExam',
-                      style: TextStyle(
-                          color: Colors.amber.shade200,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14)),
+                  Text(
+                    '필기시험 시작까지 D-$dExam',
+                    style: TextStyle(
+                      color: Colors.amber.shade200,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
                 const SizedBox(height: 4),
-                const Text('접수 첫날 10시에 바로 접수하세요. 인기 시험장은 금방 마감됩니다.',
-                    style: TextStyle(color: Colors.white70, fontSize: 12)),
+                const Text(
+                  '접수 첫날 10시에 바로 접수하세요. 인기 시험장은 금방 마감됩니다.',
+                  style: TextStyle(color: Colors.white70, fontSize: 12),
+                ),
               ],
             ),
           ),
@@ -278,8 +309,8 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
     final color = isTarget
         ? Colors.indigo
         : done
-            ? Colors.grey
-            : Colors.teal;
+        ? Colors.grey
+        : Colors.teal;
 
     Widget row(String label, String? value, {bool bold = false}) {
       if (value == null) return const SizedBox.shrink();
@@ -289,16 +320,21 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-                width: 92,
-                child: Text(label,
-                    style: TextStyle(
-                        fontSize: 12.5, color: Colors.grey.shade600))),
+              width: 92,
+              child: Text(
+                label,
+                style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600),
+              ),
+            ),
             Expanded(
-              child: Text(value,
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-                      color: done ? Colors.grey : Colors.black87)),
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+                  color: done ? Colors.grey : Colors.black87,
+                ),
+              ),
             ),
           ],
         ),
@@ -321,29 +357,41 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
             Row(
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text('${r['round']}회차',
-                      style: TextStyle(
-                          color: color,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13)),
+                  child: Text(
+                    '${r['round']}회차',
+                    style: TextStyle(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 8),
                 if (isTarget)
-                  const Text('지금 목표로 삼을 회차',
-                      style: TextStyle(
-                          color: Colors.indigo,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12.5)),
+                  const Text(
+                    '지금 목표로 삼을 회차',
+                    style: TextStyle(
+                      color: Colors.indigo,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12.5,
+                    ),
+                  ),
                 if (done)
-                  Text('접수 종료',
-                      style: TextStyle(
-                          color: Colors.grey.shade500, fontSize: 12.5)),
+                  Text(
+                    '접수 종료',
+                    style: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontSize: 12.5,
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 8),
@@ -364,7 +412,8 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
   Widget _criteriaTab() {
     final c = _info!['criteria2026'] as Map<String, dynamic>;
     final items = (c['items'] as List).cast<Map<String, dynamic>>();
-    final passRates = (_info!['passRates'] as List).cast<Map<String, dynamic>>();
+    final passRates = (_info!['passRates'] as List)
+        .cast<Map<String, dynamic>>();
     final insights = (_info!['passRateInsights'] as List).cast<String>();
 
     return ListView(
@@ -385,44 +434,61 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
                   Icon(Icons.campaign, color: Colors.deepOrange.shade700),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(c['title'] as String,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: Colors.deepOrange.shade800)),
+                    child: Text(
+                      c['title'] as String,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: Colors.deepOrange.shade800,
+                      ),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              Text(c['summary'] as String,
-                  style: const TextStyle(fontSize: 13.5, height: 1.5)),
+              Text(
+                c['summary'] as String,
+                style: const TextStyle(fontSize: 13.5, height: 1.5),
+              ),
             ],
           ),
         ),
         const SizedBox(height: 12),
-        ...items.map((it) => Card(
-              margin: const EdgeInsets.only(bottom: 10),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              child: ExpansionTile(
-                leading: const Icon(Icons.rule, color: Colors.deepOrange),
-                title: Text(it['title'] as String,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 14)),
-                childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-                children: [
-                  Text(it['detail'] as String,
-                      style: const TextStyle(fontSize: 13.5, height: 1.6)),
-                ],
+        ...items.map(
+          (it) => Card(
+            margin: const EdgeInsets.only(bottom: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ExpansionTile(
+              leading: const Icon(Icons.rule, color: Colors.deepOrange),
+              title: Text(
+                it['title'] as String,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
-            )),
+              childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              children: [
+                Text(
+                  it['detail'] as String,
+                  style: const TextStyle(fontSize: 13.5, height: 1.6),
+                ),
+              ],
+            ),
+          ),
+        ),
         const SizedBox(height: 16),
-        const Text('연도별 합격률 (필기 / 실기)',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+        const Text(
+          '연도별 합격률 (필기 / 실기)',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
         const SizedBox(height: 8),
         Card(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Column(
@@ -434,14 +500,18 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
                   child: Row(
                     children: [
                       SizedBox(
-                          width: 44,
-                          child: Text(p['year'] as String,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 13))),
+                        width: 44,
+                        child: Text(
+                          p['year'] as String,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
                       Expanded(child: _rateBar('필기', written, Colors.indigo)),
                       const SizedBox(width: 8),
-                      Expanded(
-                          child: _rateBar('실기', practical, Colors.teal)),
+                      Expanded(child: _rateBar('실기', practical, Colors.teal)),
                     ],
                   ),
                 );
@@ -475,24 +545,32 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
                 color: Colors.red.shade50,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Text('NEW',
-                  style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red.shade700)),
+              child: Text(
+                'NEW',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red.shade700,
+                ),
+              ),
             ),
             const SizedBox(width: 6),
             Expanded(
-              child: Text(p25['title'] as String,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 15)),
+              child: Text(
+                p25['title'] as String,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
             ),
           ],
         ),
         const SizedBox(height: 8),
         Card(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Column(
@@ -508,10 +586,13 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
                     children: [
                       SizedBox(
                         width: 118,
-                        child: Text(r['round'] as String,
-                            style: const TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w600)),
+                        child: Text(
+                          r['round'] as String,
+                          style: const TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                       Expanded(
                         child: Column(
@@ -523,35 +604,40 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
                                 value: rate / 100,
                                 minHeight: 8,
                                 backgroundColor: Colors.grey.shade200,
-                                valueColor: AlwaysStoppedAnimation(danger
-                                    ? Colors.red
-                                    : isPractical
-                                        ? Colors.teal
-                                        : Colors.indigo),
+                                valueColor: AlwaysStoppedAnimation(
+                                  danger
+                                      ? Colors.red
+                                      : isPractical
+                                      ? Colors.teal
+                                      : Colors.indigo,
+                                ),
                               ),
                             ),
                             if (applicants != null && passed != null)
                               Padding(
                                 padding: const EdgeInsets.only(top: 2),
                                 child: Text(
-                                    '응시 $applicants명 · 합격 $passed명',
-                                    style: TextStyle(
-                                        fontSize: 10.5,
-                                        color: Colors.grey.shade600)),
+                                  '응시 $applicants명 · 합격 $passed명',
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
                               ),
                           ],
                         ),
                       ),
                       SizedBox(
                         width: 52,
-                        child: Text(' $rate%',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: danger
-                                    ? Colors.red.shade700
-                                    : Colors.indigo)),
+                        child: Text(
+                          ' $rate%',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: danger ? Colors.red.shade700 : Colors.indigo,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -572,26 +658,36 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(trends['title'] as String,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+        Text(
+          trends['title'] as String,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
         const SizedBox(height: 8),
-        ...items.map((it) => Card(
-              margin: const EdgeInsets.only(bottom: 10),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              child: ExpansionTile(
-                leading:
-                    const Icon(Icons.trending_up, color: Colors.purple),
-                title: Text(it['title'] as String,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 14)),
-                childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-                children: [
-                  Text(it['detail'] as String,
-                      style: const TextStyle(fontSize: 13.5, height: 1.6)),
-                ],
+        ...items.map(
+          (it) => Card(
+            margin: const EdgeInsets.only(bottom: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ExpansionTile(
+              leading: const Icon(Icons.trending_up, color: Colors.purple),
+              title: Text(
+                it['title'] as String,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
-            )),
+              childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              children: [
+                Text(
+                  it['detail'] as String,
+                  style: const TextStyle(fontSize: 13.5, height: 1.6),
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -599,14 +695,14 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
   // ── Tab 3: KEC 2026 개정 ─────────────────────────────────────
   Widget _kecTab() {
     final kec = _info!['kecChanges2026'] as Map<String, dynamic>;
-    final areas =
-        ((kec['areas'] as List?) ?? const []).cast<Map<String, dynamic>>();
+    final areas = ((kec['areas'] as List?) ?? const [])
+        .cast<Map<String, dynamic>>();
     final mnemonics = ((kec['mnemonics'] as List?) ?? const []).cast<String>();
     final traps = ((kec['trapPoints'] as List?) ?? const []).cast<String>();
     // dataCoverage는 일부 트랙에만 존재 → null-safe 처리
     final coverage = _info!['dataCoverage'] as Map<String, dynamic>?;
-    final howTo =
-        ((coverage?['howToCover'] as List?) ?? const []).cast<String>();
+    final howTo = ((coverage?['howToCover'] as List?) ?? const [])
+        .cast<String>();
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -629,18 +725,26 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
                   const Icon(Icons.warning_amber, color: Colors.white),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(kec['title'] as String,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15)),
+                    child: Text(
+                      kec['title'] as String,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              Text(kec['warning'] as String,
-                  style: const TextStyle(
-                      color: Colors.white, fontSize: 13, height: 1.5)),
+              Text(
+                kec['warning'] as String,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  height: 1.5,
+                ),
+              ),
             ],
           ),
         ),
@@ -652,8 +756,12 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
         ],
         if (traps.isNotEmpty) ...[
           const SizedBox(height: 10),
-          _noteCard('시험장 함정 5포인트 (구규정 = 오답)', traps,
-              Icons.dangerous, Colors.red),
+          _noteCard(
+            '시험장 함정 5포인트 (구규정 = 오답)',
+            traps,
+            Icons.dangerous,
+            Colors.red,
+          ),
         ],
         if (coverage != null) ...[
           const SizedBox(height: 14),
@@ -669,37 +777,52 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
               children: [
                 Row(
                   children: [
-                    Icon(Icons.fact_check,
-                        size: 18, color: Colors.blueGrey.shade700),
+                    Icon(
+                      Icons.fact_check,
+                      size: 18,
+                      color: Colors.blueGrey.shade700,
+                    ),
                     const SizedBox(width: 6),
                     Expanded(
-                      child: Text((coverage['title'] as String?) ?? '데이터 커버리지',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13.5,
-                              color: Colors.blueGrey.shade800)),
+                      child: Text(
+                        (coverage['title'] as String?) ?? '데이터 커버리지',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13.5,
+                          color: Colors.blueGrey.shade800,
+                        ),
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text((coverage['detail'] as String?) ?? '',
-                    style: const TextStyle(fontSize: 12.5, height: 1.55)),
+                Text(
+                  (coverage['detail'] as String?) ?? '',
+                  style: const TextStyle(fontSize: 12.5, height: 1.55),
+                ),
                 const SizedBox(height: 8),
-                ...howTo.map((t) => Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.check_circle,
-                              size: 14, color: Colors.blueGrey.shade600),
-                          const SizedBox(width: 6),
-                          Expanded(
-                              child: Text(t,
-                                  style: const TextStyle(
-                                      fontSize: 12.5, height: 1.5))),
-                        ],
-                      ),
-                    )),
+                ...howTo.map(
+                  (t) => Padding(
+                    padding: const EdgeInsets.only(bottom: 5),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          size: 14,
+                          color: Colors.blueGrey.shade600,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            t,
+                            style: const TextStyle(fontSize: 12.5, height: 1.5),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -718,11 +841,14 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(area['area'] as String,
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Colors.deepOrange.shade800)),
+            Text(
+              area['area'] as String,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: Colors.deepOrange.shade800,
+              ),
+            ),
             const SizedBox(height: 10),
             ...changes.map((c) {
               final before = c['before'] as String;
@@ -731,9 +857,13 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(c['item'] as String,
-                        style: const TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.w600)),
+                    Text(
+                      c['item'] as String,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
@@ -741,41 +871,52 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
                           Expanded(
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 5),
+                                horizontal: 8,
+                                vertical: 5,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.grey.shade100,
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: Text(before,
-                                  style: TextStyle(
-                                      fontSize: 12,
-                                      decoration:
-                                          TextDecoration.lineThrough,
-                                      color: Colors.grey.shade600)),
+                              child: Text(
+                                before,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  decoration: TextDecoration.lineThrough,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
                             ),
                           ),
                           const Padding(
                             padding: EdgeInsets.symmetric(horizontal: 6),
-                            child: Icon(Icons.arrow_forward,
-                                size: 16, color: Colors.deepOrange),
+                            child: Icon(
+                              Icons.arrow_forward,
+                              size: 16,
+                              color: Colors.deepOrange,
+                            ),
                           ),
                         ],
                         Expanded(
                           flex: before == '—' ? 2 : 1,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 5),
+                              horizontal: 8,
+                              vertical: 5,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.green.shade50,
                               borderRadius: BorderRadius.circular(8),
-                              border:
-                                  Border.all(color: Colors.green.shade200),
+                              border: Border.all(color: Colors.green.shade200),
                             ),
-                            child: Text(c['after'] as String,
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green.shade800)),
+                            child: Text(
+                              c['after'] as String,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green.shade800,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -794,8 +935,7 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('$label $pct%',
-            style: TextStyle(fontSize: 11, color: color)),
+        Text('$label $pct%', style: TextStyle(fontSize: 11, color: color)),
         const SizedBox(height: 2),
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
@@ -823,34 +963,45 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
       children: [
         TutorBanner(
           mood: TutorMood.teaching,
-          message: '${StudyData.instance.track.name}은(는) 절대평가! 100점이 아니라 "평균 60 + 과목당 40 이상"을 설계하는 시험이에요.',
+          message:
+              '${StudyData.instance.track.name}은(는) 절대평가! 100점이 아니라 "평균 60 + 과목당 40 이상"을 설계하는 시험이에요.',
         ),
         if (scenarios.isNotEmpty) ...[
           const SizedBox(height: 12),
-          const Text('합격 점수 시나리오',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          const Text(
+            '합격 점수 시나리오',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
           const SizedBox(height: 8),
           ...scenarios.map(_scenarioCard),
         ],
         if (strategies.isNotEmpty) ...[
           const SizedBox(height: 16),
-          const Text('과목별 공략법',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          const Text(
+            '과목별 공략법',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
           const SizedBox(height: 8),
           ...strategies.map(_strategyCard),
         ],
         if (order != null) ...[
           const SizedBox(height: 16),
-          const Text('추천 학습 순서',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          const Text(
+            '추천 학습 순서',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
           const SizedBox(height: 8),
-          _orderCard('전공자 루트',
-              ((order['major'] as List?) ?? const []).cast<String>(),
-              Colors.indigo),
+          _orderCard(
+            '전공자 루트',
+            ((order['major'] as List?) ?? const []).cast<String>(),
+            Colors.indigo,
+          ),
           const SizedBox(height: 8),
-          _orderCard('비전공자 루트',
-              ((order['nonMajor'] as List?) ?? const []).cast<String>(),
-              Colors.teal),
+          _orderCard(
+            '비전공자 루트',
+            ((order['nonMajor'] as List?) ?? const []).cast<String>(),
+            Colors.teal,
+          ),
         ],
       ],
     );
@@ -869,28 +1020,39 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
             Row(
               children: [
                 Expanded(
-                  child: Text(s['name'] as String,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 14)),
+                  child: Text(
+                    s['name'] as String,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.green.shade50,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text('평균 ${s['average']}점',
-                      style: TextStyle(
-                          color: Colors.green.shade700,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12)),
+                  child: Text(
+                    '평균 ${s['average']}점',
+                    style: TextStyle(
+                      color: Colors.green.shade700,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 4),
-            Text(s['desc'] as String,
-                style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700)),
+            Text(
+              s['desc'] as String,
+              style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700),
+            ),
             const SizedBox(height: 10),
             ...scores.entries.map((e) {
               final v = (e.value as num).toInt();
@@ -900,9 +1062,12 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
                 child: Row(
                   children: [
                     SizedBox(
-                        width: 110,
-                        child: Text(e.key,
-                            style: const TextStyle(fontSize: 12.5))),
+                      width: 110,
+                      child: Text(
+                        e.key,
+                        style: const TextStyle(fontSize: 12.5),
+                      ),
+                    ),
                     Expanded(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(4),
@@ -911,19 +1076,24 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
                           minHeight: 8,
                           backgroundColor: Colors.grey.shade200,
                           valueColor: AlwaysStoppedAnimation(
-                              danger ? Colors.orange : Colors.indigo),
+                            danger ? Colors.orange : Colors.indigo,
+                          ),
                         ),
                       ),
                     ),
                     SizedBox(
-                        width: 38,
-                        child: Text(' $v점',
-                            style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: danger
-                                    ? Colors.orange.shade800
-                                    : Colors.indigo))),
+                      width: 38,
+                      child: Text(
+                        ' $v점',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: danger
+                              ? Colors.orange.shade800
+                              : Colors.indigo,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -940,8 +1110,10 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
       margin: const EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ExpansionTile(
-        title: Text(st['subject'] as String,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        title: Text(
+          st['subject'] as String,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 3),
           child: Wrap(
@@ -957,28 +1129,39 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
         children: [
           Align(
             alignment: Alignment.centerLeft,
-            child: Text('우선순위: ${st['priority']}',
-                style: const TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.indigo)),
+            child: Text(
+              '우선순위: ${st['priority']}',
+              style: const TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: Colors.indigo,
+              ),
+            ),
           ),
           const SizedBox(height: 8),
-          ...tips.map((t) => Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('• ',
-                        style: TextStyle(
-                            color: Colors.indigo, fontWeight: FontWeight.bold)),
-                    Expanded(
-                        child: Text(t,
-                            style: const TextStyle(
-                                fontSize: 13, height: 1.5))),
-                  ],
-                ),
-              )),
+          ...tips.map(
+            (t) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '• ',
+                    style: TextStyle(
+                      color: Colors.indigo,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      t,
+                      style: const TextStyle(fontSize: 13, height: 1.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -991,9 +1174,14 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
         color: color.shade50,
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Text(text,
-          style: TextStyle(
-              fontSize: 11, color: color.shade700, fontWeight: FontWeight.w600)),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 11,
+          color: color.shade700,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 
@@ -1005,32 +1193,43 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title,
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: color.shade700)),
+            Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: color.shade700,
+              ),
+            ),
             const SizedBox(height: 8),
-            ...steps.asMap().entries.map((e) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 3),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 11,
-                        backgroundColor: color.shade100,
-                        child: Text('${e.key + 1}',
-                            style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: color.shade800)),
+            ...steps.asMap().entries.map(
+              (e) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 11,
+                      backgroundColor: color.shade100,
+                      child: Text(
+                        '${e.key + 1}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: color.shade800,
+                        ),
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                          child: Text(e.value,
-                              style: const TextStyle(fontSize: 13))),
-                    ],
-                  ),
-                )),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        e.value,
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -1048,21 +1247,30 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
           message: 'CBT는 문제은행에서 사람마다 다른 문제가 나와요. "기출 암기"가 아니라 "유형 대비"가 정답!',
         ),
         const SizedBox(height: 12),
-        ...tips.asMap().entries.map((e) => Card(
-              margin: const EdgeInsets.only(bottom: 10),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: Colors.indigo.shade50,
-                  child: Text('${e.key + 1}',
-                      style: const TextStyle(
-                          color: Colors.indigo, fontWeight: FontWeight.bold)),
+        ...tips.asMap().entries.map(
+          (e) => Card(
+            margin: const EdgeInsets.only(bottom: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Colors.indigo.shade50,
+                child: Text(
+                  '${e.key + 1}',
+                  style: const TextStyle(
+                    color: Colors.indigo,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                title: Text(e.value,
-                    style: const TextStyle(fontSize: 13.5, height: 1.5)),
               ),
-            )),
+              title: Text(
+                e.value,
+                style: const TextStyle(fontSize: 13.5, height: 1.5),
+              ),
+            ),
+          ),
+        ),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(14),
@@ -1091,7 +1299,11 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
   }
 
   Widget _noteCard(
-      String title, List<String> items, IconData icon, MaterialColor color) {
+    String title,
+    List<String> items,
+    IconData icon,
+    MaterialColor color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -1105,28 +1317,34 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
             children: [
               Icon(icon, size: 18, color: color.shade700),
               const SizedBox(width: 6),
-              Text(title,
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13.5,
-                      color: color.shade800)),
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13.5,
+                  color: color.shade800,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
-          ...items.map((t) => Padding(
-                padding: const EdgeInsets.only(bottom: 5),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('• ',
-                        style: TextStyle(color: color.shade700)),
-                    Expanded(
-                        child: Text(t,
-                            style:
-                                const TextStyle(fontSize: 12.5, height: 1.5))),
-                  ],
-                ),
-              )),
+          ...items.map(
+            (t) => Padding(
+              padding: const EdgeInsets.only(bottom: 5),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('• ', style: TextStyle(color: color.shade700)),
+                  Expanded(
+                    child: Text(
+                      t,
+                      style: const TextStyle(fontSize: 12.5, height: 1.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

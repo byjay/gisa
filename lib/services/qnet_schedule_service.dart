@@ -28,24 +28,24 @@ class QnetExamRound {
   });
 
   Map<String, dynamic> toMap() => {
-        'label': label,
-        'writtenReg': writtenReg?.toMap(),
-        'writtenExam': writtenExam?.toMap(),
-        'writtenResult': writtenResult?.toIso8601String(),
-        'practicalReg': practicalReg?.toMap(),
-        'practicalExam': practicalExam?.toMap(),
-        'finalResult': finalResult?.toIso8601String(),
-      };
+    'label': label,
+    'writtenReg': writtenReg?.toMap(),
+    'writtenExam': writtenExam?.toMap(),
+    'writtenResult': writtenResult?.toIso8601String(),
+    'practicalReg': practicalReg?.toMap(),
+    'practicalExam': practicalExam?.toMap(),
+    'finalResult': finalResult?.toIso8601String(),
+  };
 
   factory QnetExamRound.fromMap(Map<dynamic, dynamic> m) => QnetExamRound(
-        label: (m['label'] as String?) ?? '',
-        writtenReg: DateRange.fromMap(m['writtenReg']),
-        writtenExam: DateRange.fromMap(m['writtenExam']),
-        writtenResult: _parse(m['writtenResult']),
-        practicalReg: DateRange.fromMap(m['practicalReg']),
-        practicalExam: DateRange.fromMap(m['practicalExam']),
-        finalResult: _parse(m['finalResult']),
-      );
+    label: (m['label'] as String?) ?? '',
+    writtenReg: DateRange.fromMap(m['writtenReg']),
+    writtenExam: DateRange.fromMap(m['writtenExam']),
+    writtenResult: _parse(m['writtenResult']),
+    practicalReg: DateRange.fromMap(m['practicalReg']),
+    practicalExam: DateRange.fromMap(m['practicalExam']),
+    finalResult: _parse(m['finalResult']),
+  );
 
   static DateTime? _parse(dynamic v) =>
       v is String && v.isNotEmpty ? DateTime.tryParse(v) : null;
@@ -66,8 +66,10 @@ class DateRange {
       start.month == end.month &&
       start.day == end.day;
 
-  Map<String, dynamic> toMap() =>
-      {'s': start.toIso8601String(), 'e': end.toIso8601String()};
+  Map<String, dynamic> toMap() => {
+    's': start.toIso8601String(),
+    'e': end.toIso8601String(),
+  };
 
   static DateRange? fromMap(dynamic m) {
     if (m is! Map) return null;
@@ -121,9 +123,11 @@ class QnetScheduleService {
     if (!forceRefresh && _cache.containsKey(jmCd)) {
       return _cache[jmCd]!;
     }
-    final url = Uri.parse('$_base'
-        '?id=crf00503s02&gSite=Q&gId='
-        '&jmCd=$jmCd&jmInfoDivCcd=B0&seriesCd=$seriesCd');
+    final url = Uri.parse(
+      '$_base'
+      '?id=crf00503s02&gSite=Q&gId='
+      '&jmCd=$jmCd&jmInfoDivCcd=B0&seriesCd=$seriesCd',
+    );
 
     final html = await _fetchWithFallback(url.toString());
     if (html != null) {
@@ -167,15 +171,17 @@ class QnetScheduleService {
       final rounds = <QnetExamRound>[];
       for (final item in (list as List)) {
         final m = item as Map<String, dynamic>;
-        rounds.add(QnetExamRound(
-          label: (m['label'] as String?) ?? '',
-          writtenReg: _rangeFromJson(m['writtenReg']),
-          writtenExam: _rangeFromJson(m['writtenExam']),
-          writtenResult: _dateFromJson(m['writtenResult']),
-          practicalReg: _rangeFromJson(m['practicalReg']),
-          practicalExam: _rangeFromJson(m['practicalExam']),
-          finalResult: _dateFromJson(m['finalResult']),
-        ));
+        rounds.add(
+          QnetExamRound(
+            label: (m['label'] as String?) ?? '',
+            writtenReg: _rangeFromJson(m['writtenReg']),
+            writtenExam: _rangeFromJson(m['writtenExam']),
+            writtenResult: _dateFromJson(m['writtenResult']),
+            practicalReg: _rangeFromJson(m['practicalReg']),
+            practicalExam: _rangeFromJson(m['practicalExam']),
+            finalResult: _dateFromJson(m['finalResult']),
+          ),
+        );
       }
       out[cid] = rounds;
     });
@@ -222,13 +228,16 @@ class QnetScheduleService {
   Future<String?> _tryGet(String url) async {
     try {
       final res = await http
-          .get(Uri.parse(url), headers: {
-            'User-Agent':
-                'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36',
-            'Accept': 'text/html,application/xhtml+xml',
-            // proxy.cors.sh 브라우저 요청용 데모 키(공개)
-            'x-cors-api-key': 'temp_qnet_cert_tracker',
-          })
+          .get(
+            Uri.parse(url),
+            headers: {
+              'User-Agent':
+                  'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36',
+              'Accept': 'text/html,application/xhtml+xml',
+              // proxy.cors.sh 브라우저 요청용 데모 키(공개)
+              'x-cors-api-key': 'temp_qnet_cert_tracker',
+            },
+          )
           .timeout(const Duration(seconds: 12));
       if (res.statusCode == 200) {
         // Q-Net은 UTF-8. 프록시가 이미 문자열을 주지만 안전하게 디코딩.
@@ -258,19 +267,19 @@ class QnetScheduleService {
     if (tableEnd < 0) return const [];
     final table = html.substring(tableStart, tableEnd);
 
-    final rows = RegExp(r'<tr[^>]*>(.*?)</tr>', dotAll: true)
-        .allMatches(table)
-        .map((m) => m.group(1) ?? '')
-        .toList();
+    final rows = RegExp(
+      r'<tr[^>]*>(.*?)</tr>',
+      dotAll: true,
+    ).allMatches(table).map((m) => m.group(1) ?? '').toList();
 
     final result = <QnetExamRound>[];
     for (final row in rows) {
       // 헤더 행(th 포함) 건너뜀
       if (row.contains('<th')) continue;
-      final cells = RegExp(r'<td[^>]*>(.*?)</td>', dotAll: true)
-          .allMatches(row)
-          .map((m) => _clean(m.group(1) ?? ''))
-          .toList();
+      final cells = RegExp(
+        r'<td[^>]*>(.*?)</td>',
+        dotAll: true,
+      ).allMatches(row).map((m) => _clean(m.group(1) ?? '')).toList();
       if (cells.length < 4) continue;
 
       final label = cells[0];
@@ -281,15 +290,17 @@ class QnetScheduleService {
       DateTime? single(int i) =>
           i < cells.length ? _parseSingle(cells[i]) : null;
 
-      result.add(QnetExamRound(
-        label: label,
-        writtenReg: range(1),
-        writtenExam: range(2),
-        writtenResult: single(3),
-        practicalReg: range(4),
-        practicalExam: range(5),
-        finalResult: single(6),
-      ));
+      result.add(
+        QnetExamRound(
+          label: label,
+          writtenReg: range(1),
+          writtenExam: range(2),
+          writtenResult: single(3),
+          practicalReg: range(4),
+          practicalExam: range(5),
+          finalResult: single(6),
+        ),
+      );
     }
     return result;
   }

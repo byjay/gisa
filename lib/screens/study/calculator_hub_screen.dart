@@ -15,7 +15,9 @@ class CalculatorHubScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     // 현재 종목에 따라 소방 계산기 우선 노출
-    final trackId = context.select<AppProvider, String?>((p) => p.selectedTrackId);
+    final trackId = context.select<AppProvider, String?>(
+      (p) => p.selectedTrackId,
+    );
     final isFire = trackId == 'fire_electric';
 
     final entries = <_HubEntry>[
@@ -34,8 +36,7 @@ class CalculatorHubScreen extends StatelessWidget {
         builder: () => FormulaCalcListScreen(
           title: '전기 공식 계산기',
           calcs: FormulaCalculators.electrical,
-          bannerMsg:
-              '전기기사 실기·필기에 자주 나오는 공식을 값만 넣으면 계산해드려요.',
+          bannerMsg: '전기기사 실기·필기에 자주 나오는 공식을 값만 넣으면 계산해드려요.',
         ),
       ),
       _HubEntry(
@@ -46,8 +47,7 @@ class CalculatorHubScreen extends StatelessWidget {
         builder: () => FormulaCalcListScreen(
           title: '소방 공식 계산기',
           calcs: FormulaCalculators.fire,
-          bannerMsg:
-              '소방설비기사(전기) 실기 계산 공식을 값만 넣으면 계산해드려요.',
+          bannerMsg: '소방설비기사(전기) 실기 계산 공식을 값만 넣으면 계산해드려요.',
         ),
       ),
     ];
@@ -70,7 +70,8 @@ class CalculatorHubScreen extends StatelessWidget {
         children: [
           const TutorBanner(
             mood: TutorMood.teaching,
-            message: '시험장에서 자주 쓰는 단위 환산과 핵심 공식을 바로 계산해요. '
+            message:
+                '시험장에서 자주 쓰는 단위 환산과 핵심 공식을 바로 계산해요. '
                 '값만 넣으면 결과가 즉시 나옵니다! 🧮',
           ),
           const SizedBox(height: 16),
@@ -104,20 +105,29 @@ class CalculatorHubScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(e.title,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w800)),
+                    Text(
+                      e.title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(e.subtitle,
-                        style: TextStyle(
-                            fontSize: 12,
-                            height: 1.4,
-                            color: cs.onSurface.withValues(alpha: 0.65))),
+                    Text(
+                      e.subtitle,
+                      style: TextStyle(
+                        fontSize: 12,
+                        height: 1.4,
+                        color: cs.onSurface.withValues(alpha: 0.65),
+                      ),
+                    ),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right_rounded,
-                  color: cs.onSurface.withValues(alpha: 0.4)),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: cs.onSurface.withValues(alpha: 0.4),
+              ),
             ],
           ),
         ),

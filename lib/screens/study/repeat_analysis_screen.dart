@@ -65,8 +65,7 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
     });
 
     final subjects = <String>['전체', ...kSubjects];
-    final totalAppear =
-        items.fold<int>(0, (s, r) => s + r.count);
+    final totalAppear = items.fold<int>(0, (s, r) => s + r.count);
 
     return Scaffold(
       appBar: AppBar(title: const Text('빈출 유형변형 분석')),
@@ -100,11 +99,16 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
                     children: [
                       _stat(context, '${items.length}', '유형 수'),
                       _stat(context, '$totalAppear회', '누적 출제'),
-                      _stat(context,
-                          '${items.where((r) => r.count >= 3).length}', '3회+ 유형'),
-                      _stat(context,
-                          '${items.where((r) => r.variations.length >= 2).length}',
-                          '변형 유형'),
+                      _stat(
+                        context,
+                        '${items.where((r) => r.count >= 3).length}',
+                        '3회+ 유형',
+                      ),
+                      _stat(
+                        context,
+                        '${items.where((r) => r.variations.length >= 2).length}',
+                        '변형 유형',
+                      ),
                     ],
                   ),
                 ),
@@ -119,8 +123,10 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
                     itemBuilder: (context, i) {
                       final s = subjects[i];
                       return ChoiceChip(
-                        label: Text(s == '전체' ? s : s.substring(0, 4),
-                            style: const TextStyle(fontSize: 12)),
+                        label: Text(
+                          s == '전체' ? s : s.substring(0, 4),
+                          style: const TextStyle(fontSize: 12),
+                        ),
                         selected: s == _subject,
                         onSelected: (_) => setState(() => _subject = s),
                       );
@@ -135,8 +141,10 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
                       Padding(
                         padding: const EdgeInsets.only(right: 6),
                         child: ChoiceChip(
-                          label: Text('$c회 이상',
-                              style: const TextStyle(fontSize: 12)),
+                          label: Text(
+                            '$c회 이상',
+                            style: const TextStyle(fontSize: 12),
+                          ),
                           selected: _minCount == c,
                           onSelected: (_) => setState(() => _minCount = c),
                         ),
@@ -157,10 +165,13 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
                       children: [
                         const TutorAvatar(mood: TutorMood.wrong, size: 90),
                         const SizedBox(height: 8),
-                        Text('조건에 맞는 유형이 없어요. 필터를 조정해보세요.',
-                            style: TextStyle(
-                                fontSize: 13,
-                                color: cs.onSurface.withValues(alpha: 0.6))),
+                        Text(
+                          '조건에 맞는 유형이 없어요. 필터를 조정해보세요.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: cs.onSurface.withValues(alpha: 0.6),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -178,12 +189,21 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
     final cs = Theme.of(context).colorScheme;
     return Column(
       children: [
-        Text(value,
-            style: TextStyle(
-                fontSize: 16, fontWeight: FontWeight.w800, color: cs.primary)),
-        Text(label,
-            style: TextStyle(
-                fontSize: 11, color: cs.onSurface.withValues(alpha: 0.65))),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            color: cs.primary,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: cs.onSurface.withValues(alpha: 0.65),
+          ),
+        ),
       ],
     );
   }
@@ -203,11 +223,18 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
           ),
           child: Column(
             children: [
-              Text('${r.count}회',
-                  style: TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.w900, color: cc)),
-              Text(_countLabel(r.count),
-                  style: TextStyle(fontSize: 9.5, color: cc)),
+              Text(
+                '${r.count}회',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                  color: cc,
+                ),
+              ),
+              Text(
+                _countLabel(r.count),
+                style: TextStyle(fontSize: 9.5, color: cc),
+              ),
             ],
           ),
         ),
@@ -224,23 +251,31 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
             runSpacing: 4,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Text('${r.subject.length > 4 ? r.subject.substring(0, 4) : r.subject} · ${r.topic}',
-                  style: TextStyle(
-                      fontSize: 11,
-                      color: Theme.of(context).colorScheme.primary)),
+              Text(
+                '${r.subject.length > 4 ? r.subject.substring(0, 4) : r.subject} · ${r.topic}',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
               if (hasVars)
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.purple.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Text('변형 ${r.variations.length}종',
-                      style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.purple)),
+                  child: Text(
+                    '변형 ${r.variations.length}종',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.purple,
+                    ),
+                  ),
                 ),
             ],
           ),
@@ -255,17 +290,20 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
             spacing: 6,
             runSpacing: 6,
             children: r.exams
-                .map((e) => Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: cc.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: cc.withValues(alpha: 0.3)),
-                      ),
-                      child: Text(e,
-                          style: TextStyle(fontSize: 11, color: cc)),
-                    ))
+                .map(
+                  (e) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: cc.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: cc.withValues(alpha: 0.3)),
+                    ),
+                    child: Text(e, style: TextStyle(fontSize: 11, color: cc)),
+                  ),
+                )
                 .toList(),
           ),
           const SizedBox(height: 12),
@@ -283,21 +321,29 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SelectableText(r.question,
-                    style: const TextStyle(fontSize: 13, height: 1.55)),
+                SelectableText(
+                  r.question,
+                  style: const TextStyle(fontSize: 13, height: 1.55),
+                ),
                 const SizedBox(height: 8),
                 if (r.options.isNotEmpty && r.answer >= 1)
-                  Text('정답: ${r.answer}번 — ${r.answerText}',
-                      style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.teal))
+                  Text(
+                    '정답: ${r.answer}번 — ${r.answerText}',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.teal,
+                    ),
+                  )
                 else if (r.answerText.isNotEmpty)
-                  Text('정답: ${r.answerText}',
-                      style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.teal)),
+                  Text(
+                    '정답: ${r.answerText}',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.teal,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -311,7 +357,10 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
                 _solvableCount(r) >= 2
                     ? '이 유형 문제 풀기 (${_solvableCount(r)}문항)'
                     : '이 유형 문제 풀기',
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               onPressed: () => _solveCluster(context, r),
             ),
@@ -320,41 +369,53 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
           if (r.variations.isNotEmpty) ...[
             const SizedBox(height: 12),
             _sectionLabel(
-                context, '🔀 유형 변형 — 이렇게 바뀌어 나옵니다 (${r.variations.length}종)'),
+              context,
+              '🔀 유형 변형 — 이렇게 바뀌어 나옵니다 (${r.variations.length}종)',
+            ),
             const SizedBox(height: 6),
-            ...r.variations.map((v) => Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.only(bottom: 6),
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.purple.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                        color: Colors.purple.withValues(alpha: 0.2)),
+            ...r.variations.map(
+              (v) => Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 6),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.purple.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: Colors.purple.withValues(alpha: 0.2),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(v.exam,
-                          style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.purple)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      v.exam,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.purple,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    SelectableText(
+                      v.question,
+                      style: const TextStyle(fontSize: 12.5, height: 1.5),
+                    ),
+                    if (v.answerText.isNotEmpty) ...[
                       const SizedBox(height: 4),
-                      SelectableText(v.question,
-                          style:
-                              const TextStyle(fontSize: 12.5, height: 1.5)),
-                      if (v.answerText.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text('→ 정답: ${v.answerText}',
-                            style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.purple)),
-                      ],
+                      Text(
+                        '→ 정답: ${v.answerText}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.purple,
+                        ),
+                      ),
                     ],
-                  ),
-                )),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 8),
             // 대비 포인트
             Container(
@@ -363,17 +424,19 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
               decoration: BoxDecoration(
                 color: Colors.orange.withValues(alpha: 0.07),
                 borderRadius: BorderRadius.circular(12),
-                border:
-                    Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('🎯 대비 포인트',
-                      style: TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.deepOrange)),
+                  const Text(
+                    '🎯 대비 포인트',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.deepOrange,
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     _prepTip(r),
@@ -389,11 +452,14 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
   }
 
   Widget _sectionLabel(BuildContext context, String text) {
-    return Text(text,
-        style: TextStyle(
-            fontSize: 12.5,
-            fontWeight: FontWeight.w800,
-            color: Theme.of(context).colorScheme.primary));
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 12.5,
+        fontWeight: FontWeight.w800,
+        color: Theme.of(context).colorScheme.primary,
+      ),
+    );
   }
 
   /// 클러스터에서 실제로 풀 수 있는(4지선다) 문항 수
@@ -404,17 +470,19 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
     final out = <Question>[];
     // 대표 문제
     if (r.options.length >= 2 && r.answer >= 1) {
-      out.add(Question(
-        no: 1,
-        subject: r.subject,
-        topic: r.topic,
-        question: r.question,
-        options: r.options,
-        answer: r.answer,
-        hasImage: false,
-        explanation: r.answerText.isNotEmpty ? '정답: ${r.answerText}' : '',
-        examLabel: r.exams.isNotEmpty ? r.exams.first : '',
-      ));
+      out.add(
+        Question(
+          no: 1,
+          subject: r.subject,
+          topic: r.topic,
+          question: r.question,
+          options: r.options,
+          answer: r.answer,
+          hasImage: false,
+          explanation: r.answerText.isNotEmpty ? '정답: ${r.answerText}' : '',
+          examLabel: r.exams.isNotEmpty ? r.exams.first : '',
+        ),
+      );
     }
     // 변형 문제 — 보기가 없으면 대표 보기를 재활용해 풀이 가능하게
     var n = out.length;
@@ -424,18 +492,19 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
       final ans = v.answer >= 1 ? v.answer : r.answer;
       if (opts.length < 2 || ans < 1) continue;
       n++;
-      out.add(Question(
-        no: n,
-        subject: r.subject,
-        topic: r.topic,
-        question: v.question,
-        options: opts,
-        answer: ans,
-        hasImage: false,
-        explanation:
-            v.answerText.isNotEmpty ? '정답: ${v.answerText}' : '',
-        examLabel: v.exam,
-      ));
+      out.add(
+        Question(
+          no: n,
+          subject: r.subject,
+          topic: r.topic,
+          question: v.question,
+          options: opts,
+          answer: ans,
+          hasImage: false,
+          explanation: v.answerText.isNotEmpty ? '정답: ${v.answerText}' : '',
+          examLabel: v.exam,
+        ),
+      );
     }
     return out;
   }
@@ -460,8 +529,14 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
   String _prepTip(RepeatCluster r) {
     final qs = [r.question, ...r.variations.map((v) => v.question)];
     final hasNumbers = qs.every((q) => RegExp(r'\d').hasMatch(q));
-    final numsVary = hasNumbers &&
-        qs.map((q) => RegExp(r'[\d.]+').allMatches(q).map((m) => m.group(0)).join(','))
+    final numsVary =
+        hasNumbers &&
+        qs
+                .map(
+                  (q) => RegExp(
+                    r'[\d.]+',
+                  ).allMatches(q).map((m) => m.group(0)).join(','),
+                )
                 .toSet()
                 .length >
             1;

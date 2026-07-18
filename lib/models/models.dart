@@ -27,22 +27,22 @@ class Exam {
   }
 
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'name': name,
-        'category': category,
-        'examDate': examDate.toIso8601String(),
-        'memo': memo,
-        'colorValue': colorValue,
-      };
+    'id': id,
+    'name': name,
+    'category': category,
+    'examDate': examDate.toIso8601String(),
+    'memo': memo,
+    'colorValue': colorValue,
+  };
 
   factory Exam.fromMap(Map<dynamic, dynamic> m) => Exam(
-        id: m['id'] as String,
-        name: (m['name'] as String?) ?? '',
-        category: (m['category'] as String?) ?? '',
-        examDate: DateTime.parse(m['examDate'] as String),
-        memo: (m['memo'] as String?) ?? '',
-        colorValue: (m['colorValue'] as int?) ?? 0xFF5C6BC0,
-      );
+    id: m['id'] as String,
+    name: (m['name'] as String?) ?? '',
+    category: (m['category'] as String?) ?? '',
+    examDate: DateTime.parse(m['examDate'] as String),
+    memo: (m['memo'] as String?) ?? '',
+    colorValue: (m['colorValue'] as int?) ?? 0xFF5C6BC0,
+  );
 }
 
 class StudySession {
@@ -63,22 +63,22 @@ class StudySession {
   });
 
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'examId': examId,
-        'date': date.toIso8601String(),
-        'minutes': minutes,
-        'subject': subject,
-        'memo': memo,
-      };
+    'id': id,
+    'examId': examId,
+    'date': date.toIso8601String(),
+    'minutes': minutes,
+    'subject': subject,
+    'memo': memo,
+  };
 
   factory StudySession.fromMap(Map<dynamic, dynamic> m) => StudySession(
-        id: m['id'] as String,
-        examId: (m['examId'] as String?) ?? '',
-        date: DateTime.parse(m['date'] as String),
-        minutes: (m['minutes'] as int?) ?? 0,
-        subject: (m['subject'] as String?) ?? '',
-        memo: (m['memo'] as String?) ?? '',
-      );
+    id: m['id'] as String,
+    examId: (m['examId'] as String?) ?? '',
+    date: DateTime.parse(m['date'] as String),
+    minutes: (m['minutes'] as int?) ?? 0,
+    subject: (m['subject'] as String?) ?? '',
+    memo: (m['memo'] as String?) ?? '',
+  );
 }
 
 class WrongNote {
@@ -101,22 +101,22 @@ class WrongNote {
   });
 
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'examId': examId,
-        'question': question,
-        'answer': answer,
-        'memo': memo,
-        'mastered': mastered,
-        'createdAt': createdAt.toIso8601String(),
-      };
+    'id': id,
+    'examId': examId,
+    'question': question,
+    'answer': answer,
+    'memo': memo,
+    'mastered': mastered,
+    'createdAt': createdAt.toIso8601String(),
+  };
 
   factory WrongNote.fromMap(Map<dynamic, dynamic> m) => WrongNote(
-        id: m['id'] as String,
-        examId: (m['examId'] as String?) ?? '',
-        question: (m['question'] as String?) ?? '',
-        answer: (m['answer'] as String?) ?? '',
-        memo: (m['memo'] as String?) ?? '',
-        mastered: (m['mastered'] as bool?) ?? false,
-        createdAt: DateTime.parse(m['createdAt'] as String),
-      );
+    id: m['id'] as String,
+    examId: (m['examId'] as String?) ?? '',
+    question: (m['question'] as String?) ?? '',
+    answer: (m['answer'] as String?) ?? '',
+    memo: (m['memo'] as String?) ?? '',
+    mastered: (m['mastered'] as bool?) ?? false,
+    createdAt: DateTime.parse(m['createdAt'] as String),
+  );
 }

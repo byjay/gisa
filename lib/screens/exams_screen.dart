@@ -45,8 +45,12 @@ class _ExamsScreenState extends State<ExamsScreen> {
       return;
     }
     setState(() => _loadingCbt = true);
-    final info = await CbtInfoService.instance.fetch(item.jmCd!, item.name,
-        seriesCd: item.seriesCd, catalogId: item.id);
+    final info = await CbtInfoService.instance.fetch(
+      item.jmCd!,
+      item.name,
+      seriesCd: item.seriesCd,
+      catalogId: item.id,
+    );
     if (mounted) {
       setState(() {
         _cbt = info;
@@ -110,17 +114,16 @@ class _ExamsScreenState extends State<ExamsScreen> {
               onAnswerBoard: () => _launch(CbtInfo.answerBoardUrl),
             ),
             const SizedBox(height: 18),
-            _SectionTitle('🗓 회차별 시험일정',
-                count: app.qnetRounds.isEmpty ? null : app.qnetRounds.length),
+            _SectionTitle(
+              '🗓 회차별 시험일정',
+              count: app.qnetRounds.isEmpty ? null : app.qnetRounds.length,
+            ),
             const SizedBox(height: 4),
             Text(
               app.scheduleFetchedAt != null
                   ? '실시간 연동 · ${DateFormat('M월 d일 HH:mm').format(app.scheduleFetchedAt!)} 기준'
                   : '큐넷에서 실시간으로 불러옵니다.',
-              style: TextStyle(
-                fontSize: 11.5,
-                color: _muted(context),
-              ),
+              style: TextStyle(fontSize: 11.5, color: _muted(context)),
             ),
             const SizedBox(height: 10),
             if (app.loadingSchedule && app.qnetRounds.isEmpty)
@@ -135,10 +138,7 @@ class _ExamsScreenState extends State<ExamsScreen> {
               )
             else
               ...app.qnetRounds.map(
-                (r) => _RoundCard(
-                  round: r,
-                  item: app.catalogItem,
-                ),
+                (r) => _RoundCard(round: r, item: app.catalogItem),
               ),
           ],
         ),
@@ -148,13 +148,14 @@ class _ExamsScreenState extends State<ExamsScreen> {
 
   Color _muted(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark
-          ? Colors.white54
-          : AppTheme.textMuted;
+      ? Colors.white54
+      : AppTheme.textMuted;
 
   Future<void> _openQnetDetail(CatalogItem item) async {
     final jm = item.jmCd ?? '1150';
-    final uri =
-        Uri.parse('https://www.q-net.or.kr/crf005.do?id=crf00503&jmCd=$jm');
+    final uri = Uri.parse(
+      'https://www.q-net.or.kr/crf005.do?id=crf00503&jmCd=$jm',
+    );
     await _launch(uri.toString());
   }
 
@@ -194,8 +195,7 @@ class _CatalogPicker extends StatelessWidget {
               return ChoiceChip(
                 selected: sel,
                 onSelected: (_) => onSelect(item.id),
-                avatar: Text(item.emoji,
-                    style: const TextStyle(fontSize: 14)),
+                avatar: Text(item.emoji, style: const TextStyle(fontSize: 14)),
                 label: Text(item.name),
                 labelStyle: TextStyle(
                   fontWeight: FontWeight.w700,
@@ -205,8 +205,9 @@ class _CatalogPicker extends StatelessWidget {
                       : (dark ? Colors.white70 : AppTheme.textBody),
                 ),
                 selectedColor: AppTheme.primary,
-                backgroundColor:
-                    dark ? Colors.white.withValues(alpha: 0.06) : const Color(0xFFF3F4F6),
+                backgroundColor: dark
+                    ? Colors.white.withValues(alpha: 0.06)
+                    : const Color(0xFFF3F4F6),
                 showCheckmark: false,
               );
             },
@@ -268,8 +269,9 @@ class _StatusBanner extends StatelessWidget {
       child: Row(
         children: [
           const IconBadge(
-              icon: Icons.notifications_active_rounded,
-              color: AppTheme.primary),
+            icon: Icons.notifications_active_rounded,
+            color: AppTheme.primary,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -277,7 +279,9 @@ class _StatusBanner extends StatelessWidget {
                   ? '실시간 시험일정을 불러오는 중…'
                   : '지금은 임박한 일정 알림이 없어요. 회차 일정을 확인해 보세요.',
               style: const TextStyle(
-                  fontSize: 12.5, fontWeight: FontWeight.w600),
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -315,7 +319,9 @@ class _AlertTile extends StatelessWidget {
                   Text(
                     '${alert.phaseLabel} ${alert.type.label}',
                     style: const TextStyle(
-                        fontSize: 13, fontWeight: FontWeight.w800),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -373,12 +379,15 @@ class _CbtCard extends StatelessWidget {
           Row(
             children: [
               const IconBadge(
-                  icon: Icons.computer_rounded, color: Color(0xFF7C3AED)),
+                icon: Icons.computer_rounded,
+                color: Color(0xFF7C3AED),
+              ),
               const SizedBox(width: 12),
               const Expanded(
-                child: Text('CBT 시험 정보 (실시간)',
-                    style: TextStyle(
-                        fontSize: 14.5, fontWeight: FontWeight.w800)),
+                child: Text(
+                  'CBT 시험 정보 (실시간)',
+                  style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800),
+                ),
               ),
               if (loading)
                 const SizedBox(
@@ -399,29 +408,34 @@ class _CbtCard extends StatelessWidget {
           if (info != null) ...[
             Row(
               children: [
-                Expanded(
-                    child: _feeBox('필기 수수료', info!.feeWritten, muted)),
+                Expanded(child: _feeBox('필기 수수료', info!.feeWritten, muted)),
                 const SizedBox(width: 10),
-                Expanded(
-                    child: _feeBox('실기 수수료', info!.feePractical, muted)),
+                Expanded(child: _feeBox('실기 수수료', info!.feePractical, muted)),
               ],
             ),
             if (info!.notes.isNotEmpty) ...[
               const SizedBox(height: 12),
-              ...info!.notes.take(3).map(
+              ...info!.notes
+                  .take(3)
+                  .map(
                     (n) => Padding(
                       padding: const EdgeInsets.only(bottom: 4),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('• ',
-                              style: TextStyle(color: muted, fontSize: 12)),
+                          Text(
+                            '• ',
+                            style: TextStyle(color: muted, fontSize: 12),
+                          ),
                           Expanded(
-                            child: Text(n,
-                                style: TextStyle(
-                                    fontSize: 11.5,
-                                    height: 1.35,
-                                    color: muted)),
+                            child: Text(
+                              n,
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                height: 1.35,
+                                color: muted,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -429,16 +443,17 @@ class _CbtCard extends StatelessWidget {
                   ),
             ],
           ] else if (!loading)
-            Text('CBT 정보를 불러오지 못했어요.',
-                style: TextStyle(fontSize: 12, color: muted)),
+            Text(
+              'CBT 정보를 불러오지 못했어요.',
+              style: TextStyle(fontSize: 12, color: muted),
+            ),
           const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: onTrial,
-                  icon: const Icon(Icons.play_circle_outline_rounded,
-                      size: 18),
+                  icon: const Icon(Icons.play_circle_outline_rounded, size: 18),
                   label: const Text('CBT 체험'),
                 ),
               ),
@@ -469,9 +484,10 @@ class _CbtCard extends StatelessWidget {
         children: [
           Text(label, style: TextStyle(fontSize: 11, color: muted)),
           const SizedBox(height: 3),
-          Text(value,
-              style: const TextStyle(
-                  fontSize: 15, fontWeight: FontWeight.w800)),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+          ),
         ],
       ),
     );
@@ -495,9 +511,15 @@ class _RoundCard extends StatelessWidget {
         : AppTheme.textMuted;
 
     final writtenReg = app.registrationFor(
-        item.jmCd ?? '', round.label, ExamPhase.written);
+      item.jmCd ?? '',
+      round.label,
+      ExamPhase.written,
+    );
     final practicalReg = app.registrationFor(
-        item.jmCd ?? '', round.label, ExamPhase.practical);
+      item.jmCd ?? '',
+      round.label,
+      ExamPhase.practical,
+    );
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -514,7 +536,9 @@ class _RoundCard extends StatelessWidget {
                   child: Text(
                     round.label,
                     style: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w800),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
                 if (round.anchorDate != null)
@@ -580,12 +604,14 @@ class _RoundCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        _dateRow(Icons.edit_calendar_outlined, '원서접수',
-            _rangeText(reg), muted),
-        _dateRow(Icons.assignment_outlined, '시험일',
-            _rangeText(exam), muted),
-        _dateRow(Icons.emoji_events_outlined, '합격발표',
-            result != null ? _dateText(result) : '-', muted),
+        _dateRow(Icons.edit_calendar_outlined, '원서접수', _rangeText(reg), muted),
+        _dateRow(Icons.assignment_outlined, '시험일', _rangeText(exam), muted),
+        _dateRow(
+          Icons.emoji_events_outlined,
+          '합격발표',
+          result != null ? _dateText(result) : '-',
+          muted,
+        ),
         if (registration?.score != null) ...[
           const SizedBox(height: 8),
           _scoreSummary(registration!, muted),
@@ -617,8 +643,7 @@ class _RoundCard extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: TextButton.icon(
-            onPressed: () =>
-                _openAnalysisSheet(context, phase, registration),
+            onPressed: () => _openAnalysisSheet(context, phase, registration),
             icon: const Icon(Icons.insights_rounded, size: 18),
             label: const Text('합격 분석 (내 학습데이터 연동)'),
           ),
@@ -629,7 +654,10 @@ class _RoundCard extends StatelessWidget {
 
   /// 통합 분석 시트: 크롤링 시험일(D-Day) + 과거 학습데이터 예측 + 플랜 + 가답안 비교.
   void _openAnalysisSheet(
-      BuildContext context, ExamPhase phase, ExamRegistration? reg) {
+    BuildContext context,
+    ExamPhase phase,
+    ExamRegistration? reg,
+  ) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -654,7 +682,10 @@ class _RoundCard extends StatelessWidget {
               );
             }
             return _AnalysisReport(
-                analysis: snap.data!, item: item, scroll: sc);
+              analysis: snap.data!,
+              item: item,
+              scroll: sc,
+            );
           },
         ),
       ),
@@ -678,8 +709,8 @@ class _RoundCard extends StatelessWidget {
             pass == true
                 ? Icons.check_circle_rounded
                 : (pass == false
-                    ? Icons.cancel_rounded
-                    : Icons.help_outline_rounded),
+                      ? Icons.cancel_rounded
+                      : Icons.help_outline_rounded),
             color: color,
             size: 18,
           ),
@@ -690,13 +721,19 @@ class _RoundCard extends StatelessWidget {
               '(${reg.scoredCorrect}/${reg.scoredTotal})'
               '${(reg.subjectFails ?? 0) > 0 ? ' · 과락 ${reg.subjectFails}과목' : ''}',
               style: TextStyle(
-                  fontSize: 12, fontWeight: FontWeight.w700, color: color),
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
             ),
           ),
           Text(
             pass == null ? '' : (pass ? '합격 예상' : '불합격 예상'),
             style: TextStyle(
-                fontSize: 11.5, fontWeight: FontWeight.w800, color: color),
+              fontSize: 11.5,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
           ),
         ],
       ),
@@ -712,14 +749,15 @@ class _RoundCard extends StatelessWidget {
           const SizedBox(width: 7),
           SizedBox(
             width: 62,
-            child: Text(label,
-                style: TextStyle(fontSize: 12, color: muted)),
+            child: Text(label, style: TextStyle(fontSize: 12, color: muted)),
           ),
           Expanded(
             child: Text(
               value,
               style: const TextStyle(
-                  fontSize: 12.5, fontWeight: FontWeight.w600),
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -728,8 +766,12 @@ class _RoundCard extends StatelessWidget {
   }
 
   // 응시 상태 선택 시트
-  void _openStatusSheet(BuildContext context, AppProvider app,
-      ExamPhase phase, ExamRegistration? existing) {
+  void _openStatusSheet(
+    BuildContext context,
+    AppProvider app,
+    ExamPhase phase,
+    ExamRegistration? existing,
+  ) {
     showModalBottomSheet<void>(
       context: context,
       builder: (ctx) => SafeArea(
@@ -744,7 +786,9 @@ class _RoundCard extends StatelessWidget {
                     child: Text(
                       '${round.label} · ${phase.label} 응시 상태',
                       style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w800),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                   if (existing != null)
@@ -753,8 +797,10 @@ class _RoundCard extends StatelessWidget {
                         app.deleteRegistration(existing.id);
                         Navigator.pop(ctx);
                       },
-                      child: const Text('해제',
-                          style: TextStyle(color: AppTheme.danger)),
+                      child: const Text(
+                        '해제',
+                        style: TextStyle(color: AppTheme.danger),
+                      ),
                     ),
                 ],
               ),
@@ -764,8 +810,7 @@ class _RoundCard extends StatelessWidget {
                 leading: Icon(_statusIcon(s), color: AppTheme.primary),
                 title: Text(s.label),
                 trailing: existing?.status == s
-                    ? const Icon(Icons.check_rounded,
-                        color: AppTheme.primary)
+                    ? const Icon(Icons.check_rounded, color: AppTheme.primary)
                     : null,
                 onTap: () {
                   _setStatus(app, phase, existing, s);
@@ -780,11 +825,15 @@ class _RoundCard extends StatelessWidget {
     );
   }
 
-  void _setStatus(AppProvider app, ExamPhase phase,
-      ExamRegistration? existing, RegStatus status) {
-    final id =
-        ExamRegistration.makeId(item.jmCd ?? '', round.label, phase);
-    final reg = existing ??
+  void _setStatus(
+    AppProvider app,
+    ExamPhase phase,
+    ExamRegistration? existing,
+    RegStatus status,
+  ) {
+    final id = ExamRegistration.makeId(item.jmCd ?? '', round.label, phase);
+    final reg =
+        existing ??
         ExamRegistration(
           id: id,
           jmCd: item.jmCd ?? '',
@@ -798,26 +847,31 @@ class _RoundCard extends StatelessWidget {
   }
 
   // 가답안 채점 시트
-  void _openScoreSheet(BuildContext context, AppProvider app,
-      ExamPhase phase, ExamRegistration? existing) {
-    final subjects =
-        phase == ExamPhase.written ? item.subjects.length : 1;
+  void _openScoreSheet(
+    BuildContext context,
+    AppProvider app,
+    ExamPhase phase,
+    ExamRegistration? existing,
+  ) {
+    final subjects = phase == ExamPhase.written ? item.subjects.length : 1;
     final totalCtrl = TextEditingController(
-        text: (existing?.scoredTotal ??
-                (phase == ExamPhase.written ? subjects * 20 : 100))
-            .toString());
+      text:
+          (existing?.scoredTotal ??
+                  (phase == ExamPhase.written ? subjects * 20 : 100))
+              .toString(),
+    );
     final correctCtrl = TextEditingController(
-        text: existing?.scoredCorrect?.toString() ?? '');
+      text: existing?.scoredCorrect?.toString() ?? '',
+    );
     final failCtrl = TextEditingController(
-        text: (existing?.subjectFails ?? 0).toString());
+      text: (existing?.subjectFails ?? 0).toString(),
+    );
 
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (ctx) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(ctx).viewInsets.bottom,
-        ),
+        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -825,17 +879,22 @@ class _RoundCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${round.label} · ${phase.label} 가답안 채점',
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w800)),
+                Text(
+                  '${round.label} · ${phase.label} 가답안 채점',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
                 const SizedBox(height: 4),
                 Text(
                   '발표된 가답안과 내 답을 대조해 맞힌 문항 수를 입력하면 예상 점수를 계산해요.',
                   style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(ctx).brightness == Brightness.dark
-                          ? Colors.white54
-                          : AppTheme.textMuted),
+                    fontSize: 12,
+                    color: Theme.of(ctx).brightness == Brightness.dark
+                        ? Colors.white54
+                        : AppTheme.textMuted,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
@@ -872,21 +931,25 @@ class _RoundCard extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: () {
                       final total = int.tryParse(totalCtrl.text.trim());
-                      final correct =
-                          int.tryParse(correctCtrl.text.trim());
+                      final correct = int.tryParse(correctCtrl.text.trim());
                       if (total == null ||
                           correct == null ||
                           total <= 0 ||
                           correct < 0 ||
                           correct > total) {
                         ScaffoldMessenger.of(ctx).showSnackBar(
-                          const SnackBar(
-                              content: Text('문항 수를 올바르게 입력해 주세요.')),
+                          const SnackBar(content: Text('문항 수를 올바르게 입력해 주세요.')),
                         );
                         return;
                       }
-                      _saveScore(app, phase, existing, total, correct,
-                          int.tryParse(failCtrl.text.trim()) ?? 0);
+                      _saveScore(
+                        app,
+                        phase,
+                        existing,
+                        total,
+                        correct,
+                        int.tryParse(failCtrl.text.trim()) ?? 0,
+                      );
                       Navigator.pop(ctx);
                     },
                     icon: const Icon(Icons.calculate_rounded),
@@ -901,11 +964,17 @@ class _RoundCard extends StatelessWidget {
     );
   }
 
-  void _saveScore(AppProvider app, ExamPhase phase,
-      ExamRegistration? existing, int total, int correct, int fails) {
-    final id =
-        ExamRegistration.makeId(item.jmCd ?? '', round.label, phase);
-    final reg = existing ??
+  void _saveScore(
+    AppProvider app,
+    ExamPhase phase,
+    ExamRegistration? existing,
+    int total,
+    int correct,
+    int fails,
+  ) {
+    final id = ExamRegistration.makeId(item.jmCd ?? '', round.label, phase);
+    final reg =
+        existing ??
         ExamRegistration(
           id: id,
           jmCd: item.jmCd ?? '',
@@ -919,8 +988,7 @@ class _RoundCard extends StatelessWidget {
     reg.scoredCorrect = correct;
     reg.subjectFails = phase == ExamPhase.written ? fails : 0;
     reg.scoredAt = DateTime.now();
-    if (reg.status == RegStatus.planned ||
-        reg.status == RegStatus.registered) {
+    if (reg.status == RegStatus.planned || reg.status == RegStatus.registered) {
       reg.status = RegStatus.taken;
     }
     app.saveRegistration(reg);
@@ -981,9 +1049,10 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(text,
-            style: const TextStyle(
-                fontSize: 15.5, fontWeight: FontWeight.w800)),
+        Text(
+          text,
+          style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800),
+        ),
         if (count != null) ...[
           const SizedBox(width: 6),
           PillBadge(text: '$count', color: AppTheme.primary),
@@ -1004,12 +1073,17 @@ class _EmptySchedule extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 30),
       child: Column(
         children: [
-          Icon(Icons.cloud_off_rounded,
-              size: 50, color: AppTheme.textMuted.withValues(alpha: 0.6)),
+          Icon(
+            Icons.cloud_off_rounded,
+            size: 50,
+            color: AppTheme.textMuted.withValues(alpha: 0.6),
+          ),
           const SizedBox(height: 12),
-          Text(message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13)),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 13),
+          ),
           const SizedBox(height: 14),
           FilledButton.tonalIcon(
             onPressed: onRetry,
@@ -1058,11 +1132,15 @@ class _AnalysisReport extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-        Text('${item.name} · ${analysis.roundLabel}',
-            style: TextStyle(fontSize: 12.5, color: muted)),
+        Text(
+          '${item.name} · ${analysis.roundLabel}',
+          style: TextStyle(fontSize: 12.5, color: muted),
+        ),
         const SizedBox(height: 2),
-        Text('${analysis.phase.label} 합격 분석',
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+        Text(
+          '${analysis.phase.label} 합격 분석',
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+        ),
         const SizedBox(height: 16),
 
         // 예측 점수 + D-Day 헤더
@@ -1075,44 +1153,53 @@ class _AnalysisReport extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('과거 학습데이터 기반 예측',
-                        style: TextStyle(
-                            color: Color(0xFFDDE5FF), fontSize: 12)),
+                    const Text(
+                      '과거 학습데이터 기반 예측',
+                      style: TextStyle(color: Color(0xFFDDE5FF), fontSize: 12),
+                    ),
                     const SizedBox(height: 4),
-                    Text('${p.overall.toStringAsFixed(0)}점',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 34,
-                            fontWeight: FontWeight.w900)),
+                    Text(
+                      '${p.overall.toStringAsFixed(0)}점',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 34,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
                     Text(
                       p.needsDiagnosis
                           ? '데이터 부족 · 진단 필요'
                           : (p.pass ? '합격권 예측 ✅' : '합격선 미달'),
                       style: const TextStyle(
-                          color: Color(0xFFDDE5FF), fontSize: 12.5),
+                        color: Color(0xFFDDE5FF),
+                        fontSize: 12.5,
+                      ),
                     ),
                   ],
                 ),
               ),
               Column(
                 children: [
-                  const Icon(Icons.event_rounded,
-                      color: Colors.white70, size: 22),
+                  const Icon(
+                    Icons.event_rounded,
+                    color: Colors.white70,
+                    size: 22,
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     analysis.dDay == null
                         ? '-'
-                        : (analysis.dDay! >= 0
-                            ? 'D-${analysis.dDay}'
-                            : '종료'),
+                        : (analysis.dDay! >= 0 ? 'D-${analysis.dDay}' : '종료'),
                     style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900),
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
-                  const Text('시험일',
-                      style: TextStyle(
-                          color: Color(0xFFDDE5FF), fontSize: 11)),
+                  const Text(
+                    '시험일',
+                    style: TextStyle(color: Color(0xFFDDE5FF), fontSize: 11),
+                  ),
                 ],
               ),
             ],
@@ -1128,9 +1215,14 @@ class _AnalysisReport extends StatelessWidget {
               const Text('🧭', style: TextStyle(fontSize: 22)),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(analysis.coaching,
-                    style: const TextStyle(
-                        fontSize: 13, height: 1.4, fontWeight: FontWeight.w600)),
+                child: Text(
+                  analysis.coaching,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    height: 1.4,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           ),
@@ -1147,8 +1239,12 @@ class _AnalysisReport extends StatelessWidget {
               children: [
                 _compareCol('예측', p.overall, muted),
                 _arrow(analysis.predVsActualGap ?? 0),
-                _compareCol('실측(가답안)', analysis.actualScore!, muted,
-                    strong: true),
+                _compareCol(
+                  '실측(가답안)',
+                  analysis.actualScore!,
+                  muted,
+                  strong: true,
+                ),
               ],
             ),
           ),
@@ -1163,13 +1259,18 @@ class _AnalysisReport extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             child: Column(
               children: [
-                _planRow('목표 점수', '${plan.targetScore.toStringAsFixed(0)}점',
-                    muted),
-                _planRow('남은 점수',
-                    '${plan.pointsNeeded.toStringAsFixed(0)}점', muted),
+                _planRow(
+                  '목표 점수',
+                  '${plan.targetScore.toStringAsFixed(0)}점',
+                  muted,
+                ),
+                _planRow(
+                  '남은 점수',
+                  '${plan.pointsNeeded.toStringAsFixed(0)}점',
+                  muted,
+                ),
                 _planRow('필요 문제 수', '${plan.questionsNeeded}문제', muted),
-                _planRow('하루 권장량', '${plan.perDay}문제', muted,
-                    highlight: true),
+                _planRow('하루 권장량', '${plan.perDay}문제', muted, highlight: true),
               ],
             ),
           ),
@@ -1194,26 +1295,33 @@ class _AnalysisReport extends StatelessWidget {
                 child: Row(
                   children: [
                     const IconBadge(
-                        icon: Icons.local_hospital_rounded,
-                        color: Color(0xFF16A34A),
-                        size: 38),
+                      icon: Icons.local_hospital_rounded,
+                      color: Color(0xFF16A34A),
+                      size: 38,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${rx.subject} · ${rx.topic}',
-                              style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800)),
-                          Text('기출 ${rx.topicQuestionCount}문항',
-                              style: TextStyle(fontSize: 11, color: muted)),
+                          Text(
+                            '${rx.subject} · ${rx.topic}',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            '기출 ${rx.topicQuestionCount}문항',
+                            style: TextStyle(fontSize: 11, color: muted),
+                          ),
                         ],
                       ),
                     ),
                     PillBadge(
-                        text: '+${rx.expectedGain.toStringAsFixed(1)}점',
-                        color: const Color(0xFF16A34A)),
+                      text: '+${rx.expectedGain.toStringAsFixed(1)}점',
+                      color: const Color(0xFF16A34A),
+                    ),
                   ],
                 ),
               ),
@@ -1224,18 +1332,25 @@ class _AnalysisReport extends StatelessWidget {
     );
   }
 
-  Widget _compareCol(String label, double v, Color muted,
-      {bool strong = false}) {
+  Widget _compareCol(
+    String label,
+    double v,
+    Color muted, {
+    bool strong = false,
+  }) {
     return Expanded(
       child: Column(
         children: [
           Text(label, style: TextStyle(fontSize: 11.5, color: muted)),
           const SizedBox(height: 4),
-          Text('${v.toStringAsFixed(0)}점',
-              style: TextStyle(
-                  fontSize: strong ? 24 : 20,
-                  fontWeight: FontWeight.w900,
-                  color: strong ? AppTheme.primary : null)),
+          Text(
+            '${v.toStringAsFixed(0)}점',
+            style: TextStyle(
+              fontSize: strong ? 24 : 20,
+              fontWeight: FontWeight.w900,
+              color: strong ? AppTheme.primary : null,
+            ),
+          ),
         ],
       ),
     );
@@ -1245,30 +1360,42 @@ class _AnalysisReport extends StatelessWidget {
     final up = gap >= 0;
     return Column(
       children: [
-        Icon(up ? Icons.trending_up_rounded : Icons.trending_down_rounded,
-            color: up ? const Color(0xFF16A34A) : AppTheme.danger),
-        Text('${up ? '+' : ''}${gap.toStringAsFixed(0)}',
-            style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: up ? const Color(0xFF16A34A) : AppTheme.danger)),
+        Icon(
+          up ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+          color: up ? const Color(0xFF16A34A) : AppTheme.danger,
+        ),
+        Text(
+          '${up ? '+' : ''}${gap.toStringAsFixed(0)}',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            color: up ? const Color(0xFF16A34A) : AppTheme.danger,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _planRow(String label, String value, Color muted,
-      {bool highlight = false}) {
+  Widget _planRow(
+    String label,
+    String value,
+    Color muted, {
+    bool highlight = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: TextStyle(fontSize: 13, color: muted)),
-          Text(value,
-              style: TextStyle(
-                  fontSize: highlight ? 16 : 13.5,
-                  fontWeight: FontWeight.w800,
-                  color: highlight ? AppTheme.primary : null)),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: highlight ? 16 : 13.5,
+              fontWeight: FontWeight.w800,
+              color: highlight ? AppTheme.primary : null,
+            ),
+          ),
         ],
       ),
     );
@@ -1287,22 +1414,29 @@ class _AnalysisReport extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(s.subject,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontSize: 12.5, fontWeight: FontWeight.w700)),
+                child: Text(
+                  s.subject,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
               if (s.gwarak)
                 const Padding(
                   padding: EdgeInsets.only(right: 6),
                   child: PillBadge(text: '과락위험', color: AppTheme.danger),
                 ),
-              Text('${s.score.toStringAsFixed(0)}점',
-                  style: TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w800,
-                      color: color)),
+              Text(
+                '${s.score.toStringAsFixed(0)}점',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w800,
+                  color: color,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 5),

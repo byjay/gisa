@@ -49,8 +49,7 @@ class _BeginnerRoadmapScreenState extends State<BeginnerRoadmapScreen> {
       }
     });
     final p = await SharedPreferences.getInstance();
-    await p.setStringList(
-        _prefsKey, _done.map((e) => e.toString()).toList());
+    await p.setStringList(_prefsKey, _done.map((e) => e.toString()).toList());
   }
 
   @override
@@ -72,8 +71,8 @@ class _BeginnerRoadmapScreenState extends State<BeginnerRoadmapScreen> {
             situation: progress >= 1.0
                 ? CoachSituation.roadmapDone
                 : (progress > 0
-                    ? CoachSituation.roadmapProgress
-                    : CoachSituation.roadmapStart),
+                      ? CoachSituation.roadmapProgress
+                      : CoachSituation.roadmapStart),
             height: 104,
           ),
           const SizedBox(height: 16),
@@ -89,43 +88,66 @@ class _BeginnerRoadmapScreenState extends State<BeginnerRoadmapScreen> {
 
   // ── 단계 데이터 ────────────────────────────────────────
   List<_RoadStep> _buildSteps(
-      BuildContext context, String trackName, List<String> subjects) {
+    BuildContext context,
+    String trackName,
+    List<String> subjects,
+  ) {
     final firstSubject = subjects.isNotEmpty ? subjects.first : '기초 과목';
     return [
       _RoadStep(
         emoji: '🌱',
         title: 'STEP 0 · 마음 준비 (1일)',
-        why: '$trackName은(는) 비전공자도 합격하는 시험이에요. "나는 아무것도 모른다"는 지금이 가장 정상적인 출발점입니다.',
+        why:
+            '$trackName은(는) 비전공자도 합격하는 시험이에요. "나는 아무것도 모른다"는 지금이 가장 정상적인 출발점입니다.',
         todos: const [
           '시험이 객관식(CBT) 4지선다라는 것만 기억하기 — 100점이 아니라 평균 60점이면 합격',
           '하루 30분부터 시작 — 습관이 실력보다 먼저',
           '모르는 단어가 나와도 당황하지 않기 — 어차피 다 처음 봅니다',
         ],
         actions: [
-          _StepAction('합격 공부법 읽기', Icons.emoji_events_rounded,
-              () => pushWithNav(context, const StudyGuideScreen(), currentSection: 1)),
+          _StepAction(
+            '합격 공부법 읽기',
+            Icons.emoji_events_rounded,
+            () => pushWithNav(
+              context,
+              const StudyGuideScreen(),
+              currentSection: 1,
+            ),
+          ),
         ],
       ),
       _RoadStep(
         emoji: '📖',
         title: 'STEP 1 · 용어와 친해지기 (1주)',
-        why: '전기 공부의 80%는 "단어 낯섦"입니다. 이론을 외우지 말고 그림책 보듯 훑어보세요. 2번째 볼 때부터 갑자기 쉬워집니다.',
+        why:
+            '전기 공부의 80%는 "단어 낯섦"입니다. 이론을 외우지 말고 그림책 보듯 훑어보세요. 2번째 볼 때부터 갑자기 쉬워집니다.',
         todos: [
           '기초 이론에서 $firstSubject 첫 단원만 가볍게 훑기 (외우기 금지!)',
           '모르는 단어는 볼트쌤에게 "초등학생도 알게 설명해줘"라고 묻기',
           '하루에 이론 1개 단원 = 충분히 훌륭한 진도',
         ],
         actions: [
-          _StepAction('기초 이론 보기', Icons.menu_book_rounded,
-              () => pushWithNav(context, const TheoryScreen(), currentSection: 1)),
-          _StepAction('볼트쌤에게 질문', Icons.smart_toy_rounded,
-              () => pushWithNav(context, const TutorChatScreen(), currentSection: 1)),
+          _StepAction(
+            '기초 이론 보기',
+            Icons.menu_book_rounded,
+            () => pushWithNav(context, const TheoryScreen(), currentSection: 1),
+          ),
+          _StepAction(
+            '볼트쌤에게 질문',
+            Icons.smart_toy_rounded,
+            () => pushWithNav(
+              context,
+              const TutorChatScreen(),
+              currentSection: 1,
+            ),
+          ),
         ],
       ),
       _RoadStep(
         emoji: '✏️',
         title: 'STEP 2 · 일단 문제 구경하기 (1주)',
-        why: '이론을 다 알고 문제를 푸는 게 아니라, 문제를 보면서 이론이 필요해지는 순서가 맞습니다. 틀려도 됩니다 — 지금은 "시험이 뭘 묻는지" 구경하는 단계예요.',
+        why:
+            '이론을 다 알고 문제를 푸는 게 아니라, 문제를 보면서 이론이 필요해지는 순서가 맞습니다. 틀려도 됩니다 — 지금은 "시험이 뭘 묻는지" 구경하는 단계예요.',
         todos: const [
           '기출 10문제만 풀어보기 (정답률 0%여도 정상)',
           '해설을 읽고 "아 이런 걸 묻는구나"만 느끼기',
@@ -137,42 +159,63 @@ class _BeginnerRoadmapScreenState extends State<BeginnerRoadmapScreen> {
             if (!context.mounted) return;
             if (qs.isEmpty) return;
             pushWithNav(
-                context,
-                QuizPlayScreen(
-                    title: '왕초보 맛보기 10문제',
-                    questions: qs.take(10).toList(),
-                    examMode: false),
-                currentSection: 1);
+              context,
+              QuizPlayScreen(
+                title: '왕초보 맛보기 10문제',
+                questions: qs.take(10).toList(),
+                examMode: false,
+              ),
+              currentSection: 1,
+            );
           }),
         ],
       ),
       _RoadStep(
         emoji: '🔁',
         title: 'STEP 3 · 암기 루틴 만들기 (2~4주)',
-        why: '기사 시험은 "이해 30% + 반복 70%"입니다. 플래시카드와 암기법으로 매일 10분씩만 반복하면 뇌가 알아서 외워줍니다.',
+        why:
+            '기사 시험은 "이해 30% + 반복 70%"입니다. 플래시카드와 암기법으로 매일 10분씩만 반복하면 뇌가 알아서 외워줍니다.',
         todos: const [
           '매일 플래시카드 10장 — 아침·저녁 5분씩',
           '공식은 공식 가이드에서 "왜 이렇게 생겼는지"부터 이해',
           '틀린 문제는 자동으로 복습 큐에 쌓이니 홈의 긴급 복습만 따라가기',
         ],
         actions: [
-          _StepAction('플래시카드 시작', Icons.style_rounded,
-              () => pushWithNav(context, const FlashcardScreen(), currentSection: 1)),
-          _StepAction('공식 가이드', Icons.functions_rounded,
-              () => pushWithNav(context, const FormulaGuideScreen(), currentSection: 1)),
+          _StepAction(
+            '플래시카드 시작',
+            Icons.style_rounded,
+            () => pushWithNav(
+              context,
+              const FlashcardScreen(),
+              currentSection: 1,
+            ),
+          ),
+          _StepAction(
+            '공식 가이드',
+            Icons.functions_rounded,
+            () => pushWithNav(
+              context,
+              const FormulaGuideScreen(),
+              currentSection: 1,
+            ),
+          ),
         ],
       ),
       _RoadStep(
         emoji: '🎯',
         title: 'STEP 4 · 과목별 정복 (4~8주)',
-        why: '이제 과목 단위로 기출을 돌릴 차례입니다. 홈에서 과목을 골라 과목별 문제를 풀고, 정답률 60%가 넘으면 다음 과목으로 넘어가세요.',
+        why:
+            '이제 과목 단위로 기출을 돌릴 차례입니다. 홈에서 과목을 골라 과목별 문제를 풀고, 정답률 60%가 넘으면 다음 과목으로 넘어가세요.',
         todos: [
           for (final s in subjects.take(3)) '「$s」 과목 기출 1회독',
           '과락(40점 미만) 위험 과목은 볼트쌤과 집중 보강',
         ],
         actions: [
-          _StepAction('홈에서 과목 선택', Icons.home_rounded,
-              () => Navigator.of(context).popUntil((r) => r.isFirst)),
+          _StepAction(
+            '홈에서 과목 선택',
+            Icons.home_rounded,
+            () => Navigator.of(context).popUntil((r) => r.isFirst),
+          ),
         ],
       ),
       _RoadStep(
@@ -185,8 +228,11 @@ class _BeginnerRoadmapScreenState extends State<BeginnerRoadmapScreen> {
           '시험 전날은 요약·암기법만 가볍게 훑기',
         ],
         actions: [
-          _StepAction('학습 탭에서 실전 모의', Icons.timer_rounded,
-              () => Navigator.of(context).popUntil((r) => r.isFirst)),
+          _StepAction(
+            '학습 탭에서 실전 모의',
+            Icons.timer_rounded,
+            () => Navigator.of(context).popUntil((r) => r.isFirst),
+          ),
         ],
       ),
     ];
@@ -203,18 +249,22 @@ class _BeginnerRoadmapScreenState extends State<BeginnerRoadmapScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('아무것도 몰라도 괜찮아요',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 19,
-                  fontWeight: FontWeight.w900)),
+          const Text(
+            '아무것도 몰라도 괜찮아요',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 19,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
           const SizedBox(height: 6),
           Text(
             '$trackName, 지식 0에서 합격까지 6단계.\n체크하며 한 칸씩만 가면 됩니다.',
             style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.9),
-                fontSize: 13,
-                height: 1.5),
+              color: Colors.white.withValues(alpha: 0.9),
+              fontSize: 13,
+              height: 1.5,
+            ),
           ),
           const SizedBox(height: 14),
           ClipRRect(
@@ -227,11 +277,14 @@ class _BeginnerRoadmapScreenState extends State<BeginnerRoadmapScreen> {
             ),
           ),
           const SizedBox(height: 6),
-          Text('${(progress * 100).round()}% 진행',
-              style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.85),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700)),
+          Text(
+            '${(progress * 100).round()}% 진행',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.85),
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );
@@ -252,30 +305,35 @@ class _BeginnerRoadmapScreenState extends State<BeginnerRoadmapScreen> {
                 Text(s.emoji, style: const TextStyle(fontSize: 22)),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(s.title,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w900,
-                        decoration:
-                            done ? TextDecoration.lineThrough : null,
-                        color: done
-                            ? cs.onSurface.withValues(alpha: 0.45)
-                            : cs.onSurface,
-                      )),
+                  child: Text(
+                    s.title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      decoration: done ? TextDecoration.lineThrough : null,
+                      color: done
+                          ? cs.onSurface.withValues(alpha: 0.45)
+                          : cs.onSurface,
+                    ),
+                  ),
                 ),
                 Checkbox(
                   value: done,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6)),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
                   onChanged: (_) => _toggle(idx),
                 ),
               ],
             ),
-            Text(s.why,
-                style: TextStyle(
-                    fontSize: 12.5,
-                    height: 1.55,
-                    color: cs.onSurface.withValues(alpha: 0.7))),
+            Text(
+              s.why,
+              style: TextStyle(
+                fontSize: 12.5,
+                height: 1.55,
+                color: cs.onSurface.withValues(alpha: 0.7),
+              ),
+            ),
             const SizedBox(height: 10),
             for (final t in s.todos)
               Padding(
@@ -283,17 +341,22 @@ class _BeginnerRoadmapScreenState extends State<BeginnerRoadmapScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.check_circle_outline_rounded,
-                        size: 15,
-                        color: cs.primary.withValues(alpha: 0.7)),
+                    Icon(
+                      Icons.check_circle_outline_rounded,
+                      size: 15,
+                      color: cs.primary.withValues(alpha: 0.7),
+                    ),
                     const SizedBox(width: 6),
                     Expanded(
-                        child: Text(t,
-                            style: TextStyle(
-                                fontSize: 12.5,
-                                height: 1.45,
-                                color:
-                                    cs.onSurface.withValues(alpha: 0.85)))),
+                      child: Text(
+                        t,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          height: 1.45,
+                          color: cs.onSurface.withValues(alpha: 0.85),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -306,9 +369,13 @@ class _BeginnerRoadmapScreenState extends State<BeginnerRoadmapScreen> {
                   for (final a in s.actions)
                     ActionChip(
                       avatar: Icon(a.icon, size: 16, color: cs.primary),
-                      label: Text(a.label,
-                          style: const TextStyle(
-                              fontSize: 12, fontWeight: FontWeight.w700)),
+                      label: Text(
+                        a.label,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       onPressed: a.onTap,
                     ),
                 ],
@@ -331,10 +398,11 @@ class _BeginnerRoadmapScreenState extends State<BeginnerRoadmapScreen> {
       child: Text(
         '💡 합격자의 90%가 "처음엔 아무것도 몰랐다"고 말합니다.\n차이는 재능이 아니라, 오늘 STEP 0에 체크했는지 뿐이에요.',
         style: TextStyle(
-            fontSize: 13,
-            height: 1.6,
-            fontWeight: FontWeight.w600,
-            color: cs.onSurface.withValues(alpha: 0.8)),
+          fontSize: 13,
+          height: 1.6,
+          fontWeight: FontWeight.w600,
+          color: cs.onSurface.withValues(alpha: 0.8),
+        ),
       ),
     );
   }
@@ -346,12 +414,13 @@ class _RoadStep {
   final String why;
   final List<String> todos;
   final List<_StepAction> actions;
-  _RoadStep(
-      {required this.emoji,
-      required this.title,
-      required this.why,
-      required this.todos,
-      required this.actions});
+  _RoadStep({
+    required this.emoji,
+    required this.title,
+    required this.why,
+    required this.todos,
+    required this.actions,
+  });
 }
 
 class _StepAction {

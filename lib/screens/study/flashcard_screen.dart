@@ -63,10 +63,7 @@ class _FlashcardScreenState extends State<FlashcardScreen>
     newCards.shuffle(rand);
 
     // 복습 대상 우선, 그다음 신규 카드(최대 20개씩 섞어서 부담 줄이기)
-    final queue = <Mnemonic>[
-      ...dueCards,
-      ...newCards.take(30),
-    ];
+    final queue = <Mnemonic>[...dueCards, ...newCards.take(30)];
     if (queue.isEmpty) {
       // 더 이상 복습/신규가 없으면 전체 중 랜덤으로 가볍게 복습
       laterCards.shuffle(rand);
@@ -106,26 +103,28 @@ class _FlashcardScreenState extends State<FlashcardScreen>
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('플래시카드${widget.subjectFilter != null ? ' · ${widget.subjectFilter}' : ''}'),
+        title: Text(
+          '플래시카드${widget.subjectFilter != null ? ' · ${widget.subjectFilter}' : ''}',
+        ),
       ),
       body: SafeArea(
         child: _loading
             ? const Center(child: CircularProgressIndicator())
             : (_queue == null || _queue!.isEmpty)
-                ? _emptyView()
-                : (_index >= _queue!.length)
-                    ? _doneView(theme)
-                    : _cardView(theme),
+            ? _emptyView()
+            : (_index >= _queue!.length)
+            ? _doneView(theme)
+            : _cardView(theme),
       ),
     );
   }
 
   Widget _emptyView() => const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Text('암기법 데이터가 없습니다.', textAlign: TextAlign.center),
-        ),
-      );
+    child: Padding(
+      padding: EdgeInsets.all(24),
+      child: Text('암기법 데이터가 없습니다.', textAlign: TextAlign.center),
+    ),
+  );
 
   Widget _doneView(ThemeData theme) {
     final total = _knownCount + _unknownCount;
@@ -137,12 +136,15 @@ class _FlashcardScreenState extends State<FlashcardScreen>
           children: [
             const Text('🎉', style: TextStyle(fontSize: 56)),
             const SizedBox(height: 12),
-            Text('이번 세트 완료! ($total개)',
-                style: const TextStyle(
-                    fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(
+              '이번 세트 완료! ($total개)',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
-            Text('안다 $_knownCount개 · 모른다 $_unknownCount개',
-                style: TextStyle(color: Colors.grey.shade600)),
+            Text(
+              '안다 $_knownCount개 · 모른다 $_unknownCount개',
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
             const SizedBox(height: 4),
             Text(
               _unknownCount == 0
@@ -210,9 +212,10 @@ class _FlashcardScreenState extends State<FlashcardScreen>
               const SizedBox(height: 6),
               Align(
                 alignment: Alignment.centerRight,
-                child: Text('${_index + 1} / ${_queue!.length}',
-                    style: TextStyle(
-                        fontSize: 12, color: Colors.grey.shade600)),
+                child: Text(
+                  '${_index + 1} / ${_queue!.length}',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                ),
               ),
             ],
           ),
@@ -237,7 +240,8 @@ class _FlashcardScreenState extends State<FlashcardScreen>
                           ? min(rotate.value, pi / 2)
                           : rotate.value;
                       return Transform(
-                        transform: Matrix4.rotationY(value)..setEntry(3, 0, tilt),
+                        transform: Matrix4.rotationY(value)
+                          ..setEntry(3, 0, tilt),
                         alignment: Alignment.center,
                         child: child,
                       );
@@ -349,11 +353,14 @@ class _FlashcardScreenState extends State<FlashcardScreen>
                 visualDensity: VisualDensity.compact,
                 padding: EdgeInsets.zero,
               ),
-              Text(headline,
-                  style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w600)),
+              Text(
+                headline,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
           Expanded(
@@ -363,7 +370,10 @@ class _FlashcardScreenState extends State<FlashcardScreen>
                   content,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                      fontSize: 20, height: 1.5, fontWeight: FontWeight.w700),
+                    fontSize: 20,
+                    height: 1.5,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
@@ -376,8 +386,10 @@ class _FlashcardScreenState extends State<FlashcardScreen>
                 color: Colors.black.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Text('💡 $tip',
-                  style: const TextStyle(fontSize: 12.5, height: 1.4)),
+              child: Text(
+                '💡 $tip',
+                style: const TextStyle(fontSize: 12.5, height: 1.4),
+              ),
             ),
         ],
       ),

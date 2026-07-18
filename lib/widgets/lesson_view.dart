@@ -22,7 +22,9 @@ class LessonView extends StatelessWidget {
                 child: Text(
                   lesson.topic,
                   style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold),
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               _importanceStars(lesson.importance),
@@ -33,13 +35,17 @@ class LessonView extends StatelessWidget {
             spacing: 6,
             children: [
               Chip(
-                label: Text(lesson.subject,
-                    style: const TextStyle(fontSize: 11)),
+                label: Text(
+                  lesson.subject,
+                  style: const TextStyle(fontSize: 11),
+                ),
                 visualDensity: VisualDensity.compact,
               ),
               Chip(
-                label: Text('기출 ${lesson.freq}문항',
-                    style: const TextStyle(fontSize: 11)),
+                label: Text(
+                  '기출 ${lesson.freq}문항',
+                  style: const TextStyle(fontSize: 11),
+                ),
                 visualDensity: VisualDensity.compact,
                 backgroundColor: scheme.primaryContainer,
               ),
@@ -65,11 +71,14 @@ class LessonView extends StatelessWidget {
                   children: [
                     Icon(Icons.child_care, size: 18, color: Colors.blue[700]),
                     const SizedBox(width: 6),
-                    Text('왕초보 기초 — 이것부터 이해하세요',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: Colors.blue[800])),
+                    Text(
+                      '왕초보 기초 — 이것부터 이해하세요',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: Colors.blue[800],
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -90,8 +99,7 @@ class LessonView extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.record_voice_over,
-                    size: 20, color: scheme.primary),
+                Icon(Icons.record_voice_over, size: 20, color: scheme.primary),
                 const SizedBox(width: 10),
                 Expanded(child: _richText(context, lesson.intro)),
               ],
@@ -110,17 +118,24 @@ class LessonView extends StatelessWidget {
                   color: scheme.primary,
                   shape: BoxShape.circle,
                 ),
-                child: Text('${i + 1}',
-                    style: TextStyle(
-                        color: scheme.onPrimary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold)),
+                child: Text(
+                  '${i + 1}',
+                  style: TextStyle(
+                    color: scheme.onPrimary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(lesson.sections[i].title,
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold)),
+                child: Text(
+                  lesson.sections[i].title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ],
           ),
@@ -133,8 +148,7 @@ class LessonView extends StatelessWidget {
         // ── 시험에 이렇게 나온다 (출제 패턴)
         if (lesson.examHow.isNotEmpty) ...[
           const SizedBox(height: 20),
-          _sectionLabel(context, Icons.quiz, '시험에 이렇게 나온다',
-              Colors.deepPurple),
+          _sectionLabel(context, Icons.quiz, '시험에 이렇게 나온다', Colors.deepPurple),
           const SizedBox(height: 8),
           for (final e in lesson.examHow)
             Container(
@@ -145,13 +159,17 @@ class LessonView extends StatelessWidget {
                 color: Colors.deepPurple.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                    color: Colors.deepPurple.withValues(alpha: 0.25)),
+                  color: Colors.deepPurple.withValues(alpha: 0.25),
+                ),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.edit_note,
-                      size: 18, color: Colors.deepPurple[400]),
+                  Icon(
+                    Icons.edit_note,
+                    size: 18,
+                    color: Colors.deepPurple[400],
+                  ),
                   const SizedBox(width: 8),
                   Expanded(child: _richText(context, e)),
                 ],
@@ -172,29 +190,42 @@ class LessonView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(f.name,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 13)),
+                    Text(
+                      f.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 8),
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: scheme.surface,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text(f.expr,
-                          style: const TextStyle(
-                              fontFamily: 'monospace',
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600)),
+                      child: Text(
+                        f.expr,
+                        style: const TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                     if (f.note.isNotEmpty) ...[
                       const SizedBox(height: 4),
-                      Text(f.note,
-                          style: TextStyle(
-                              fontSize: 12, color: scheme.onSurfaceVariant)),
+                      Text(
+                        f.note,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
                     ],
                   ],
                 ),
@@ -224,27 +255,38 @@ class LessonView extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.workspace_premium,
-                        size: 20, color: Color(0xFFB8860B)),
+                    const Icon(
+                      Icons.workspace_premium,
+                      size: 20,
+                      color: Color(0xFFB8860B),
+                    ),
                     const SizedBox(width: 6),
-                    const Text('필수 암기 — 시험장 직행',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Color(0xFF8B6508))),
+                    const Text(
+                      '필수 암기 — 시험장 직행',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Color(0xFF8B6508),
+                      ),
+                    ),
                     const Spacer(),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFB8860B),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Text('${lesson.must.length}개',
-                          style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white)),
+                      child: Text(
+                        '${lesson.must.length}개',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -263,17 +305,19 @@ class LessonView extends StatelessWidget {
                             color: Color(0xFFB8860B),
                             shape: BoxShape.circle,
                           ),
-                          child: Text('${i + 1}',
-                              style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
+                          child: Text(
+                            '${i + 1}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: DefaultTextStyle.merge(
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w600),
+                            style: const TextStyle(fontWeight: FontWeight.w600),
                             child: _richText(context, lesson.must[i]),
                           ),
                         ),
@@ -297,8 +341,7 @@ class LessonView extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.amber.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                    color: Colors.amber.withValues(alpha: 0.5)),
+                border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
               ),
               child: _richText(context, m),
             ),
@@ -307,7 +350,11 @@ class LessonView extends StatelessWidget {
         if (lesson.traps.isNotEmpty) ...[
           const SizedBox(height: 16),
           _sectionLabel(
-              context, Icons.warning_amber, '출제 함정 주의', Colors.red[700]!),
+            context,
+            Icons.warning_amber,
+            '출제 함정 주의',
+            Colors.red[700]!,
+          ),
           const SizedBox(height: 8),
           for (final t in lesson.traps)
             Padding(
@@ -315,8 +362,11 @@ class LessonView extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.dangerous_outlined,
-                      size: 16, color: Colors.red[700]),
+                  Icon(
+                    Icons.dangerous_outlined,
+                    size: 16,
+                    color: Colors.red[700],
+                  ),
                   const SizedBox(width: 6),
                   Expanded(child: _richText(context, t)),
                 ],
@@ -330,28 +380,36 @@ class LessonView extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                  color: scheme.outlineVariant.withValues(alpha: 0.8)),
+                color: scheme.outlineVariant.withValues(alpha: 0.8),
+              ),
             ),
             child: Theme(
-              data: Theme.of(context)
-                  .copyWith(dividerColor: Colors.transparent),
+              data: Theme.of(
+                context,
+              ).copyWith(dividerColor: Colors.transparent),
               child: ExpansionTile(
-                tilePadding:
-                    const EdgeInsets.symmetric(horizontal: 14),
-                childrenPadding:
-                    const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                leading: Icon(Icons.rocket_launch,
-                    size: 20, color: scheme.tertiary),
-                title: Text('심화 암기 — 만점·고득점 포인트',
-                    style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: scheme.tertiary)),
+                tilePadding: const EdgeInsets.symmetric(horizontal: 14),
+                childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                leading: Icon(
+                  Icons.rocket_launch,
+                  size: 20,
+                  color: scheme.tertiary,
+                ),
+                title: Text(
+                  '심화 암기 — 만점·고득점 포인트',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: scheme.tertiary,
+                  ),
+                ),
                 subtitle: Text(
-                    '기초가 끝났다면 열어보세요 (${lesson.advanced.length}개)',
-                    style: TextStyle(
-                        fontSize: 11.5,
-                        color: scheme.onSurfaceVariant)),
+                  '기초가 끝났다면 열어보세요 (${lesson.advanced.length}개)',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
                 children: [
                   for (final a in lesson.advanced)
                     Padding(
@@ -359,8 +417,11 @@ class LessonView extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.add_circle_outline,
-                              size: 16, color: scheme.tertiary),
+                          Icon(
+                            Icons.add_circle_outline,
+                            size: 16,
+                            color: scheme.tertiary,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(child: _richText(context, a)),
                         ],
@@ -380,8 +441,7 @@ class LessonView extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.green.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(12),
-              border:
-                  Border.all(color: Colors.green.withValues(alpha: 0.4)),
+              border: Border.all(color: Colors.green.withValues(alpha: 0.4)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,10 +450,13 @@ class LessonView extends StatelessWidget {
                   children: [
                     Icon(Icons.flag, size: 18, color: Colors.green[700]),
                     const SizedBox(width: 6),
-                    Text('합격 전략',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green[800])),
+                    Text(
+                      '합격 전략',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green[800],
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -418,13 +481,15 @@ class LessonView extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.construction,
-                        size: 18, color: Colors.teal[700]),
+                    Icon(Icons.construction, size: 18, color: Colors.teal[700]),
                     const SizedBox(width: 6),
-                    Text('실기 연계 포인트',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.teal[800])),
+                    Text(
+                      '실기 연계 포인트',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal[800],
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -438,28 +503,36 @@ class LessonView extends StatelessWidget {
   }
 
   Widget _importanceStars(int n) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: List.generate(
-          5,
-          (i) => Icon(
-            i < n ? Icons.star : Icons.star_border,
-            size: 16,
-            color: Colors.amber[700],
-          ),
-        ),
-      );
+    mainAxisSize: MainAxisSize.min,
+    children: List.generate(
+      5,
+      (i) => Icon(
+        i < n ? Icons.star : Icons.star_border,
+        size: 16,
+        color: Colors.amber[700],
+      ),
+    ),
+  );
 
   Widget _sectionLabel(
-          BuildContext context, IconData icon, String label, Color color) =>
-      Row(
-        children: [
-          Icon(icon, size: 18, color: color),
-          const SizedBox(width: 6),
-          Text(label,
-              style: TextStyle(
-                  fontSize: 15, fontWeight: FontWeight.bold, color: color)),
-        ],
-      );
+    BuildContext context,
+    IconData icon,
+    String label,
+    Color color,
+  ) => Row(
+    children: [
+      Icon(icon, size: 18, color: color),
+      const SizedBox(width: 6),
+      Text(
+        label,
+        style: TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.bold,
+          color: color,
+        ),
+      ),
+    ],
+  );
 
   /// body 텍스트: 마크다운 표(|...|) 블록과 일반 텍스트 분리 렌더
   Widget _bodyContent(BuildContext context, String body) {
@@ -476,10 +549,12 @@ class LessonView extends StatelessWidget {
 
     void flushTable() {
       if (tableLines.isEmpty) return;
-      children.add(Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: _buildTable(context, tableLines),
-      ));
+      children.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: _buildTable(context, tableLines),
+        ),
+      );
       tableLines.clear();
     }
 
@@ -498,17 +573,21 @@ class LessonView extends StatelessWidget {
     flushTable();
 
     return Column(
-        crossAxisAlignment: CrossAxisAlignment.start, children: children);
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children,
+    );
   }
 
   Widget _buildTable(BuildContext context, List<String> rows) {
     final scheme = Theme.of(context).colorScheme;
     final parsed = rows
-        .map((r) => r
-            .substring(1, r.length - 1)
-            .split('|')
-            .map((c) => c.trim())
-            .toList())
+        .map(
+          (r) => r
+              .substring(1, r.length - 1)
+              .split('|')
+              .map((c) => c.trim())
+              .toList(),
+        )
         .toList();
     if (parsed.isEmpty) return const SizedBox.shrink();
     final cols = parsed.map((r) => r.length).reduce((a, b) => a > b ? a : b);
@@ -518,7 +597,9 @@ class LessonView extends StatelessWidget {
       child: Table(
         defaultColumnWidth: const IntrinsicColumnWidth(),
         border: TableBorder.all(
-            color: scheme.outlineVariant, borderRadius: BorderRadius.circular(6)),
+          color: scheme.outlineVariant,
+          borderRadius: BorderRadius.circular(6),
+        ),
         children: [
           for (var i = 0; i < parsed.length; i++)
             TableRow(
@@ -529,7 +610,9 @@ class LessonView extends StatelessWidget {
                 for (var c = 0; c < cols; c++)
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 7),
+                      horizontal: 10,
+                      vertical: 7,
+                    ),
                     child: _richText(
                       context,
                       c < parsed[i].length ? parsed[i][c] : '',
@@ -537,8 +620,9 @@ class LessonView extends StatelessWidget {
                         fontSize: 12.5,
                         height: 1.3,
                         color: scheme.onSurface,
-                        fontWeight:
-                            i == 0 ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: i == 0
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
                     ),
                   ),
@@ -559,30 +643,37 @@ class LessonView extends StatelessWidget {
       if (m.start > last) {
         spans.add(TextSpan(text: text.substring(last, m.start)));
       }
-      spans.add(TextSpan(
+      spans.add(
+        TextSpan(
           text: m.group(1),
           style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary)));
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+      );
       last = m.end;
     }
     if (last < text.length) {
       spans.add(TextSpan(text: text.substring(last)));
     }
-    final style = baseStyle ??
+    final style =
+        baseStyle ??
         TextStyle(
-            fontSize: 14,
-            height: 1.65,
-            color: Theme.of(context).colorScheme.onSurface);
-    return Text.rich(
-      TextSpan(children: spans, style: style),
-    );
+          fontSize: 14,
+          height: 1.65,
+          color: Theme.of(context).colorScheme.onSurface,
+        );
+    return Text.rich(TextSpan(children: spans, style: style));
   }
 }
 
 /// 어디서든 강의를 바텀시트로 여는 헬퍼 (퀴즈·암기 화면 공용)
 Future<void> showLessonSheet(
-    BuildContext context, String subject, String topic) async {
+  BuildContext context,
+  String subject,
+  String topic,
+) async {
   final lesson = await StudyData.instance.lessonFor(subject, topic);
   final mnemonics = await StudyData.instance.mnemonicsFor(subject, topic);
   if (!context.mounted) return;
@@ -613,18 +704,22 @@ Future<void> showLessonSheet(
               ),
             // 🧑‍🏫 풀이 레시피 — 공식 적용법 + 풀이 순서 (모든 강의에 공통 탑재)
             TeacherRecipeBox(
-                topic: topic,
-                subject: subject,
-                initiallyExpanded: lesson == null,
-                showMnemonics: false),
+              topic: topic,
+              subject: subject,
+              initiallyExpanded: lesson == null,
+              showMnemonics: false,
+            ),
             // 추가 암기법 (mnemonics.json 연동 — 강의에 없는 보조 자료)
             if (mnemonics.isNotEmpty) ...[
               const SizedBox(height: 20),
               const Divider(),
               const SizedBox(height: 8),
-              Text('보조 암기 카드',
-                  style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold)),
+              Text(
+                '보조 암기 카드',
+                style: Theme.of(
+                  ctx,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
               for (final m in mnemonics.take(4))
                 Card(
@@ -633,21 +728,27 @@ Future<void> showLessonSheet(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(m.title,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 13)),
+                        Text(
+                          m.title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
                         const SizedBox(height: 4),
-                        Text(m.body,
-                            style: const TextStyle(
-                                fontSize: 13, height: 1.5)),
+                        Text(
+                          m.body,
+                          style: const TextStyle(fontSize: 13, height: 1.5),
+                        ),
                         if (m.tip.isNotEmpty) ...[
                           const SizedBox(height: 4),
-                          Text('TIP: ${m.tip}',
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  color: Theme.of(ctx)
-                                      .colorScheme
-                                      .primary)),
+                          Text(
+                            'TIP: ${m.tip}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(ctx).colorScheme.primary,
+                            ),
+                          ),
                         ],
                       ],
                     ),

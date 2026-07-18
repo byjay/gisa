@@ -38,11 +38,14 @@ class FormulaCalcListScreen extends StatelessWidget {
           for (final entry in byCat.entries) ...[
             Padding(
               padding: const EdgeInsets.only(left: 4, bottom: 8, top: 4),
-              child: Text(entry.key,
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w900,
-                      color: cs.primary)),
+              child: Text(
+                entry.key,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                  color: cs.primary,
+                ),
+              ),
             ),
             ...entry.value.map((c) => _calcTile(context, c)),
             const SizedBox(height: 10),
@@ -58,14 +61,23 @@ class FormulaCalcListScreen extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: Icon(Icons.calculate_rounded, color: cs.primary),
-        title: Text(c.title,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
-        subtitle: Text(c.formula,
-            style: TextStyle(
-                fontSize: 11.5, color: cs.onSurface.withValues(alpha: 0.6))),
+        title: Text(
+          c.title,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+        ),
+        subtitle: Text(
+          c.formula,
+          style: TextStyle(
+            fontSize: 11.5,
+            color: cs.onSurface.withValues(alpha: 0.6),
+          ),
+        ),
         trailing: const Icon(Icons.chevron_right_rounded),
-        onTap: () =>
-            pushWithNav(context, FormulaCalcDetailScreen(calc: c), currentSection: 1),
+        onTap: () => pushWithNav(
+          context,
+          FormulaCalcDetailScreen(calc: c),
+          currentSection: 1,
+        ),
       ),
     );
   }
@@ -91,7 +103,8 @@ class _FormulaCalcDetailScreenState extends State<FormulaCalcDetailScreen> {
     _ctrls = {
       for (final f in widget.calc.fields)
         f.key: TextEditingController(
-            text: f.defaultValue == 0 ? '' : _num(f.defaultValue))
+          text: f.defaultValue == 0 ? '' : _num(f.defaultValue),
+        ),
     };
     _recompute();
   }
@@ -143,41 +156,54 @@ class _FormulaCalcDetailScreenState extends State<FormulaCalcDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(calc.formula,
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w900,
-                        color: cs.primary)),
+                Text(
+                  calc.formula,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                    color: cs.primary,
+                  ),
+                ),
                 const SizedBox(height: 6),
-                Text(calc.desc,
-                    style: const TextStyle(fontSize: 12.5, height: 1.5)),
+                Text(
+                  calc.desc,
+                  style: const TextStyle(fontSize: 12.5, height: 1.5),
+                ),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          Text('입력값',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  color: cs.primary)),
+          Text(
+            '입력값',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: cs.primary,
+            ),
+          ),
           const SizedBox(height: 8),
-          ...calc.fields.map((f) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: TextField(
-                  controller: _ctrls[f.key],
-                  keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true, signed: true),
-                  onChanged: (_) => _recompute(),
-                  decoration: InputDecoration(
-                    labelText: f.label,
-                    suffixText: f.unit.isNotEmpty ? f.unit : null,
-                    filled: true,
-                    isDense: true,
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10)),
+          ...calc.fields.map(
+            (f) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: TextField(
+                controller: _ctrls[f.key],
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                  signed: true,
+                ),
+                onChanged: (_) => _recompute(),
+                decoration: InputDecoration(
+                  labelText: f.label,
+                  suffixText: f.unit.isNotEmpty ? f.unit : null,
+                  filled: true,
+                  isDense: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-              )),
+              ),
+            ),
+          ),
           const SizedBox(height: 8),
           // Results
           Container(
@@ -187,48 +213,67 @@ class _FormulaCalcDetailScreenState extends State<FormulaCalcDetailScreen> {
               color: const Color(0xFF445544),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Text('계산 결과',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800)),
+            child: const Text(
+              '계산 결과',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
           const SizedBox(height: 6),
           if (_results.isEmpty)
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text('값을 입력하면 결과가 표시됩니다.',
-                  style: TextStyle(
-                      color: cs.onSurface.withValues(alpha: 0.6))),
+              child: Text(
+                '값을 입력하면 결과가 표시됩니다.',
+                style: TextStyle(color: cs.onSurface.withValues(alpha: 0.6)),
+              ),
             )
           else
-            ..._results.map((r) => Container(
-                  margin: const EdgeInsets.only(bottom: 5),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(r.label,
-                            style: const TextStyle(
-                                fontSize: 13.5, fontWeight: FontWeight.w600)),
+            ..._results.map(
+              (r) => Container(
+                margin: const EdgeInsets.only(bottom: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        r.label,
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      Text(r.value,
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w900,
-                              color: cs.primary)),
-                      const SizedBox(width: 6),
-                      Text(r.unit,
-                          style: const TextStyle(
-                              fontSize: 13, fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                )),
+                    ),
+                    Text(
+                      r.value,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        color: cs.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      r.unit,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           const SizedBox(height: 20),
         ],
       ),

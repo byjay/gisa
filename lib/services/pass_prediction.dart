@@ -102,12 +102,13 @@ class PassPredictionEngine {
       stats[s]?.forEach((_, pair) => attempts += pair[1]);
       totalAttempts += attempts;
       subjectPreds.add(
-          SubjectPrediction(subject: s, score: score, attempts: attempts));
+        SubjectPrediction(subject: s, score: score, attempts: attempts),
+      );
     }
     final overall = subjectPreds.isEmpty
         ? 0.0
         : subjectPreds.map((s) => s.score).reduce((a, b) => a + b) /
-            subjectPreds.length;
+              subjectPreds.length;
 
     // 4) 처방전 — "이 토픽을 75% 정답률로 끌어올리면 평균이 몇 점 오르는가"
     final rx = <Prescription>[];
@@ -122,11 +123,14 @@ class PassPredictionEngine {
         if (acc >= target) return;
         // 과목 점수 상승 = 비중 × (목표-현재) × 100, 평균 상승 = /5과목
         final gain = (n / total) * (target - acc) * 100 / kSubjects.length;
-        rx.add(Prescription(
+        rx.add(
+          Prescription(
             subject: s,
             topic: t,
             expectedGain: gain,
-            topicQuestionCount: n));
+            topicQuestionCount: n,
+          ),
+        );
       });
     }
     rx.sort((a, b) => b.expectedGain.compareTo(a.expectedGain));

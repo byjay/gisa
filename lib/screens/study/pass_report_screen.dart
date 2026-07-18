@@ -46,8 +46,9 @@ class _PassReportScreenState extends State<PassReportScreen> {
     final app = context.watch<AppProvider>();
     final analysis = app.subjectAnalysis();
     final rounds = _bankSize > 0 ? app.reviewRounds(_bankSize) : 0;
-    final roundProgress =
-        _bankSize > 0 ? app.reviewRoundProgress(_bankSize) : 0.0;
+    final roundProgress = _bankSize > 0
+        ? app.reviewRoundProgress(_bankSize)
+        : 0.0;
 
     return Scaffold(
       appBar: AppBar(title: const Text('합격 분석 리포트')),
@@ -65,8 +66,8 @@ class _PassReportScreenState extends State<PassReportScreen> {
                   mood: analysis.isEmpty
                       ? TutorMood.cheer
                       : (analysis.first['accuracy'] as int) < 60
-                          ? TutorMood.thinking
-                          : TutorMood.happy,
+                      ? TutorMood.thinking
+                      : TutorMood.happy,
                   message: _headline(app, analysis, rounds),
                 ),
                 const SizedBox(height: 16),
@@ -78,17 +79,34 @@ class _PassReportScreenState extends State<PassReportScreen> {
                 // ===== 핵심 지표 =====
                 Row(
                   children: [
-                    _statTile(cs, '누적 풀이', '${app.lifetimeSolved}', '문항',
-                        Icons.assignment_turned_in_rounded, AppTheme.primary),
+                    _statTile(
+                      cs,
+                      '누적 풀이',
+                      '${app.lifetimeSolved}',
+                      '문항',
+                      Icons.assignment_turned_in_rounded,
+                      AppTheme.primary,
+                    ),
                     const SizedBox(width: 10),
-                    _statTile(cs, '평균 정답률', '${app.overallAccuracy}', '%',
-                        Icons.percent_rounded,
-                        app.overallAccuracy >= 60
-                            ? AppTheme.success
-                            : AppTheme.warning),
+                    _statTile(
+                      cs,
+                      '평균 정답률',
+                      '${app.overallAccuracy}',
+                      '%',
+                      Icons.percent_rounded,
+                      app.overallAccuracy >= 60
+                          ? AppTheme.success
+                          : AppTheme.warning,
+                    ),
                     const SizedBox(width: 10),
-                    _statTile(cs, '완료 세트', '${app.completedQuizSessions}',
-                        '회', Icons.check_circle_rounded, AppTheme.accent),
+                    _statTile(
+                      cs,
+                      '완료 세트',
+                      '${app.completedQuizSessions}',
+                      '회',
+                      Icons.check_circle_rounded,
+                      AppTheme.accent,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -100,11 +118,14 @@ class _PassReportScreenState extends State<PassReportScreen> {
                     children: [
                       Icon(Icons.radar_rounded, color: cs.primary, size: 20),
                       const SizedBox(width: 6),
-                      Text('과목별 약점 진단',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w900,
-                              color: cs.primary)),
+                      Text(
+                        '과목별 약점 진단',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: cs.primary,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -116,12 +137,14 @@ class _PassReportScreenState extends State<PassReportScreen> {
                     child: Text(
                       '정답률이 낮은 과목부터 표시됩니다. 약한 과목을 집중 공략하세요!',
                       style: TextStyle(
-                          fontSize: 12,
-                          color: cs.onSurface.withValues(alpha: 0.6)),
+                        fontSize: 12,
+                        color: cs.onSurface.withValues(alpha: 0.6),
+                      ),
                     ),
                   ),
                   ...analysis.asMap().entries.map(
-                      (e) => _subjectBar(context, cs, e.value, e.key == 0)),
+                    (e) => _subjectBar(context, cs, e.value, e.key == 0),
+                  ),
                 ],
                 const SizedBox(height: 24),
               ],
@@ -129,8 +152,11 @@ class _PassReportScreenState extends State<PassReportScreen> {
     );
   }
 
-  String _headline(AppProvider app, List<Map<String, dynamic>> analysis,
-      int rounds) {
+  String _headline(
+    AppProvider app,
+    List<Map<String, dynamic>> analysis,
+    int rounds,
+  ) {
     if (app.lifetimeSolved == 0) {
       return '문제를 풀면 합격까지 남은 약점을 자동으로 진단해드려요. '
           '지금 CBT 한 세트만 풀어볼까요? 🚀';
@@ -148,7 +174,11 @@ class _PassReportScreenState extends State<PassReportScreen> {
   }
 
   Widget _roundTracker(
-      ColorScheme cs, AppProvider app, int rounds, double progress) {
+    ColorScheme cs,
+    AppProvider app,
+    int rounds,
+    double progress,
+  ) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -160,27 +190,38 @@ class _PassReportScreenState extends State<PassReportScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.replay_circle_filled_rounded,
-                  color: Colors.white, size: 24),
+              const Icon(
+                Icons.replay_circle_filled_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
               const SizedBox(width: 8),
-              const Text('기출 회독 트래커',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w900)),
+              const Text(
+                '기출 회독 트래커',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
               const Spacer(),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.22),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Text('$rounds회독',
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900)),
+                child: Text(
+                  '$rounds회독',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
               ),
             ],
           ),
@@ -191,8 +232,7 @@ class _PassReportScreenState extends State<PassReportScreen> {
               value: progress,
               minHeight: 12,
               backgroundColor: Colors.white.withValues(alpha: 0.25),
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(Colors.white),
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
             ),
           ),
           const SizedBox(height: 8),
@@ -200,22 +240,33 @@ class _PassReportScreenState extends State<PassReportScreen> {
             _bankSize == 0
                 ? '문제은행을 불러오는 중...'
                 : '다음 회독까지 ${(progress * 100).round()}% · '
-                    '누적 ${app.lifetimeSolved}문항 / 은행 $_bankSize문항',
+                      '누적 ${app.lifetimeSolved}문항 / 은행 $_bankSize문항',
             style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.92), fontSize: 12),
+              color: Colors.white.withValues(alpha: 0.92),
+              fontSize: 12,
+            ),
           ),
           const SizedBox(height: 4),
-          Text('합격자들이 강조하는 1순위 전략은 기출 반복 풀이예요.',
-              style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 11)),
+          Text(
+            '합격자들이 강조하는 1순위 전략은 기출 반복 풀이예요.',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.8),
+              fontSize: 11,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _statTile(ColorScheme cs, String label, String value, String unit,
-      IconData icon, Color color) {
+  Widget _statTile(
+    ColorScheme cs,
+    String label,
+    String value,
+    String unit,
+    IconData icon,
+    Color color,
+  ) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
@@ -232,39 +283,48 @@ class _PassReportScreenState extends State<PassReportScreen> {
               text: TextSpan(
                 text: value,
                 style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                    color: cs.onSurface),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                  color: cs.onSurface,
+                ),
                 children: [
                   TextSpan(
                     text: ' $unit',
                     style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface.withValues(alpha: 0.6)),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface.withValues(alpha: 0.6),
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 3),
-            Text(label,
-                style: TextStyle(
-                    fontSize: 11,
-                    color: cs.onSurface.withValues(alpha: 0.65))),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                color: cs.onSurface.withValues(alpha: 0.65),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _subjectBar(BuildContext context, ColorScheme cs,
-      Map<String, dynamic> s, bool isWeakest) {
+  Widget _subjectBar(
+    BuildContext context,
+    ColorScheme cs,
+    Map<String, dynamic> s,
+    bool isWeakest,
+  ) {
     final acc = s['accuracy'] as int;
     final color = acc >= 70
         ? AppTheme.success
         : acc >= 50
-            ? AppTheme.warning
-            : AppTheme.danger;
+        ? AppTheme.warning
+        : AppTheme.danger;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
@@ -272,8 +332,9 @@ class _PassReportScreenState extends State<PassReportScreen> {
         color: cs.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-            color: isWeakest ? color : cs.outlineVariant,
-            width: isWeakest ? 1.6 : 1),
+          color: isWeakest ? color : cs.outlineVariant,
+          width: isWeakest ? 1.6 : 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,28 +344,40 @@ class _PassReportScreenState extends State<PassReportScreen> {
               if (isWeakest)
                 Container(
                   margin: const EdgeInsets.only(right: 6),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Text('최우선',
-                      style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                          color: color)),
+                  child: Text(
+                    '최우선',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      color: color,
+                    ),
+                  ),
                 ),
               Expanded(
-                child: Text(s['subject'] as String,
-                    style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w800)),
+                child: Text(
+                  s['subject'] as String,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
-              Text('$acc%',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                      color: color)),
+              Text(
+                '$acc%',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  color: color,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -320,19 +393,26 @@ class _PassReportScreenState extends State<PassReportScreen> {
           const SizedBox(height: 6),
           Row(
             children: [
-              Text('${s['correct']}/${s['total']} 정답',
-                  style: TextStyle(
-                      fontSize: 11.5,
-                      color: cs.onSurface.withValues(alpha: 0.6))),
+              Text(
+                '${s['correct']}/${s['total']} 정답',
+                style: TextStyle(
+                  fontSize: 11.5,
+                  color: cs.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
               const Spacer(),
               TextButton.icon(
-                onPressed: () => _practiceSubject(context, s['subject'] as String),
+                onPressed: () =>
+                    _practiceSubject(context, s['subject'] as String),
                 icon: const Icon(Icons.play_arrow_rounded, size: 18),
                 label: const Text('이 과목 집중 풀기'),
                 style: TextButton.styleFrom(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                    visualDensity: VisualDensity.compact),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 0,
+                  ),
+                  visualDensity: VisualDensity.compact,
+                ),
               ),
             ],
           ),
@@ -350,20 +430,29 @@ class _PassReportScreenState extends State<PassReportScreen> {
       ),
       child: Column(
         children: [
-          Icon(Icons.insights_rounded,
-              size: 40, color: cs.onSurface.withValues(alpha: 0.35)),
+          Icon(
+            Icons.insights_rounded,
+            size: 40,
+            color: cs.onSurface.withValues(alpha: 0.35),
+          ),
           const SizedBox(height: 10),
-          Text('아직 진단할 데이터가 없어요.',
-              style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurface.withValues(alpha: 0.7))),
+          Text(
+            '아직 진단할 데이터가 없어요.',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface.withValues(alpha: 0.7),
+            ),
+          ),
           const SizedBox(height: 6),
-          Text('CBT 모의고사를 한 세트 풀면\n과목별 강·약점이 자동으로 분석됩니다.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 12.5,
-                  height: 1.5,
-                  color: cs.onSurface.withValues(alpha: 0.6))),
+          Text(
+            'CBT 모의고사를 한 세트 풀면\n과목별 강·약점이 자동으로 분석됩니다.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 12.5,
+              height: 1.5,
+              color: cs.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
         ],
       ),
     );

@@ -448,6 +448,7 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
                   prefixIcon: const Icon(Icons.search_rounded),
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.arrow_forward_rounded),
+                    tooltip: '검색',
                     onPressed: _search,
                   ),
                   border: OutlineInputBorder(

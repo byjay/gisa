@@ -13,8 +13,7 @@ class WeeklyReportCard extends StatelessWidget {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
-    final monday =
-        todayStart.subtract(Duration(days: now.weekday - 1));
+    final monday = todayStart.subtract(Duration(days: now.weekday - 1));
     final lastMonday = monday.subtract(const Duration(days: 7));
 
     int rangeMinutes(DateTime from, int days) {
@@ -26,22 +25,27 @@ class WeeklyReportCard extends StatelessWidget {
     }
 
     int rangeQuiz(DateTime from, DateTime to, bool correctOnly) {
-      return app.quizResults.where((r) {
-        final d = DateTime.tryParse(r['date'] as String? ?? '');
-        return d != null && !d.isBefore(from) && d.isBefore(to);
-      }).fold<int>(
-          0,
-          (s, r) =>
-              s +
-              ((correctOnly ? r['correct'] : r['total']) as int? ?? 0));
+      return app.quizResults
+          .where((r) {
+            final d = DateTime.tryParse(r['date'] as String? ?? '');
+            return d != null && !d.isBefore(from) && d.isBefore(to);
+          })
+          .fold<int>(
+            0,
+            (s, r) =>
+                s + ((correctOnly ? r['correct'] : r['total']) as int? ?? 0),
+          );
     }
 
     // 이번 주는 경과일수만큼, 지난주는 같은 요일수로 공정 비교
     final daysPassed = now.weekday;
     final thisMin = rangeMinutes(monday, daysPassed);
     final lastMinSame = rangeMinutes(lastMonday, daysPassed);
-    final thisSolved =
-        rangeQuiz(monday, todayStart.add(const Duration(days: 1)), false);
+    final thisSolved = rangeQuiz(
+      monday,
+      todayStart.add(const Duration(days: 1)),
+      false,
+    );
     final lastSolvedFull = rangeQuiz(lastMonday, monday, false);
 
     final diffMin = thisMin - lastMinSame;
@@ -65,14 +69,16 @@ class WeeklyReportCard extends StatelessWidget {
           Row(
             children: [
               const IconBadge(
-                  icon: Icons.trending_up_rounded,
-                  color: AppTheme.electric,
-                  size: 36,
-                  iconSize: 18),
+                icon: Icons.trending_up_rounded,
+                color: AppTheme.electric,
+                size: 36,
+                iconSize: 18,
+              ),
               const SizedBox(width: 10),
-              const Text('주간 성장 리포트',
-                  style:
-                      TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+              const Text(
+                '주간 성장 리포트',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+              ),
               const Spacer(),
               PillBadge(
                 text: up ? '▲ $diffMin분' : '▼ ${-diffMin}분',
@@ -83,8 +89,13 @@ class WeeklyReportCard extends StatelessWidget {
           const SizedBox(height: 14),
           Row(
             children: [
-              _metric(context, '이번 주 학습', '$thisMin분',
-                  '지난주 같은 기간 $lastMinSame분', up),
+              _metric(
+                context,
+                '이번 주 학습',
+                '$thisMin분',
+                '지난주 같은 기간 $lastMinSame분',
+                up,
+              ),
               Container(
                 width: 1,
                 height: 44,
@@ -93,8 +104,13 @@ class WeeklyReportCard extends StatelessWidget {
                     ? Colors.white.withValues(alpha: 0.06)
                     : const Color(0xFFEEF0F7),
               ),
-              _metric(context, '이번 주 문제', '$thisSolved개',
-                  '지난주 $lastSolvedFull개', thisSolved >= lastSolvedFull),
+              _metric(
+                context,
+                '이번 주 문제',
+                '$thisSolved개',
+                '지난주 $lastSolvedFull개',
+                thisSolved >= lastSolvedFull,
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -102,8 +118,9 @@ class WeeklyReportCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(11),
             decoration: BoxDecoration(
-              color: (up ? AppTheme.success : AppTheme.warning)
-                  .withValues(alpha: dark ? 0.12 : 0.08),
+              color: (up ? AppTheme.success : AppTheme.warning).withValues(
+                alpha: dark ? 0.12 : 0.08,
+              ),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -123,25 +140,36 @@ class WeeklyReportCard extends StatelessWidget {
     );
   }
 
-  Widget _metric(BuildContext context, String label, String value,
-      String sub, bool up) {
+  Widget _metric(
+    BuildContext context,
+    String label,
+    String value,
+    String sub,
+    bool up,
+  ) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label,
-              style: TextStyle(
-                  fontSize: 11,
-                  color: dark ? Colors.white54 : AppTheme.textMuted)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: dark ? Colors.white54 : AppTheme.textMuted,
+            ),
+          ),
           const SizedBox(height: 3),
           Row(
             children: [
-              Text(value,
-                  style: const TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.4)),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.4,
+                ),
+              ),
               const SizedBox(width: 5),
               Icon(
                 up ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
@@ -151,10 +179,13 @@ class WeeklyReportCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 2),
-          Text(sub,
-              style: TextStyle(
-                  fontSize: 10,
-                  color: dark ? Colors.white38 : AppTheme.textMuted)),
+          Text(
+            sub,
+            style: TextStyle(
+              fontSize: 10,
+              color: dark ? Colors.white38 : AppTheme.textMuted,
+            ),
+          ),
         ],
       ),
     );

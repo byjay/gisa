@@ -104,35 +104,36 @@ class ScheduleAlertEngine {
   }
 
   /// 한 종목의 회차 목록 → 활성 알림 목록.
-  List<ScheduleAlert> buildAlerts(
-    String certName,
-    List<QnetExamRound> rounds,
-  ) {
+  List<ScheduleAlert> buildAlerts(String certName, List<QnetExamRound> rounds) {
     final alerts = <ScheduleAlert>[];
 
     void addReg(DateRange? reg, String phase) {
       if (reg == null) return;
       if (_inRange(reg)) {
-        alerts.add(ScheduleAlert(
-          type: AlertType.regOpen,
-          certName: certName,
-          roundLabel: '',
-          phaseLabel: phase,
-          targetDate: reg.end,
-          dDay: _dday(reg.end),
-          ongoing: true,
-        ));
-      } else {
-        final d = _dday(reg.start);
-        if (d >= 0 && d <= regLeadDays) {
-          alerts.add(ScheduleAlert(
+        alerts.add(
+          ScheduleAlert(
             type: AlertType.regOpen,
             certName: certName,
             roundLabel: '',
             phaseLabel: phase,
-            targetDate: reg.start,
-            dDay: d,
-          ));
+            targetDate: reg.end,
+            dDay: _dday(reg.end),
+            ongoing: true,
+          ),
+        );
+      } else {
+        final d = _dday(reg.start);
+        if (d >= 0 && d <= regLeadDays) {
+          alerts.add(
+            ScheduleAlert(
+              type: AlertType.regOpen,
+              certName: certName,
+              roundLabel: '',
+              phaseLabel: phase,
+              targetDate: reg.start,
+              dDay: d,
+            ),
+          );
         }
       }
     }
@@ -141,14 +142,16 @@ class ScheduleAlertEngine {
       if (exam == null) return;
       final d = _dday(exam.start);
       if (d >= 0 && d <= examLeadDays) {
-        alerts.add(ScheduleAlert(
-          type: AlertType.examSoon,
-          certName: certName,
-          roundLabel: '',
-          phaseLabel: phase,
-          targetDate: exam.start,
-          dDay: d,
-        ));
+        alerts.add(
+          ScheduleAlert(
+            type: AlertType.examSoon,
+            certName: certName,
+            roundLabel: '',
+            phaseLabel: phase,
+            targetDate: exam.start,
+            dDay: d,
+          ),
+        );
       }
     }
 
@@ -156,14 +159,16 @@ class ScheduleAlertEngine {
       if (date == null) return;
       final d = _dday(date);
       if (d >= 0 && d <= resultLeadDays) {
-        alerts.add(ScheduleAlert(
-          type: AlertType.resultSoon,
-          certName: certName,
-          roundLabel: '',
-          phaseLabel: phase,
-          targetDate: date,
-          dDay: d,
-        ));
+        alerts.add(
+          ScheduleAlert(
+            type: AlertType.resultSoon,
+            certName: certName,
+            roundLabel: '',
+            phaseLabel: phase,
+            targetDate: date,
+            dDay: d,
+          ),
+        );
       }
     }
 

@@ -28,7 +28,9 @@ class _FadeSlideInState extends State<FadeSlideIn>
   void initState() {
     super.initState();
     _c = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 480));
+      vsync: this,
+      duration: const Duration(milliseconds: 480),
+    );
     _fade = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
     _slide = Tween<Offset>(
       begin: const Offset(0, 0.06),
@@ -73,8 +75,7 @@ class _SparkleOverlayState extends State<SparkleOverlay>
   @override
   void initState() {
     super.initState();
-    _c = AnimationController(
-        vsync: this, duration: const Duration(seconds: 5))
+    _c = AnimationController(vsync: this, duration: const Duration(seconds: 5))
       ..repeat();
     _stars = List.generate(14, (i) {
       return _Star(
@@ -126,8 +127,7 @@ class _StarPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     for (final s in stars) {
-      final tw =
-          (math.sin(t * math.pi * 2 * s.speed + s.phase) + 1) / 2; // 0~1
+      final tw = (math.sin(t * math.pi * 2 * s.speed + s.phase) + 1) / 2; // 0~1
       final paint = Paint()
         ..color = Colors.white.withValues(alpha: 0.15 + tw * 0.45);
       final cx = s.x * size.width;
@@ -174,8 +174,9 @@ class _PulseGlowState extends State<PulseGlow>
   void initState() {
     super.initState();
     _c = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1800))
-      ..repeat(reverse: true);
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    )..repeat(reverse: true);
   }
 
   @override

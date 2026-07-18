@@ -12,26 +12,27 @@ class DailyMissionCard extends StatelessWidget {
     final app = context.watch<AppProvider>();
     final dark = Theme.of(context).brightness == Brightness.dark;
 
-    final missions = <({String label, String reward, bool done, double progress})>[
-      (
-        label: '학습 30분 채우기',
-        reward: '+60 XP',
-        done: app.todayMinutes >= 30,
-        progress: (app.todayMinutes / 30).clamp(0.0, 1.0),
-      ),
-      (
-        label: '문제 10개 풀기',
-        reward: '+50 XP',
-        done: app.todayQuizSolved >= 10,
-        progress: (app.todayQuizSolved / 10).clamp(0.0, 1.0),
-      ),
-      (
-        label: '정답 5개 맞히기',
-        reward: '+25 XP',
-        done: app.todayQuizCorrect >= 5,
-        progress: (app.todayQuizCorrect / 5).clamp(0.0, 1.0),
-      ),
-    ];
+    final missions =
+        <({String label, String reward, bool done, double progress})>[
+          (
+            label: '학습 30분 채우기',
+            reward: '+60 XP',
+            done: app.todayMinutes >= 30,
+            progress: (app.todayMinutes / 30).clamp(0.0, 1.0),
+          ),
+          (
+            label: '문제 10개 풀기',
+            reward: '+50 XP',
+            done: app.todayQuizSolved >= 10,
+            progress: (app.todayQuizSolved / 10).clamp(0.0, 1.0),
+          ),
+          (
+            label: '정답 5개 맞히기',
+            reward: '+25 XP',
+            done: app.todayQuizCorrect >= 5,
+            progress: (app.todayQuizCorrect / 5).clamp(0.0, 1.0),
+          ),
+        ];
     final doneCount = missions.where((m) => m.done).length;
     final allDone = doneCount == missions.length;
 
@@ -44,9 +45,10 @@ class DailyMissionCard extends StatelessWidget {
             children: [
               const Text('🪄', style: TextStyle(fontSize: 18)),
               const SizedBox(width: 7),
-              const Text('오늘의 마법 미션',
-                  style:
-                      TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+              const Text(
+                '오늘의 마법 미션',
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+              ),
               const Spacer(),
               PillBadge(
                 text: allDone ? '올 클리어! ✨' : '$doneCount / ${missions.length}',
@@ -66,9 +68,10 @@ class DailyMissionCard extends StatelessWidget {
   }
 
   Widget _missionRow(
-      BuildContext context,
-      ({String label, String reward, bool done, double progress}) m,
-      bool dark) {
+    BuildContext context,
+    ({String label, String reward, bool done, double progress}) m,
+    bool dark,
+  ) {
     return Row(
       children: [
         AnimatedContainer(
@@ -80,13 +83,12 @@ class DailyMissionCard extends StatelessWidget {
             color: m.done
                 ? null
                 : (dark
-                    ? Colors.white.withValues(alpha: 0.07)
-                    : const Color(0xFFEEF0F7)),
+                      ? Colors.white.withValues(alpha: 0.07)
+                      : const Color(0xFFEEF0F7)),
             borderRadius: BorderRadius.circular(7),
           ),
           child: m.done
-              ? const Icon(Icons.check_rounded,
-                  size: 15, color: Colors.white)
+              ? const Icon(Icons.check_rounded, size: 15, color: Colors.white)
               : null,
         ),
         const SizedBox(width: 10),
