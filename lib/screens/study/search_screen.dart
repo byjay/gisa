@@ -249,11 +249,18 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
   Future<void> _askAi() async {
     final q = _controller.text.trim();
     if (q.isEmpty) return;
+    // 🧪 테스트 기간 종료 시 AI 검증 차단 (로컬 검색은 계속 사용 가능)
+    if (!CerebrasService.isTestPeriod) {
+      setState(() {
+        _aiError = 'AI 튜터 테스트 기간이 종료되었어요. 로컬 자료 검색 결과를 이용해주세요.';
+      });
+      return;
+    }
     final hasKey = await CerebrasService.instance.hasKey();
     if (!mounted) return;
     if (!hasKey) {
       setState(() {
-        _aiError = 'AI 키가 설정되지 않았습니다. 열쇠 버튼에서 본인 키를 설정하거나 로컬 자료 검색 결과를 이용해주세요.';
+        _aiError = 'AI 키가 설정되지 않았습니다. 열쇠 버튼 또는 설정 화면의 "AI 튜터 (테스트 기간 한정)" 카드에서 본인 키를 등록하거나 로컬 자료 검색 결과를 이용해주세요.';
       });
       return;
     }
@@ -302,13 +309,14 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
+              '🧪 테스트 기간(~${CerebrasService.testPeriodEndLabel}) 한정 기능입니다.\n'
               '보안을 위해 앱에는 공용 키를 내장하지 않습니다.\n'
               '직접 발급한 Cerebras 키를 사용하려면:\n'
               '1. cloud.cerebras.ai 접속 → 로그인\n'
               '2. API Keys 메뉴에서 키 생성\n'
               '3. 아래에 붙여넣기 (기기에만 저장됩니다)',
-              style: TextStyle(fontSize: 13, height: 1.5),
+              style: const TextStyle(fontSize: 13, height: 1.5),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -424,14 +432,16 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
       appBar: AppBar(
         title: const Text('이론 검색 · AI 검증'),
         actions: [
-          IconButton(
-            tooltip: 'API 키 설정',
-            icon: Icon(
-              _hasKey ? Icons.vpn_key_rounded : Icons.vpn_key_off_rounded,
-              color: _hasKey ? Colors.teal : null,
+          // 🧪 API 키 버튼은 테스트 기간에만 노출
+          if (CerebrasService.isTestPeriod)
+            IconButton(
+              tooltip: 'API 키 설정 (테스트 기간 한정)',
+              icon: Icon(
+                _hasKey ? Icons.vpn_key_rounded : Icons.vpn_key_off_rounded,
+                color: _hasKey ? Colors.teal : null,
+              ),
+              onPressed: _showKeyDialog,
             ),
-            onPressed: _showKeyDialog,
-          ),
         ],
       ),
       body: SafeArea(

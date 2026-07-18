@@ -12,6 +12,7 @@ import 'legal_screen.dart';
 import 'help_faq_screen.dart';
 import '../services/auth_service.dart';
 import '../services/backup_service.dart';
+import '../services/cerebras_service.dart';
 import '../services/notification_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/tutor_avatar.dart';
@@ -44,6 +45,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 8),
           _accountCard(context),
           const SizedBox(height: 20),
+          // 🧪 AI 튜터 API 키 — 테스트 기간에만 노출되는 설정 카드 (잘 보이는 상단 배치)
+          if (CerebrasService.isTestPeriod) ...[
+            _sectionTitle(cs, 'AI 튜터 (테스트 기간 한정)'),
+            const SizedBox(height: 8),
+            _aiApiKeyCard(context),
+            const SizedBox(height: 20),
+          ],
           _sectionTitle(cs, '화면'),
           const SizedBox(height: 8),
           Card(
@@ -344,6 +352,185 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       }
     }
+  }
+
+  /// 🧪 AI 튜터 API 키 설정 카드 — 테스트 기간에만 표시.
+  /// 키 등록 상태를 한눈에 보여주고, 탭 하나로 바로 설정할 수 있다.
+  Widget _aiApiKeyCard(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return FutureBuilder<bool>(
+      future: CerebrasService.instance.hasKey(),
+      builder: (context, snap) {
+        final hasKey = snap.data ?? false;
+        return Card(
+          clipBehavior: Clip.antiAlias,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.teal.withValues(alpha: 0.12),
+                  cs.primaryContainer.withValues(alpha: 0.25),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.teal.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.vpn_key_rounded,
+                      color: Colors.teal,
+                    ),
+                  ),
+                  title: const Text(
+                    'AI API 키 설정',
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  subtitle: Text(
+                    hasKey
+                        ? '✅ 키 등록됨 · AI 튜터 사용 가능'
+                        : '키 미등록 · 탭해서 키를 입력하면 AI 튜터가 켜져요',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: hasKey ? Colors.teal : cs.error,
+                    ),
+                  ),
+                  trailing: FilledButton.tonalIcon(
+                    onPressed: () => _showAiKeyDialog(context),
+                    icon: Icon(
+                      hasKey ? Icons.edit_rounded : Icons.add_rounded,
+                      size: 18,
+                    ),
+                    label: Text(hasKey ? '변경' : '키 등록'),
+                  ),
+                  onTap: () => _showAiKeyDialog(context),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: cs.surface.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '🧪 테스트 기간(~${CerebrasService.testPeriodEndLabel})에만 AI 튜터를 설정·사용할 수 있어요.\n'
+                      '키는 이 기기에만 저장되며 외부로 전송되지 않습니다.',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        height: 1.5,
+                        color: cs.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showAiKeyDialog(BuildContext context) async {
+    final keyCtrl = TextEditingController(
+      text: await CerebrasService.instance.getApiKey(),
+    );
+    if (!context.mounted) return;
+    var obscure = true;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDlg) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.vpn_key_rounded, color: Colors.teal),
+              SizedBox(width: 8),
+              Text('AI API 키 설정'),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '🧪 테스트 기간(~${CerebrasService.testPeriodEndLabel}) 전용 기능입니다.\n'
+                  'Cerebras 추론 엔진(gpt-oss-120b)을 사용하며,\n'
+                  '본인이 발급한 키만 이 기기에 저장됩니다.',
+                  style: const TextStyle(fontSize: 13, height: 1.5),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: keyCtrl,
+                  obscureText: obscure,
+                  decoration: InputDecoration(
+                    labelText: 'API Key (csk-...)',
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        obscure
+                            ? Icons.visibility_rounded
+                            : Icons.visibility_off_rounded,
+                        size: 20,
+                      ),
+                      onPressed: () => setDlg(() => obscure = !obscure),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            if (keyCtrl.text.isNotEmpty)
+              TextButton(
+                onPressed: () async {
+                  await CerebrasService.instance.setApiKey('');
+                  if (ctx.mounted) Navigator.pop(ctx);
+                  if (mounted) setState(() {});
+                },
+                child: const Text('키 삭제', style: TextStyle(color: Colors.red)),
+              ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('취소'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                await CerebrasService.instance.setApiKey(keyCtrl.text);
+                if (ctx.mounted) Navigator.pop(ctx);
+                if (mounted) setState(() {});
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        keyCtrl.text.trim().isEmpty
+                            ? 'AI 키가 삭제되었어요'
+                            : '✅ AI 키가 저장됐어요! 이제 AI 튜터를 사용할 수 있어요',
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: const Text('저장'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _sectionTitle(ColorScheme cs, String t) => Padding(

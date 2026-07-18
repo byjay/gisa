@@ -35,6 +35,17 @@ class CerebrasService {
   static const _endpoint = 'https://api.cerebras.ai/v1/chat/completions';
   static const _model = 'gpt-oss-120b';
 
+  /// 🧪 AI 튜터 테스트 기간 — 이 기간 동안에만 API 키 설정과 AI 기능을 사용할 수 있다.
+  /// 기간이 지나면 키 설정 UI가 잠기고, 저장된 키가 있어도 호출이 차단된다.
+  static final DateTime testPeriodEnd = DateTime(2026, 12, 31, 23, 59, 59);
+
+  /// 현재가 테스트 기간인지 여부
+  static bool get isTestPeriod => DateTime.now().isBefore(testPeriodEnd);
+
+  /// 테스트 종료일 표시용 문자열 (예: 2026.12.31)
+  static String get testPeriodEndLabel =>
+      '${testPeriodEnd.year}.${testPeriodEnd.month.toString().padLeft(2, '0')}.${testPeriodEnd.day.toString().padLeft(2, '0')}';
+
   String? _cachedKey;
 
   Future<String> getApiKey() async {
@@ -56,6 +67,9 @@ class CerebrasService {
   }
 
   Future<bool> hasKey() async => (await getApiKey()).isNotEmpty;
+
+  /// AI 기능 사용 가능 여부 = 테스트 기간 + 키 설정 완료
+  Future<bool> get aiAvailable async => isTestPeriod && await hasKey();
 
   /// 튜터 시스템 프롬프트 — 현재 종목 맞춤 + 사고 지시 + 페르소나 스타일
   String _systemPrompt({String? personaStyle}) {
@@ -121,10 +135,15 @@ class CerebrasService {
     required double temperature,
     required String effort,
   }) async {
+    if (!isTestPeriod) {
+      throw CerebrasException(
+        'AI 튜터 테스트 기간이 종료되었습니다. 로컬 강의·공식·암기법 검색을 이용해주세요.',
+      );
+    }
     final key = await getApiKey();
     if (key.isEmpty) {
       throw CerebrasException(
-        'AI API 키가 설정되지 않았습니다. 키를 설정하거나 로컬 자료 검색을 이용해주세요.',
+        'AI API 키가 설정되지 않았습니다. 설정 화면의 "AI 튜터 (테스트)" 카드에서 키를 등록해주세요.',
       );
     }
 

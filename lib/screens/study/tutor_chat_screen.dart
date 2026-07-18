@@ -197,6 +197,21 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
     }
 
     FocusScope.of(context).unfocus();
+    // 🧪 테스트 기간 종료 시 AI 호출 차단
+    if (!CerebrasService.isTestPeriod) {
+      setState(() {
+        _msgs.add(_Msg('user', msg));
+        _msgs.add(
+          _Msg(
+            'assistant',
+            'AI 튜터 테스트 기간이 종료되었어요. 학습 메뉴의 이론 검색에서 로컬 강의·공식·암기법을 바로 찾아보세요.',
+          ),
+        );
+        _controller.clear();
+      });
+      _scrollToBottom();
+      return;
+    }
     final hasKey = await CerebrasService.instance.hasKey();
     if (!mounted) return;
     if (!hasKey) {
@@ -205,7 +220,7 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
         _msgs.add(
           _Msg(
             'assistant',
-            'AI 키가 아직 설정되지 않았어요. 우측 상단의 열쇠 버튼에서 본인 키를 설정하거나, 학습 메뉴의 이론 검색에서 로컬 강의·공식·암기법을 바로 찾아보세요.',
+            'AI 키가 아직 설정되지 않았어요. 우측 상단의 열쇠 버튼 또는 설정 화면의 "AI 튜터 (테스트 기간 한정)" 카드에서 본인 키를 등록하거나, 학습 메뉴의 이론 검색에서 로컬 강의·공식·암기법을 바로 찾아보세요.',
           ),
         );
         _controller.clear();
@@ -276,11 +291,12 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
+                '🧪 테스트 기간(~${CerebrasService.testPeriodEndLabel}) 한정 기능입니다.\n'
                 'Cerebras 추론 엔진(gpt-oss-120b)을 사용합니다.\n'
                 '보안을 위해 앱에는 공용 키를 넣지 않습니다.\n'
                 '본인이 발급한 키를 입력하면 이 기기에만 저장됩니다.',
-                style: TextStyle(fontSize: 13, height: 1.5),
+                style: const TextStyle(fontSize: 13, height: 1.5),
               ),
               const SizedBox(height: 12),
               TextField(
@@ -354,11 +370,13 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
               PopupMenuItem(value: 'high', child: Text('🔬 깊은 생각 (high)')),
             ],
           ),
-          IconButton(
-            tooltip: 'API 키 설정',
-            icon: const Icon(Icons.vpn_key_rounded, color: Colors.teal),
-            onPressed: _showSettings,
-          ),
+          // 🧪 API 키 설정 버튼은 테스트 기간에만 노출
+          if (CerebrasService.isTestPeriod)
+            IconButton(
+              tooltip: 'API 키 설정 (테스트 기간 한정)',
+              icon: const Icon(Icons.vpn_key_rounded, color: Colors.teal),
+              onPressed: _showSettings,
+            ),
         ],
       ),
       body: SafeArea(
@@ -454,6 +472,71 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
             ),
           ),
         ),
+        const SizedBox(height: 12),
+        // 🧪 테스트 기간 안내 + 키 미설정 시 눈에 띄는 설정 유도 배너
+        if (CerebrasService.isTestPeriod)
+          FutureBuilder<bool>(
+            future: CerebrasService.instance.hasKey(),
+            builder: (context, snap) {
+              final hasKey = snap.data ?? false;
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: hasKey
+                      ? Colors.teal.withValues(alpha: 0.08)
+                      : cs.errorContainer.withValues(alpha: 0.35),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: hasKey
+                        ? Colors.teal.withValues(alpha: 0.3)
+                        : cs.error.withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      hasKey
+                          ? '✅ AI 키 등록 완료 · 테스트 기간 ~${CerebrasService.testPeriodEndLabel}'
+                          : '🧪 AI 튜터는 테스트 기간(~${CerebrasService.testPeriodEndLabel}) 한정 기능이에요.\n사용하려면 API 키를 먼저 등록해주세요.',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        height: 1.5,
+                        fontWeight: FontWeight.w700,
+                        color: hasKey ? Colors.teal : cs.error,
+                      ),
+                    ),
+                    if (!hasKey) ...[
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: () async {
+                            await _showSettings();
+                            if (mounted) setState(() {});
+                          },
+                          icon: const Icon(Icons.vpn_key_rounded, size: 18),
+                          label: const Text('API 키 지금 설정하기'),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            },
+          )
+        else
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Text(
+              'ℹ️ AI 튜터 테스트 기간이 종료되었어요.\n학습 메뉴의 이론 검색에서 로컬 강의·공식·암기법을 이용해주세요.',
+              style: TextStyle(fontSize: 12.5, height: 1.5),
+            ),
+          ),
         const SizedBox(height: 22),
         Text(
           '추천 질문',
