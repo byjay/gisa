@@ -123,6 +123,127 @@ class _PassPredictionCardState extends State<PassPredictionCard> {
     _load(); // 돌아오면 예측 갱신
   }
 
+  // ── 예측 근거(방법론) 안내 시트 ───────────────────────
+  void _showMethodology(BuildContext context, PassPrediction p) {
+    final cs = Theme.of(context).colorScheme;
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (ctx) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.functions_rounded, color: cs.primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    '합격 예측은 이렇게 계산됩니다',
+                    style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              _methodRow(
+                ctx,
+                '1',
+                '토픽별 출제 비중',
+                '기출문제 은행에서 과목별로 각 토픽이 얼마나 자주 출제됐는지 비중을 계산합니다.',
+              ),
+              _methodRow(
+                ctx,
+                '2',
+                '나의 실제 정답률',
+                '회원님이 푼 문제의 토픽별 정답률을 반영합니다. 풀이 수가 적은 토픽은 '
+                    '사전 확률(35%) 쪽으로 보수적으로 보정합니다(베이지안 스무딩).',
+              ),
+              _methodRow(
+                ctx,
+                '3',
+                '과목 점수 = Σ(출제비중 × 예상 정답률)',
+                '토픽 비중과 정답률을 곱해 과목별 100점 만점 점수로 환산합니다.',
+              ),
+              _methodRow(
+                ctx,
+                '4',
+                '합격 판정',
+                '전 과목 평균 60점 이상 + 모든 과목 40점 이상(과락 없음)이면 합격권입니다.',
+              ),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHighest.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '현재 풀이 ${p.totalAttempts}문제 기반 추정치입니다. '
+                  '풀이가 쌓일수록 예측이 정확해지며, 실제 시험 결과와 다를 수 있는 '
+                  '학습 참고용 지표입니다.',
+                  style: Theme.of(
+                    ctx,
+                  ).textTheme.bodySmall?.copyWith(height: 1.5),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _methodRow(BuildContext ctx, String no, String title, String desc) {
+    final cs = Theme.of(ctx).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 11,
+            backgroundColor: cs.primary.withValues(alpha: 0.12),
+            child: Text(
+              no,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: cs.primary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  desc,
+                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                    height: 1.45,
+                    color: cs.onSurface.withValues(alpha: 0.75),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ── 본 예측 카드 ─────────────────────────────────────
   Widget _predictionCard(BuildContext context, PassPrediction p) {
     final pass = p.pass;
@@ -180,6 +301,15 @@ class _PassPredictionCardState extends State<PassPredictionCard> {
                   ],
                 ),
                 const Spacer(),
+                IconButton(
+                  tooltip: '예측 점수 계산 근거',
+                  onPressed: () => _showMethodology(context, p),
+                  icon: const Icon(
+                    Icons.info_outline_rounded,
+                    color: Colors.white70,
+                    size: 20,
+                  ),
+                ),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,

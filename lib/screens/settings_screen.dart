@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart' show Share, XFile;
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/app_provider.dart';
 import 'legal_screen.dart';
+import 'help_faq_screen.dart';
 import '../services/auth_service.dart';
 import '../services/backup_service.dart';
 import '../services/notification_service.dart';
@@ -92,6 +93,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   leading: Icon(Icons.info_outline_rounded),
                   title: Text('버전'),
                   trailing: Text('1.0.0'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.help_outline_rounded),
+                  title: const Text('도움말 · 자주 묻는 질문'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const HelpFaqScreen()),
+                  ),
                 ),
                 const Divider(height: 1),
                 ListTile(
