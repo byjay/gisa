@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/app_provider.dart';
 import '../screens/study/tutor_chat_screen.dart';
+import '../services/tutor_behavior.dart';
 import 'persistent_nav.dart';
 import 'tutor_avatar.dart';
 
@@ -564,13 +565,14 @@ class TutorCoach extends StatefulWidget {
 }
 
 class _TutorCoachState extends State<TutorCoach> {
-  late String _message;
+  String? _message;
+  String? _messageTutorId;
 
-  @override
-  void initState() {
-    super.initState();
-    _message =
-        widget.overrideMessage ??
+  /// 선택된 캐릭터의 100+ 행동패턴 뱅크를 우선 사용하고,
+  /// 등록되지 않은 조합이면 공용 멘트(TutorMents)로 대체한다.
+  String _pickMessage(String tutorId) {
+    return widget.overrideMessage ??
+        TutorBehaviorBank.pick(tutorId, widget.situation) ??
         TutorMents.pick(widget.situation, level: widget.level);
   }
 
@@ -579,9 +581,7 @@ class _TutorCoachState extends State<TutorCoach> {
     super.didUpdateWidget(old);
     if (old.situation != widget.situation ||
         old.overrideMessage != widget.overrideMessage) {
-      _message =
-          widget.overrideMessage ??
-          TutorMents.pick(widget.situation, level: widget.level);
+      _message = null; // 다음 build에서 새 멘트 선택
     }
   }
 
@@ -593,6 +593,11 @@ class _TutorCoachState extends State<TutorCoach> {
       (app) => app.selectedTutorId,
     );
     final tutor = tutorProfileById(tutorId);
+    // 캐릭터가 바뀌거나 아직 멘트가 없으면 해당 캐릭터의 행동패턴에서 선택
+    if (_message == null || _messageTutorId != tutorId) {
+      _message = _pickMessage(tutorId);
+      _messageTutorId = tutorId;
+    }
 
     return GestureDetector(
       onTap: widget.linkToChat
@@ -657,7 +662,7 @@ class _TutorCoachState extends State<TutorCoach> {
                       ),
                     ),
                     child: Text(
-                      _message,
+                      _message!,
                       style: const TextStyle(
                         fontSize: 13,
                         height: 1.45,
