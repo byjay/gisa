@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
     <application
-        android:label="볼트쌤"
+        android:label="Cert Study Tracker"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -69,6 +69,7 @@
         </intent>
     </queries>
 </manifest>
+
 
 
 
