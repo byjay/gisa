@@ -592,6 +592,29 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                           height: 1.5,
                         ),
                       ),
+                      if (_q.hasImage && _q.imageAssetPath != null) ...[
+                        const SizedBox(height: 12),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(
+                                color: scheme.outlineVariant,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Image.asset(
+                              _q.imageAssetPath!,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stack) =>
+                                  const SizedBox.shrink(),
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 16),
                       for (var i = 0; i < _q.options.length; i++)
                         _optionTile(i + 1, _q.options[i], picked, scheme),

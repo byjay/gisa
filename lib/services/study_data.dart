@@ -30,6 +30,7 @@ class Question {
   final String explanation; // 문제별 해설
   final int difficulty; // 1=하, 2=중, 3=상
   final double freqScore; // 0~100 출제빈도 점수
+  final String? image; // 원본 PDF 크롭 이미지 상대경로 (assets/data/<track>/ 기준)
   String examLabel; // 출제 회차 라벨
 
   Question({
@@ -43,6 +44,7 @@ class Question {
     this.explanation = '',
     this.difficulty = 2,
     this.freqScore = 0,
+    this.image,
     this.examLabel = '',
   });
 
@@ -69,7 +71,13 @@ class Question {
     explanation: (j['explanation'] as String?) ?? '',
     difficulty: (j['difficulty'] as int?) ?? 2,
     freqScore: ((j['freq_score'] as num?) ?? 0).toDouble(),
+    image: j['image'] as String?,
   );
+
+  /// 문제 이미지의 전체 asset 경로 (assets/data/{트랙}/{image}).
+  /// image 필드가 없으면 null.
+  String? get imageAssetPath =>
+      image == null ? null : 'assets/data/${_currentTrack.dir}/$image';
 }
 
 class TopicFreq {

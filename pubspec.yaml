@@ -89,15 +89,25 @@ flutter:
     - assets/data/qnet_schedule.json
     - assets/data/common/
     - assets/data/electrician/
+    - assets/data/electrician/images/
     - assets/data/elec_construction/
+    - assets/data/elec_construction/images/
     - assets/data/fire_electric/
+    - assets/data/fire_electric/images/
     - assets/data/fire_mechanical/
+    - assets/data/fire_mechanical/images/
     - assets/data/info_processing/
+    - assets/data/info_processing/images/
     - assets/data/industrial_safety/
+    - assets/data/industrial_safety/images/
     - assets/data/architecture/
+    - assets/data/architecture/images/
     - assets/data/construction_safety/
+    - assets/data/construction_safety/images/
     - assets/data/elec_industrial/
+    - assets/data/elec_industrial/images/
     - assets/data/hazmat_industrial/
+    - assets/data/hazmat_industrial/images/
     - assets/theory/electrician/
     - assets/theory/elec_construction/
     - assets/theory/fire_electric/
