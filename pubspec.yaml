@@ -87,9 +87,23 @@ flutter:
     - assets/data/electrician/
     - assets/data/elec_construction/
     - assets/data/fire_electric/
+    - assets/data/fire_mechanical/
+    - assets/data/info_processing/
+    - assets/data/industrial_safety/
+    - assets/data/architecture/
+    - assets/data/construction_safety/
+    - assets/data/elec_industrial/
+    - assets/data/hazmat_industrial/
     - assets/theory/electrician/
     - assets/theory/elec_construction/
     - assets/theory/fire_electric/
+    - assets/theory/fire_mechanical/
+    - assets/theory/info_processing/
+    - assets/theory/industrial_safety/
+    - assets/theory/architecture/
+    - assets/theory/construction_safety/
+    - assets/theory/elec_industrial/
+    - assets/theory/hazmat_industrial/
     - assets/tutor/
     - assets/icons/app_icon.png
 
