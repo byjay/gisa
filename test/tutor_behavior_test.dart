@@ -5,16 +5,17 @@ import 'package:cert_study_tracker/widgets/tutor_avatar.dart';
 import 'package:cert_study_tracker/widgets/tutor_coach.dart';
 
 void main() {
-  group('3캐릭터 × 100 행동패턴 뱅크', () {
-    const tutorIds = ['soyeon', 'harin', 'jiyoon'];
+  group('캐릭터 × 100 행동패턴 뱅크', () {
+    // 캐릭터 목록은 튜터 프로필을 단일 진실 원천으로 삼아 파생한다.
+    final tutorIds = tutorProfiles.map((p) => p.id).toList();
 
-    test('등록 캐릭터는 튜터 프로필 3명과 정확히 일치한다', () {
-      expect(TutorBehaviorBank.banks.keys.toSet(), tutorIds.toSet());
+    test('등록 캐릭터는 튜터 프로필과 정확히 일치한다', () {
       expect(
+        TutorBehaviorBank.banks.keys.toSet(),
         tutorProfiles.map((p) => p.id).toSet(),
-        tutorIds.toSet(),
         reason: '행동패턴 뱅크와 튜터 프로필 캐릭터가 일치해야 한다',
       );
+      expect(tutorIds, contains('volt'), reason: 'volt(볼트쌤) 대표 캐릭터가 포함되어야 한다');
     });
 
     test('캐릭터마다 행동패턴이 100개 이상이다', () {
