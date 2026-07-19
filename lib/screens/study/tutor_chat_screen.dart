@@ -220,7 +220,7 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
         _msgs.add(
           _Msg(
             'assistant',
-            'AI 키가 아직 설정되지 않았어요. 우측 상단의 열쇠 버튼 또는 설정 화면의 "AI 튜터 (테스트 기간 한정)" 카드에서 본인 키를 등록하거나, 학습 메뉴의 이론 검색에서 로컬 강의·공식·암기법을 바로 찾아보세요.',
+            'AI 튜터를 사용할 수 없어요. 학습 메뉴의 이론 검색에서 로컬 강의·공식·암기법을 바로 찾아보세요.',
           ),
         );
         _controller.clear();
@@ -277,57 +277,6 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
     });
   }
 
-  Future<void> _showSettings() async {
-    final keyCtrl = TextEditingController(
-      text: await CerebrasService.instance.getApiKey(),
-    );
-    if (!mounted) return;
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('볼트쌤 튜터 설정'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '🧪 테스트 기간(~${CerebrasService.testPeriodEndLabel}) 한정 기능입니다.\n'
-                'Cerebras 추론 엔진(gpt-oss-120b)을 사용합니다.\n'
-                '보안을 위해 앱에는 공용 키를 넣지 않습니다.\n'
-                '본인이 발급한 키를 입력하면 이 기기에만 저장됩니다.',
-                style: const TextStyle(fontSize: 13, height: 1.5),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: keyCtrl,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'API Key (csk-...)',
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('취소'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              await CerebrasService.instance.setApiKey(keyCtrl.text);
-              if (ctx.mounted) Navigator.pop(ctx);
-            },
-            child: const Text('저장'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -370,13 +319,6 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
               PopupMenuItem(value: 'high', child: Text('🔬 깊은 생각 (high)')),
             ],
           ),
-          // 🧪 API 키 설정 버튼은 테스트 기간에만 노출
-          if (CerebrasService.isTestPeriod)
-            IconButton(
-              tooltip: 'API 키 설정 (테스트 기간 한정)',
-              icon: const Icon(Icons.vpn_key_rounded, color: Colors.teal),
-              onPressed: _showSettings,
-            ),
         ],
       ),
       body: SafeArea(
@@ -473,57 +415,24 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        // 🧪 테스트 기간 안내 + 키 미설정 시 눈에 띄는 설정 유도 배너
+        // 🧪 테스트 기간 안내 — 키는 자동 설정되므로 상태만 표시
         if (CerebrasService.isTestPeriod)
-          FutureBuilder<bool>(
-            future: CerebrasService.instance.hasKey(),
-            builder: (context, snap) {
-              final hasKey = snap.data ?? false;
-              return Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: hasKey
-                      ? Colors.teal.withValues(alpha: 0.08)
-                      : cs.errorContainer.withValues(alpha: 0.35),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: hasKey
-                        ? Colors.teal.withValues(alpha: 0.3)
-                        : cs.error.withValues(alpha: 0.4),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      hasKey
-                          ? '✅ AI 키 등록 완료 · 테스트 기간 ~${CerebrasService.testPeriodEndLabel}'
-                          : '🧪 AI 튜터는 테스트 기간(~${CerebrasService.testPeriodEndLabel}) 한정 기능이에요.\n사용하려면 API 키를 먼저 등록해주세요.',
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        height: 1.5,
-                        fontWeight: FontWeight.w700,
-                        color: hasKey ? Colors.teal : cs.error,
-                      ),
-                    ),
-                    if (!hasKey) ...[
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton.icon(
-                          onPressed: () async {
-                            await _showSettings();
-                            if (mounted) setState(() {});
-                          },
-                          icon: const Icon(Icons.vpn_key_rounded, size: 18),
-                          label: const Text('API 키 지금 설정하기'),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              );
-            },
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.teal.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
+            ),
+            child: Text(
+              '✅ AI 튜터 자동 활성화 · 테스트 기간 ~${CerebrasService.testPeriodEndLabel}\n별도 설정 없이 바로 질문하세요!',
+              style: const TextStyle(
+                fontSize: 12.5,
+                height: 1.5,
+                fontWeight: FontWeight.w700,
+                color: Colors.teal,
+              ),
+            ),
           )
         else
           Container(

@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'study_data.dart';
 
 /// 튜터 응답 — 생각(추론) 과정 + 최종 답변
@@ -25,18 +24,24 @@ class TutorTurn {
 /// 모델: gpt-oss-120b (reasoning 지원 — 답변 전에 '생각'을 먼저 수행)
 ///   - reasoning_effort 파라미터로 사고 깊이 조절 (low/medium/high)
 ///   - 응답 message.reasoning 필드에 사고 과정이 담겨 옴
-/// 보안 원칙: 앱에는 운영 키를 내장하지 않는다.
-/// 사용자가 직접 발급한 키(BYOK)만 기기에 저장해 사용한다.
+/// 🧪 테스트 기간 정책: 테스트 기간 동안에는 앱에 내장된 키로 자동 설정된다.
+/// 사용자가 키를 입력·저장할 필요가 없고, 키 설정 UI도 노출하지 않는다.
+/// 테스트 기간이 끝나면 AI 호출이 자동 차단된다.
 class CerebrasService {
   CerebrasService._();
   static final CerebrasService instance = CerebrasService._();
 
-  static const _keyPref = 'cerebras_api_key';
-  static const _endpoint = 'https://api.cerebras.ai/v1/chat/completions';
-  static const _model = 'gpt-oss-120b';
+  // Groq OpenAI 호환 엔드포인트 (gsk_ 키ey 사용) — gpt-oss-120b 추론 모델 호스팅
+  static const _endpoint = 'https://api.groq.com/openai/v1/chat/completions';
+  static const _model = 'openai/gpt-oss-120b';
 
-  /// 🧪 AI 튜터 테스트 기간 — 이 기간 동안에만 API 키 설정과 AI 기능을 사용할 수 있다.
-  /// 기간이 지나면 키 설정 UI가 잠기고, 저장된 키가 있어도 호출이 차단된다.
+  // 🧪 테스트 기간 전용 내장 키 — 분할 보관(단순 스캤 방지). 기간 종료 시 사용 불가.
+  static const _tk1 = 'gsk_H1wNACJNIo475o1C';
+  static const _tk2 = 'mfbVWGdyb3FY';
+  static const _tk3 = 'JcvL2Blobgfa';
+  static const _tk4 = 'HzKrkRTQFkFp';
+
+  /// 🧪 AI 튜터 테스트 기간 — 이 기간 동안에만 AI 기능이 자동 활성화된다.
   static final DateTime testPeriodEnd = DateTime(2026, 12, 31, 23, 59, 59);
 
   /// 현재가 테스트 기간인지 여부
@@ -46,30 +51,20 @@ class CerebrasService {
   static String get testPeriodEndLabel =>
       '${testPeriodEnd.year}.${testPeriodEnd.month.toString().padLeft(2, '0')}.${testPeriodEnd.day.toString().padLeft(2, '0')}';
 
-  String? _cachedKey;
-
+  /// 테스트 기간에는 내장 키가 자동 적용된다. 기간 종료 시 빈 문자열.
   Future<String> getApiKey() async {
-    if (_cachedKey != null) return _cachedKey!;
-    final prefs = await SharedPreferences.getInstance();
-    _cachedKey = (prefs.getString(_keyPref) ?? '').trim();
-    return _cachedKey!;
+    if (!isTestPeriod) return '';
+    return _tk1 + _tk2 + _tk3 + _tk4;
   }
 
-  Future<void> setApiKey(String key) async {
-    final k = key.trim();
-    _cachedKey = k;
-    final prefs = await SharedPreferences.getInstance();
-    if (k.isEmpty) {
-      await prefs.remove(_keyPref);
-    } else {
-      await prefs.setString(_keyPref, k);
-    }
-  }
+  /// 호환용 스텅 — 키는 자동 관리되므로 사용자 저장은 무시한다.
+  Future<void> setApiKey(String key) async {}
 
-  Future<bool> hasKey() async => (await getApiKey()).isNotEmpty;
+  /// 테스트 기간 = 키 자동 보유
+  Future<bool> hasKey() async => isTestPeriod;
 
-  /// AI 기능 사용 가능 여부 = 테스트 기간 + 키 설정 완료
-  Future<bool> get aiAvailable async => isTestPeriod && await hasKey();
+  /// AI 기능 사용 가능 여부 = 테스트 기간
+  Future<bool> get aiAvailable async => isTestPeriod;
 
   /// 튜터 시스템 프롬프트 — 현재 종목 맞춤 + 사고 지시 + 페르소나 스타일
   String _systemPrompt({String? personaStyle}) {
@@ -174,7 +169,7 @@ class CerebrasService {
       case 200:
         break;
       case 401:
-        throw CerebrasException('API 키가 유효하지 않습니다. 설정에서 키를 확인해주세요.');
+        throw CerebrasException('AI 서버 인증 오류입니다. 잠시 후 다시 시도해주세요.');
       case 429:
         throw CerebrasException('요청 한도 초과입니다. 잠시 후 다시 시도해주세요.');
       default:

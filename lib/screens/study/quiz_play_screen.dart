@@ -41,6 +41,9 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   final Set<int> _recorded = {}; // 진척도 중복 기록 방지
   bool _showAnswer = false;
   bool _bookmarked = false;
+  // 🖼 글·그림 중복 방지: 보기가 텍스트로 완전한 문제는 이미지를 접어두고
+  // 버튼으로만 펼친다(이미지에 같은 지문·보기가 또 들어있어 중복되므로).
+  bool _showOriginalImage = false;
   bool _easyMode = true; // 초급자 기본값: 모든 문제에 쉬운 설명 자동 노출
   bool _allowExit = false;
   ({int seenCount, String? lastResult, int box})? _history; // 다시 만난 문제 인식 배너
@@ -53,6 +56,16 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   bool _timeOver = false;
 
   Question get _q => widget.questions[_idx];
+
+  /// 보기가 이미지 안에만 있는 문제인지 — 이 경우 이미지가 본문이므로 항상 표시.
+  /// 보기가 텍스트로 완전하면 이미지(같은 지문·보기 포함)는 숨겨 중복을 막는다.
+  bool get _optionsNeedImage => _q.options.any(
+    (o) =>
+        o.contains('이미지 참고') ||
+        o.contains('위 그림') ||
+        o.contains('그림 참조') ||
+        o.trim().length <= 2,
+  );
 
   /// 🍼 아주 쉬운 설명 — 기존 문제·정답·해설 데이터를 그대로 재활용하여
   /// 초보자용 친절한 말투로 재구성 (새 데이터 생성 없이 규칙 기반 변환)
@@ -584,6 +597,9 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                       ),
                       if (_kecRiskLevel > 0) _kecWarningBanner(),
                       const SizedBox(height: 12),
+                      // 🖼 글·그림 중복 방지 렌더링:
+                      // ① 보기가 이미지 안에만 있는 문제 → 이미지가 본문(필수 표시)
+                      // ② 텍스트가 완전한 문제 → 텍스트만 보이고 이미지는 버튼으로 펼침
                       Text(
                         '${_q.no}. ${_q.question}',
                         style: const TextStyle(
@@ -594,26 +610,40 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                       ),
                       if (_q.hasImage && _q.imageAssetPath != null) ...[
                         const SizedBox(height: 12),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border.all(
-                                color: scheme.outlineVariant,
+                        if (_optionsNeedImage || _showOriginalImage)
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                border: Border.all(
+                                  color: scheme.outlineVariant,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              borderRadius: BorderRadius.circular(10),
+                              child: Image.asset(
+                                _q.imageAssetPath!,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stack) =>
+                                    const SizedBox.shrink(),
+                              ),
                             ),
-                            child: Image.asset(
-                              _q.imageAssetPath!,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stack) =>
-                                  const SizedBox.shrink(),
+                          )
+                        else
+                          // 텍스트 완전 문제: 중복 방지를 위해 원본 그림은 접어둔다
+                          OutlinedButton.icon(
+                            onPressed: () =>
+                                setState(() => _showOriginalImage = true),
+                            icon: const Icon(Icons.image_outlined, size: 18),
+                            label: const Text(
+                              '원본 그림 보기 (지문과 동일 내용)',
+                              style: TextStyle(fontSize: 12.5),
                             ),
                           ),
-                        ),
+                        if (_optionsNeedImage && _showOriginalImage == false)
+                          const SizedBox.shrink(),
                       ],
                       const SizedBox(height: 16),
                       for (var i = 0; i < _q.options.length; i++)
@@ -1093,6 +1123,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                     setState(() {
                       _idx--;
                       _showAnswer = false;
+                      _showOriginalImage = false;
                       _easyMode = true;
                     });
                     _syncBookmark();
@@ -1121,6 +1152,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                 setState(() {
                   _idx++;
                   _showAnswer = false;
+                  _showOriginalImage = false;
                   _easyMode = true;
                 });
                 _syncBookmark();

@@ -27,7 +27,7 @@ class AppProvider extends ChangeNotifier {
   bool darkMode = false;
   int weeklyGoalMinutes = 600;
   String themePaletteId = 'indigo';
-  String selectedTutorId = 'soyeon';
+  String selectedTutorId = 'volt';
   bool notificationsEnabled = true; // 🔔 시험 일정·학습 리마인드 알림 on/off
   bool dailyReminderEnabled = true;
   int dailyReminderHour = 9;
@@ -79,7 +79,7 @@ class AppProvider extends ChangeNotifier {
     darkMode = (_settingsBox.get('darkMode') as bool?) ?? false;
     themePaletteId = (_settingsBox.get('themePalette') as String?) ?? 'indigo';
     selectedTutorId =
-        (_settingsBox.get('selectedTutor') as String?) ?? 'soyeon';
+        (_settingsBox.get('selectedTutor') as String?) ?? 'volt';
     notificationsEnabled =
         (_settingsBox.get('notificationsEnabled') as bool?) ?? true;
     dailyReminderEnabled =

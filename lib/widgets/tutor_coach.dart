@@ -599,6 +599,9 @@ class _TutorCoachState extends State<TutorCoach> {
       _messageTutorId = tutorId;
     }
 
+    // 선생님별 시그니처 컬러로 말풍선·배지·테두리를 차별화 —
+    // 누가 말하고 있는지 한눈에 구분된다.
+    final tColor = tutor.color;
     return GestureDetector(
       onTap: widget.linkToChat
           ? () =>
@@ -609,19 +612,19 @@ class _TutorCoachState extends State<TutorCoach> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              cs.primaryContainer.withValues(alpha: 0.75),
-              cs.secondaryContainer.withValues(alpha: 0.45),
+              tColor.withValues(alpha: 0.14),
+              cs.secondaryContainer.withValues(alpha: 0.4),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: cs.primary.withValues(alpha: 0.15)),
+          border: Border.all(color: tColor.withValues(alpha: 0.3)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // 전신 튜터 — 사람 비율 그대로, 잘림 없음
+            // 전신 튜터 — 볼트쌤은 상황별 포즈 애니메이션, 잘림 없음
             TutorAvatar(mood: mood, size: widget.height),
             const SizedBox(width: 10),
             Expanded(
@@ -632,11 +635,30 @@ class _TutorCoachState extends State<TutorCoach> {
                   Row(
                     children: [
                       Text(
-                        tutor.name,
+                        '${tutor.emoji} ${tutor.name}',
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 13,
-                          color: cs.primary,
+                          color: tColor,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 1.5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: tColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          tutor.styleTag,
+                          style: TextStyle(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w700,
+                            color: tColor,
+                          ),
                         ),
                       ),
                       const Spacer(),
@@ -654,11 +676,14 @@ class _TutorCoachState extends State<TutorCoach> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: cs.surface.withValues(alpha: 0.85),
+                      color: cs.surface.withValues(alpha: 0.9),
                       borderRadius: const BorderRadius.only(
                         topRight: Radius.circular(14),
                         bottomLeft: Radius.circular(14),
                         bottomRight: Radius.circular(14),
+                      ),
+                      border: Border.all(
+                        color: tColor.withValues(alpha: 0.18),
                       ),
                     ),
                     child: Text(

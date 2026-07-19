@@ -39,14 +39,10 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
   bool _aiLoading = false;
   String? _aiAnswer;
   String? _aiError;
-  bool _hasKey = false;
 
   @override
   void initState() {
     super.initState();
-    CerebrasService.instance.hasKey().then((v) {
-      if (mounted) setState(() => _hasKey = v);
-    });
   }
 
   @override
@@ -260,7 +256,7 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
     if (!mounted) return;
     if (!hasKey) {
       setState(() {
-        _aiError = 'AI 키가 설정되지 않았습니다. 열쇠 버튼 또는 설정 화면의 "AI 튜터 (테스트 기간 한정)" 카드에서 본인 키를 등록하거나 로컬 자료 검색 결과를 이용해주세요.';
+        _aiError = 'AI 검증을 사용할 수 없습니다. 로컬 자료 검색 결과를 이용해주세요.';
       });
       return;
     }
@@ -283,7 +279,6 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
         setState(() {
           _aiAnswer = ans;
           _aiLoading = false;
-          _hasKey = true;
         });
       }
     } catch (e) {
@@ -294,61 +289,6 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
         });
       }
     }
-  }
-
-  Future<void> _showKeyDialog() async {
-    final keyCtrl = TextEditingController(
-      text: await CerebrasService.instance.getApiKey(),
-    );
-    if (!mounted) return;
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('AI API 키 설정'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '🧪 테스트 기간(~${CerebrasService.testPeriodEndLabel}) 한정 기능입니다.\n'
-              '보안을 위해 앱에는 공용 키를 내장하지 않습니다.\n'
-              '직접 발급한 Cerebras 키를 사용하려면:\n'
-              '1. cloud.cerebras.ai 접속 → 로그인\n'
-              '2. API Keys 메뉴에서 키 생성\n'
-              '3. 아래에 붙여넣기 (기기에만 저장됩니다)',
-              style: const TextStyle(fontSize: 13, height: 1.5),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: keyCtrl,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'API Key (csk-...)',
-                border: OutlineInputBorder(),
-                isDense: true,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('취소'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              await CerebrasService.instance.setApiKey(keyCtrl.text);
-              if (ctx.mounted) Navigator.pop(ctx);
-              if (mounted) {
-                final has = await CerebrasService.instance.hasKey();
-                setState(() => _hasKey = has);
-              }
-            },
-            child: const Text('저장'),
-          ),
-        ],
-      ),
-    );
   }
 
   Color _kindColor(String kind) {
@@ -431,18 +371,7 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('이론 검색 · AI 검증'),
-        actions: [
-          // 🧪 API 키 버튼은 테스트 기간에만 노출
-          if (CerebrasService.isTestPeriod)
-            IconButton(
-              tooltip: 'API 키 설정 (테스트 기간 한정)',
-              icon: Icon(
-                _hasKey ? Icons.vpn_key_rounded : Icons.vpn_key_off_rounded,
-                color: _hasKey ? Colors.teal : null,
-              ),
-              onPressed: _showKeyDialog,
-            ),
-        ],
+        actions: const [],
       ),
       body: SafeArea(
         child: Column(
