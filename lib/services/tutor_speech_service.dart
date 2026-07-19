@@ -8,17 +8,17 @@ class TutorSpeechService {
   final FlutterTts _tts = FlutterTts();
   bool _ready = false;
 
-  Future<void> _prepare({double rate = 0.46}) async {
+  Future<void> _prepare({double rate = 0.46, double pitch = 1.0}) async {
     if (!_ready) {
       await _tts.setLanguage('ko-KR');
-      await _tts.setPitch(1.0);
       await _tts.awaitSpeakCompletion(false);
       _ready = true;
     }
+    await _tts.setPitch(pitch);
     await _tts.setSpeechRate(rate);
   }
 
-  Future<void> speak(String text, {double rate = 0.46}) async {
+  Future<void> speak(String text, {double rate = 0.46, double pitch = 1.0}) async {
     final clean = text
         .replaceAll(RegExp(r'[*#`_>【】]'), '')
         .replaceAll(RegExp(r'\s+'), ' ')

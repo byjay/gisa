@@ -5,6 +5,8 @@ import '../../services/cerebras_service.dart';
 import '../../services/study_data.dart';
 import '../../services/tutor_persona.dart';
 import '../../services/tutor_speech_service.dart';
+import '../../services/voice_service.dart';
+import '../../widgets/drawing_pad.dart';
 import '../../widgets/tutor_avatar.dart';
 
 /// AI 튜터 채팅 — Cerebras gpt-oss-120b 기반 "생각하는 튜터".
@@ -33,6 +35,7 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
   final List<_Msg> _msgs = [];
   bool _loading = false;
   bool _speakerOn = true;
+  bool _voiceMode = false; // 🎙️ 핸즈프리 음성 대화 모드
   String _effort = 'medium'; // 사고 깊이
   TutorPersona _persona = kTutorPersonas.first;
 
@@ -169,13 +172,23 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
       setState(() {
         _persona = picked;
         // 새 선생님 소개 메시지 (대화 이력은 유지)
+        // 페르소나 고유 인사말로 전환 안내 (말투 체감)
         _msgs.add(
           _Msg(
             'assistant',
-            '${picked.emoji} 안녕하세요! 지금부터 『${picked.name}』이 함께할게요. ${picked.tagline}',
+            picked.greeting.isNotEmpty
+                ? '${picked.emoji} ${picked.greeting}'
+                : '${picked.emoji} 안녕하세요! 지금부터 『${picked.name}』이 함께할게요. ${picked.tagline}',
           ),
         );
       });
+      if (_speakerOn && picked.greeting.isNotEmpty) {
+        TutorSpeechService.instance.speak(
+          picked.greeting,
+          rate: picked.speechRate,
+          pitch: picked.speechPitch,
+        );
+      }
       _scrollToBottom();
     }
   }
@@ -184,10 +197,83 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
   void dispose() {
     _controller.dispose();
     _scrollCtrl.dispose();
+    VoiceService.instance.stopAll();
     super.dispose();
   }
 
-  Future<void> _send(String text) async {
+  // ── 🎙️ 음성 대화 ────────────────────────────
+
+  /// 마이크 버튼 탭 — 한 번 듣고 자동 전송
+  Future<void> _startListening() async {
+    final vs = VoiceService.instance;
+    if (vs.isListening) {
+      await vs.stopListening();
+      return;
+    }
+    await vs.stopSpeaking();
+    final ok = await vs.listen(
+      onFinal: (text) {
+        if (!mounted) return;
+        if (_voiceMode) {
+          _send(text, viaVoice: true);
+        } else {
+          // 일반 모드: 입력창에 채워줌 → 사용자가 확인 후 전송
+          _controller.text = text;
+          _controller.selection = TextSelection.fromPosition(
+            TextPosition(offset: text.length),
+          );
+          setState(() {});
+        }
+      },
+    );
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '음성 인식을 사용할 수 없어요. 마이크 권한을 확인해 주세요.'
+            '${vs.lastError.isNotEmpty ? '\n($_voiceErrHint)' : ''}',
+          ),
+        ),
+      );
+      setState(() => _voiceMode = false);
+    }
+    setState(() {});
+  }
+
+  String get _voiceErrHint {
+    final e = VoiceService.instance.lastError;
+    if (e.contains('not-allowed') || e.contains('permission')) {
+      return '브라우저/기기 설정에서 마이크 허용 필요';
+    }
+    if (e.contains('network')) return '네트워크 연결 확인 필요';
+    return e;
+  }
+
+  /// 음성 대화 모드 토글 — 켜면 즐시 듣기 시작
+  Future<void> _toggleVoiceMode() async {
+    if (_voiceMode) {
+      setState(() => _voiceMode = false);
+      await VoiceService.instance.stopAll();
+      return;
+    }
+    final ok = await VoiceService.instance.init();
+    if (!mounted) return;
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('이 기기/브라우저는 음성 인식을 지원하지 않아요. Chrome 또는 Android 앱을 이용해 주세요.'),
+        ),
+      );
+      return;
+    }
+    setState(() {
+      _voiceMode = true;
+      _speakerOn = true;
+    });
+    _startListening();
+  }
+
+  Future<void> _send(String text, {bool viaVoice = false}) async {
     final msg = text.trim();
     if (msg.isEmpty || _loading) return;
     // 🔒 Q65: 실전모드 중에는 전송 자체를 차단(다이얼로그로 이미 안내했지만 2중 방어)
@@ -249,10 +335,19 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
         _msgs.add(_Msg('assistant', reply.answer, thinking: reply.thinking));
         _loading = false;
       });
-      if (_speakerOn) {
+      if (_voiceMode) {
+        // 🎙️ 핸즈프리 루프: 낝독 완료까지 대기 → 자동 재청취
+        await VoiceService.instance.speak(
+          reply.answer,
+          rate: _persona.speechRate,
+          pitch: _persona.speechPitch,
+        );
+        if (mounted && _voiceMode) _startListening();
+      } else if (_speakerOn) {
         await TutorSpeechService.instance.speak(
           reply.answer,
           rate: _persona.speechRate,
+          pitch: _persona.speechPitch,
         );
       }
     } catch (e) {
@@ -292,6 +387,19 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: '필기 연습장',
+            icon: const Icon(Icons.draw_rounded),
+            onPressed: () => showDrawingPad(context),
+          ),
+          IconButton(
+            tooltip: _voiceMode ? '음성 대화 종료' : '음성 대화 모드 (핸즈프리)',
+            icon: Icon(
+              _voiceMode ? Icons.headset_mic_rounded : Icons.headset_mic_outlined,
+              color: _voiceMode ? cs.primary : null,
+            ),
+            onPressed: _toggleVoiceMode,
+          ),
           IconButton(
             tooltip: _speakerOn ? '자동 음성 끄기' : '자동 음성 켜기',
             icon: Icon(
@@ -337,10 +445,92 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
                       },
                     ),
             ),
+            if (_voiceMode) _voiceBanner(cs),
             _inputBar(cs),
           ],
         ),
       ),
+    );
+  }
+
+  /// 🎙️ 음성 대화 상태 배너 — 듣기/말하기 상태와 실시간 자막
+  Widget _voiceBanner(ColorScheme cs) {
+    final vs = VoiceService.instance;
+    return ValueListenableBuilder<VoiceState>(
+      valueListenable: vs.state,
+      builder: (context, st, _) {
+        final Color c;
+        final String label;
+        final IconData ic;
+        switch (st) {
+          case VoiceState.listening:
+            c = const Color(0xFFEF4444);
+            label = '듣고 있어요… 말씀하세요';
+            ic = Icons.mic_rounded;
+            break;
+          case VoiceState.speaking:
+            c = const Color(0xFF10B981);
+            label = '${_persona.name}이(가) 답하는 중…';
+            ic = Icons.volume_up_rounded;
+            break;
+          case VoiceState.processing:
+            c = const Color(0xFF8B5CF6);
+            label = '생각하는 중…';
+            ic = Icons.psychology_rounded;
+            break;
+          case VoiceState.idle:
+            c = cs.primary;
+            label = _loading ? '생각하는 중…' : '마이크를 누르거나 잠시 기다려 주세요';
+            ic = _loading ? Icons.psychology_rounded : Icons.headset_mic_rounded;
+            break;
+        }
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          color: c.withValues(alpha: 0.10),
+          child: Row(
+            children: [
+              if (st == VoiceState.listening)
+                ValueListenableBuilder<double>(
+                  valueListenable: vs.soundLevel,
+                  builder: (_, lvl, __) => _MicPulse(level: lvl, color: c),
+                )
+              else
+                Icon(ic, size: 18, color: c),
+              const SizedBox(width: 10),
+              Expanded(
+                child: ValueListenableBuilder<String>(
+                  valueListenable: vs.partialText,
+                  builder: (_, partial, __) => Text(
+                    st == VoiceState.listening && partial.isNotEmpty
+                        ? '“$partial”'
+                        : label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: c,
+                    ),
+                  ),
+                ),
+              ),
+              if (st == VoiceState.speaking)
+                TextButton(
+                  onPressed: () async {
+                    await vs.stopSpeaking();
+                    if (mounted && _voiceMode) _startListening();
+                  },
+                  child: const Text('건너뛰기', style: TextStyle(fontSize: 12)),
+                ),
+              TextButton(
+                onPressed: _toggleVoiceMode,
+                child: const Text('종료', style: TextStyle(fontSize: 12)),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -604,6 +794,7 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
                       onPressed: () => TutorSpeechService.instance.speak(
                         m.content,
                         rate: _persona.speechRate,
+                        pitch: _persona.speechPitch,
                       ),
                     ),
                   ),
@@ -786,7 +977,30 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
             ),
           ),
           const SizedBox(width: 8),
+          // 🎙️ 마이크 버튼 — 누르면 듣기 시작/중지
+          ValueListenableBuilder<VoiceState>(
+            valueListenable: VoiceService.instance.state,
+            builder: (context, st, _) {
+              final listening = st == VoiceState.listening;
+              return FloatingActionButton.small(
+                heroTag: 'micBtn',
+                onPressed: _loading ? null : _startListening,
+                elevation: 0,
+                backgroundColor: listening
+                    ? const Color(0xFFEF4444)
+                    : cs.surfaceContainerHighest,
+                child: Icon(
+                  listening ? Icons.stop_rounded : Icons.mic_rounded,
+                  color: listening
+                      ? Colors.white
+                      : cs.onSurface.withValues(alpha: 0.75),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 8),
           FloatingActionButton.small(
+            heroTag: 'sendBtn',
             onPressed: _loading ? null : () => _send(_controller.text),
             elevation: 0,
             backgroundColor: _loading ? cs.surfaceContainerHighest : cs.primary,
@@ -797,6 +1011,37 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
                   : Colors.white,
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 🎙️ 마이크 입력 레벨 펄스 애니메이션
+class _MicPulse extends StatelessWidget {
+  final double level; // 0.0~1.0
+  final Color color;
+  const _MicPulse({required this.level, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final size = 14.0 + level * 10;
+    return SizedBox(
+      width: 26,
+      height: 26,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 90),
+            width: size + 8,
+            height: size + 8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withValues(alpha: 0.18 + level * 0.2),
+            ),
+          ),
+          Icon(Icons.mic_rounded, size: 16, color: color),
         ],
       ),
     );

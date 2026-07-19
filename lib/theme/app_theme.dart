@@ -210,10 +210,16 @@ class AppTheme {
     final scheme = ColorScheme.fromSeed(
       seedColor: p.seed,
     ).copyWith(primary: p.seed, secondary: p.accent, surface: cardLight);
+    // 팔레트 씨앗이 배경에 은은하게 배어나오도록 — 테마 교체 체감 극대화
+    final tintedBg = Color.alphaBlend(
+      p.seed.withValues(alpha: 0.035),
+      bgLight,
+    );
     return _base(
       scheme,
       Brightness.light,
-    ).copyWith(scaffoldBackgroundColor: bgLight);
+      p,
+    ).copyWith(scaffoldBackgroundColor: tintedBg);
   }
 
   static ThemeData dark([ThemePalette? palette]) {
@@ -222,13 +228,19 @@ class AppTheme {
       seedColor: p.seed,
       brightness: Brightness.dark,
     ).copyWith(surface: cardDark);
+    final tintedBg = Color.alphaBlend(p.seed.withValues(alpha: 0.05), bgDark);
     return _base(
       scheme,
       Brightness.dark,
-    ).copyWith(scaffoldBackgroundColor: bgDark);
+      p,
+    ).copyWith(scaffoldBackgroundColor: tintedBg);
   }
 
-  static ThemeData _base(ColorScheme scheme, Brightness brightness) {
+  static ThemeData _base(
+    ColorScheme scheme,
+    Brightness brightness,
+    ThemePalette p,
+  ) {
     final dark = brightness == Brightness.dark;
     return ThemeData(
       useMaterial3: true,
@@ -239,15 +251,20 @@ class AppTheme {
       splashFactory: InkSparkle.splashFactory,
       cardTheme: CardThemeData(
         elevation: 0,
-        color: dark ? cardDark : cardLight,
+        color: dark
+            ? Color.alphaBlend(p.seed.withValues(alpha: 0.04), cardDark)
+            : cardLight,
         surfaceTintColor: Colors.transparent,
         margin: const EdgeInsets.symmetric(vertical: 5),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(rMd),
           side: BorderSide(
             color: dark
-                ? Colors.white.withValues(alpha: 0.06)
-                : const Color(0xFFE8EAF2),
+                ? p.seed.withValues(alpha: 0.14)
+                : Color.alphaBlend(
+                    p.seed.withValues(alpha: 0.10),
+                    const Color(0xFFE8EAF2),
+                  ),
           ),
         ),
       ),
@@ -255,13 +272,57 @@ class AppTheme {
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: dark ? bgDark : bgLight,
+        backgroundColor: Colors.transparent,
         titleTextStyle: TextStyle(
           fontSize: 19,
           fontWeight: FontWeight.w800,
           letterSpacing: -0.4,
           color: dark ? Colors.white : textStrong,
         ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: dark
+            ? Colors.white.withValues(alpha: 0.04)
+            : p.seed.withValues(alpha: 0.03),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: dark
+                ? Colors.white.withValues(alpha: 0.12)
+                : p.seed.withValues(alpha: 0.18),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: p.seed, width: 1.6),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: p.seed.withValues(alpha: 0.2)),
+        ),
+      ),
+      dialogTheme: DialogThemeData(
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        titleTextStyle: TextStyle(
+          fontSize: 17.5,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.3,
+          color: dark ? Colors.white : textStrong,
+        ),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: p.seed,
+        linearTrackColor: p.seed.withValues(alpha: 0.12),
+        circularTrackColor: p.seed.withValues(alpha: 0.12),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        elevation: 2,
+        highlightElevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        backgroundColor: p.seed,
+        foregroundColor: Colors.white,
       ),
       navigationBarTheme: NavigationBarThemeData(
         height: 66,

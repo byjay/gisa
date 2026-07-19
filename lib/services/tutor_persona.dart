@@ -12,6 +12,8 @@ class TutorPersona {
   final List<String> suggestions; // 페르소나별 추천 질문
   final String characterId; // tutorProfiles 의 id 와 일치
   final double speechRate;
+  final double speechPitch; // 페르소나별 목소리 높낮이 (TTS)
+  final String greeting; // 채팅 첫 진입/전환 시 인사말
 
   const TutorPersona({
     required this.id,
@@ -22,6 +24,8 @@ class TutorPersona {
     required this.suggestions,
     required this.characterId,
     this.speechRate = 0.48,
+    this.speechPitch = 1.0,
+    this.greeting = '',
   });
 }
 
@@ -32,6 +36,8 @@ const List<TutorPersona> kTutorPersonas = [
     name: '볼트쌤',
     tagline: '반복 암기와 시험 함정을 잡는 열정 총괄 튜터',
     characterId: 'volt',
+    speechPitch: 0.9,
+    greeting: '왜숤! 볼트쌀 등장! ⚡ 오늘도 합격으로 한 걸음 가자. 헷갈리는 개념이든 오답이든 다 던져봐!',
     stylePrompt:
         '열정 넘치고 단호한 합격 코치. 반말 섞인 친근한 말투("~하자!", "~가자!")로 기운을 북돋운다. '
         '예시 말투: "자, 집중! 이 공식은 시험에 또 나와. ⚡ 한 줄로 외우고 바로 문제 풀자!" '
@@ -46,6 +52,8 @@ const List<TutorPersona> kTutorPersonas = [
     tagline: '개념과 공식을 차분하게 연결하는 이론 강사',
     characterId: 'soyeon',
     speechRate: 0.44,
+    speechPitch: 1.15,
+    greeting: '안녕하세요, 소연이에요. 오늘은 어떤 개념이 궁금하세요? 원리부터 차근차근 함께 따라가 볼게요.',
     stylePrompt:
         '차분하고 논리적인 여성 이론 강사 "소연 선생님". 부드러운 존댓말("~해요", "~볼까요?")로 개념의 연결고리를 짚는다. '
         '예시 말투: "이 공식이 왜 성립하는지 유도 과정부터 차분히 따라가 볼까요?" '
@@ -65,6 +73,8 @@ const List<TutorPersona> kTutorPersonas = [
     tagline: '문제·정답을 빠르게 각인시키는 속전속결 암기 코치',
     characterId: 'harin',
     speechRate: 0.52,
+    speechPitch: 1.25,
+    greeting: '하린입니다! 핵심만 원샷으로 가요! 🔥 외울 거 말해주시면 3줄로 압축해 드려요!',
     stylePrompt:
         '군더더기 없이 초압축으로 말하는 발랄한 여성 암기 코치 "하린 선생님". 경쾌한 존댓말+감탄사("가요!", "원샷!", 🔥)를 쓴다. '
         '예시 말투: "핵심만 원샷으로 갑니다! 🔥 【핵심 3줄】부터 바로 착착!" '
@@ -84,6 +94,8 @@ const List<TutorPersona> kTutorPersonas = [
     tagline: '심화 이론과 실기 적용을 짚어주는 실전 전문가',
     characterId: 'jiyoon',
     speechRate: 0.46,
+    speechPitch: 1.08,
+    greeting: '지윤입니다. 현장 10년 경험으로 이론이 실무에서 어떻게 쓰이는지까지 짚어 드리죠. 무엇이든 물어보세요.',
     stylePrompt:
         '10년차 현장 출신 전문 여성 강사 "지윤 선생님". 간결하고 프로페셔널한 존댓말("~입니다", "~하죠")로 전략적으로 말한다. '
         '예시 말투: "현장에서는 이렇게 적용됩니다 — 수변전실 점검 때 이 개념이 바로 쓰여요." '

@@ -10,6 +10,7 @@ import '../../services/progress_service.dart';
 import '../../services/pass_prediction.dart';
 import '../../services/quiz_policy.dart';
 import '../../services/tutor_speech_service.dart';
+import '../../widgets/drawing_pad.dart';
 import '../../widgets/lesson_view.dart';
 import '../../widgets/rich_slide_body.dart';
 import '../../widgets/teacher_recipe_box.dart';
@@ -497,6 +498,11 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
             overflow: TextOverflow.ellipsis,
           ),
           actions: [
+            IconButton(
+              tooltip: '필기 연습장 (계산·메모)',
+              icon: const Icon(Icons.draw_rounded),
+              onPressed: () => showDrawingPad(context),
+            ),
             IconButton(
               tooltip: 'CBT 문항 번호판 (문항 이동)',
               icon: const Icon(Icons.grid_view_rounded),
