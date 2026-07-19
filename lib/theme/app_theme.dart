@@ -125,7 +125,7 @@ class AppTheme {
   static const double rLg = 20;
   static const double rXl = 28;
 
-  // ── 테마 팔레트 (5종) ─────────────────────────────
+  // ── 테마 팔레트 (10종) ────────────────────────────
   // 사용자가 설정에서 선택. seed 색상으로 전체 톤을 결정하며
   // 브랜드 static const(primary/accent 등)는 포인트 컬러로 유지한다.
   static const List<ThemePalette> palettes = [
@@ -163,6 +163,41 @@ class AppTheme {
       emoji: '🌊',
       seed: Color(0xFF0284C7),
       accent: Color(0xFF06B6D4),
+    ),
+    ThemePalette(
+      id: 'purple',
+      name: '로얄 퍼플',
+      emoji: '💜',
+      seed: Color(0xFF7C3AED),
+      accent: Color(0xFFA855F7),
+    ),
+    ThemePalette(
+      id: 'pink',
+      name: '베리 핑크',
+      emoji: '🍓',
+      seed: Color(0xFFDB2777),
+      accent: Color(0xFFEC4899),
+    ),
+    ThemePalette(
+      id: 'lime',
+      name: '프레쉬 라임',
+      emoji: '🍏',
+      seed: Color(0xFF65A30D),
+      accent: Color(0xFF84CC16),
+    ),
+    ThemePalette(
+      id: 'graphite',
+      name: '시크 그래파이트',
+      emoji: '🪨',
+      seed: Color(0xFF475569),
+      accent: Color(0xFF64748B),
+    ),
+    ThemePalette(
+      id: 'teal',
+      name: '민트 틸',
+      emoji: '🧊',
+      seed: Color(0xFF0D9488),
+      accent: Color(0xFF14B8A6),
     ),
   ];
 
@@ -521,7 +556,7 @@ class PillBadge extends StatelessWidget {
   }
 }
 
-/// 테마 팔레트 정의 (5종)
+/// 테마 팔레트 정의 (10종)
 class ThemePalette {
   final String id;
   final String name;

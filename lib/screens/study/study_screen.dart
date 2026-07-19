@@ -5,6 +5,7 @@ import '../../providers/app_provider.dart';
 import '../../services/study_data.dart';
 import '../../theme/app_theme.dart';
 import 'quiz_play_screen.dart';
+import 'cbt_simulator_screen.dart';
 import 'theory_screen.dart';
 import 'mnemonics_screen.dart';
 import 'videos_screen.dart';
@@ -212,6 +213,28 @@ class _StudyScreenState extends State<StudyScreen>
       padding: _pagePadding,
       children: [
         SectionHeader(
+          emoji: '💻',
+          title: 'CBT 체험 모드',
+          subtitle: '실제 Q-Net CBT와 동일한 환경 · 2시간 30분 타이머 · 문항 네비게이션 · 과락 채점',
+        ),
+        _cbtCard(
+          context,
+          exams,
+          '최신 회차 실전 CBT',
+          '가장 최근 복원문제로 실전 그대로 체험',
+          const Color(0xFF0EA5E9),
+          latest: true,
+        ),
+        _cbtCard(
+          context,
+          exams,
+          '랜덤 모의 CBT (100문항)',
+          '전체 문제은행에서 과목별 20문항 무작위 출제',
+          const Color(0xFF8B5CF6),
+          latest: false,
+        ),
+        const SizedBox(height: 20),
+        SectionHeader(
           emoji: '📚',
           title: '연도별 기출 세트',
           subtitle: '최근 N년치 기출을 최신 회차부터 몰아서 풀기 · 회독용 추천',
@@ -349,6 +372,130 @@ class _StudyScreenState extends State<StudyScreen>
         questions: qs,
         examMode: false,
       ),
+      currentSection: 1,
+    );
+  }
+
+  // ── CBT 체험 모드 카드 ───────────────────────
+  Widget _cbtCard(
+    BuildContext context,
+    List<ExamPaper> exams,
+    String title,
+    String desc,
+    Color c, {
+    required bool latest,
+  }) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final info = latest
+        ? (exams.isEmpty
+              ? 'CBT 데이터 없음'
+              : '${exams.first.label} · ${exams.first.questions.length}문항 · 2시간 30분')
+        : '5과목 × 20문항 · 매번 새로운 조합 · 2시간 30분';
+    return PremiumCard(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+      onTap: () => _startCbt(exams, title, latest: latest),
+      child: Row(
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [c, c.withValues(alpha: 0.65)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            alignment: Alignment.center,
+            child: Icon(
+              latest ? Icons.computer_rounded : Icons.shuffle_rounded,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  desc,
+                  style: TextStyle(
+                    fontSize: 11,
+                    height: 1.3,
+                    color: dark ? Colors.white54 : AppTheme.textMuted,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  info,
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                    color: c,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right_rounded, color: c),
+        ],
+      ),
+    );
+  }
+
+  void _startCbt(List<ExamPaper> exams, String title, {required bool latest}) {
+    List<Question> qs;
+    if (latest) {
+      if (exams.isEmpty) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('CBT 기출 데이터가 없습니다.')));
+        return;
+      }
+      final e = exams.first;
+      qs = e.questions
+          .where((q) => q.options.length == 4 && q.answer >= 1)
+          .toList();
+      for (final q in qs) {
+        q.examLabel = e.label;
+      }
+    } else {
+      // 전체 문제은행에서 과목별 20문항 무작위 추출
+      final rng = Random();
+      final bySubject = <String, List<Question>>{};
+      for (final e in exams) {
+        for (final q in e.questions) {
+          if (q.options.length != 4 || q.answer < 1) continue;
+          q.examLabel = e.label;
+          (bySubject[q.subject] ??= []).add(q);
+        }
+      }
+      qs = [];
+      for (final s in kSubjects) {
+        final pool = List<Question>.of(bySubject[s] ?? const []);
+        pool.shuffle(rng);
+        qs.addAll(pool.take(20));
+      }
+      if (qs.isEmpty) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('출제 가능한 문제가 없습니다.')));
+        return;
+      }
+    }
+    pushWithNav(
+      context,
+      CbtSimulatorScreen(title: title, questions: qs),
       currentSection: 1,
     );
   }

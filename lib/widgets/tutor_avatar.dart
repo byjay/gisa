@@ -11,13 +11,13 @@ enum TutorMood { idle, happy, thinking, wrong, teaching, meditate, cheer }
 /// 볼트쌤(푸티) 전용 — 상황(무드)별 포즈 프레임 매핑 (pose_01 ~ pose_38)
 /// 스텝마다 다른 행동 이미지가 나오도록 각 무드에 여러 포즈를 배정한다.
 const Map<TutorMood, List<int>> voltMoodPoses = {
-  TutorMood.idle: [1, 7, 8, 11, 29],
-  TutorMood.happy: [4, 16, 26, 34, 30],
-  TutorMood.thinking: [5, 9, 12, 17, 27],
-  TutorMood.wrong: [10, 11, 28, 37],
-  TutorMood.teaching: [2, 3, 13, 14, 21],
+  TutorMood.idle: [1, 7, 8, 11, 29, 6, 24],
+  TutorMood.happy: [4, 16, 26, 34, 30, 19, 38],
+  TutorMood.thinking: [5, 9, 12, 17, 27, 22, 23],
+  TutorMood.wrong: [10, 11, 28, 37, 20],
+  TutorMood.teaching: [2, 3, 13, 14, 21, 18, 32],
   TutorMood.meditate: [35, 36, 31],
-  TutorMood.cheer: [4, 15, 25, 33, 34],
+  TutorMood.cheer: [4, 15, 25, 33, 34, 19, 38],
 };
 
 String voltPoseAsset(int pose) =>

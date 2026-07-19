@@ -68,6 +68,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onChanged: (_) =>
                       context.read<AppProvider>().toggleDarkMode(),
                 ),
+                const Divider(height: 1),
+                _paletteSelector(context, app),
               ],
             ),
           ),
@@ -161,6 +163,97 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 테마 팔레트 선택 — 10종 색상 칩
+  Widget _paletteSelector(BuildContext context, AppProvider app) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.palette_rounded, size: 22),
+              const SizedBox(width: 14),
+              const Text('테마 컬러', style: TextStyle(fontSize: 15)),
+              const Spacer(),
+              Text(
+                AppTheme.paletteById(app.themePaletteId).name,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.paletteById(app.themePaletteId).seed,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final p in AppTheme.palettes)
+                InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () =>
+                      context.read<AppProvider>().setThemePalette(p.id),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: app.themePaletteId == p.id
+                          ? p.seed.withValues(alpha: 0.14)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: app.themePaletteId == p.id
+                            ? p.seed
+                            : Theme.of(
+                                context,
+                              ).dividerColor.withValues(alpha: 0.5),
+                        width: app.themePaletteId == p.id ? 1.6 : 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 16,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              colors: [p.seed, p.accent],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${p.emoji} ${p.name}',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: app.themePaletteId == p.id
+                                ? FontWeight.w800
+                                : FontWeight.w600,
+                          ),
+                        ),
+                        if (app.themePaletteId == p.id) ...[
+                          const SizedBox(width: 4),
+                          Icon(Icons.check_rounded, size: 14, color: p.seed),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+            ],
           ),
         ],
       ),
