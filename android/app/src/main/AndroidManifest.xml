@@ -15,7 +15,7 @@
         </intent>
     </queries>
     <application
-        android:label="Cert Study Tracker"
+        android:label="볼트쌤"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

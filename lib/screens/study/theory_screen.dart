@@ -1,161 +1,208 @@
 import 'package:flutter/material.dart';
 import '../../services/study_data.dart';
+import '../../services/slide_progress.dart';
+import '../../widgets/help_dot.dart';
 import 'quiz_play_screen.dart';
+import 'slides_screen.dart';
 import '../../widgets/persistent_nav.dart';
 
-/// 핵심이론서: 과목 선택 → 마크다운 이론서 열람 (간이 렌더러)
-class TheoryScreen extends StatelessWidget {
+/// 핵심이론서: 과목 선택 → 슬라이드(PPT) 형태로 버튼 전환하며 학습
+///
+/// 과목당 최대 30장 안팎의 카드를 버튼으로 한 장씩 넘겨보는 컴팩트한
+/// 슬라이드 구조. 내부적으로 30일 이론 카드(theory_slides.json)를
+/// 과목 단위로 병합해 [SlideDeckScreen] UI(버튼 네비게이션·왕초보 모드·
+/// 암기법 노트·유튜브 연동)를 그대로 재사용한다.
+class TheoryScreen extends StatefulWidget {
   const TheoryScreen({super.key});
 
   @override
+  State<TheoryScreen> createState() => _TheoryScreenState();
+}
+
+class _TheoryScreenState extends State<TheoryScreen> {
+  final Map<String, int> _cardCounts = {};
+  bool _loading = true;
+
+  String get _progressPrefix => 'theory_${StudyData.instance.track.id}';
+
+  @override
+  void initState() {
+    super.initState();
+    SlideProgress.instance.ensureReady().then((_) {
+      if (mounted) setState(() {});
+    });
+    _loadCounts();
+  }
+
+  Future<void> _loadCounts() async {
+    for (final s in kSubjects) {
+      final deck = await StudyData.instance.loadSubjectTheoryDeck(s);
+      _cardCounts[s] = deck?.cards.length ?? 0;
+    }
+    if (mounted) setState(() => _loading = false);
+  }
+
+  Future<void> _openSubject(String subject) async {
+    final deck = await StudyData.instance.loadSubjectTheoryDeck(subject);
+    if (!mounted) return;
+    if (deck == null || deck.cards.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$subject 이론 슬라이드가 아직 준비되지 않았어요.')),
+      );
+      return;
+    }
+    await pushWithNav(
+      context,
+      SlideDeckScreen(deck: deck, progressPrefix: _progressPrefix),
+      currentSection: 1,
+    );
+    if (mounted) setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('핵심이론서 (빈출도 반영)')),
+      appBar: AppBar(
+        title: const Text('핵심이론서 (빈출도 반영)'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: HelpDot(
+              size: 22,
+              title: '핵심이론서 안내',
+              body:
+                  '과목을 고르면 슬라이드(PPT) 형태로 한 장씩 버튼을 눌러 넘겨보는 이론 카드가 열려요.\n\n'
+                  '👉 화면 아래 화살표 버튼으로 이전/다음 장을 넘기고, 스와이프도 가능해요.\n\n'
+                  '🐣📘⚡ 상단 난이도 버튼(왕초보/표준/속성)으로 설명 깊이를 바꿀 수 있어요.\n\n'
+                  '🧠 각 장마다 공식·암기법·시험 포인트가 색깔별 카드로 구분되어 있어요.\n\n'
+                  '💡 다 본 뒤 "이론을 문제로 확인하기"로 바로 기초 문제를 풀어보세요!',
+            ),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
-            '${StudyData.instance.track.bankLabel} ${StudyData.instance.track.questionCountLabel}문제 빈출 분석을 반영한 과목별 핵심이론서입니다. '
-            '실기 연계 포인트도 함께 정리했습니다.',
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: cs.primaryContainer.withValues(alpha: 0.35),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.slideshow_rounded, color: cs.primary),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '${StudyData.instance.track.bankLabel} ${StudyData.instance.track.questionCountLabel}문제 빈출 분석을 반영한 과목별 슬라이드 이론서입니다. '
+                    '버튼으로 한 장씩 넘기며 개념→공식→암기법→시험포인트 순서로 학습하세요.',
+                    style: const TextStyle(fontSize: 12.5, height: 1.45),
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           for (var i = 0; i < kSubjects.length; i++)
-            Card(
-              child: ListTile(
-                leading: CircleAvatar(child: Text('${i + 1}')),
-                title: Text(kSubjects[i]),
-                subtitle: const Text('빈출 토픽 순위 · 공식 · 암기법 · 강의링크 포함'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => pushWithNav(
-                  context,
-                  TheoryViewer(subject: kSubjects[i]),
-                  currentSection: 1,
+            _subjectCard(context, i, kSubjects[i]),
+        ],
+      ),
+    );
+  }
+
+  Widget _subjectCard(BuildContext context, int i, String subject) {
+    final total = _cardCounts[subject] ?? 0;
+    final seen = SlideProgress.instance.seen(
+      kSubjects.indexOf(subject) + 1,
+      prefix: _progressPrefix,
+    );
+    final done = total > 0 && seen >= total;
+    final pct = total == 0 ? 0.0 : (seen / total).clamp(0.0, 1.0);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        leading: SizedBox(
+          width: 46,
+          height: 46,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                width: 44,
+                height: 44,
+                child: CircularProgressIndicator(
+                  value: total == 0 ? null : pct,
+                  strokeWidth: 3.2,
+                  color: done ? Colors.green : Colors.indigo,
+                  backgroundColor: Colors.indigo.withValues(alpha: 0.15),
                 ),
               ),
-            ),
-        ],
+              done
+                  ? const Icon(
+                      Icons.check_rounded,
+                      color: Colors.green,
+                      size: 20,
+                    )
+                  : Text(
+                      '${i + 1}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: Colors.indigo,
+                      ),
+                    ),
+            ],
+          ),
+        ),
+        title: Text(
+          subject,
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+        ),
+        subtitle: Text(
+          _loading
+              ? '슬라이드 준비 중…'
+              : total == 0
+              ? '슬라이드 준비 중 (곧 업데이트)'
+              : done
+              ? '✅ 완료 · $total장 · 공식·암기법·시험포인트 포함'
+              : seen > 0
+              ? '$seen/$total장 진행 중 · 버튼으로 이어보기'
+              : '$total장 슬라이드 · 빈출 토픽 순위·공식·암기법 포함',
+          style: TextStyle(
+            fontSize: 12,
+            color: done ? Colors.green : Colors.indigo,
+          ),
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: total == 0 ? null : () => _openSubject(subject),
       ),
     );
   }
 }
 
-class TheoryViewer extends StatefulWidget {
+/// (레거시) 마크다운 이론 뷰어 — 슬라이드 데이터가 없는 예외 상황을 위한
+/// 폴백 뷰. 현재 UI에서는 직접 노출되지 않지만, 다른 화면에서 참조할 수
+/// 있도록 유지한다.
+class TheoryMarkdownFallback extends StatefulWidget {
   final String subject;
-  const TheoryViewer({super.key, required this.subject});
+  const TheoryMarkdownFallback({super.key, required this.subject});
 
   @override
-  State<TheoryViewer> createState() => _TheoryViewerState();
+  State<TheoryMarkdownFallback> createState() => _TheoryMarkdownFallbackState();
 }
 
-class _TheoryViewerState extends State<TheoryViewer> {
+class _TheoryMarkdownFallbackState extends State<TheoryMarkdownFallback> {
   String? _content;
-  String? _loadError;
   bool _startingQuiz = false;
 
   @override
   void initState() {
     super.initState();
-    StudyData.instance
-        .loadTheory(widget.subject)
-        .then((value) {
-          if (!mounted) return;
-          setState(() {
-            _content = value;
-            if (value.contains('불러올 수 없습니다')) {
-              _loadError = '이론 자료를 불러오지 못했습니다.';
-            }
-          });
-        })
-        .catchError((Object error) {
-          if (!mounted) return;
-          setState(() => _loadError = '이론 자료를 불러오지 못했습니다.');
-        });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.subject)),
-      body: _loadError != null
-          ? _errorView()
-          : _content == null
-          ? const Center(child: CircularProgressIndicator())
-          : Scrollbar(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-                children: [
-                  _learningLoopGuide(context),
-                  const SizedBox(height: 8),
-                  ..._renderMarkdown(context, _content!),
-                  const SizedBox(height: 8),
-                  FilledButton.icon(
-                    onPressed: _startingQuiz ? null : _startBasicQuiz,
-                    icon: _startingQuiz
-                        ? const SizedBox.square(
-                            dimension: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.quiz_outlined),
-                    label: Text(_startingQuiz ? '기초 문제 준비 중…' : '이론을 문제로 확인하기'),
-                  ),
-                ],
-              ),
-            ),
-    );
-  }
-
-  Widget _learningLoopGuide(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: scheme.secondaryContainer.withValues(alpha: 0.55),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.sync_rounded, color: scheme.onSecondaryContainer),
-          const SizedBox(width: 10),
-          const Expanded(
-            child: Text(
-              '기초를 짧게 읽고 문제로 확인하세요. 막히면 문제 해설의 '
-              '‘기초이론 다시 보기’로 돌아올 수 있습니다.',
-              style: TextStyle(fontSize: 12.5, height: 1.45),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _errorView() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error_outline, size: 42),
-            const SizedBox(height: 12),
-            Text(_loadError!, textAlign: TextAlign.center),
-            const SizedBox(height: 12),
-            FilledButton.tonal(
-              onPressed: () {
-                setState(() {
-                  _loadError = null;
-                  _content = null;
-                });
-                StudyData.instance.loadTheory(widget.subject).then((value) {
-                  if (mounted) setState(() => _content = value);
-                });
-              },
-              child: const Text('다시 시도'),
-            ),
-          ],
-        ),
-      ),
-    );
+    StudyData.instance.loadTheory(widget.subject).then((value) {
+      if (mounted) setState(() => _content = value);
+    });
   }
 
   Future<void> _startBasicQuiz() async {
@@ -187,203 +234,29 @@ class _TheoryViewerState extends State<TheoryViewer> {
     }
   }
 
-  /// 초경량 마크다운 렌더러 (외부 패키지 불필요)
-  List<Widget> _renderMarkdown(BuildContext context, String md) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final widgets = <Widget>[];
-    final lines = md.split('\n');
-    var inCode = false;
-    final codeBuf = StringBuffer();
-    List<String>? tableBuf;
-
-    void flushTable() {
-      if (tableBuf == null || tableBuf!.isEmpty) return;
-      final rows = tableBuf!
-          .where((l) => !RegExp(r'^\s*\|[\s\-:|]+\|\s*$').hasMatch(l))
-          .map(
-            (l) => l
-                .trim()
-                .replaceAll(RegExp(r'^\||\|$'), '')
-                .split('|')
-                .map((c) => c.trim().replaceAll('**', ''))
-                .toList(),
-          )
-          .toList();
-      if (rows.isEmpty) {
-        tableBuf = null;
-        return;
-      }
-      final colCount = rows
-          .map((r) => r.length)
-          .reduce((a, b) => a > b ? a : b);
-      widgets.add(
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Table(
-              defaultColumnWidth: const IntrinsicColumnWidth(),
-              border: TableBorder.all(color: scheme.outlineVariant, width: 0.7),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.subject)),
+      body: _content == null
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
               children: [
-                for (var r = 0; r < rows.length; r++)
-                  TableRow(
-                    decoration: BoxDecoration(
-                      color: r == 0 ? scheme.surfaceContainerHighest : null,
-                    ),
-                    children: [
-                      for (var c = 0; c < colCount; c++)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 6,
-                          ),
-                          child: Text(
-                            c < rows[r].length ? rows[r][c] : '',
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              fontWeight: r == 0
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-        ),
-      );
-      tableBuf = null;
-    }
-
-    for (final raw in lines) {
-      final line = raw.trimRight();
-
-      if (line.startsWith('```')) {
-        if (inCode) {
-          widgets.add(
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.symmetric(vertical: 6),
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                codeBuf.toString().trimRight(),
-                style: const TextStyle(
-                  fontFamily: 'monospace',
-                  fontSize: 13,
-                  height: 1.5,
-                ),
-              ),
-            ),
-          );
-          codeBuf.clear();
-        }
-        inCode = !inCode;
-        continue;
-      }
-      if (inCode) {
-        codeBuf.writeln(raw);
-        continue;
-      }
-
-      if (line.trimLeft().startsWith('|')) {
-        tableBuf ??= [];
-        tableBuf!.add(line);
-        continue;
-      } else {
-        flushTable();
-      }
-
-      if (line.isEmpty) {
-        widgets.add(const SizedBox(height: 6));
-      } else if (line.startsWith('# ')) {
-        widgets.add(
-          Padding(
-            padding: const EdgeInsets.only(top: 8, bottom: 6),
-            child: Text(
-              _strip(line.substring(2)),
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        );
-      } else if (line.startsWith('## ')) {
-        widgets.add(
-          Padding(
-            padding: const EdgeInsets.only(top: 14, bottom: 4),
-            child: Text(
-              _strip(line.substring(3)),
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: scheme.primary,
-              ),
-            ),
-          ),
-        );
-      } else if (line.startsWith('### ')) {
-        widgets.add(
-          Padding(
-            padding: const EdgeInsets.only(top: 10, bottom: 3),
-            child: Text(
-              _strip(line.substring(4)),
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        );
-      } else if (line.startsWith('> ')) {
-        widgets.add(
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.symmetric(vertical: 4),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: scheme.primaryContainer.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(8),
-              border: Border(left: BorderSide(color: scheme.primary, width: 3)),
-            ),
-            child: Text(
-              _strip(line.substring(2)),
-              style: const TextStyle(height: 1.5, fontSize: 14),
-            ),
-          ),
-        );
-      } else if (line.startsWith('- ') || line.startsWith('* ')) {
-        widgets.add(
-          Padding(
-            padding: const EdgeInsets.only(left: 8, bottom: 2),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('•  '),
-                Expanded(
-                  child: Text(
-                    _strip(line.substring(2)),
-                    style: const TextStyle(height: 1.5),
-                  ),
+                Text(_content!, style: const TextStyle(height: 1.6)),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: _startingQuiz ? null : _startBasicQuiz,
+                  icon: _startingQuiz
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.quiz_outlined),
+                  label: Text(_startingQuiz ? '기초 문제 준비 중…' : '이론을 문제로 확인하기'),
                 ),
               ],
             ),
-          ),
-        );
-      } else if (line == '---') {
-        widgets.add(const Divider(height: 20));
-      } else {
-        widgets.add(Text(_strip(line), style: const TextStyle(height: 1.6)));
-      }
-    }
-    flushTable();
-    widgets.add(const SizedBox(height: 32));
-    return widgets;
+    );
   }
-
-  String _strip(String s) => s.replaceAll('**', '').replaceAll('`', '');
 }

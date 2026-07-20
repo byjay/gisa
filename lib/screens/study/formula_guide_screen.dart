@@ -55,7 +55,8 @@ class _FormulaGuideScreenState extends State<FormulaGuideScreen>
             child: HelpDot(
               size: 22,
               title: '공식 마스터 안내',
-              body: '시험에 나오는 공식을 이해하고 암기하는 화면이에요.\n\n'
+              body:
+                  '시험에 나오는 공식을 이해하고 암기하는 화면이에요.\n\n'
                   '🧮 공식 이해·암기 탭 — 각 공식이 어떤 상황에 쓰이는지 원리와 함께 설명하고, 외우기 쉬운 암기법도 함께 보여줘요.\n\n'
                   '🌱 왕초보 기초사전 탭 — 공식에 쓰이는 기본 용어와 개념부터 차근차근 설명해줘요. 완전 처음이라면 여기부터!\n\n'
                   '💡 공식만 외우지 말고 "왜 이 식이 나오는지" 원리를 이해하면 응용문제도 쉽게 풀 수 있어요!',
@@ -161,10 +162,11 @@ class _FormulaGuideScreenState extends State<FormulaGuideScreen>
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _step(context, '1', '🗣 소리내어 읽기', f.read, Colors.blue),
+          if (f.read.isNotEmpty)
+            _step(context, '1', '소리내어 읽기', f.read, Colors.blue),
           if (f.symbols.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            _stepHeader(context, '2', '🔤 기호 하나씩 뜯어보기', Colors.indigo),
+            if (f.read.isNotEmpty) const SizedBox(height: 8),
+            _stepHeader(context, '2', '기호 하나씩 뜯어보기', Colors.indigo),
             const SizedBox(height: 6),
             Container(
               width: double.infinity,
@@ -217,12 +219,25 @@ class _FormulaGuideScreenState extends State<FormulaGuideScreen>
               ),
             ),
           ],
-          const SizedBox(height: 8),
-          _step(context, '3', '💡 비유로 이해하기', f.understand, Colors.teal),
-          const SizedBox(height: 8),
-          _step(context, '4', '🧠 암기법', f.mnemonic, Colors.deepOrange),
-          const SizedBox(height: 8),
-          _step(context, '5', '✏️ 기출 포인트·예제', f.example, Colors.purple),
+          if (f.understand.isNotEmpty) ...[
+            if (f.symbols.isNotEmpty || f.read.isNotEmpty)
+              const SizedBox(height: 8),
+            _step(
+              context,
+              f.symbols.isEmpty && f.read.isEmpty ? '1' : '3',
+              f.symbols.isEmpty && f.read.isEmpty ? '핵심 설명' : '비유로 이해하기',
+              f.understand,
+              Colors.teal,
+            ),
+          ],
+          if (f.mnemonic.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            _step(context, '4', '암기법', f.mnemonic, Colors.deepOrange),
+          ],
+          if (f.example.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            _step(context, '5', '기출 포인트·예제', f.example, Colors.purple),
+          ],
         ],
       ),
     );

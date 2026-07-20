@@ -937,6 +937,7 @@ class StudyData {
     _recipes = null;
     _recipeByTopic = null;
     _theoryCache.clear();
+    _theorySubjectDecks.clear();
   }
 
   List<ExamPaper>? _exams;
@@ -994,6 +995,38 @@ class StudyData {
       SlideDeck.fromJson,
     );
     return _subjectSummaries!;
+  }
+
+  /// 핵심이론서(과목별) 슬라이드 덱 캐시 — subject → 병합 덱
+  final Map<String, SlideDeck> _theorySubjectDecks = {};
+
+  /// 특정 과목의 모든 이론 카드를 day 순서대로 모아 하나의 슬라이드 덱으로 병합.
+  ///
+  /// theory_slides.json 은 30일(day) 단위로 나뉘어 있지만, "핵심이론서"는
+  /// 과목 단위로 처음부터 끝까지 버튼으로 넘겨보는 슬라이드/PPT 형태를
+  /// 원하므로, 같은 과목에 속한 모든 day의 카드를 day 오름차순으로 이어붙여
+  /// 하나의 긴 덱으로 만든다. (전기기사는 과목당 60~100장, 다른 종목도
+  /// 순차적으로 30장 안팎까지 보강 중)
+  Future<SlideDeck?> loadSubjectTheoryDeck(String subject) async {
+    final cacheKey = '${_currentTrack.id}|$subject';
+    if (_theorySubjectDecks.containsKey(cacheKey)) {
+      return _theorySubjectDecks[cacheKey];
+    }
+    final decks = await loadSlideDecks();
+    final matched = decks.where((d) => d.subject == subject).toList()
+      ..sort((a, b) => a.day.compareTo(b.day));
+    final cards = <SlideCard>[for (final d in matched) ...d.cards];
+    if (cards.isEmpty) return null;
+    final idx = kSubjects.indexOf(subject);
+    final merged = SlideDeck(
+      day: idx >= 0 ? idx + 1 : (subject.hashCode & 0x7fffffff),
+      subject: subject,
+      title: subject,
+      phase: '핵심이론서',
+      cards: cards,
+    );
+    _theorySubjectDecks[cacheKey] = merged;
+    return merged;
   }
 
   FormulaGuideData? _formulaGuide;
