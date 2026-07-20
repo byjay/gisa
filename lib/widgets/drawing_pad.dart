@@ -1,21 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../services/handwriting_service.dart';
 
 /// ✍️ 필기 패드 — 태블릿/패드 손글씨 계산·메모용 캔버스.
 ///
 /// - 스타일러스·손가락 자유 필기 (부드러운 곡선 보간)
 /// - 펜 색상 6종 · 굵기 3단계 · 지우개 · 되돌리기 · 전체 지우기
+/// - ✍️→가 손글씨 인식(Android·ML Kit 한국어) — 쓴 글씨를 텍스트로 변환
 /// - 퀴즈/CBT 화면 위에 [showDrawingPad]로 띄워 풀이 중 계산 가능
 class DrawingStroke {
   final List<Offset> points;
+
+  /// 인식 엔진용 타임스탬프(ms) — points와 1:1 대응
+  final List<int> times;
   final Color color;
   final double width;
   final bool eraser;
   DrawingStroke({
     required this.points,
+    List<int>? times,
     required this.color,
     required this.width,
     this.eraser = false,
-  });
+  }) : times = times ?? [];
 }
 
 class DrawingPad extends StatefulWidget {
@@ -44,9 +52,15 @@ class _DrawingPadState extends State<DrawingPad> {
   ];
   static const _widths = [1.8, 2.6, 4.6];
 
+  // ── 손글씨 인식 상태 ──
+  bool _recognizing = false;
+  List<String> _candidates = [];
+  String? _recogStatus;
+
   void _start(Offset p) {
     _current = DrawingStroke(
       points: [p],
+      times: [DateTime.now().millisecondsSinceEpoch],
       color: _color,
       width: _eraser ? 22 : _width,
       eraser: _eraser,
@@ -56,10 +70,52 @@ class _DrawingPadState extends State<DrawingPad> {
 
   void _move(Offset p) {
     if (_current == null) return;
-    setState(() => _current!.points.add(p));
+    setState(() {
+      _current!.points.add(p);
+      _current!.times.add(DateTime.now().millisecondsSinceEpoch);
+    });
   }
 
   void _end() => _current = null;
+
+  /// ✍️→가 손글씨 인식 — 지우개 획 제외, ML Kit 한국어 모델 사용
+  Future<void> _recognize() async {
+    final inkStrokes = <List<({double x, double y, int t})>>[
+      for (final s in _strokes)
+        if (!s.eraser && s.points.isNotEmpty)
+          [
+            for (var i = 0; i < s.points.length; i++)
+              (
+                x: s.points[i].dx,
+                y: s.points[i].dy,
+                t: i < s.times.length
+                    ? s.times[i]
+                    : DateTime.now().millisecondsSinceEpoch,
+              ),
+          ],
+    ];
+    setState(() {
+      _recognizing = true;
+      _recogStatus = null;
+      _candidates = [];
+    });
+    final result = await HandwritingService.instance.recognize(
+      inkStrokes,
+      onStatus: (msg) {
+        if (mounted) setState(() => _recogStatus = msg);
+      },
+    );
+    if (!mounted) return;
+    setState(() {
+      _recognizing = false;
+      if (result.ok) {
+        _candidates = result.candidates;
+        _recogStatus = null;
+      } else {
+        _recogStatus = result.error;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -159,11 +215,85 @@ class _DrawingPadState extends State<DrawingPad> {
                 icon: const Icon(Icons.delete_sweep_rounded, size: 20),
                 onPressed: _strokes.isEmpty
                     ? null
-                    : () => setState(_strokes.clear),
+                    : () => setState(() {
+                        _strokes.clear();
+                        _candidates = [];
+                        _recogStatus = null;
+                      }),
+              ),
+              // ✍️→가 손글씨 인식
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                tooltip: '손글씨 인식 (✍️→가)',
+                icon: _recognizing
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2.2),
+                      )
+                    : const Icon(Icons.translate_rounded, size: 20),
+                onPressed: _strokes.isEmpty || _recognizing
+                    ? null
+                    : _recognize,
               ),
             ],
           ),
         ),
+        // ── 인식 결과 바 ──
+        if (_candidates.isNotEmpty || _recogStatus != null)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            color: Theme.of(
+              context,
+            ).colorScheme.primaryContainer.withValues(alpha: 0.35),
+            child: _recogStatus != null
+                ? Text(
+                    _recogStatus!,
+                    style: const TextStyle(fontSize: 12, height: 1.35),
+                  )
+                : Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      const Text(
+                        '인식 결과:',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      for (final c in _candidates)
+                        ActionChip(
+                          visualDensity: VisualDensity.compact,
+                          labelPadding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                          ),
+                          label: Text(
+                            c,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          onPressed: () async {
+                            await Clipboard.setData(ClipboardData(text: c));
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('“$c” 복사됨'),
+                                  duration: const Duration(
+                                    milliseconds: 900,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                    ],
+                  ),
+          ),
         const Divider(height: 1),
         // ── 캔버스 ──
         Expanded(

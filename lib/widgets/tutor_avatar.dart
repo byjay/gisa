@@ -219,7 +219,10 @@ class _TutorAvatarState extends State<TutorAvatar> {
     // 볼트쌤이면 무드별 포즈 프레임, 아니면 고정 전신 이미지 + 무드 리액션
     final asset = profile.animatedPoses ? _voltAsset() : profile.asset;
     final headOnly = widget.headOnly;
-    final width = headOnly ? widget.size : widget.size * 0.56;
+    // 이미지 실측 비율: pose 프레임 132×292(0.452), teacher 1536×2752(0.558).
+    // 비율 + 기울기 여유분을 더해 어떤 상황에서도 잘리지 않게 한다.
+    final ratio = profile.animatedPoses ? 0.46 : 0.56;
+    final width = headOnly ? widget.size : widget.size * (ratio + 0.08);
     final badge = profile.animatedPoses ? '' : (moodBadge[widget.mood] ?? '');
     final tilt = profile.animatedPoses ? 0.0 : (_moodTilt[widget.mood] ?? 0.0);
 
@@ -234,10 +237,12 @@ class _TutorAvatarState extends State<TutorAvatar> {
         color: cs.primary,
       ),
     );
-    // 정적 강사는 무드에 따라 미세 기울기 — 살아있는 느낌
+    // 정적 강사는 무드에 따라 미세 기울기 — 살아있는 느낌.
+    // 하단 중심축 회전 + 축소로 회전해도 경계 밖으로 밀려나 잘리지 않게 한다.
     if (tilt != 0.0) {
       image = AnimatedRotation(
         turns: tilt / (2 * pi),
+        alignment: Alignment.bottomCenter,
         duration: const Duration(milliseconds: 400),
         child: image,
       );
@@ -269,8 +274,19 @@ class _TutorAvatarState extends State<TutorAvatar> {
       label: '${profile.name} 캐릭터',
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 320),
+        // 전환 중 old/new 프레임이 겹칠 때 어긋난 중복 조각이 보이지 않도록
+        // 하단 중앙 정렬 스택으로 고정한다.
+        layoutBuilder: (currentChild, previousChildren) => Stack(
+          alignment: Alignment.bottomCenter,
+          children: <Widget>[
+            ...previousChildren,
+            if (currentChild != null) currentChild,
+          ],
+        ),
         child: Container(
-          key: ValueKey('$asset-${widget.mood}'),
+          // 정적 강사는 이미지가 바뀌지 않으므로 asset만 key로 사용 —
+          // mood 변경 때 같은 이미지 2장이 겹쳐 보이던 중복 버그 제거.
+          key: ValueKey(asset),
           width: width,
           height: widget.size,
           padding: EdgeInsets.all(headOnly ? widget.size * 0.05 : 0),

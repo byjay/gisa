@@ -296,9 +296,17 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     _syncHistory();
     // 🔒 Q65: 실전모드 진행 중에는 AI 튜터를 통한 정답 유출 우회를 막기 위해
     // 전역 플래그를 세운다. 화면 종료 시(dispose) 반드시 해제한다.
+    // ⏱ 모의고사 시작 시 전역 학습 타이머도 자동 시작 — 시험 시간이
+    // 상단 TimerRunningBar에 표시되고 종료 시 학습시간으로 기록된다.
     if (widget.examMode) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) context.read<AppProvider>().setExamInProgress(true);
+        if (!mounted) return;
+        final app = context.read<AppProvider>();
+        app.setExamInProgress(true);
+        if (!app.timerRunning) {
+          _startedGlobalTimer = true;
+          app.startTimer(null);
+        }
       });
     }
     if (widget.examMode && widget.questions.isNotEmpty) {
@@ -318,13 +326,21 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     }
   }
 
+  /// 이 화면이 시작한 전역 타이머인지 — 사용자가 별도로 켜둔 타이머는 건드리지 않는다.
+  bool _startedGlobalTimer = false;
+
   @override
   void dispose() {
     _timer?.cancel();
     // 🔒 Q65: 실전모드 종료 시 AI 튜터 접근 제한 플래그 해제
     if (widget.examMode) {
       try {
-        context.read<AppProvider>().setExamInProgress(false);
+        final app = context.read<AppProvider>();
+        app.setExamInProgress(false);
+        // ⏱ 자동 시작했던 전역 타이머 정지 — 경과 시간은 학습 세션으로 저장된다.
+        if (_startedGlobalTimer && app.timerRunning) {
+          app.stopTimer();
+        }
       } catch (_) {
         // context가 이미 트리에서 분리된 경우 무시(다음 진입 시 재설정됨)
       }
