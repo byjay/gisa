@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../services/progress_service.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/tutor_avatar.dart';
+import '../../widgets/tutor_coach.dart';
+import '../../widgets/help_dot.dart';
 import '../../widgets/persistent_nav.dart';
 import 'quiz_play_screen.dart';
 
@@ -70,6 +71,18 @@ class _WrongFocusScreenState extends State<WrongFocusScreen> {
       appBar: AppBar(
         title: const Text('집중 오답노트'),
         actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: HelpDot(
+              size: 22,
+              title: '집중 오답노트 안내',
+              body: '틀린 문제를 모아서 "왜 틀렸는지"까지 분석해주는 복습 도구예요.\n\n'
+                  '📊 자주 틀리는 문제 랭킹 — 틀린 횟수가 많은 문제부터 순서대로 보여줘요.\n\n'
+                  '🔍 오답 원인별 집계 — 실수인지, 개념을 몰라서인지, 헷갈려서인지 원인을 분류해줘요.\n\n'
+                  '🎯 원인별 집중 풀기 — 같은 원인으로 틀린 문제들만 모아 다시 풀어볼 수 있어요.\n\n'
+                  '💡 같은 실수를 반복하지 않으려면 이 화면을 꾸준히 확인하는 게 최고예요!',
+            ),
+          ),
           IconButton(
             tooltip: '새로고침',
             icon: const Icon(Icons.refresh_rounded),
@@ -89,13 +102,12 @@ class _WrongFocusScreenState extends State<WrongFocusScreen> {
                   vertical: 14,
                 ),
                 children: [
-                  TutorBanner(
-                    mood: _frequent.isEmpty
-                        ? TutorMood.happy
-                        : TutorMood.teaching,
-                    message: _frequent.isEmpty
-                        ? '아직 오답이 없어요! 문제를 풀다 틀리면 여기에서 '
-                              '"왜 틀렸는지"까지 모아 집중 복습할 수 있어요. 🎯'
+                  DynamicTutorBanner(
+                    situation: _frequent.isEmpty
+                        ? CoachSituation.encourage
+                        : CoachSituation.quizWrongRepeat,
+                    overrideMessage: _frequent.isEmpty
+                        ? null
                         : '틀린 문제 ${_frequent.length}개(총 $totalWrong회 오답)를 모았어요. '
                               '${topReason != null ? '특히 「${topReason.key}」 실수가 가장 많아요. ' : ''}'
                               '같은 실수를 반복하지 않도록 원인부터 잡아봐요! 💪',

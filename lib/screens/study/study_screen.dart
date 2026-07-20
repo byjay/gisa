@@ -16,7 +16,6 @@ import 'search_screen.dart';
 import 'repeat_analysis_screen.dart';
 import 'circuit_screen.dart';
 import 'calculator_hub_screen.dart';
-import 'pass_report_screen.dart';
 import 'wrong_focus_screen.dart';
 import 'visual_repeat_screen.dart';
 import 'beginner_roadmap_screen.dart';
@@ -27,7 +26,8 @@ import 'study_guide_screen.dart';
 import 'tutor_chat_screen.dart';
 import 'auto_study_screen.dart';
 import 'speed_memorize_screen.dart';
-import '../../widgets/tutor_avatar.dart';
+import '../../widgets/tutor_coach.dart';
+import '../../widgets/help_dot.dart';
 import '../../widgets/persistent_nav.dart';
 
 /// 학습 허브: 탭 구조로 직관적 분류 — 기초학습 / 문제풀이 / 모의고사 / 이력
@@ -128,15 +128,33 @@ class _StudyScreenState extends State<StudyScreen>
     return ListView(
       padding: _pagePadding,
       children: [
-        TutorBanner(
-          mood: TutorMood.cheer,
-          message: '지금은 기초를 단단히 할 때예요. 이론을 짧게 보고 쉬운 문제로 바로 확인해 보세요.',
+        DynamicTutorBanner(
+          situation: CoachSituation.encourage,
           onTap: () =>
               pushWithNav(context, const SlidesHomeScreen(), currentSection: 1),
         ),
         const SizedBox(height: 12),
         _heroCards(context),
-        const SectionHeader(emoji: '✨', title: '핵심 기능'),
+        Row(
+          children: [
+            const Expanded(
+              child: SectionHeader(emoji: '✨', title: '핵심 기능'),
+            ),
+            const HelpDot(
+              title: '핵심 기능 안내',
+              body: '학습 홈의 모든 기능을 한눈에 보는 그리드예요.\n\n'
+                  '🐣 왕초보 로드맵 — 완전 처음이라면 여기서 시작! 단계별로 무엇을 공부할지 순서를 알려줘요.\n\n'
+                  '📚 30일 슬라이드 — 하루 한 덱씩 스와이프하면 30일에 이론이 끝나는 카드 학습이에요.\n\n'
+                  '📝 과목별 요약 — 과목별 핵심만 압축한 요약 덱. 시험 직전 총정리용!\n\n'
+                  '🧠 집중 오답노트 — 틀린 문제를 모아 "왜 틀렸는지"까지 분석해 같은 실수를 막아줘요.\n\n'
+                  '🔁 유형변형 분석 — 기출이 어떻게 변형돼 재출제되는지 패턴을 보여줘요.\n\n'
+                  '✍️ 실기 대비 — 필답형 문답 카드로 실기까지 한 번에.\n\n'
+                  '⚡ 회로도 마스터 — 도면 기호·규칙을 단계별로 익혀요.\n\n'
+                  '🧮 계산기 — 단위 환산·핵심 공식 계산을 바로 해볼 수 있어요.\n\n'
+                  '💡 모든 기능은 "가장 빠르고 쉽게 암기"를 돕도록 설계됐어요. 무엇부터 할지 모르면 왕초보 로드맵부터 누르세요!',
+            ),
+          ],
+        ),
         _featureGrid(context),
         const SizedBox(height: 8),
         _beginnerCard(context),
@@ -875,12 +893,6 @@ class _StudyScreenState extends State<StudyScreen>
         Icons.psychology_alt_rounded,
         const Color(0xFFDC2626),
         const WrongFocusScreen(),
-      ),
-      (
-        '합격 분석',
-        Icons.insights_rounded,
-        const Color(0xFF16A34A),
-        const PassReportScreen(),
       ),
       (
         '유형변형 분석',

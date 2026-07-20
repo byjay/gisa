@@ -542,6 +542,60 @@ class TutorMents {
   };
 }
 
+/// 🎓 동적 튜터 배너 — 정적 메시지 대신 상황(CoachSituation)별로
+/// 선택된 선생님의 행동패턴 뱅크/멘트 엔진에서 매번 다른 멘트를 고른다.
+/// [overrideMessage]가 있으면(데이터 기반 설명 등) 그 내용을 우선 표시.
+class DynamicTutorBanner extends StatefulWidget {
+  final CoachSituation situation;
+  final String? overrideMessage;
+  final double avatarSize;
+  final VoidCallback? onTap;
+
+  const DynamicTutorBanner({
+    super.key,
+    required this.situation,
+    this.overrideMessage,
+    this.avatarSize = 72,
+    this.onTap,
+  });
+
+  @override
+  State<DynamicTutorBanner> createState() => _DynamicTutorBannerState();
+}
+
+class _DynamicTutorBannerState extends State<DynamicTutorBanner> {
+  String? _message;
+  String? _messageTutorId;
+
+  @override
+  void didUpdateWidget(DynamicTutorBanner old) {
+    super.didUpdateWidget(old);
+    if (old.situation != widget.situation ||
+        old.overrideMessage != widget.overrideMessage) {
+      _message = null; // 상황이 바뀌면 새 멘트 선택
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tutorId = context.select<AppProvider, String>(
+      (app) => app.selectedTutorId,
+    );
+    if (_message == null || _messageTutorId != tutorId) {
+      _message = widget.overrideMessage ??
+          TutorBehaviorBank.pick(tutorId, widget.situation) ??
+          TutorMents.pick(widget.situation);
+      _messageTutorId = tutorId;
+    }
+    return TutorBanner(
+      mood: TutorMents.moodOf(widget.situation),
+      message: _message!,
+      avatarSize: widget.avatarSize,
+      onTap: widget.onTap,
+    );
+  }
+}
+
 /// 🎓 전신 볼트쌤 코치 카드 — 어떤 화면에든 배치하는 1:1 과외 위젯.
 /// 전신(잘림 없음) + 상황별 멘트 + 탭하면 볼트쌤 채팅으로 연결.
 class TutorCoach extends StatefulWidget {

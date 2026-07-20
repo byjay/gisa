@@ -303,6 +303,74 @@ class HomeScreen extends StatelessWidget {
                     // 종목 전환 (다른 시험 고르기)
                     _trackChip(context),
                     const SizedBox(width: 8),
+                    // ❓ 홈 화면 도움말
+                    _glassIconButton(
+                      context,
+                      icon: Icons.help_outline_rounded,
+                      semanticLabel: '홈 화면 도움말',
+                      onTap: () => showDialog<void>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          title: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(7),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(ctx).colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(
+                                  Icons.help_rounded,
+                                  size: 20,
+                                  color: Theme.of(ctx).colorScheme.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              const Expanded(
+                                child: Text(
+                                  '홈 화면 안내',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          content: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxHeight: MediaQuery.of(ctx).size.height * 0.6,
+                            ),
+                            child: const SingleChildScrollView(
+                              child: Text(
+                                '앱을 처음 켰을 때 보이는 메인 화면이에요.\n\n'
+                                '🎓 볼트쌤 코치 — 시간대와 학습 상태에 맞춰 매번 다른 격려 멘트를 건네줘요.\n\n'
+                                '🐣 왕초보 로드맵 — 완전 처음이라면 여기를 눌러 순서대로 따라가세요.\n\n'
+                                '🎯 과목 선택 허브 — 과목별로 이론·기출·암기에 바로 진입할 수 있어요.\n\n'
+                                '🔁 긴급 복습 / 플래시카드 — 잊기 전에 복습해야 할 내용을 자동으로 모아줘요.\n\n'
+                                '🪄 오늘의 마법 미션 — 매일 완료하면 보상을 받는 작은 목표예요.\n\n'
+                                '🏆 위클리 리그 — 다른 학습자와 함께 경쟁하며 동기부여를 얻어요.\n\n'
+                                '🎯 합격 예측 — 지금까지의 학습 데이터로 합격 가능성을 보여줘요.\n\n'
+                                '⚡ 문제은행 — 과목별 문제은행으로 바로 이동해요.\n\n'
+                                '🚀 빠른 실행 — 타이머 시작, 모의고사 등 자주 쓰는 기능에 원터치로 접근해요.\n\n'
+                                '💡 오른쪽 위 아이콘들로 테마 색상, 다크모드, 설정에도 바로 접근할 수 있어요!',
+                                style: TextStyle(fontSize: 13.5, height: 1.65),
+                              ),
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: const Text('알겠어요!'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     // 테마 팔레트 선택
                     _glassIconButton(
                       context,

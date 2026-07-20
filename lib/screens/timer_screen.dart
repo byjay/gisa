@@ -4,6 +4,7 @@ import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/level_up_dialog.dart';
 import '../widgets/tutor_coach.dart';
+import '../widgets/help_dot.dart';
 
 class TimerScreen extends StatefulWidget {
   const TimerScreen({super.key});
@@ -29,7 +30,23 @@ class _TimerScreenState extends State<TimerScreen> {
     final running = app.timerRunning;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('학습 타이머')),
+      appBar: AppBar(
+        title: const Text('학습 타이머'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: HelpDot(
+              size: 22,
+              title: '학습 타이머 안내',
+              body: '집중해서 공부한 시간을 재는 기능이에요.\n\n'
+                  '▶️ 학습 시작 — 버튼을 누르면 시간이 흐르기 시작하고, 상단 타이머바에도 경과시간이 표시되어 어느 화면을 보더라도 확인할 수 있어요.\n\n'
+                  '⏹️ 종료 — 종료 버튼을 누르면 경과시간이 학습이력에 자동 저장되고, 오늘의 기록과 주간 통계에 반영돼요.\n\n'
+                  '📈 모의고사(실전모드)를 시작하면 이 타이머가 자동으로 함께 시작돼요 — 따로 누르지 않아도 돼요!\n\n'
+                  '🔥 매일 꾸준히 사용하면 학습 스트릭과 마법 방패 보상도 받을 수 있어요.',
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),

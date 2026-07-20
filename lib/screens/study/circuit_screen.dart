@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/study_data.dart';
-import '../../widgets/tutor_avatar.dart';
+import '../../widgets/tutor_coach.dart';
+import '../../widgets/help_dot.dart';
 
 /// 회로도 마스터 — 모터 제어반 도면 [보기]와 [작성하기] 서브메뉴
 /// 첨부 실무 자료(IEC 60617) 기반. 시험(실기)·실무 도면 해독 모두 대비.
@@ -38,6 +39,19 @@ class _CircuitScreenState extends State<CircuitScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('회로도 마스터'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: HelpDot(
+              size: 22,
+              title: '회로도 마스터 안내',
+              body: '모터 제어반 도면 기호와 규칙을 단계별로 익히는 기능이에요.\n\n'
+                  '👀 보기 탭 — IEC 60617 표준 기호로 그려진 실제 도면을 보면서 각 심볼(퓨즈, 모터, 접지 등)이 무엇을 뜻하는지 확인해요.\n\n'
+                  '✍️ 작성하기 탭 — 체크리스트를 따라가며 도면을 직접 그려보는 연습을 해요. 실기 시험에서 도면을 처음부터 그려야 할 때 큰 도움이 돼요.\n\n'
+                  '💡 기호를 눈으로만 외우지 말고, 실제로 손으로 그려보면 훨씬 오래 기억에 남아요!',
+            ),
+          ),
+        ],
         bottom: TabBar(
           controller: _tab,
           tabs: const [
@@ -71,11 +85,9 @@ class _CircuitScreenState extends State<CircuitScreen>
     return ListView(
       padding: _pad,
       children: [
-        TutorBanner(
-          mood: TutorMood.teaching,
-          message: g.overview.isNotEmpty
-              ? g.overview
-              : '문자기호·계통번호·전선번호 규칙만 알면 처음 보는 도면도 바로 읽을 수 있어요!',
+        DynamicTutorBanner(
+          situation: CoachSituation.theory,
+          overrideMessage: g.overview.isNotEmpty ? g.overview : null,
         ),
         const SizedBox(height: 14),
         _sectionTitle(context, '① 기호 범례 (IEC 60617)', Icons.category_rounded),
@@ -338,9 +350,8 @@ class _CircuitScreenState extends State<CircuitScreen>
     return ListView(
       padding: _pad,
       children: [
-        TutorBanner(
-          mood: TutorMood.cheer,
-          message: '아래 STEP을 순서대로 따라 그리면 완성! 그릴 때마다 체크리스트를 눌러 진행률을 확인하세요. ✏️',
+        const DynamicTutorBanner(
+          situation: CoachSituation.encourage,
         ),
         const SizedBox(height: 14),
         // 진행률

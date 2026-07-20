@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../services/study_data.dart';
 import '../../widgets/tutor_avatar.dart';
+import '../../widgets/tutor_coach.dart';
+import '../../widgets/help_dot.dart';
 import '../../widgets/persistent_nav.dart';
 import 'quiz_play_screen.dart';
 
@@ -68,7 +70,23 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
     final totalAppear = items.fold<int>(0, (s, r) => s + r.count);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('빈출 유형변형 분석')),
+      appBar: AppBar(
+        title: const Text('빈출 유형변형 분석'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: HelpDot(
+              size: 22,
+              title: '빈출 유형변형 분석 안내',
+              body: '기출문제가 어떻게 변형되어 재출제되는지 패턴을 분석해주는 화면이에요.\n\n'
+                  '🔁 출제횟수순 정렬 — 가장 자주 나온 유형부터 순서대로 보여줘요.\n\n'
+                  '🎨 변형 포인트 — 숫자나 조건이 어떻게 바뀌어 다시 나오는지 실제 예시로 비교해줘요.\n\n'
+                  '🏷️ 초빈출/빈출/반복 태그 — 출제 빈도에 따라 색깔로 위험도를 표시해요.\n\n'
+                  '💡 초빈출 유형만 확실히 잡아도 합격 점수에 크게 가까워질 수 있어요!',
+            ),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(
@@ -80,11 +98,8 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
                 vertical: 12,
               ),
               children: [
-                TutorBanner(
-                  mood: TutorMood.thinking,
-                  message:
-                      'CBT의 절반은 기출 재출제·변형이에요! 몇 번 나왔는지, 숫자·조건이 어떻게 바뀌는지 '
-                      '패턴을 알면 변형이 나와도 안 틀립니다.',
+                const DynamicTutorBanner(
+                  situation: CoachSituation.quizHardQuestion,
                 ),
                 const SizedBox(height: 10),
                 // 요약 통계

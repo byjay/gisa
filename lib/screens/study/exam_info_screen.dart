@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../services/study_data.dart';
 import '../../widgets/tutor_avatar.dart';
+import '../../widgets/tutor_coach.dart';
+import '../../widgets/help_dot.dart';
 
 /// 2026 시험 정보 센터: 일정·D-Day, 출제기준 개정, 합격률 통계,
 /// 과목별 전략, 점수 시나리오, CBT 실전 팁
@@ -62,6 +64,22 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('2026 시험 정보 센터'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: HelpDot(
+              size: 22,
+              title: '시험 정보 센터 안내',
+              body: '자격증 시험에 필요한 모든 공식 정보를 모아둔 곳이에요.\n\n'
+                  '📅 시험일정 — 접수 기간, 필기/실기 날짜, D-Day를 한눈에 확인해요.\n\n'
+                  '📘 출제기준 개정 — 올해 바뀐 출제 범위와 항목을 정리했어요. 놓치면 손해!\n\n'
+                  '🔌 KEC 2026 개정 — 전기설비규정 최신 개정 내용을 반영했어요.\n\n'
+                  '🎯 과목별 전략 — 과목마다 어떤 부분에 시간을 더 투자해야 하는지 알려줘요.\n\n'
+                  '💻 CBT 실전 — 컴퓨터 시험(CBT) 화면 조작법과 실전 팁을 미리 익혀요.\n\n'
+                  '💡 시험 직전에 꼭 한 번씩 훑어보면 실수를 줄일 수 있어요!',
+            ),
+          ),
+        ],
         bottom: ready
             ? TabBar(
                 controller: _tab,
@@ -961,9 +979,9 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        TutorBanner(
-          mood: TutorMood.teaching,
-          message:
+        DynamicTutorBanner(
+          situation: CoachSituation.theory,
+          overrideMessage:
               '${StudyData.instance.track.name}은(는) 절대평가! 100점이 아니라 "평균 60 + 과목당 40 이상"을 설계하는 시험이에요.',
         ),
         if (scenarios.isNotEmpty) ...[
@@ -1242,9 +1260,8 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const TutorBanner(
-          mood: TutorMood.thinking,
-          message: 'CBT는 문제은행에서 사람마다 다른 문제가 나와요. "기출 암기"가 아니라 "유형 대비"가 정답!',
+        const DynamicTutorBanner(
+          situation: CoachSituation.quizHardQuestion,
         ),
         const SizedBox(height: 12),
         ...tips.asMap().entries.map(

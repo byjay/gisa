@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 import '../../providers/app_provider.dart';
 import '../../services/formula_calculators.dart';
 import '../../widgets/persistent_nav.dart';
-import '../../widgets/tutor_avatar.dart';
+import '../../widgets/tutor_coach.dart';
+import '../../widgets/help_dot.dart';
 import 'unit_converter_screen.dart';
 import 'formula_calc_screen.dart';
 
@@ -59,7 +60,23 @@ class CalculatorHubScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('계산기')),
+      appBar: AppBar(
+        title: const Text('계산기'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: HelpDot(
+              size: 22,
+              title: '계산기 안내',
+              body: '시험에 자주 나오는 계산 문제를 값만 넣으면 바로 풀어주는 기능이에요.\n\n'
+                  '🔄 단위 환산 — 전류·전압·저항·온도·면적·압력 등 13종 단위를 서로 변환해요.\n\n'
+                  '⚡ 전기 공식 계산기 — 옴의 법칙, 3상 전력, 역률개선, 전압강하, 단락전류, 조명설계 등 전기기사 필기·실기 핵심 공식을 자동 계산해요.\n\n'
+                  '🔥 소방 공식 계산기 — 축전지 용량, 감지기 개수, 경계구역, 전선관 규격 등 소방설비기사(전기) 실기에 필요한 계산을 도와줘요.\n\n'
+                  '💡 값을 입력하면 계산 과정과 정답이 함께 나와서, 공식을 외우면서 원리도 같이 이해할 수 있어요!',
+            ),
+          ),
+        ],
+      ),
       body: ListView(
         padding: EdgeInsets.symmetric(
           horizontal: MediaQuery.of(context).size.width > 800
@@ -68,11 +85,8 @@ class CalculatorHubScreen extends StatelessWidget {
           vertical: 14,
         ),
         children: [
-          const TutorBanner(
-            mood: TutorMood.teaching,
-            message:
-                '시험장에서 자주 쓰는 단위 환산과 핵심 공식을 바로 계산해요. '
-                '값만 넣으면 결과가 즉시 나옵니다! 🧮',
+          const DynamicTutorBanner(
+            situation: CoachSituation.formula,
           ),
           const SizedBox(height: 16),
           ...entries.map((e) => _card(context, cs, e)),

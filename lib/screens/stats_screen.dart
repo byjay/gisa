@@ -8,6 +8,7 @@ import '../widgets/study_heatmap.dart';
 import '../widgets/weekly_league_card.dart';
 import '../widgets/weekly_report_card.dart';
 import '../widgets/tutor_coach.dart';
+import '../widgets/help_dot.dart';
 
 class StatsScreen extends StatelessWidget {
   const StatsScreen({super.key});
@@ -21,7 +22,24 @@ class StatsScreen extends StatelessWidget {
     final now = DateTime.now();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('통계 & 목표')),
+      appBar: AppBar(
+        title: const Text('통계 & 목표'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: HelpDot(
+              size: 22,
+              title: '통계 & 목표 안내',
+              body: '나의 학습 패턴을 데이터로 보여주는 화면이에요.\n\n'
+                  '📊 주간 학습량 그래프 — 지난 7일간 매일 얼마나 공부했는지 한눈에 볼 수 있어요.\n\n'
+                  '🔥 학습 스트릭 — 연속으로 공부한 날짜 수를 보여줘요. 연속될수록 마법 방패 같은 보상도 받을 수 있어요.\n\n'
+                  '🏆 배지 컬렉션 — 여러 연속목표를 달성하면 특별한 배지로 보상을 받을 수 있어요.\n\n'
+                  '📅 학습 히트맵 — 달력처럼 날짜별 학습량을 색상으로 보여줘요.\n\n'
+                  '💡 매일 조금씩이라도 꾸준히 하면 합격이 훨씬 가까워져요!',
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),

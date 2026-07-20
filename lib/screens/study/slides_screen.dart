@@ -4,8 +4,10 @@ import '../../services/study_data.dart';
 import '../../services/link_launcher.dart';
 import '../../services/slide_progress.dart';
 import '../../widgets/tutor_avatar.dart';
+import '../../widgets/tutor_coach.dart';
 import '../../widgets/rich_slide_body.dart';
 import '../../widgets/teacher_recipe_box.dart';
+import '../../widgets/help_dot.dart';
 import 'quiz_play_screen.dart';
 import '../../widgets/persistent_nav.dart';
 
@@ -149,7 +151,23 @@ class _SlidesHomeScreenState extends State<SlidesHomeScreen> {
     final decks = _decks;
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('30일 슬라이드 이론')),
+      appBar: AppBar(
+        title: const Text('30일 슬라이드 이론'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: HelpDot(
+              size: 22,
+              title: '30일 슬라이드 이론 안내',
+              body: '하루 한 덱씩 스와이프하면 30일 만에 이론을 다 끝낼 수 있는 카드 학습이에요.\n\n'
+                  '📅 덱 순서 — 학습 계획(플랜)에 맞춰 순서대로 덱을 진행하면 가장 효율적이에요.\n\n'
+                  '🌙 왕초보 모드 — 덱 안 슬라이드마다 핵심만 뽑아 쉬운 말로 풀어줘요.\n\n'
+                  '💬 볼트쌤 코치 — 각 덱을 열 때마다 그 덱의 핵심 요점을 먼저 짚어줘요.\n\n'
+                  '💡 완료한 덱은 체크 표시되어 어디까지 진행했는지 한눈에 볼 수 있어요!',
+            ),
+          ),
+        ],
+      ),
       body: decks == null
           ? const Center(child: CircularProgressIndicator())
           : ListView(
@@ -160,11 +178,11 @@ class _SlidesHomeScreenState extends State<SlidesHomeScreen> {
                 vertical: 16,
               ),
               children: [
-                TutorBanner(
-                  mood: TutorMood.teaching,
-                  message: _plan?.description.isNotEmpty == true
+                DynamicTutorBanner(
+                  situation: CoachSituation.theory,
+                  overrideMessage: _plan?.description.isNotEmpty == true
                       ? _plan!.description
-                      : '하루 한 덱! 개념→핵심→공식→암기법→함정 순서로 스와이프하면 30일 만에 이론이 끝나요.',
+                      : null,
                 ),
                 const SizedBox(height: 8),
                 if (_plan != null && _plan!.strategy.isNotEmpty)
@@ -381,7 +399,22 @@ class _SubjectSummaryHomeScreenState extends State<SubjectSummaryHomeScreen> {
   Widget build(BuildContext context) {
     final decks = _decks;
     return Scaffold(
-      appBar: AppBar(title: const Text('과목별 핵심요약')),
+      appBar: AppBar(
+        title: const Text('과목별 핵심요약'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: HelpDot(
+              size: 22,
+              title: '과목별 핵심요약 안내',
+              body: '시험 직전 총정리용으로, 과목별 핵심만 압축한 요약 카드예요.\n\n'
+                  '📚 과목 목록 — 각 과목의 핵심 개념·공식·주의사항만 뽑아 짧게 정리했어요.\n\n'
+                  '⏱️ 짧은 시간 안에 훑어보기 좋아서 시험 며칠 전이나 시험 당일 아침에 보면 효과적이에요.\n\n'
+                  '💡 이미 이론을 한 번 배운 뒤 복습용으로 사용하면 가장 효과가 좋아요!',
+            ),
+          ),
+        ],
+      ),
       body: decks == null
           ? const Center(child: CircularProgressIndicator())
           : decks.isEmpty
@@ -403,10 +436,8 @@ class _SubjectSummaryHomeScreenState extends State<SubjectSummaryHomeScreen> {
                 vertical: 16,
               ),
               children: [
-                const TutorBanner(
-                  mood: TutorMood.teaching,
-                  message:
-                      '시험 직전 총정리에 딱! 과목별로 실기출 빈도순 핵심만 30장으로 압축했어요. 필수공식·함정 카드를 반복하면 점수가 확 오릅니다.',
+                const DynamicTutorBanner(
+                  situation: CoachSituation.dDayNear,
                 ),
                 const SizedBox(height: 8),
                 _overall(decks),

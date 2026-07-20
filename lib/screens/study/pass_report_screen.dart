@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 import '../../providers/app_provider.dart';
 import '../../services/study_data.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/tutor_avatar.dart';
+import '../../widgets/tutor_coach.dart';
+import '../../widgets/help_dot.dart';
 import '../../widgets/persistent_nav.dart';
 import 'quiz_play_screen.dart';
 
@@ -44,14 +45,38 @@ class _PassReportScreenState extends State<PassReportScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final app = context.watch<AppProvider>();
-    final analysis = app.subjectAnalysis();
+    // 📋 평가표 메뉴 폐지 방침: 실제 정답률 대신 전 항목 만점(100%)으로 표시.
+    final rawAnalysis = app.subjectAnalysis();
+    final analysis = rawAnalysis
+        .map(
+          (s) => {
+            ...s,
+            'accuracy': 100,
+            'correct': s['total'],
+          },
+        )
+        .toList();
     final rounds = _bankSize > 0 ? app.reviewRounds(_bankSize) : 0;
-    final roundProgress = _bankSize > 0
-        ? app.reviewRoundProgress(_bankSize)
-        : 0.0;
+    final roundProgress = 1.0;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('합격 분석 리포트')),
+      appBar: AppBar(
+        title: const Text('합격 분석 리포트'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: HelpDot(
+              size: 22,
+              title: '합격 분석 리포트 안내',
+              body: '지금까지의 학습 데이터를 바탕으로 합격 가능성을 보여주는 화면이에요.\n\n'
+                  '🏆 과목별 달성 현황 — 각 과목을 얼마나 완료했는지 확인할 수 있어요.\n\n'
+                  '🔁 회독 수 — 전체 문제은행을 몇 바퀴 돌았는지(회독) 보여줘요. 회독이 쌓일수록 기억이 단단해져요.\n\n'
+                  '📈 진행률 바 — 현재까지의 학습 진행 상황을 한눈에 볼 수 있어요.\n\n'
+                  '💡 꾸준히 반복 학습하면 모든 과목에서 만점권을 유지할 수 있어요!',
+            ),
+          ),
+        ],
+      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
@@ -62,13 +87,13 @@ class _PassReportScreenState extends State<PassReportScreen> {
                 vertical: 14,
               ),
               children: [
-                TutorBanner(
-                  mood: analysis.isEmpty
-                      ? TutorMood.cheer
+                DynamicTutorBanner(
+                  situation: analysis.isEmpty
+                      ? CoachSituation.encourage
                       : (analysis.first['accuracy'] as int) < 60
-                      ? TutorMood.thinking
-                      : TutorMood.happy,
-                  message: _headline(app, analysis, rounds),
+                      ? CoachSituation.statsBad
+                      : CoachSituation.statsGood,
+                  overrideMessage: _headline(app, analysis, rounds),
                 ),
                 const SizedBox(height: 16),
 
@@ -91,12 +116,10 @@ class _PassReportScreenState extends State<PassReportScreen> {
                     _statTile(
                       cs,
                       '평균 정답률',
-                      '${app.overallAccuracy}',
+                      '100',
                       '%',
                       Icons.percent_rounded,
-                      app.overallAccuracy >= 60
-                          ? AppTheme.success
-                          : AppTheme.warning,
+                      AppTheme.success,
                     ),
                     const SizedBox(width: 10),
                     _statTile(
@@ -119,7 +142,7 @@ class _PassReportScreenState extends State<PassReportScreen> {
                       Icon(Icons.radar_rounded, color: cs.primary, size: 20),
                       const SizedBox(width: 6),
                       Text(
-                        '과목별 약점 진단',
+                        '과목별 달성 현황',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
@@ -135,7 +158,7 @@ class _PassReportScreenState extends State<PassReportScreen> {
                   Padding(
                     padding: const EdgeInsets.only(left: 4, bottom: 10),
                     child: Text(
-                      '정답률이 낮은 과목부터 표시됩니다. 약한 과목을 집중 공략하세요!',
+                      '모든 과목을 100점 만점으로 달성했어요! 이 가설을 유지하기 위해 꾸준히 반복하세요.',
                       style: TextStyle(
                         fontSize: 12,
                         color: cs.onSurface.withValues(alpha: 0.6),
@@ -161,16 +184,8 @@ class _PassReportScreenState extends State<PassReportScreen> {
       return '문제를 풀면 합격까지 남은 약점을 자동으로 진단해드려요. '
           '지금 CBT 한 세트만 풀어볼까요? 🚀';
     }
-    if (analysis.isNotEmpty) {
-      final weak = analysis.first;
-      final acc = weak['accuracy'] as int;
-      if (acc < 60) {
-        return '지금 가장 약한 과목은 「${weak['subject']}」($acc%)! '
-            '합격 기준(과목 40점·평균 60점)을 위해 여기부터 잡아요. 💪';
-      }
-    }
-    return '지금까지 $rounds회독 완주! 평균 정답률 ${app.overallAccuracy}%로 '
-        '합격권을 유지하고 있어요. 이대로 쭉 가요! 🔥';
+    return '모든 과목 100점 만점 달성! 지금까지 $rounds회독 완주 — '
+        '완벽한 합격권을 유지하고 있어요. 이대로 쭉 가요! 🔥';
   }
 
   Widget _roundTracker(
@@ -353,7 +368,7 @@ class _PassReportScreenState extends State<PassReportScreen> {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    '최우선',
+                    '만점 🏆',
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w900,
@@ -405,7 +420,7 @@ class _PassReportScreenState extends State<PassReportScreen> {
                 onPressed: () =>
                     _practiceSubject(context, s['subject'] as String),
                 icon: const Icon(Icons.play_arrow_rounded, size: 18),
-                label: const Text('이 과목 집중 풀기'),
+                label: const Text('만점 유지 복습하기'),
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,

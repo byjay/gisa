@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/study_data.dart';
-import '../../widgets/tutor_avatar.dart';
+import '../../widgets/tutor_coach.dart';
+import '../../widgets/help_dot.dart';
 
 /// 공식 마스터 화면 — 읽는법·기호뜻·비유이해·암기법·기출예제 + 초보자 기초사전
 class FormulaGuideScreen extends StatefulWidget {
@@ -48,6 +49,19 @@ class _FormulaGuideScreenState extends State<FormulaGuideScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('공식 마스터'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: HelpDot(
+              size: 22,
+              title: '공식 마스터 안내',
+              body: '시험에 나오는 공식을 이해하고 암기하는 화면이에요.\n\n'
+                  '🧮 공식 이해·암기 탭 — 각 공식이 어떤 상황에 쓰이는지 원리와 함께 설명하고, 외우기 쉬운 암기법도 함께 보여줘요.\n\n'
+                  '🌱 왕초보 기초사전 탭 — 공식에 쓰이는 기본 용어와 개념부터 차근차근 설명해줘요. 완전 처음이라면 여기부터!\n\n'
+                  '💡 공식만 외우지 말고 "왜 이 식이 나오는지" 원리를 이해하면 응용문제도 쉽게 풀 수 있어요!',
+            ),
+          ),
+        ],
         bottom: TabBar(
           controller: _tab,
           tabs: const [
@@ -79,11 +93,9 @@ class _FormulaGuideScreenState extends State<FormulaGuideScreen>
         vertical: 12,
       ),
       children: [
-        TutorBanner(
-          mood: TutorMood.teaching,
-          message: data.intro.isNotEmpty
-              ? data.intro
-              : '공식은 이해하면 자동으로 외워져요! 읽는법, 기호뜻, 비유, 암기법, 예제 순서로 정복하세요.',
+        DynamicTutorBanner(
+          situation: CoachSituation.formula,
+          overrideMessage: data.intro.isNotEmpty ? data.intro : null,
         ),
         const SizedBox(height: 10),
         SizedBox(
@@ -312,9 +324,9 @@ class _FormulaGuideScreenState extends State<FormulaGuideScreen>
         vertical: 12,
       ),
       children: [
-        TutorBanner(
-          mood: TutorMood.happy,
-          message:
+        DynamicTutorBanner(
+          situation: CoachSituation.formula,
+          overrideMessage:
               '전기가 처음이라면 여기부터! 단위·기호·핵심개념 ${merged.length}개를 한 곳에 모았어요. V·A·Ω부터 ε·ω·θ 읽는 법까지 — 기초가 잡히면 공식이 무섭지 않아요.',
         ),
         const SizedBox(height: 10),

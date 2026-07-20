@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../services/study_data.dart';
 import '../../services/tutor_speech_service.dart';
-import '../../widgets/tutor_avatar.dart';
+import '../../widgets/tutor_coach.dart';
+import '../../widgets/help_dot.dart';
 import 'lesson_screen.dart';
 import '../../widgets/persistent_nav.dart';
 
@@ -55,7 +56,22 @@ class _SilgiScreenState extends State<SilgiScreen> {
         : data.items.where((i) => i.category == _category).toList();
 
     return Scaffold(
-      appBar: AppBar(title: Text(data.title.isNotEmpty ? data.title : '실기 대비')),
+      appBar: AppBar(
+        title: Text(data.title.isNotEmpty ? data.title : '실기 대비'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: HelpDot(
+              size: 22,
+              title: '실기 대비 안내',
+              body: '실기(필답형) 시험을 위한 핵심 문답 암기 스타일이에요.\n\n'
+                  '📚 상단 카테고리 탭 — 수변전설비, 보호계전, 전선로, 시퀀스·PLC 등 주제별로 이어져 필요한 질답만 바로 모아볼 수 있어요.\n\n'
+                  '🎯 각 질문을 탭하면 정답과 해설이 함께 열려요. 눈으로만 보지 말고 손으로 직접 써보면 암기가 훨씬 오래가요!\n\n'
+                  '💡 자주 틀리는 문답은 오답노트에 자동으로 쌓여서 반복 복습할 수 있어요.',
+            ),
+          ),
+        ],
+      ),
       body: ListView(
         padding: EdgeInsets.symmetric(
           horizontal: MediaQuery.of(context).size.width > 900
@@ -64,11 +80,9 @@ class _SilgiScreenState extends State<SilgiScreen> {
           vertical: 16,
         ),
         children: [
-          TutorBanner(
-            mood: TutorMood.teaching,
-            message: data.overview.isNotEmpty
-                ? data.overview
-                : '필답형 16~18문항 150분, 60점 합격 (과락 없음). 단답형이 70~85%라서 문답 암기가 답입니다!',
+          DynamicTutorBanner(
+            situation: CoachSituation.theory,
+            overrideMessage: data.overview.isNotEmpty ? data.overview : null,
           ),
           const SizedBox(height: 8),
           if (data.strategy.isNotEmpty)
