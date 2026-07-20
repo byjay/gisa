@@ -23,28 +23,21 @@ const Map<TutorMood, List<int>> voltMoodPoses = {
 String voltPoseAsset(int pose) =>
     'assets/tutor/pose_${pose.toString().padLeft(2, '0')}.png';
 
-/// 정적 강사(소연·하린·지윤)의 무드별 시각 반응 — 배지 이모지.
-/// 포즈 이미지가 없는 강사도 상황마다 다른 리액션이 보이게 한다.
-const Map<TutorMood, String> moodBadge = {
-  TutorMood.idle: '',
-  TutorMood.happy: '🎉',
-  TutorMood.thinking: '🤔',
-  TutorMood.wrong: '💦',
-  TutorMood.teaching: '📖',
-  TutorMood.meditate: '🧘',
-  TutorMood.cheer: '📣',
+/// 소연·하린·지윤 3D 강사 전용 — 무드별 포즈 프레임 매핑 (pose_01 ~ pose_50)
+/// 시트 구성: 1-10 idle, 11-20 happy, 21-30 thinking, 31-40 teaching,
+/// 41-44 wrong, 45-48 cheer, 49-50 meditate.
+const Map<TutorMood, List<int>> teacherMoodPoses = {
+  TutorMood.idle: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  TutorMood.happy: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+  TutorMood.thinking: [21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+  TutorMood.teaching: [31, 32, 33, 34, 35, 36, 37, 38, 39, 40],
+  TutorMood.wrong: [41, 42, 43, 44],
+  TutorMood.cheer: [45, 46, 47, 48, 16, 20],
+  TutorMood.meditate: [49, 50],
 };
 
-/// 정적 강사의 무드별 기울기(라디안) — 살아있는 느낌의 미세 모션.
-const Map<TutorMood, double> _moodTilt = {
-  TutorMood.idle: 0.0,
-  TutorMood.happy: 0.05,
-  TutorMood.thinking: -0.06,
-  TutorMood.wrong: -0.04,
-  TutorMood.teaching: 0.03,
-  TutorMood.meditate: 0.0,
-  TutorMood.cheer: 0.06,
-};
+String teacherPoseAsset(String tutorId, int pose) =>
+    'assets/tutor/${tutorId}_pose_${pose.toString().padLeft(2, '0')}.png';
 
 class TutorProfile {
   final String id;
@@ -62,7 +55,7 @@ class TutorProfile {
   /// 대표 이모지
   final String emoji;
 
-  /// true면 포즈 애니메이션 캐릭터(볼트쌤) — pose_01~38 프레임 사용
+  /// true면 포즈 애니메이션 캐릭터 — 볼트쌤 pose_01~38 / 강사 {id}_pose_01~50 프레임 사용
   final bool animatedPoses;
 
   const TutorProfile({
@@ -92,29 +85,32 @@ const tutorProfiles = <TutorProfile>[
   TutorProfile(
     id: 'soyeon',
     name: '소연 선생님',
-    role: '개념과 공식을 차분하게 연결하는 이론 강사',
-    asset: 'assets/tutor/teacher_soyeon.png',
+    role: '개념과 공식을 차분하게 연결하는 이론 강사 (50가지 3D 포즈)',
+    asset: 'assets/tutor/soyeon_pose_01.png',
     color: Color(0xFF2E7DFF), // 차분한 블루
     styleTag: '차분한 이론파',
     emoji: '📘',
+    animatedPoses: true,
   ),
   TutorProfile(
     id: 'harin',
     name: '하린 선생님',
-    role: '문제·정답을 빠르게 각인시키는 암기 코치',
-    asset: 'assets/tutor/teacher_harin.png',
+    role: '문제·정답을 빠르게 각인시키는 암기 코치 (50가지 3D 포즈)',
+    asset: 'assets/tutor/harin_pose_01.png',
     color: Color(0xFFFF6B35), // 스피드 오렌지
     styleTag: '속전속결 암기코치',
     emoji: '🔥',
+    animatedPoses: true,
   ),
   TutorProfile(
     id: 'jiyoon',
     name: '지윤 선생님',
-    role: '심화 이론과 실기 적용을 짚어주는 전문 강사',
-    asset: 'assets/tutor/teacher_jiyoon.png',
+    role: '심화 이론과 실기 적용을 짚어주는 전문 강사 (50가지 3D 포즈)',
+    asset: 'assets/tutor/jiyoon_pose_01.png',
     color: Color(0xFF7C4DFF), // 전문가 퍼플
     styleTag: '실전 심화 전문가',
     emoji: '🎯',
+    animatedPoses: true,
   ),
 ];
 
@@ -124,8 +120,8 @@ TutorProfile tutorProfileById(String id) => tutorProfiles.firstWhere(
 );
 
 /// 사용자가 고른 강사 이미지를 원본 비율로 표시한다.
-/// 볼트쌤은 무드별 38개 포즈를 순환하는 살아있는 애니메이션으로,
-/// 정적 강사(소연·하린·지윤)는 전신 이미지 그대로 표시한다.
+/// 볼트쌤은 무드별 38개 포즈, 소연·하린·지윤은 무드별 50개 3D 포즈를
+/// 순환하는 살아있는 애니메이션으로 표시한다.
 class TutorAvatar extends StatefulWidget {
   final TutorMood mood;
   final double size;
@@ -159,8 +155,13 @@ class _TutorAvatarState extends State<TutorAvatar> {
   int _frameIdx = 0;
   final _rand = Random();
 
-  List<int> get _frames =>
-      voltMoodPoses[widget.mood] ?? voltMoodPoses[TutorMood.idle]!;
+  /// build에서 갱신되는 현재 강사 id — 프레임 목록 계산에 사용.
+  String _profileId = 'volt';
+
+  List<int> get _frames {
+    final map = _profileId == 'volt' ? voltMoodPoses : teacherMoodPoses;
+    return map[widget.mood] ?? map[TutorMood.idle]!;
+  }
 
   @override
   void initState() {
@@ -200,12 +201,17 @@ class _TutorAvatarState extends State<TutorAvatar> {
     super.dispose();
   }
 
-  String _voltAsset() {
+  String _poseAssetFor(TutorProfile profile) {
+    final isVolt = profile.id == 'volt';
+    final maxPose = isVolt ? 38 : 50;
+    final int pose;
     if (widget.poseOverride != null) {
-      return voltPoseAsset(widget.poseOverride!.clamp(1, 38));
+      pose = widget.poseOverride!.clamp(1, maxPose);
+    } else {
+      final frames = _frames;
+      pose = frames[_frameIdx % frames.length];
     }
-    final pose = _frames[_frameIdx % _frames.length];
-    return voltPoseAsset(pose);
+    return isVolt ? voltPoseAsset(pose) : teacherPoseAsset(profile.id, pose);
   }
 
   @override
@@ -214,19 +220,20 @@ class _TutorAvatarState extends State<TutorAvatar> {
         ? context.select<AppProvider, String>((app) => app.selectedTutorId)
         : widget.characterId;
     final profile = tutorProfileById(selectedId);
+    _profileId = profile.id;
     final cs = Theme.of(context).colorScheme;
 
-    // 볼트쌤이면 무드별 포즈 프레임, 아니면 고정 전신 이미지 + 무드 리액션
-    final asset = profile.animatedPoses ? _voltAsset() : profile.asset;
+    // 모든 강사가 무드별 3D 포즈 프레임을 순환한다.
+    final asset = profile.animatedPoses
+        ? _poseAssetFor(profile)
+        : profile.asset;
     final headOnly = widget.headOnly;
-    // 이미지 실측 비율: pose 프레임 132×292(0.452), teacher 1536×2752(0.558).
-    // 비율 + 기울기 여유분을 더해 어떤 상황에서도 잘리지 않게 한다.
-    final ratio = profile.animatedPoses ? 0.46 : 0.56;
+    // 이미지 실측 비율: 볼트 pose 프레임 132×292(0.452), 강사 포즈 280×560(0.50).
+    // 비율 + 여유분을 더해 어떤 상황에서도 잘리지 않게 한다.
+    final ratio = profile.id == 'volt' ? 0.46 : 0.50;
     final width = headOnly ? widget.size : widget.size * (ratio + 0.08);
-    final badge = profile.animatedPoses ? '' : (moodBadge[widget.mood] ?? '');
-    final tilt = profile.animatedPoses ? 0.0 : (_moodTilt[widget.mood] ?? 0.0);
 
-    Widget image = Image.asset(
+    final Widget image = Image.asset(
       asset,
       fit: BoxFit.contain,
       alignment: Alignment.bottomCenter,
@@ -237,37 +244,6 @@ class _TutorAvatarState extends State<TutorAvatar> {
         color: cs.primary,
       ),
     );
-    // 정적 강사는 무드에 따라 미세 기울기 — 살아있는 느낌.
-    // 하단 중심축 회전 + 축소로 회전해도 경계 밖으로 밀려나 잘리지 않게 한다.
-    if (tilt != 0.0) {
-      image = AnimatedRotation(
-        turns: tilt / (2 * pi),
-        alignment: Alignment.bottomCenter,
-        duration: const Duration(milliseconds: 400),
-        child: image,
-      );
-    }
-    // 무드 리액션 배지 (정적 강사 전용)
-    if (badge.isNotEmpty && !headOnly) {
-      image = Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned.fill(child: image),
-          Positioned(
-            top: 0,
-            right: -2,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 260),
-              child: Text(
-                badge,
-                key: ValueKey(badge),
-                style: TextStyle(fontSize: widget.size * 0.2),
-              ),
-            ),
-          ),
-        ],
-      );
-    }
 
     return Semantics(
       image: true,
@@ -284,8 +260,7 @@ class _TutorAvatarState extends State<TutorAvatar> {
           ],
         ),
         child: Container(
-          // 정적 강사는 이미지가 바뀌지 않으므로 asset만 key로 사용 —
-          // mood 변경 때 같은 이미지 2장이 겹쳐 보이던 중복 버그 제거.
+          // asset을 key로 사용해 같은 이미지 2장이 겹쳐 보이는 중복을 방지.
           key: ValueKey(asset),
           width: width,
           height: widget.size,
