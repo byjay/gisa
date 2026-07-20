@@ -930,6 +930,7 @@ class StudyData {
     _plan = null;
     _guide = null;
     _slideDecks = null;
+    _subjectSummaries = null;
     _silgi = null;
     _formulaGuide = null;
     _examInfo = null;
@@ -947,6 +948,7 @@ class StudyData {
   StudyPlan? _plan;
   StudyGuide? _guide;
   List<SlideDeck>? _slideDecks;
+  List<SlideDeck>? _subjectSummaries;
   SilgiData? _silgi;
   final Map<String, String> _theoryCache = {};
 
@@ -982,6 +984,16 @@ class StudyData {
       SlideDeck.fromJson,
     );
     return _slideDecks!;
+  }
+
+  /// 과목별 핵심요약 슬라이드 덱 로드 (빈도순·필수암기 중심)
+  Future<List<SlideDeck>> loadSubjectSummaries() async {
+    if (_subjectSummaries != null) return _subjectSummaries!;
+    _subjectSummaries = await _safeLoadList(
+      _p('subject_summary.json'),
+      SlideDeck.fromJson,
+    );
+    return _subjectSummaries!;
   }
 
   FormulaGuideData? _formulaGuide;

@@ -285,6 +285,210 @@ class _SlidesHomeScreenState extends State<SlidesHomeScreen> {
   }
 }
 
+/// 과목별 핵심요약 — 5과목 요약 덱 목록 화면
+/// (빈도순·필수암기 중심 요약. 30일 이론과 진도가 분리됨)
+class SubjectSummaryHomeScreen extends StatefulWidget {
+  const SubjectSummaryHomeScreen({super.key});
+
+  @override
+  State<SubjectSummaryHomeScreen> createState() =>
+      _SubjectSummaryHomeScreenState();
+}
+
+class _SubjectSummaryHomeScreenState extends State<SubjectSummaryHomeScreen> {
+  static const String _prefix = 'summary';
+  List<SlideDeck>? _decks;
+
+  @override
+  void initState() {
+    super.initState();
+    SlideProgress.instance.ensureReady().then((_) {
+      if (mounted) setState(() {});
+    });
+    StudyData.instance.loadSubjectSummaries().then((v) {
+      if (mounted) setState(() => _decks = v);
+    });
+  }
+
+  void _openDeck(SlideDeck d) {
+    pushWithNav(
+      context,
+      SlideDeckScreen(deck: d, progressPrefix: _prefix),
+      currentSection: 1,
+    ).then((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  Widget _overall(List<SlideDeck> decks) {
+    int seen = 0, total = 0, doneDecks = 0;
+    for (final d in decks) {
+      final s = SlideProgress.instance
+          .seen(d.day, prefix: _prefix)
+          .clamp(0, d.cards.length);
+      seen += s;
+      total += d.cards.length;
+      if (d.cards.isNotEmpty && s >= d.cards.length) doneDecks++;
+    }
+    final pct = total == 0 ? 0.0 : seen / total;
+    return Card(
+      color: Colors.deepPurple.withValues(alpha: 0.06),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.summarize_rounded,
+                  color: Colors.deepPurple,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  '요약 정복 진도',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                ),
+                const Spacer(),
+                Text(
+                  '$doneDecks/${decks.length}과목 · ${(pct * 100).toStringAsFixed(0)}%',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    color: Colors.deepPurple,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: pct,
+                minHeight: 10,
+                color: Colors.deepPurple,
+                backgroundColor: Colors.deepPurple.withValues(alpha: 0.12),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final decks = _decks;
+    return Scaffold(
+      appBar: AppBar(title: const Text('과목별 핵심요약')),
+      body: decks == null
+          ? const Center(child: CircularProgressIndicator())
+          : decks.isEmpty
+          ? const Center(
+              child: Padding(
+                padding: EdgeInsets.all(32),
+                child: Text(
+                  '이 트랙의 과목별 핵심요약은 아직 준비 중이에요.\n30일 슬라이드 이론으로 학습을 이어가 보세요!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, height: 1.5),
+                ),
+              ),
+            )
+          : ListView(
+              padding: EdgeInsets.symmetric(
+                horizontal: MediaQuery.of(context).size.width > 900
+                    ? (MediaQuery.of(context).size.width - 800) / 2
+                    : 16,
+                vertical: 16,
+              ),
+              children: [
+                const TutorBanner(
+                  mood: TutorMood.teaching,
+                  message:
+                      '시험 직전 총정리에 딱! 과목별로 실기출 빈도순 핵심만 30장으로 압축했어요. 필수공식·함정 카드를 반복하면 점수가 확 오릅니다.',
+                ),
+                const SizedBox(height: 8),
+                _overall(decks),
+                const SizedBox(height: 4),
+                ...List.generate(decks.length, (i) {
+                  final d = decks[i];
+                  final seen = SlideProgress.instance.seen(
+                    d.day,
+                    prefix: _prefix,
+                  );
+                  final total = d.cards.length;
+                  final done = seen >= total && total > 0;
+                  final pct = total == 0
+                      ? 0.0
+                      : (seen / total).clamp(0.0, 1.0);
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: ListTile(
+                      leading: SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            SizedBox(
+                              width: 46,
+                              height: 46,
+                              child: CircularProgressIndicator(
+                                value: pct,
+                                strokeWidth: 3.5,
+                                color: done
+                                    ? Colors.green
+                                    : Colors.deepPurple,
+                                backgroundColor: Colors.deepPurple.withValues(
+                                  alpha: 0.15,
+                                ),
+                              ),
+                            ),
+                            done
+                                ? const Icon(
+                                    Icons.check_rounded,
+                                    color: Colors.green,
+                                    size: 22,
+                                  )
+                                : const Icon(
+                                    Icons.summarize_rounded,
+                                    color: Colors.deepPurple,
+                                    size: 20,
+                                  ),
+                          ],
+                        ),
+                      ),
+                      title: Text(
+                        d.subject,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                      subtitle: Text(
+                        done
+                            ? '✅ 완료 · ${d.cards.length}장'
+                            : seen > 0
+                            ? '$seen/$total장 진행 중'
+                            : '${d.cards.length}장 요약 카드',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: done ? Colors.green : Colors.deepPurple,
+                        ),
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => _openDeck(d),
+                    ),
+                  );
+                }),
+                const SizedBox(height: 24),
+              ],
+            ),
+    );
+  }
+}
+
 /// 카드 타입별 스타일
 class _CardStyle {
   final Color color;
@@ -326,7 +530,15 @@ const List<(String, String)> kYoutubeChannels = [
 /// 슬라이드 카드 뷰어 — PageView 스와이프
 class SlideDeckScreen extends StatefulWidget {
   final SlideDeck deck;
-  const SlideDeckScreen({super.key, required this.deck});
+
+  /// 진도 저장 네임스페이스. 기본 30일 이론 덱은 빈 문자열,
+  /// 과목별 핵심요약 등 별도 덱은 고유 접두사를 넘겨 진도 키 충돌을 방지.
+  final String progressPrefix;
+  const SlideDeckScreen({
+    super.key,
+    required this.deck,
+    this.progressPrefix = '',
+  });
 
   @override
   State<SlideDeckScreen> createState() => _SlideDeckScreenState();
@@ -345,7 +557,10 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
   void initState() {
     super.initState();
     // 이어서 학습: 마지막 본 페이지부터
-    final seen = SlideProgress.instance.seen(widget.deck.day);
+    final seen = SlideProgress.instance.seen(
+      widget.deck.day,
+      prefix: widget.progressPrefix,
+    );
     final start = (seen > 0 && seen < widget.deck.cards.length) ? seen : 0;
     _page = start;
     _pc = PageController(initialPage: start);
@@ -362,6 +577,7 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
       widget.deck.day,
       start,
       widget.deck.cards.length,
+      prefix: widget.progressPrefix,
     );
     StudyData.instance.loadMnemonics().then((all) {
       if (!mounted) return;
@@ -605,7 +821,12 @@ class _SlideDeckScreenState extends State<SlideDeckScreen> {
                 itemCount: total,
                 onPageChanged: (p) {
                   setState(() => _page = p);
-                  SlideProgress.instance.markSeen(widget.deck.day, p, total);
+                  SlideProgress.instance.markSeen(
+                    widget.deck.day,
+                    p,
+                    total,
+                    prefix: widget.progressPrefix,
+                  );
                 },
                 itemBuilder: (context, i) {
                   final c = cards[i];

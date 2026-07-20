@@ -865,6 +865,12 @@ class _StudyScreenState extends State<StudyScreen>
         const SlidesHomeScreen(),
       ),
       (
+        '과목별 요약',
+        Icons.summarize_rounded,
+        const Color(0xFF7C3AED),
+        const SubjectSummaryHomeScreen(),
+      ),
+      (
         '집중 오답노트',
         Icons.psychology_alt_rounded,
         const Color(0xFFDC2626),
