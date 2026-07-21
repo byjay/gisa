@@ -6,6 +6,7 @@ import '../../services/auto_study_service.dart';
 import '../../theme/app_theme.dart';
 import 'quiz_play_screen.dart';
 import '../../widgets/persistent_nav.dart';
+import '../../widgets/tutor_avatar.dart';
 
 class AutoStudyScreen extends StatefulWidget {
   const AutoStudyScreen({super.key});
@@ -339,16 +340,12 @@ class _CoachHero extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(
-                  Icons.psychology_alt_rounded,
-                  color: Colors.white,
-                  size: 28,
-                ),
+                child: const TutorAvatar(mood: TutorMood.teaching, size: 56),
               ),
               const SizedBox(width: 12),
               Expanded(

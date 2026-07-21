@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/study_data.dart';
 import '../../services/slide_progress.dart';
 import '../../widgets/help_dot.dart';
+import '../../widgets/tutor_coach.dart';
 import 'quiz_play_screen.dart';
 import 'slides_screen.dart';
 import '../../widgets/persistent_nav.dart';
@@ -84,6 +85,8 @@ class _TheoryScreenState extends State<TheoryScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          const DynamicTutorBanner(situation: CoachSituation.theory),
+          const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(

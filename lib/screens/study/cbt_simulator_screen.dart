@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/study_data.dart';
 import '../../widgets/drawing_pad.dart';
+import '../../widgets/tutor_avatar.dart';
 
 /// 💻 CBT 체험 모드 — 실제 Q-Net CBT 시험 환경 시뮬레이터.
 /// 실전과 동일하게: 2시간 30분 타이머 · 100문항(5과목×20) · 문항 네비게이션
@@ -124,6 +125,11 @@ class _CbtSimulatorScreenState extends State<CbtSimulatorScreen> {
                 ),
                 child: Column(
                   children: [
+                    TutorAvatar(
+                      mood: pass ? TutorMood.happy : TutorMood.wrong,
+                      size: 72,
+                    ),
+                    const SizedBox(height: 4),
                     Text(
                       '평균 ${avg.toStringAsFixed(1)}점',
                       style: TextStyle(

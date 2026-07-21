@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import '../../services/study_data.dart';
 import '../../widgets/lesson_view.dart';
+import '../../widgets/tutor_avatar.dart';
 
 /// 문제-답 스피드 암기 모드
 /// 10년 기출에서 2회 이상 반복 출제된 347개 클러스터를 빈도순 플래시카드로 암기.
@@ -68,6 +69,25 @@ class _SpeedMemorizeScreenState extends State<SpeedMemorizeScreen> {
 
     return Column(
       children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(hPad, 8, hPad, 0),
+          child: Row(
+            children: [
+              const TutorAvatar(mood: TutorMood.cheer, size: 46),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  '번개처럼 빠르게! ${_idx + 1}번째 · 리듬 타면서 외워봐요 ⚡',
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    height: 1.3,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         // 과목 필터
         SizedBox(
           height: 44,

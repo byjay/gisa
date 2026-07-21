@@ -193,9 +193,7 @@ class _DrawingPadState extends State<DrawingPad> {
                 icon: Icon(
                   Icons.cleaning_services_rounded,
                   size: 20,
-                  color: _eraser
-                      ? Theme.of(context).colorScheme.primary
-                      : null,
+                  color: _eraser ? Theme.of(context).colorScheme.primary : null,
                 ),
                 onPressed: () => setState(() => _eraser = !_eraser),
               ),
@@ -232,9 +230,7 @@ class _DrawingPadState extends State<DrawingPad> {
                         child: CircularProgressIndicator(strokeWidth: 2.2),
                       )
                     : const Icon(Icons.translate_rounded, size: 20),
-                onPressed: _strokes.isEmpty || _recognizing
-                    ? null
-                    : _recognize,
+                onPressed: _strokes.isEmpty || _recognizing ? null : _recognize,
               ),
             ],
           ),
@@ -283,9 +279,7 @@ class _DrawingPadState extends State<DrawingPad> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('“$c” 복사됨'),
-                                  duration: const Duration(
-                                    milliseconds: 900,
-                                  ),
+                                  duration: const Duration(milliseconds: 900),
                                 ),
                               );
                             }
@@ -390,7 +384,10 @@ class _PadPainter extends CustomPainter {
 
 /// 문제 풀이 중 아래에서 올라오는 필기 패드 시트.
 /// 높이 조절 가능(드래그 핸들) — 문제를 보면서 계산할 수 있게 65% 기본.
-Future<void> showDrawingPad(BuildContext context, {String title = '✍️ 필기 연습장'}) {
+Future<void> showDrawingPad(
+  BuildContext context, {
+  String title = '✍️ 필기 연습장',
+}) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,

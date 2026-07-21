@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/study_data.dart';
 import '../../widgets/persistent_nav.dart';
+import '../../widgets/tutor_coach.dart';
 import 'lesson_screen.dart';
 import 'quiz_play_screen.dart';
 
@@ -57,6 +58,10 @@ class _VideosScreenState extends State<VideosScreen> {
             ? const Center(child: CircularProgressIndicator())
             : Column(
                 children: [
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(14, 12, 14, 0),
+                    child: DynamicTutorBanner(situation: CoachSituation.theory),
+                  ),
                   _methodCard(context, lessons.length),
                   SizedBox(
                     height: 52,

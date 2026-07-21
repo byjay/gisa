@@ -582,7 +582,8 @@ class _DynamicTutorBannerState extends State<DynamicTutorBanner> {
       (app) => app.selectedTutorId,
     );
     if (_message == null || _messageTutorId != tutorId) {
-      _message = widget.overrideMessage ??
+      _message =
+          widget.overrideMessage ??
           TutorBehaviorBank.pick(tutorId, widget.situation) ??
           TutorMents.pick(widget.situation);
       _messageTutorId = tutorId;
@@ -736,9 +737,7 @@ class _TutorCoachState extends State<TutorCoach> {
                         bottomLeft: Radius.circular(14),
                         bottomRight: Radius.circular(14),
                       ),
-                      border: Border.all(
-                        color: tColor.withValues(alpha: 0.18),
-                      ),
+                      border: Border.all(color: tColor.withValues(alpha: 0.18)),
                     ),
                     child: Text(
                       _message!,

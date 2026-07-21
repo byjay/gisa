@@ -261,7 +261,9 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
     if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('이 기기/브라우저는 음성 인식을 지원하지 않아요. Chrome 또는 Android 앱을 이용해 주세요.'),
+          content: Text(
+            '이 기기/브라우저는 음성 인식을 지원하지 않아요. Chrome 또는 Android 앱을 이용해 주세요.',
+          ),
         ),
       );
       return;
@@ -395,7 +397,9 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
           IconButton(
             tooltip: _voiceMode ? '음성 대화 종료' : '음성 대화 모드 (핸즈프리)',
             icon: Icon(
-              _voiceMode ? Icons.headset_mic_rounded : Icons.headset_mic_outlined,
+              _voiceMode
+                  ? Icons.headset_mic_rounded
+                  : Icons.headset_mic_outlined,
               color: _voiceMode ? cs.primary : null,
             ),
             onPressed: _toggleVoiceMode,
@@ -481,7 +485,9 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
           case VoiceState.idle:
             c = cs.primary;
             label = _loading ? '생각하는 중…' : '마이크를 누르거나 잠시 기다려 주세요';
-            ic = _loading ? Icons.psychology_rounded : Icons.headset_mic_rounded;
+            ic = _loading
+                ? Icons.psychology_rounded
+                : Icons.headset_mic_rounded;
             break;
         }
         return Container(

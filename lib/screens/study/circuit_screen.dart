@@ -45,7 +45,8 @@ class _CircuitScreenState extends State<CircuitScreen>
             child: HelpDot(
               size: 22,
               title: '회로도 마스터 안내',
-              body: '모터 제어반 도면 기호와 규칙을 단계별로 익히는 기능이에요.\n\n'
+              body:
+                  '모터 제어반 도면 기호와 규칙을 단계별로 익히는 기능이에요.\n\n'
                   '👀 보기 탭 — IEC 60617 표준 기호로 그려진 실제 도면을 보면서 각 심볼(퓨즈, 모터, 접지 등)이 무엇을 뜻하는지 확인해요.\n\n'
                   '✍️ 작성하기 탭 — 체크리스트를 따라가며 도면을 직접 그려보는 연습을 해요. 실기 시험에서 도면을 처음부터 그려야 할 때 큰 도움이 돼요.\n\n'
                   '💡 기호를 눈으로만 외우지 말고, 실제로 손으로 그려보면 훨씬 오래 기억에 남아요!',
@@ -350,9 +351,7 @@ class _CircuitScreenState extends State<CircuitScreen>
     return ListView(
       padding: _pad,
       children: [
-        const DynamicTutorBanner(
-          situation: CoachSituation.encourage,
-        ),
+        const DynamicTutorBanner(situation: CoachSituation.encourage),
         const SizedBox(height: 14),
         // 진행률
         Container(

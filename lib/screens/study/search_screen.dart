@@ -369,10 +369,7 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('이론 검색 · AI 검증'),
-        actions: const [],
-      ),
+      appBar: AppBar(title: const Text('이론 검색 · AI 검증'), actions: const []),
       body: SafeArea(
         child: Column(
           children: [

@@ -24,7 +24,9 @@ class HandwritingService {
 
   static const _lang = 'ko';
   mlkit.DigitalInkRecognizer? _recognizer;
-  final _modelManager = kIsWeb ? null : mlkit.DigitalInkRecognizerModelManager();
+  final _modelManager = kIsWeb
+      ? null
+      : mlkit.DigitalInkRecognizerModelManager();
   bool _modelReady = false;
 
   bool get supported => !kIsWeb;
@@ -60,7 +62,8 @@ class HandwritingService {
     if (kIsWeb) {
       return const HandwritingResult(
         ok: false,
-        error: '웹 미리보기에서는 필기 인식이 지원되지 않습니다.\n'
+        error:
+            '웹 미리보기에서는 필기 인식이 지원되지 않습니다.\n'
             'Android 앱(APK)에서 한국어 손글씨 인식이 동작합니다.',
       );
     }
@@ -81,8 +84,7 @@ class HandwritingService {
           for (final s in strokes)
             mlkit.Stroke()
               ..points = [
-                for (final p in s)
-                  mlkit.StrokePoint(x: p.x, y: p.y, t: p.t),
+                for (final p in s) mlkit.StrokePoint(x: p.x, y: p.y, t: p.t),
               ],
         ];
       final candidates = await _recognizer!.recognize(ink);

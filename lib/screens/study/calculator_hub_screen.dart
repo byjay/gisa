@@ -68,7 +68,8 @@ class CalculatorHubScreen extends StatelessWidget {
             child: HelpDot(
               size: 22,
               title: '계산기 안내',
-              body: '시험에 자주 나오는 계산 문제를 값만 넣으면 바로 풀어주는 기능이에요.\n\n'
+              body:
+                  '시험에 자주 나오는 계산 문제를 값만 넣으면 바로 풀어주는 기능이에요.\n\n'
                   '🔄 단위 환산 — 전류·전압·저항·온도·면적·압력 등 13종 단위를 서로 변환해요.\n\n'
                   '⚡ 전기 공식 계산기 — 옴의 법칙, 3상 전력, 역률개선, 전압강하, 단락전류, 조명설계 등 전기기사 필기·실기 핵심 공식을 자동 계산해요.\n\n'
                   '🔥 소방 공식 계산기 — 축전지 용량, 감지기 개수, 경계구역, 전선관 규격 등 소방설비기사(전기) 실기에 필요한 계산을 도와줘요.\n\n'
@@ -85,9 +86,7 @@ class CalculatorHubScreen extends StatelessWidget {
           vertical: 14,
         ),
         children: [
-          const DynamicTutorBanner(
-            situation: CoachSituation.formula,
-          ),
+          const DynamicTutorBanner(situation: CoachSituation.formula),
           const SizedBox(height: 16),
           ...entries.map((e) => _card(context, cs, e)),
         ],

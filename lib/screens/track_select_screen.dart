@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../services/exam_track.dart';
 import '../theme/app_theme.dart';
+import '../widgets/tutor_avatar.dart';
 
 /// 시험 종목 선택 — 앱 진입 시 큰 버튼 3개로 시험을 고른다.
 class TrackSelectScreen extends StatelessWidget {
@@ -21,30 +22,39 @@ class TrackSelectScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 8),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.workspace_premium_rounded,
-                      color: AppTheme.primary,
-                      size: 30,
+                    const TutorAvatar(
+                      mood: TutorMood.cheer,
+                      size: 68,
+                      characterId: 'volt',
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '어떤 시험을 준비하세요?',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        color: dark ? Colors.white : AppTheme.textStrong,
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '어떤 시험을 준비하세요?',
+                            style: TextStyle(
+                              fontSize: 21,
+                              fontWeight: FontWeight.w900,
+                              color: dark ? Colors.white : AppTheme.textStrong,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '기출·이론·암기법·모의고사까지 합격에 필요한 모든 것을 한 앱에서. 제가 끝까지 도와드릴게요! ⚡',
+                            style: TextStyle(
+                              fontSize: 13,
+                              height: 1.35,
+                              color: dark ? Colors.white70 : AppTheme.textMuted,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '기출·이론·암기법·모의고사까지 합격에 필요한 모든 것을 한 앱에서.',
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    color: dark ? Colors.white70 : AppTheme.textMuted,
-                  ),
                 ),
                 const SizedBox(height: 20),
                 for (final t in kExamTracks) ...[

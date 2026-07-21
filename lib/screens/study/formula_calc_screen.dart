@@ -33,7 +33,8 @@ class FormulaCalcListScreen extends StatelessWidget {
             child: HelpDot(
               size: 22,
               title: '공식 계산기 안내',
-              body: '값만 입력하면 시험에 자주 나오는 계산 문제를 자동으로 풀어주는 기능이에요.\n\n'
+              body:
+                  '값만 입력하면 시험에 자주 나오는 계산 문제를 자동으로 풀어주는 기능이에요.\n\n'
                   '📂 카테고리별 정리 — 관련된 공식끼리 묶어서 필요한 계산기를 빠르게 찾을 수 있어요.\n\n'
                   '🧮 값을 넣으면 계산 과정과 정답이 함께 나와서, 공식을 눈으로 확인하면서 원리도 이해할 수 있어요.\n\n'
                   '💡 실제 시험에서 계산기가 없을 때를 대비해, 계산 과정을 손으로도 한 번씩 따라 써보세요!',
@@ -163,7 +164,8 @@ class _FormulaCalcDetailScreenState extends State<FormulaCalcDetailScreen> {
             child: HelpDot(
               size: 22,
               title: '${calc.title} 계산기 안내',
-              body: '이 공식에 필요한 값을 입력하면 자동으로 계산 과정과 정답을 보여줘요.\n\n'
+              body:
+                  '이 공식에 필요한 값을 입력하면 자동으로 계산 과정과 정답을 보여줘요.\n\n'
                   '✏️ 각 입력칸에 조건에 맞는 숫자를 넣으면 실시간으로 결과가 계산돼요.\n\n'
                   '📐 계산 과정도 함께 표시되니, 눈으로 원리를 확인하며 공식을 외워보세요.\n\n'
                   '💡 시험장에서는 계산기가 없을 수 있으니, 손으로 직접 풀어보는 연습도 함께 하면 좋아요!',

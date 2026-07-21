@@ -78,7 +78,8 @@ class _RepeatAnalysisScreenState extends State<RepeatAnalysisScreen> {
             child: HelpDot(
               size: 22,
               title: '빈출 유형변형 분석 안내',
-              body: '기출문제가 어떻게 변형되어 재출제되는지 패턴을 분석해주는 화면이에요.\n\n'
+              body:
+                  '기출문제가 어떻게 변형되어 재출제되는지 패턴을 분석해주는 화면이에요.\n\n'
                   '🔁 출제횟수순 정렬 — 가장 자주 나온 유형부터 순서대로 보여줘요.\n\n'
                   '🎨 변형 포인트 — 숫자나 조건이 어떻게 바뀌어 다시 나오는지 실제 예시로 비교해줘요.\n\n'
                   '🏷️ 초빈출/빈출/반복 태그 — 출제 빈도에 따라 색깔로 위험도를 표시해요.\n\n'

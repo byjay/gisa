@@ -4,6 +4,7 @@ import '../../widgets/lesson_view.dart';
 import '../../widgets/teacher_recipe_box.dart';
 import 'quiz_play_screen.dart';
 import '../../widgets/persistent_nav.dart';
+import '../../widgets/tutor_avatar.dart';
 
 /// 1:1 강의 커리큘럼 — 과목 선택 → 빈출순 토픽 강의 목록 → 강의 뷰어
 /// 46개 토픽 전체 (기출 2,897문항 100% 커버)
@@ -67,21 +68,30 @@ class _LessonCurriculumScreenState extends State<LessonCurriculumScreen> {
           color: Theme.of(context).colorScheme.primaryContainer,
           child: Padding(
             padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  subject,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
+                const TutorAvatar(mood: TutorMood.teaching, size: 60),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        subject,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '토픽 ${lessons.length}개 · 기출 $total문항 전체 커버\n'
+                        '빈출 순서대로 위에서부터 학습하세요. 상위 3~4개 토픽만 마스터해도 과락은 면합니다.',
+                        style: const TextStyle(fontSize: 12.5, height: 1.5),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '토픽 ${lessons.length}개 · 기출 $total문항 전체 커버\n'
-                  '빈출 순서대로 위에서부터 학습하세요. 상위 3~4개 토픽만 마스터해도 과락은 면합니다.',
-                  style: const TextStyle(fontSize: 12.5, height: 1.5),
                 ),
               ],
             ),

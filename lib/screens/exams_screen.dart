@@ -11,6 +11,7 @@ import '../services/schedule_alerts.dart';
 import '../services/exam_registration.dart';
 import '../services/cbt_info_service.dart';
 import '../services/exam_analysis.dart';
+import '../widgets/tutor_coach.dart';
 import '../services/pass_prediction.dart';
 import '../widgets/help_dot.dart';
 
@@ -72,7 +73,8 @@ class _ExamsScreenState extends State<ExamsScreen> {
             child: HelpDot(
               size: 22,
               title: '시험 일정 안내',
-              body: '큐넷(Q-Net)과 실시간으로 연동된 시험 일정 화면이에요.\n\n'
+              body:
+                  '큐넷(Q-Net)과 실시간으로 연동된 시험 일정 화면이에요.\n\n'
                   '🔔 임박 알림 — 원서접수·시험일·합격발표가 다가오면 카드 상단에 알림이 표시돼요.\n\n'
                   '📋 회차별 일정 카드 — 각 회차의 접수 기간, 시험 날짜, 발표일을 확인하고 응시 회차로 선택할 수 있어요.\n\n'
                   '✅ 가답안 채점 — 시험 종료 후 가답안이 공개되면 바로 채점해서 예상 점수를 확인할 수 있어요.\n\n'
@@ -105,6 +107,8 @@ class _ExamsScreenState extends State<ExamsScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 100),
           children: [
+            const DynamicTutorBanner(situation: CoachSituation.dDayNear),
+            const SizedBox(height: 12),
             _CatalogPicker(
               selectedId: app.catalogId,
               onSelect: (id) {

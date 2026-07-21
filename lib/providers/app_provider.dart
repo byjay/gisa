@@ -78,8 +78,7 @@ class AppProvider extends ChangeNotifier {
     weeklyGoalMinutes = (_settingsBox.get('weeklyGoal') as int?) ?? 600;
     darkMode = (_settingsBox.get('darkMode') as bool?) ?? false;
     themePaletteId = (_settingsBox.get('themePalette') as String?) ?? 'indigo';
-    selectedTutorId =
-        (_settingsBox.get('selectedTutor') as String?) ?? 'volt';
+    selectedTutorId = (_settingsBox.get('selectedTutor') as String?) ?? 'volt';
     notificationsEnabled =
         (_settingsBox.get('notificationsEnabled') as bool?) ?? true;
     dailyReminderEnabled =

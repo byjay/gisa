@@ -211,10 +211,7 @@ class AppTheme {
       seedColor: p.seed,
     ).copyWith(primary: p.seed, secondary: p.accent, surface: cardLight);
     // 팔레트 씨앗이 배경에 은은하게 배어나오도록 — 테마 교체 체감 극대화
-    final tintedBg = Color.alphaBlend(
-      p.seed.withValues(alpha: 0.035),
-      bgLight,
-    );
+    final tintedBg = Color.alphaBlend(p.seed.withValues(alpha: 0.035), bgLight);
     return _base(
       scheme,
       Brightness.light,

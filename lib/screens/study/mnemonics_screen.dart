@@ -3,6 +3,7 @@ import '../../services/study_data.dart';
 import '../../services/flashcard_srs.dart';
 import 'flashcard_screen.dart';
 import '../../widgets/persistent_nav.dart';
+import '../../widgets/tutor_coach.dart';
 
 /// 암기법 사전: 과목별 필터 + 검색
 class MnemonicsScreen extends StatefulWidget {
@@ -69,6 +70,12 @@ class _MnemonicsScreenState extends State<MnemonicsScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: DynamicTutorBanner(
+                    situation: CoachSituation.flashcard,
+                  ),
+                ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                   child: Material(

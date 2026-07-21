@@ -70,7 +70,8 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
             child: HelpDot(
               size: 22,
               title: '시험 정보 센터 안내',
-              body: '자격증 시험에 필요한 모든 공식 정보를 모아둔 곳이에요.\n\n'
+              body:
+                  '자격증 시험에 필요한 모든 공식 정보를 모아둔 곳이에요.\n\n'
                   '📅 시험일정 — 접수 기간, 필기/실기 날짜, D-Day를 한눈에 확인해요.\n\n'
                   '📘 출제기준 개정 — 올해 바뀐 출제 범위와 항목을 정리했어요. 놓치면 손해!\n\n'
                   '🔌 KEC 2026 개정 — 전기설비규정 최신 개정 내용을 반영했어요.\n\n'
@@ -1260,9 +1261,7 @@ class _ExamInfoScreenState extends State<ExamInfoScreen>
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const DynamicTutorBanner(
-          situation: CoachSituation.quizHardQuestion,
-        ),
+        const DynamicTutorBanner(situation: CoachSituation.quizHardQuestion),
         const SizedBox(height: 12),
         ...tips.asMap().entries.map(
           (e) => Card(

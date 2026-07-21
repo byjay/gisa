@@ -159,7 +159,8 @@ class _SlidesHomeScreenState extends State<SlidesHomeScreen> {
             child: HelpDot(
               size: 22,
               title: '30일 슬라이드 이론 안내',
-              body: '하루 한 덱씩 스와이프하면 30일 만에 이론을 다 끝낼 수 있는 카드 학습이에요.\n\n'
+              body:
+                  '하루 한 덱씩 스와이프하면 30일 만에 이론을 다 끝낼 수 있는 카드 학습이에요.\n\n'
                   '📅 덱 순서 — 학습 계획(플랜)에 맞춰 순서대로 덱을 진행하면 가장 효율적이에요.\n\n'
                   '🌙 왕초보 모드 — 덱 안 슬라이드마다 핵심만 뽑아 쉬운 말로 풀어줘요.\n\n'
                   '💬 볼트쌤 코치 — 각 덱을 열 때마다 그 덱의 핵심 요점을 먼저 짚어줘요.\n\n'
@@ -407,7 +408,8 @@ class _SubjectSummaryHomeScreenState extends State<SubjectSummaryHomeScreen> {
             child: HelpDot(
               size: 22,
               title: '과목별 핵심요약 안내',
-              body: '시험 직전 총정리용으로, 과목별 핵심만 압축한 요약 카드예요.\n\n'
+              body:
+                  '시험 직전 총정리용으로, 과목별 핵심만 압축한 요약 카드예요.\n\n'
                   '📚 과목 목록 — 각 과목의 핵심 개념·공식·주의사항만 뽑아 짧게 정리했어요.\n\n'
                   '⏱️ 짧은 시간 안에 훑어보기 좋아서 시험 며칠 전이나 시험 당일 아침에 보면 효과적이에요.\n\n'
                   '💡 이미 이론을 한 번 배운 뒤 복습용으로 사용하면 가장 효과가 좋아요!',
@@ -436,9 +438,7 @@ class _SubjectSummaryHomeScreenState extends State<SubjectSummaryHomeScreen> {
                 vertical: 16,
               ),
               children: [
-                const DynamicTutorBanner(
-                  situation: CoachSituation.dDayNear,
-                ),
+                const DynamicTutorBanner(situation: CoachSituation.dDayNear),
                 const SizedBox(height: 8),
                 _overall(decks),
                 const SizedBox(height: 4),
@@ -450,9 +450,7 @@ class _SubjectSummaryHomeScreenState extends State<SubjectSummaryHomeScreen> {
                   );
                   final total = d.cards.length;
                   final done = seen >= total && total > 0;
-                  final pct = total == 0
-                      ? 0.0
-                      : (seen / total).clamp(0.0, 1.0);
+                  final pct = total == 0 ? 0.0 : (seen / total).clamp(0.0, 1.0);
                   return Card(
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
@@ -468,9 +466,7 @@ class _SubjectSummaryHomeScreenState extends State<SubjectSummaryHomeScreen> {
                               child: CircularProgressIndicator(
                                 value: pct,
                                 strokeWidth: 3.5,
-                                color: done
-                                    ? Colors.green
-                                    : Colors.deepPurple,
+                                color: done ? Colors.green : Colors.deepPurple,
                                 backgroundColor: Colors.deepPurple.withValues(
                                   alpha: 0.15,
                                 ),

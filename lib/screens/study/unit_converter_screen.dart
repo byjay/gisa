@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/unit_converter.dart';
 import '../../widgets/persistent_nav.dart';
+import '../../widgets/tutor_avatar.dart';
 
 /// 단위 환산 — 13개 카테고리 목록
 class UnitConverterHomeScreen extends StatelessWidget {
@@ -12,73 +13,99 @@ class UnitConverterHomeScreen extends StatelessWidget {
     final cats = UnitConverter.categories;
     return Scaffold(
       appBar: AppBar(title: const Text('단위 환산')),
-      body: ListView.separated(
-        padding: EdgeInsets.symmetric(
-          horizontal: MediaQuery.of(context).size.width > 800
-              ? (MediaQuery.of(context).size.width - 680) / 2
-              : 14,
-          vertical: 14,
-        ),
-        itemCount: cats.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 8),
-        itemBuilder: (context, i) {
-          final c = cats[i];
-          return Material(
-            color: cs.surface,
-            borderRadius: BorderRadius.circular(14),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(14),
-              onTap: () => pushWithNav(
-                context,
-                UnitConverterDetailScreen(category: c),
-                currentSection: 1,
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: cs.outlineVariant),
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+            child: Row(
+              children: [
+                const TutorAvatar(mood: TutorMood.thinking, size: 48),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '단위가 헷갈리면 여기서 바로 환산해요. 시험에 자주 나오는 환산부터 익혀봐요! 📐',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      height: 1.3,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 46,
-                      height: 46,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: cs.primaryContainer.withValues(alpha: 0.5),
-                        border: Border.all(color: cs.primary, width: 1.5),
-                      ),
-                      child: Text(
-                        c.iconText,
-                        style: TextStyle(
-                          fontSize: c.iconText.length > 2 ? 12 : 17,
-                          fontWeight: FontWeight.w900,
-                          color: cs.primary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Text(
-                        c.title,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: cs.onSurface.withValues(alpha: 0.4),
-                    ),
-                  ],
-                ),
-              ),
+              ],
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: ListView.separated(
+              padding: EdgeInsets.symmetric(
+                horizontal: MediaQuery.of(context).size.width > 800
+                    ? (MediaQuery.of(context).size.width - 680) / 2
+                    : 14,
+                vertical: 6,
+              ),
+              itemCount: cats.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              itemBuilder: (context, i) {
+                final c = cats[i];
+                return Material(
+                  color: cs.surface,
+                  borderRadius: BorderRadius.circular(14),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () => pushWithNav(
+                      context,
+                      UnitConverterDetailScreen(category: c),
+                      currentSection: 1,
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: cs.outlineVariant),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 46,
+                            height: 46,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: cs.primaryContainer.withValues(alpha: 0.5),
+                              border: Border.all(color: cs.primary, width: 1.5),
+                            ),
+                            child: Text(
+                              c.iconText,
+                              style: TextStyle(
+                                fontSize: c.iconText.length > 2 ? 12 : 17,
+                                fontWeight: FontWeight.w900,
+                                color: cs.primary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Text(
+                              c.title,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            color: cs.onSurface.withValues(alpha: 0.4),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

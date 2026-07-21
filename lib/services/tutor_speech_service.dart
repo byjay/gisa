@@ -18,7 +18,11 @@ class TutorSpeechService {
     await _tts.setSpeechRate(rate);
   }
 
-  Future<void> speak(String text, {double rate = 0.46, double pitch = 1.0}) async {
+  Future<void> speak(
+    String text, {
+    double rate = 0.46,
+    double pitch = 1.0,
+  }) async {
     final clean = text
         .replaceAll(RegExp(r'[*#`_>【】]'), '')
         .replaceAll(RegExp(r'\s+'), ' ')

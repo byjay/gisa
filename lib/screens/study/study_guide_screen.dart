@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/study_data.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/tutor_coach.dart';
 
 /// 합격 공부법 — 딥리서치(합격후기·기출현황) 기반 학습 전략 가이드
 class StudyGuideScreen extends StatefulWidget {
@@ -40,6 +41,8 @@ class _StudyGuideScreenState extends State<StudyGuideScreen> {
           : ListView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
               children: [
+                const DynamicTutorBanner(situation: CoachSituation.encourage),
+                const SizedBox(height: 12),
                 _header(g),
                 const SizedBox(height: 16),
                 if (g.examNote != null) _examNote(g.examNote!),
