@@ -321,12 +321,39 @@ class AppTheme {
         backgroundColor: p.seed,
         foregroundColor: Colors.white,
       ),
+      // 모든 기본 아이콘에 동일한 굵기·색·터치 밀도를 적용한다.
+      // 개별 화면에서 색을 지정한 아이콘은 그 의도를 보존한다.
+      iconTheme: IconThemeData(
+        color: dark ? Colors.white70 : const Color(0xFF4B5568),
+        size: 22,
+        opticalSize: 24,
+        weight: 520,
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          minimumSize: const Size(44, 44),
+          padding: const EdgeInsets.all(10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          foregroundColor: dark ? Colors.white70 : const Color(0xFF4B5568),
+        ),
+      ),
+      listTileTheme: ListTileThemeData(
+        iconColor: dark ? Colors.white70 : const Color(0xFF4B5568),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(rSm)),
+        ),
+      ),
       navigationBarTheme: NavigationBarThemeData(
-        height: 66,
+        height: 70,
         elevation: 0,
         backgroundColor: dark ? cardDark : Colors.white,
         surfaceTintColor: Colors.transparent,
-        indicatorColor: scheme.primary.withValues(alpha: dark ? 0.22 : 0.1),
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        indicatorColor: scheme.primary.withValues(alpha: dark ? 0.28 : 0.12),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return TextStyle(
@@ -340,7 +367,9 @@ class AppTheme {
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return IconThemeData(
-            size: 23,
+            size: selected ? 25 : 23,
+            opticalSize: 24,
+            weight: selected ? 650 : 480,
             color: selected
                 ? scheme.primary
                 : (dark ? Colors.white54 : textMuted),
@@ -379,11 +408,6 @@ class AppTheme {
         ),
         backgroundColor: dark ? cardDark : Colors.white,
         labelStyle: const TextStyle(fontWeight: FontWeight.w600),
-      ),
-      listTileTheme: const ListTileThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(rSm)),
-        ),
       ),
       dividerTheme: DividerThemeData(
         color: dark
@@ -561,22 +585,53 @@ class IconBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(size * 0.32);
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            color.withValues(alpha: 0.16),
-            color.withValues(alpha: 0.08),
+            color.withValues(alpha: 0.24),
+            color.withValues(alpha: 0.07),
           ],
-          stops: const [0.0, 1.0],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(size * 0.32),
+        borderRadius: radius,
+        border: Border.all(color: color.withValues(alpha: 0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.12),
+            blurRadius: 12,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
-      child: Icon(icon, color: color, size: iconSize),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            top: size * 0.13,
+            left: size * 0.16,
+            child: Container(
+              width: size * 0.3,
+              height: size * 0.12,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.42),
+                borderRadius: BorderRadius.circular(size),
+              ),
+            ),
+          ),
+          Icon(
+            icon,
+            color: color,
+            size: iconSize,
+            opticalSize: iconSize,
+            weight: 600,
+          ),
+        ],
+      ),
     );
   }
 }

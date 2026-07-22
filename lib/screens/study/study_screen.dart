@@ -30,9 +30,11 @@ import '../../widgets/tutor_coach.dart';
 import '../../widgets/help_dot.dart';
 import '../../widgets/persistent_nav.dart';
 
-/// 학습 허브: 탭 구조로 직관적 분류 — 기초학습 / 문제풀이 / 모의고사 / 이력
+/// 학습 허브. [mockExamOnly]가 true면 메인 메뉴의 CBT·모의고사 전용 화면이다.
 class StudyScreen extends StatefulWidget {
-  const StudyScreen({super.key});
+  final bool mockExamOnly;
+
+  const StudyScreen({super.key, this.mockExamOnly = false});
 
   @override
   State<StudyScreen> createState() => _StudyScreenState();
@@ -55,7 +57,7 @@ class _StudyScreenState extends State<StudyScreen>
   @override
   void initState() {
     super.initState();
-    _tab = TabController(length: 4, vsync: this);
+    _tab = TabController(length: 3, vsync: this);
     StudyData.instance.loadExams().then((v) {
       if (mounted) setState(() => _exams = v);
     });
@@ -74,6 +76,27 @@ class _StudyScreenState extends State<StudyScreen>
   Widget build(BuildContext context) {
     final exams = _exams;
     final trackName = StudyData.instance.track.name;
+    if (widget.mockExamOnly) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Row(
+            children: [
+              const Icon(
+                Icons.computer_rounded,
+                color: AppTheme.accent,
+                size: 24,
+              ),
+              const SizedBox(width: 6),
+              Expanded(child: Text('$trackName CBT · 모의고사')),
+            ],
+          ),
+        ),
+        body: exams == null
+            ? const Center(child: CircularProgressIndicator())
+            : _mockExamTab(context, exams),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -97,7 +120,6 @@ class _StudyScreenState extends State<StudyScreen>
           tabs: const [
             Tab(text: '기초학습'),
             Tab(text: '문제풀이'),
-            Tab(text: '모의고사'),
             Tab(text: '이력'),
           ],
         ),
@@ -109,7 +131,6 @@ class _StudyScreenState extends State<StudyScreen>
               children: [
                 _basicsTab(context),
                 _practiceTab(context),
-                _mockExamTab(context, exams),
                 _historyTab(context),
               ],
             ),
@@ -178,7 +199,11 @@ class _StudyScreenState extends State<StudyScreen>
               '${StudyData.instance.track.bankLabel} ${StudyData.instance.track.questionCountLabel}문제를 출제 빈도 높은 토픽 순서로',
         ),
         for (var i = 0; i < kSubjects.length; i++)
-          _freqCard(context, kSubjects[i], _subjectColors[i]),
+          _freqCard(
+            context,
+            kSubjects[i],
+            _subjectColors[i % _subjectColors.length],
+          ),
         const SectionHeader(
           emoji: '🌱',
           title: '쉬운 문제부터 풀기',
@@ -391,7 +416,7 @@ class _StudyScreenState extends State<StudyScreen>
         questions: qs,
         examMode: false,
       ),
-      currentSection: 1,
+      currentSection: AppTabs.cbt,
     );
   }
 
@@ -515,7 +540,7 @@ class _StudyScreenState extends State<StudyScreen>
     pushWithNav(
       context,
       CbtSimulatorScreen(title: title, questions: qs),
-      currentSection: 1,
+      currentSection: AppTabs.cbt,
     );
   }
 
@@ -706,7 +731,7 @@ class _StudyScreenState extends State<StudyScreen>
                   contentPadding: EdgeInsets.zero,
                   leading: IconBadge(
                     icon: Icons.stairs_rounded,
-                    color: _subjectColors[i],
+                    color: _subjectColors[i % _subjectColors.length],
                     size: 38,
                     iconSize: 19,
                   ),
@@ -1183,7 +1208,7 @@ class _StudyScreenState extends State<StudyScreen>
         questions: qs,
         examMode: true,
       ),
-      currentSection: 1,
+      currentSection: widget.mockExamOnly ? AppTabs.cbt : AppTabs.study,
     );
   }
 

@@ -149,6 +149,7 @@ class _MainShellState extends State<MainShell> {
       const ExamsScreen(),
       const TimerScreen(),
       const StatsScreen(),
+      const StudyScreen(mockExamOnly: true),
     ];
 
     final dark = Theme.of(context).brightness == Brightness.dark;
@@ -179,28 +180,33 @@ class _MainShellState extends State<MainShell> {
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home_rounded),
+              selectedIcon: Icon(Icons.home_rounded, weight: 650),
               label: '홈',
             ),
             NavigationDestination(
-              icon: Icon(Icons.school_outlined),
-              selectedIcon: Icon(Icons.school_rounded),
+              icon: Icon(Icons.auto_stories_outlined),
+              selectedIcon: Icon(Icons.auto_stories_rounded, weight: 650),
               label: '학습',
             ),
             NavigationDestination(
-              icon: Icon(Icons.event_outlined),
-              selectedIcon: Icon(Icons.event_rounded),
+              icon: Icon(Icons.calendar_month_outlined),
+              selectedIcon: Icon(Icons.calendar_month_rounded, weight: 650),
               label: '시험',
             ),
             NavigationDestination(
               icon: Icon(Icons.timer_outlined),
-              selectedIcon: Icon(Icons.timer_rounded),
+              selectedIcon: Icon(Icons.timer_rounded, weight: 650),
               label: '타이머',
             ),
             NavigationDestination(
-              icon: Icon(Icons.insights_outlined),
-              selectedIcon: Icon(Icons.insights_rounded),
+              icon: Icon(Icons.query_stats_outlined),
+              selectedIcon: Icon(Icons.query_stats_rounded, weight: 650),
               label: '통계',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.computer_outlined),
+              selectedIcon: Icon(Icons.computer_rounded, weight: 650),
+              label: 'CBT',
             ),
           ],
         ),

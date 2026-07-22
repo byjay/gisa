@@ -19,52 +19,45 @@ class TutorTurn {
   Map<String, String> toJson() => {'role': role, 'content': content};
 }
 
-/// Cerebras Inference API 서비스 — OpenAI 호환 chat completions
+/// Cerebras Inference API 서비스 — OpenAI 호환 chat completions.
 ///
-/// 모델: gpt-oss-120b (reasoning 지원 — 답변 전에 '생각'을 먼저 수행)
-///   - reasoning_effort 파라미터로 사고 깊이 조절 (low/medium/high)
-///   - 응답 message.reasoning 필드에 사고 과정이 담겨 옴
-/// 🧪 테스트 기간 정책: 테스트 기간 동안에는 앱에 내장된 키로 자동 설정된다.
-/// 사용자가 키를 입력·저장할 필요가 없고, 키 설정 UI도 노출하지 않는다.
-/// 테스트 기간이 끝나면 AI 호출이 자동 차단된다.
+/// 개발 키는 소스 코드에 저장하지 않고, 로컬 실행 시 `--dart-define`으로만
+/// 주입한다. 공개 배포 빌드에는 `ENABLE_DEV_AI=true` 및 키를 절대 전달하지 않는다.
 class CerebrasService {
   CerebrasService._();
   static final CerebrasService instance = CerebrasService._();
 
-  // Groq OpenAI 호환 엔드포인트 (gsk_ 키ey 사용) — gpt-oss-120b 추론 모델 호스팅
-  static const _endpoint = 'https://api.groq.com/openai/v1/chat/completions';
-  static const _model = 'openai/gpt-oss-120b';
+  static const _endpoint = String.fromEnvironment(
+    'CEREBRAS_API_ENDPOINT',
+    defaultValue: 'https://api.cerebras.ai/v1/chat/completions',
+  );
+  static const _model = String.fromEnvironment(
+    'CEREBRAS_MODEL',
+    defaultValue: 'gpt-oss-120b',
+  );
+  static const _primaryDevKey = String.fromEnvironment('CEREBRAS_API_KEY');
+  static const _backupDevKey = String.fromEnvironment(
+    'CEREBRAS_API_BACKUP_KEY',
+  );
+  static const _developmentAiEnabled = bool.fromEnvironment('ENABLE_DEV_AI');
 
-  // 🧪 테스트 기간 전용 내장 키 — 분할 보관(단순 스캤 방지). 기간 종료 시 사용 불가.
-  static const _tk1 = 'gsk_H1wNACJNIo475o1C';
-  static const _tk2 = 'mfbVWGdyb3FY';
-  static const _tk3 = 'JcvL2Blobgfa';
-  static const _tk4 = 'HzKrkRTQFkFp';
+  /// 레거시 화면과의 호환용 상태값. 실제 사용 가능 여부는 [hasKey]로 판정한다.
+  static bool get isTestPeriod => _developmentAiEnabled;
+  static String get testPeriodEndLabel => '개발 모드';
 
-  /// 🧪 AI 튜터 테스트 기간 — 이 기간 동안에만 AI 기능이 자동 활성화된다.
-  static final DateTime testPeriodEnd = DateTime(2026, 12, 31, 23, 59, 59);
-
-  /// 현재가 테스트 기간인지 여부
-  static bool get isTestPeriod => DateTime.now().isBefore(testPeriodEnd);
-
-  /// 테스트 종료일 표시용 문자열 (예: 2026.12.31)
-  static String get testPeriodEndLabel =>
-      '${testPeriodEnd.year}.${testPeriodEnd.month.toString().padLeft(2, '0')}.${testPeriodEnd.day.toString().padLeft(2, '0')}';
-
-  /// 테스트 기간에는 내장 키가 자동 적용된다. 기간 종료 시 빈 문자열.
+  /// 개발 키는 빌드 옵션으로만 제공된다. 기본/백업 키를 모두 지원한다.
   Future<String> getApiKey() async {
-    if (!isTestPeriod) return '';
-    return _tk1 + _tk2 + _tk3 + _tk4;
+    if (!_developmentAiEnabled) return '';
+    if (_primaryDevKey.isNotEmpty) return _primaryDevKey;
+    return _backupDevKey;
   }
 
-  /// 호환용 스텅 — 키는 자동 관리되므로 사용자 저장은 무시한다.
+  /// 이 앱은 키를 로컬 저장소나 소스에 기록하지 않는다.
   Future<void> setApiKey(String key) async {}
 
-  /// 테스트 기간 = 키 자동 보유
-  Future<bool> hasKey() async => isTestPeriod;
+  Future<bool> hasKey() async => (await getApiKey()).isNotEmpty;
 
-  /// AI 기능 사용 가능 여부 = 테스트 기간
-  Future<bool> get aiAvailable async => isTestPeriod;
+  Future<bool> get aiAvailable async => hasKey();
 
   /// 튜터 시스템 프롬프트 — 현재 종목 맞춤 + 사고 지시 + 페르소나 스타일
   String _systemPrompt({String? personaStyle}) {
@@ -130,16 +123,9 @@ class CerebrasService {
     required double temperature,
     required String effort,
   }) async {
-    if (!isTestPeriod) {
-      throw CerebrasException(
-        'AI 튜터 테스트 기간이 종료되었습니다. 로컬 강의·공식·암기법 검색을 이용해주세요.',
-      );
-    }
     final key = await getApiKey();
     if (key.isEmpty) {
-      throw CerebrasException(
-        'AI API 키가 설정되지 않았습니다. 설정 화면의 "AI 튜터 (테스트)" 카드에서 키를 등록해주세요.',
-      );
+      throw CerebrasException('개발용 AI 연결이 준비되지 않았습니다. 개발 실행 설정을 확인해주세요.');
     }
 
     late final http.Response res;

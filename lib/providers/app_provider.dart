@@ -36,6 +36,23 @@ class AppProvider extends ChangeNotifier {
   String? lastAutoBackupAt; // 💾 마지막 자동 백업 시각(ISO8601)
   bool examInProgress = false; // 🔒 실전모드 진행 중 여부(런타임 전용, 저장 안 함)
 
+  // 관리자 기본 정책. 잠금 해제 여부는 저장하지 않고 설정값만 사용자별로 보관한다.
+  static const String initialAdminPassword = '1234';
+  static const Map<String, bool> defaultFeatureVisibility = {
+    'theory': true,
+    'practice': true,
+    'cbt': true,
+    'flashcards': true,
+    'aiTutor': true,
+  };
+  Map<String, bool> featureVisibility = Map<String, bool>.from(
+    defaultFeatureVisibility,
+  );
+  Map<String, Set<String>> hiddenSubjectsByTrack = {};
+  bool autoExamTimerEnabled = true;
+  int cbtTimeLimitMinutes = 150;
+  int cbtQuestionsPerSubject = 20;
+
   // Timer state
   bool timerRunning = false;
   DateTime? timerStart;
@@ -87,6 +104,30 @@ class AppProvider extends ChangeNotifier {
     reduceMotion = (_settingsBox.get('reduceMotion') as bool?) ?? false;
     textScaleFactor = (_settingsBox.get('textScaleFactor') as double?) ?? 1.0;
     lastAutoBackupAt = _settingsBox.get('lastAutoBackupAt') as String?;
+    featureVisibility = Map<String, bool>.from(defaultFeatureVisibility);
+    final rawFeatures = _settingsBox.get('adminFeatureVisibility');
+    if (rawFeatures is Map) {
+      rawFeatures.forEach((key, value) {
+        if (value is bool) featureVisibility[key.toString()] = value;
+      });
+    }
+    hiddenSubjectsByTrack = {};
+    final rawHidden = _settingsBox.get('adminHiddenSubjects');
+    if (rawHidden is Map) {
+      rawHidden.forEach((key, value) {
+        if (value is List) {
+          hiddenSubjectsByTrack[key.toString()] = value
+              .map((item) => item.toString())
+              .toSet();
+        }
+      });
+    }
+    autoExamTimerEnabled =
+        (_settingsBox.get('adminAutoExamTimer') as bool?) ?? true;
+    cbtTimeLimitMinutes =
+        (_settingsBox.get('adminCbtTimeLimitMinutes') as int?) ?? 150;
+    cbtQuestionsPerSubject =
+        (_settingsBox.get('adminCbtQuestionsPerSubject') as int?) ?? 20;
     shieldCount = (_settingsBox.get('shieldCount') as int?) ?? 0;
     onboarded = (_settingsBox.get('onboarded_v1') as bool?) ?? false;
     selectedTrackId = _settingsBox.get('selectedTrack') as String?;
@@ -267,6 +308,95 @@ class AppProvider extends ChangeNotifier {
   void setExamInProgress(bool v) {
     if (examInProgress == v) return;
     examInProgress = v;
+    notifyListeners();
+  }
+
+  // ===== 관리자 정책 설정 =====
+  bool verifyAdminPassword(String value) => value == initialAdminPassword;
+
+  bool isFeatureEnabled(String feature) => featureVisibility[feature] ?? true;
+
+  List<String> activeSubjectsFor(ExamTrack track) {
+    final hidden = hiddenSubjectsByTrack[track.id] ?? const <String>{};
+    return track.subjects
+        .where((subject) => !hidden.contains(subject))
+        .toList();
+  }
+
+  bool isSubjectEnabled(String trackId, String subject) =>
+      !(hiddenSubjectsByTrack[trackId]?.contains(subject) ?? false);
+
+  Future<void> setFeatureEnabled(String feature, bool enabled) async {
+    featureVisibility[feature] = enabled;
+    await _settingsBox.put(
+      'adminFeatureVisibility',
+      Map<String, bool>.from(featureVisibility),
+    );
+    notifyListeners();
+  }
+
+  Future<bool> setSubjectEnabled(
+    ExamTrack track,
+    String subject,
+    bool enabled,
+  ) async {
+    final hidden = hiddenSubjectsByTrack.putIfAbsent(
+      track.id,
+      () => <String>{},
+    );
+    if (enabled) {
+      hidden.remove(subject);
+    } else {
+      final activeCount = activeSubjectsFor(track).length;
+      if (activeCount <= 1 && !hidden.contains(subject)) return false;
+      hidden.add(subject);
+    }
+    await _saveHiddenSubjects();
+    notifyListeners();
+    return true;
+  }
+
+  Future<void> _saveHiddenSubjects() async {
+    await _settingsBox.put('adminHiddenSubjects', {
+      for (final entry in hiddenSubjectsByTrack.entries)
+        entry.key: entry.value.toList(),
+    });
+  }
+
+  Future<void> setAutoExamTimerEnabled(bool enabled) async {
+    autoExamTimerEnabled = enabled;
+    await _settingsBox.put('adminAutoExamTimer', enabled);
+    notifyListeners();
+  }
+
+  Future<void> setCbtTimeLimitMinutes(int minutes) async {
+    cbtTimeLimitMinutes = minutes.clamp(10, 300);
+    await _settingsBox.put('adminCbtTimeLimitMinutes', cbtTimeLimitMinutes);
+    notifyListeners();
+  }
+
+  Future<void> setCbtQuestionsPerSubject(int count) async {
+    cbtQuestionsPerSubject = count.clamp(1, 40);
+    await _settingsBox.put(
+      'adminCbtQuestionsPerSubject',
+      cbtQuestionsPerSubject,
+    );
+    notifyListeners();
+  }
+
+  Future<void> resetAdminSettings() async {
+    featureVisibility = Map<String, bool>.from(defaultFeatureVisibility);
+    hiddenSubjectsByTrack = {};
+    autoExamTimerEnabled = true;
+    cbtTimeLimitMinutes = 150;
+    cbtQuestionsPerSubject = 20;
+    await _settingsBox.deleteAll([
+      'adminFeatureVisibility',
+      'adminHiddenSubjects',
+      'adminAutoExamTimer',
+      'adminCbtTimeLimitMinutes',
+      'adminCbtQuestionsPerSubject',
+    ]);
     notifyListeners();
   }
 

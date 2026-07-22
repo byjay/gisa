@@ -16,6 +16,7 @@ import '../services/cerebras_service.dart';
 import '../services/notification_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/tutor_avatar.dart';
+import 'admin_settings_screen.dart';
 
 /// 설정 화면 — 계정(구글 로그인 준비), 테마, 목표 등.
 class SettingsScreen extends StatefulWidget {
@@ -44,6 +45,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _sectionTitle(cs, '계정'),
           const SizedBox(height: 8),
           _accountCard(context),
+          const SizedBox(height: 20),
+          _sectionTitle(cs, '관리자'),
+          const SizedBox(height: 8),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.admin_panel_settings_rounded),
+              title: const Text('관리자 모드'),
+              subtitle: const Text('과목·기능·CBT·타이머 운영 설정'),
+              trailing: const Icon(Icons.lock_outline_rounded),
+              onTap: () => _openAdminMode(context),
+            ),
+          ),
           const SizedBox(height: 20),
           // 🧪 AI 튜터 API 키 — 테스트 기간에만 노출되는 설정 카드 (잘 보이는 상단 배치)
           if (CerebrasService.isTestPeriod) ...[
@@ -167,6 +180,67 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _openAdminMode(BuildContext context) async {
+    final controller = TextEditingController();
+    String? errorText;
+    final unlocked = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('관리자 인증'),
+          content: TextField(
+            controller: controller,
+            obscureText: true,
+            autofocus: true,
+            keyboardType: TextInputType.number,
+            maxLength: 8,
+            decoration: InputDecoration(
+              labelText: '관리자 비밀번호',
+              errorText: errorText,
+              counterText: '',
+            ),
+            onSubmitted: (_) {
+              final ok = context.read<AppProvider>().verifyAdminPassword(
+                controller.text.trim(),
+              );
+              if (ok) {
+                Navigator.pop(dialogContext, true);
+              } else {
+                setDialogState(() => errorText = '비밀번호가 올바르지 않습니다.');
+              }
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('취소'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final ok = context.read<AppProvider>().verifyAdminPassword(
+                  controller.text.trim(),
+                );
+                if (ok) {
+                  Navigator.pop(dialogContext, true);
+                } else {
+                  setDialogState(() => errorText = '비밀번호가 올바르지 않습니다.');
+                }
+              },
+              child: const Text('확인'),
+            ),
+          ],
+        ),
+      ),
+    );
+    controller.dispose();
+    if (unlocked == true && context.mounted) {
+      await Navigator.push<void>(
+        context,
+        MaterialPageRoute(builder: (_) => const AdminSettingsScreen()),
+      );
+    }
   }
 
   /// 테마 팔레트 선택 — 10종 색상 칩

@@ -111,7 +111,7 @@ class ExamPaper {
     id: (j['id'] as String?) ?? '',
     label: (j['label'] as String?) ?? '',
     year: (j['year'] as int?) ?? 0,
-    session: (j['session'] as String?)?.toString() ?? '',
+    session: j['session']?.toString() ?? '',
     questions: ((j['questions'] as List?) ?? const [])
         .map((e) => Question.fromJson(e as Map<String, dynamic>))
         .toList(),
@@ -987,14 +987,58 @@ class StudyData {
     return _slideDecks!;
   }
 
-  /// 과목별 핵심요약 슬라이드 덱 로드 (빈도순·필수암기 중심)
+  /// 과목별 핵심요약 슬라이드 덱 로드 (빈도순·필수암기 중심).
+  ///
+  /// 일부 종목은 별도의 subject_summary.json이 없으므로 30일 이론 덱에서
+  /// 해당 과목의 카드를 자동 병합한다. 따라서 지원하는 모든 종목·과목에서
+  /// 핵심요약 화면이 비어 있지 않으며, 별도 요약 파일이 추가되면 우선 사용한다.
   Future<List<SlideDeck>> loadSubjectSummaries() async {
     if (_subjectSummaries != null) return _subjectSummaries!;
-    _subjectSummaries = await _safeLoadList(
+    final saved = await _safeLoadList(
       _p('subject_summary.json'),
       SlideDeck.fromJson,
     );
+    final theoryDecks = await loadSlideDecks();
+    final completed = <SlideDeck>[];
+
+    for (var index = 0; index < kSubjects.length; index++) {
+      final subject = kSubjects[index];
+      final prepared = saved.where(
+        (deck) => _sameSubject(deck.subject, subject),
+      );
+      if (prepared.isNotEmpty) {
+        completed.add(prepared.first);
+        continue;
+      }
+
+      final source =
+          theoryDecks
+              .where((deck) => _sameSubject(deck.subject, subject))
+              .toList()
+            ..sort((a, b) => a.day.compareTo(b.day));
+      final cards = <SlideCard>[for (final deck in source) ...deck.cards];
+      if (cards.isNotEmpty) {
+        completed.add(
+          SlideDeck(
+            day: index + 1,
+            subject: subject,
+            title: '$subject 핵심요약',
+            phase: '과목별 핵심요약',
+            cards: cards,
+          ),
+        );
+      }
+    }
+    _subjectSummaries = completed;
     return _subjectSummaries!;
+  }
+
+  bool _sameSubject(String value, String canonical) {
+    final normalizedValue = value.replaceAll(RegExp(r'\s+'), '');
+    final normalizedCanonical = canonical.replaceAll(RegExp(r'\s+'), '');
+    return normalizedValue == normalizedCanonical ||
+        normalizedValue.startsWith(normalizedCanonical) ||
+        normalizedCanonical.startsWith(normalizedValue);
   }
 
   /// 핵심이론서(과목별) 슬라이드 덱 캐시 — subject → 병합 덱
@@ -1058,15 +1102,87 @@ class StudyData {
     return _formulaGuide;
   }
 
-  /// 실기 데이터 로드
+  /// 실기 데이터 로드.
+  ///
+  /// 원본 실기 카드가 비어 있거나 특정 과목만 빠진 종목은 검증된 강의 노트의
+  /// 실기 연계·필수암기 내용을 카드로 보완한다. 기존 전문 실기 카드는 그대로
+  /// 유지하고 누락 과목만 채우므로 모든 종목의 전 과목에서 실기 대비가 열린다.
   Future<SilgiData?> loadSilgi() async {
     if (_silgi != null) return _silgi;
+    SilgiData? loaded;
     try {
       final raw = await rootBundle.loadString(_p('silgi.json'));
-      _silgi = SilgiData.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+      loaded = SilgiData.fromJson(jsonDecode(raw) as Map<String, dynamic>);
     } catch (e) {
       if (kDebugMode) debugPrint('silgi.json 로드 실패: $e');
     }
+
+    final items = <SilgiItem>[...?loaded?.items];
+    final lessons = await loadLessons();
+    for (final subject in kSubjects) {
+      final alreadyCovered = items.any(
+        (item) => _sameSubject(item.linkSubject, subject),
+      );
+      if (alreadyCovered) continue;
+
+      final subjectLessons = lessons
+          .where((lesson) => _sameSubject(lesson.subject, subject))
+          .take(2)
+          .toList();
+      if (subjectLessons.isEmpty) {
+        items.add(
+          SilgiItem(
+            category: '필기·실기 연계',
+            title: '$subject 실기 연결 체크',
+            linkSubject: subject,
+            importance: 3,
+            question: '$subject 핵심 개념을 실기 답안에 적용할 때 먼저 확인할 것은?',
+            answer: '문제의 조건과 단위를 확인하고, 관련 기준·공식·계산 과정을 순서대로 작성한다.',
+            memo: '필기 핵심이론을 실기 서술형 답안으로 연결하는 기본 카드',
+          ),
+        );
+        continue;
+      }
+      for (final lesson in subjectLessons) {
+        final answerParts = <String>[
+          if (lesson.silgi.isNotEmpty) lesson.silgi,
+          if (lesson.must.isNotEmpty) lesson.must.take(3).join('\n• '),
+          if (lesson.strategy.isNotEmpty) lesson.strategy,
+        ];
+        items.add(
+          SilgiItem(
+            category: lesson.topic,
+            title: '${lesson.topic} 실기 연결',
+            linkSubject: subject,
+            importance: lesson.importance,
+            question: '${lesson.topic}이 실기 문제로 출제될 때 답안에 포함해야 할 핵심은?',
+            answer: answerParts.isEmpty
+                ? lesson.intro
+                : answerParts.join('\n\n• '),
+            memo: lesson.traps.isEmpty
+                ? '계산 과정과 단위를 빠뜨리지 말고 답안을 작성하세요.'
+                : '주의: ${lesson.traps.first}',
+          ),
+        );
+      }
+    }
+
+    _silgi = SilgiData(
+      title: loaded?.title.isNotEmpty == true
+          ? loaded!.title
+          : '${_currentTrack.name} 실기 핵심',
+      overview: loaded?.overview.isNotEmpty == true
+          ? loaded!.overview
+          : '필기 전 과목의 핵심 개념을 실기 답안 작성과 계산 과정으로 연결합니다.',
+      strategy: loaded?.strategy.isNotEmpty == true
+          ? loaded!.strategy
+          : const [
+              '문제 조건과 단위를 먼저 표시한 뒤 답안을 작성하세요.',
+              '공식, 대입, 계산, 최종 단위의 순서를 지키세요.',
+              '서술형은 핵심 키워드를 빠짐없이 짧고 정확하게 적으세요.',
+            ],
+      items: items,
+    );
     return _silgi;
   }
 
@@ -1138,12 +1254,20 @@ class StudyData {
 
   Future<List<ExamPaper>> loadExams() async {
     if (_exams != null) return _exams!;
-    _exams = await _safeLoadList(_p('exams.json'), ExamPaper.fromJson)
+
+    // 종목을 빠르게 바꾸면 이전 종목의 비동기 로드가 늦게 끝날 수 있다.
+    // 로드 시작 시점의 경로를 고정하고, 현재 종목과 같을 때만 캐시에 반영한다.
+    final loadingTrackId = _currentTrack.id;
+    final loadingPath = _p('exams.json');
+    final loaded = await _safeLoadList(loadingPath, ExamPaper.fromJson)
       ..sort((a, b) {
         final c = b.year.compareTo(a.year);
         return c != 0 ? c : b.session.compareTo(a.session);
       });
-    return _exams!;
+    if (_currentTrack.id == loadingTrackId) {
+      _exams = loaded;
+    }
+    return loaded;
   }
 
   /// 문제은행 총 문항 수(회독 계산용) — 4지선다 유효 문항만 카운트
@@ -1341,13 +1465,43 @@ class StudyData {
     return out;
   }
 
-  /// 반복 출제 클러스터 로드 (빈도순 정렬 완료 상태)
+  /// 반복 출제 클러스터 로드 (빈도순 정렬 완료 상태).
+  /// 원본 분석에서 빠진 과목은 출제빈도 상위 기출을 핵심기출 카드로 보완한다.
   Future<List<RepeatCluster>> loadRepeats() async {
     if (_repeats != null) return _repeats!;
-    _repeats = await _safeLoadList(
+    final loaded = await _safeLoadList(
       _p('repeat_questions.json'),
       RepeatCluster.fromJson,
     );
+    final completed = <RepeatCluster>[...loaded];
+    for (final subject in kSubjects) {
+      if (completed.any((item) => _sameSubject(item.subject, subject))) {
+        continue;
+      }
+      final questions = await questionsByFrequency(subject);
+      for (final question in questions.take(5)) {
+        final answerText =
+            question.answer > 0 && question.answer <= question.options.length
+            ? question.options[question.answer - 1]
+            : '';
+        completed.add(
+          RepeatCluster(
+            subject: subject,
+            topic: question.topic,
+            count: 1,
+            exams: [question.examLabel],
+            question: question.question,
+            options: question.options,
+            answer: question.answer,
+            answerText: answerText,
+            isVariation: false,
+            variations: const [],
+          ),
+        );
+      }
+    }
+    completed.sort((a, b) => b.count.compareTo(a.count));
+    _repeats = completed;
     return _repeats!;
   }
 
@@ -1355,7 +1509,7 @@ class StudyData {
   Future<List<RepeatCluster>> repeatsBySubject(String? subject) async {
     final all = await loadRepeats();
     if (subject == null) return all;
-    return all.where((r) => r.subject == subject).toList();
+    return all.where((r) => _sameSubject(r.subject, subject)).toList();
   }
 
   /// 과목+토픽 관련 암기법 찾기

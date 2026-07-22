@@ -161,11 +161,11 @@ class HomeScreen extends StatelessWidget {
                         Expanded(
                           child: _actionTile(
                             context,
-                            icon: Icons.school_rounded,
-                            label: '오늘의 학습',
-                            sub: '문제·강의·암기',
+                            icon: Icons.computer_rounded,
+                            label: 'CBT 모의고사',
+                            sub: '실전처럼 바로 풀기',
                             gradient: AppTheme.electricGradient,
-                            onTap: () => onNavigate(1),
+                            onTap: () => onNavigate(AppTabs.cbt),
                           ),
                         ),
                       ],

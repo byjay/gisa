@@ -1,12 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cert_study_tracker/services/exam_track.dart';
+import 'package:cert_study_tracker/services/study_data.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// 📋 전체 문제 데이터 무결성 회귀 가드
 /// 10개 종목의 exams.json / repeat_questions.json 을 직접 읽어
 /// 정답 범위·보기 개수·중복 보기·빈 지문을 검사한다.
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   final tracks = Directory(
     'assets/data',
   ).listSync().whereType<Directory>().map((d) => d.path).toList();
@@ -66,6 +70,36 @@ void main() {
     }
     expect(total, greaterThan(500));
     expect(errors, isEmpty, reason: errors.take(20).join('\n'));
+  });
+
+  test('10개 종목 48개 전 과목의 요약·반복기출·실기 카드가 모두 열린다', () async {
+    var checkedSubjects = 0;
+    for (final track in kExamTracks) {
+      StudyData.instance.setTrack(track);
+      final summaries = await StudyData.instance.loadSubjectSummaries();
+      final repeats = await StudyData.instance.loadRepeats();
+      final silgi = await StudyData.instance.loadSilgi();
+
+      for (final subject in track.subjects) {
+        checkedSubjects++;
+        expect(
+          summaries.any((deck) => deck.subject.startsWith(subject)),
+          isTrue,
+          reason: '${track.name} / $subject 핵심요약 누락',
+        );
+        expect(
+          repeats.any((item) => item.subject == subject),
+          isTrue,
+          reason: '${track.name} / $subject 반복기출 누락',
+        );
+        expect(
+          silgi?.items.any((item) => item.linkSubject.startsWith(subject)),
+          isTrue,
+          reason: '${track.name} / $subject 실기카드 누락',
+        );
+      }
+    }
+    expect(checkedSubjects, 48);
   });
 
   test('image 필드가 있으면 실제 이미지 파일이 존재한다 (전 종목)', () {

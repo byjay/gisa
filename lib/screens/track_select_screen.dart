@@ -56,7 +56,43 @@ class TrackSelectScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 11,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withValues(
+                      alpha: dark ? 0.18 : 0.08,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: AppTheme.primary.withValues(alpha: 0.22),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.verified_rounded,
+                        color: AppTheme.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '${kExamTracks.length}개 자격 종목 · ${kExamTracks.fold<int>(0, (sum, track) => sum + track.subjects.length)}개 전 과목 학습 지원',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w800,
+                            color: dark ? Colors.white : AppTheme.textStrong,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
                 for (final t in kExamTracks) ...[
                   _TrackButton(track: t),
                   const SizedBox(height: 14),
@@ -151,9 +187,9 @@ class _TrackButton extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        '기출 ${track.questionCountLabel}문항 · 1:1강의 ${track.topicCount}토픽 · 암기카드',
+                        '${track.subjects.length}개 전 과목 · 기출 ${track.questionCountLabel}문항 · 강의 ${track.topicCount}토픽 · 실기·암기카드',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.75),
+                          color: Colors.white.withValues(alpha: 0.78),
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                         ),
