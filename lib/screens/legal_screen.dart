@@ -54,7 +54,7 @@ class LegalScreen extends StatelessWidget {
           const SizedBox(height: 18),
         ],
         Text(
-          '시행일: 2025년 1월 1일 · 문의: certstudytracker@gmail.com',
+          '시행일: 2025년 1월 1일 · 문의: admin@secms.tech',
           style: TextStyle(
             fontSize: 11.5,
             color: cs.onSurface.withValues(alpha: 0.5),
@@ -68,7 +68,7 @@ class LegalScreen extends StatelessWidget {
   static const List<(String, String)> _privacy = [
     (
       '1. 수집하는 정보',
-      'Cert Study Tracker(이하 "앱")는 회원가입 없이 사용할 수 있으며, 학습 기록(문제 풀이 내역, 학습 시간, 오답 노트, 설정값)은 모두 사용자 기기 내부에만 저장됩니다. 앱은 이름·이메일·전화번호 등 개인 식별 정보를 서버로 전송하거나 수집하지 않습니다.',
+      'Gisaclub(이하 "앱")는 회원가입 없이 사용할 수 있으며, 학습 기록(문제 풀이 내역, 학습 시간, 오답 노트, 설정값)은 모두 사용자 기기 내부에만 저장됩니다. 앱은 이름·이메일·전화번호 등 개인 식별 정보를 서버로 전송하거나 수집하지 않습니다.',
     ),
     (
       '2. AI 튜터 이용 시 처리되는 정보',

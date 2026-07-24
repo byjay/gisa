@@ -15,7 +15,7 @@
         </intent>
     </queries>
     <application
-        android:label="볼트쌤"
+        android:label="Gisaclub"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -78,6 +78,8 @@
         </intent>
     </queries>
 </manifest>
+
+
 
 
 

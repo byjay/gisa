@@ -8,7 +8,7 @@ class HelpFaqScreen extends StatelessWidget {
   static const List<_FaqSection> _sections = [
     _FaqSection('시작하기', Icons.rocket_launch_rounded, [
       _Faq(
-        '볼트쌤은 어떤 앱인가요?',
+        'Gisaclub은 어떤 앱인가요?',
         '전기기사·전기공사기사·소방설비기사 등 국가기술자격 시험을 준비하는 분들을 위한 '
             '올인원 학습 앱입니다. 기출문제 풀이, AI 튜터, 암기법, 합격 예측, '
             '학습 통계까지 한 곳에서 제공합니다.',
@@ -94,7 +94,7 @@ class HelpFaqScreen extends StatelessWidget {
     _FaqSection('알림 · 설정', Icons.notifications_active_rounded, [
       _Faq(
         '학습 리마인더 알림이 오지 않아요.',
-        '설정에서 알림이 켜져 있는지 확인한 뒤, 기기 설정 → 앱 → 볼트쌤 → 알림 '
+        '설정에서 알림이 켜져 있는지 확인한 뒤, 기기 설정 → 앱 → Gisaclub → 알림 '
             '권한이 허용되어 있는지 확인해 주세요. 일부 기기는 배터리 최적화 예외 '
             '등록이 필요할 수 있습니다.',
       ),

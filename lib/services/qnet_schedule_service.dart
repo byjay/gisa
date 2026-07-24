@@ -253,6 +253,12 @@ class QnetScheduleService {
     return null;
   }
 
+  /// [P3-A/T5] 테스트 전용 공개 진입점. private 파서/연도검증 로직을
+  /// 라이브러리 밖(test/)에서도 직접 호출해 회귀 테스트할 수 있게 한다.
+  @visibleForTesting
+  List<QnetExamRound> parseScheduleTableForTest(String html) =>
+      _parseScheduleTable(html);
+
   /// 시험일정 <table> 파싱.
   ///
   /// 표 구조(열 순서):
@@ -330,7 +336,16 @@ class QnetScheduleService {
     return dates.isEmpty ? null : dates.first;
   }
 
-  /// yyyy.MM.dd 형태의 날짜를 모두 추출.
+  /// [P1-A/S2] 크롤링 결과(3rd-party CORS 프록시 경유)는 신뢰할 수 없는
+  /// 입력으로 취급한다. 파싱된 연도가 비합리적 범위(작년~2년 후)를 벗어나면
+  /// 위조/오염된 데이터로 간주해 폐기한다 — 이 날짜들로 실제 기기 알림까지
+  /// 예약되므로 최소한의 방어가 필요하다.
+  bool _isPlausibleYear(int year) {
+    final now = DateTime.now().year;
+    return year >= now - 1 && year <= now + 2;
+  }
+
+  /// yyyy.MM.dd 형태의 날짜를 모두 추출. 비합리적 연도는 폐기한다.
   List<DateTime> _extractDates(String text) {
     final re = RegExp(r'(\d{4})\.(\d{1,2})\.(\d{1,2})');
     final out = <DateTime>[];
@@ -338,7 +353,7 @@ class QnetScheduleService {
       final y = int.tryParse(m.group(1)!);
       final mo = int.tryParse(m.group(2)!);
       final d = int.tryParse(m.group(3)!);
-      if (y != null && mo != null && d != null) {
+      if (y != null && mo != null && d != null && _isPlausibleYear(y)) {
         out.add(DateTime(y, mo, d));
       }
     }

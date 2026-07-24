@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/cerebras_service.dart';
 import '../../services/study_data.dart';
 import '../../widgets/tutor_avatar.dart';
+import '../../widgets/premium_gate.dart';
 import 'lesson_screen.dart';
 import '../../widgets/persistent_nav.dart';
 
@@ -245,18 +246,12 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
   Future<void> _askAi() async {
     final q = _controller.text.trim();
     if (q.isEmpty) return;
-    // 🧪 테스트 기간 종료 시 AI 검증 차단 (로컬 검색은 계속 사용 가능)
-    if (!CerebrasService.isTestPeriod) {
-      setState(() {
-        _aiError = 'AI 튜터 테스트 기간이 종료되었어요. 로컬 자료 검색 결과를 이용해주세요.';
-      });
-      return;
-    }
     final hasKey = await CerebrasService.instance.hasKey();
     if (!mounted) return;
     if (!hasKey) {
       setState(() {
-        _aiError = 'AI 검증을 사용할 수 없습니다. 로컬 자료 검색 결과를 이용해주세요.';
+        _aiError = 'AI 검증을 사용하려면 설정 → "AI 튜터 API 키"에서 무료 Cerebras 키를 등록하세요. '
+            '지금은 아래 로컬 자료 검색 결과를 이용할 수 있어요.';
       });
       return;
     }
@@ -280,6 +275,14 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
           _aiAnswer = ans;
           _aiLoading = false;
         });
+      }
+    } on PremiumRequiredException catch (e) {
+      if (mounted) {
+        setState(() {
+          _aiError = e.message;
+          _aiLoading = false;
+        });
+        openPremiumPaywall(context, hook: e.message);
       }
     } catch (e) {
       if (mounted) {

@@ -8,20 +8,20 @@ import '../providers/app_provider.dart';
 
 enum TutorMood { idle, happy, thinking, wrong, teaching, meditate, cheer }
 
-/// 볼트쌤(푸티) 전용 — 상황(무드)별 포즈 프레임 매핑 (pose_01 ~ pose_38)
-/// 스텝마다 다른 행동 이미지가 나오도록 각 무드에 여러 포즈를 배정한다.
-const Map<TutorMood, List<int>> voltMoodPoses = {
-  TutorMood.idle: [1, 7, 8, 11, 29, 6, 24],
-  TutorMood.happy: [4, 16, 26, 34, 30, 19, 38],
-  TutorMood.thinking: [5, 9, 12, 17, 27, 22, 23],
-  TutorMood.wrong: [10, 11, 28, 37, 20],
-  TutorMood.teaching: [2, 3, 13, 14, 21, 18, 32],
-  TutorMood.meditate: [35, 36, 31],
-  TutorMood.cheer: [4, 15, 25, 33, 34, 19, 38],
+/// 볼트쌤(푸티) 전용 — 상황(무드)별 전신 3D 이미지 매핑 (volt2_*, 잘림 없이 재제작).
+/// 기존 pose_01~38(하반신 잘림 확인됨)을 대체하는 무드별 단일 전신 이미지 세트.
+const Map<TutorMood, String> voltMoodAsset = {
+  TutorMood.idle: 'assets/tutor/volt2_idle.png',
+  TutorMood.happy: 'assets/tutor/volt2_happy.png',
+  TutorMood.thinking: 'assets/tutor/volt2_thinking.png',
+  TutorMood.wrong: 'assets/tutor/volt2_wrong.png',
+  TutorMood.teaching: 'assets/tutor/volt2_teaching.png',
+  TutorMood.meditate: 'assets/tutor/volt2_meditate.png',
+  TutorMood.cheer: 'assets/tutor/volt2_cheer.png',
 };
 
-String voltPoseAsset(int pose) =>
-    'assets/tutor/pose_${pose.toString().padLeft(2, '0')}.png';
+String voltPoseAssetForMood(TutorMood mood) =>
+    voltMoodAsset[mood] ?? voltMoodAsset[TutorMood.idle]!;
 
 /// 소연·하린·지윤 3D 강사 전용 — 무드별 포즈 프레임 매핑 (pose_01 ~ pose_50)
 /// 시트 구성: 1-10 idle, 11-20 happy, 21-30 thinking, 31-40 teaching,
@@ -75,8 +75,8 @@ const tutorProfiles = <TutorProfile>[
   TutorProfile(
     id: 'volt',
     name: '볼트쌤',
-    role: '반복 암기와 시험 함정을 잡는 총괄 튜터 (38가지 행동 포즈)',
-    asset: 'assets/tutor/pose_01.png',
+    role: '반복 암기와 시험 함정을 잡는 총괄 튜터 (무드별 전신 3D 이미지)',
+    asset: 'assets/tutor/volt2_idle.png',
     color: Color(0xFFF59E0B), // 에너지 앰버
     styleTag: '열정 총괄 코치',
     emoji: '⚡',
@@ -131,7 +131,8 @@ class TutorAvatar extends StatefulWidget {
   final bool rotate;
   final bool headOnly;
 
-  /// 볼트쌤 전용 — 특정 포즈를 고정 표시(상황별 지정 포즈)
+  /// (구) 볼트쌤 특정 포즈 고정 표시용 — 볼트쌤이 무드별 전신 단일 이미지로
+  /// 전환됨에 따라 더 이상 사용하지 않음. 하위 호환을 위해 필드만 유지.
   final int? poseOverride;
 
   const TutorAvatar({
@@ -155,11 +156,8 @@ class _TutorAvatarState extends State<TutorAvatar> {
   int _frameIdx = 0;
   final _rand = Random();
 
-  /// build에서 갱신되는 현재 강사 id — 프레임 목록 계산에 사용.
-  String _profileId = 'volt';
-
   List<int> get _frames {
-    final map = _profileId == 'volt' ? voltMoodPoses : teacherMoodPoses;
+    final map = teacherMoodPoses;
     return map[widget.mood] ?? map[TutorMood.idle]!;
   }
 
@@ -202,8 +200,9 @@ class _TutorAvatarState extends State<TutorAvatar> {
   }
 
   String _poseAssetFor(TutorProfile profile) {
-    final isVolt = profile.id == 'volt';
-    final maxPose = isVolt ? 38 : 50;
+    // 볼트쌤은 무드별 전신 단일 이미지(잘림 없음)를 그대로 사용한다.
+    if (profile.id == 'volt') return voltPoseAssetForMood(widget.mood);
+    final maxPose = 50;
     final int pose;
     if (widget.poseOverride != null) {
       pose = widget.poseOverride!.clamp(1, maxPose);
@@ -211,7 +210,7 @@ class _TutorAvatarState extends State<TutorAvatar> {
       final frames = _frames;
       pose = frames[_frameIdx % frames.length];
     }
-    return isVolt ? voltPoseAsset(pose) : teacherPoseAsset(profile.id, pose);
+    return teacherPoseAsset(profile.id, pose);
   }
 
   @override
@@ -220,7 +219,6 @@ class _TutorAvatarState extends State<TutorAvatar> {
         ? context.select<AppProvider, String>((app) => app.selectedTutorId)
         : widget.characterId;
     final profile = tutorProfileById(selectedId);
-    _profileId = profile.id;
     final cs = Theme.of(context).colorScheme;
 
     // 모든 강사가 무드별 3D 포즈 프레임을 순환한다.
@@ -228,9 +226,9 @@ class _TutorAvatarState extends State<TutorAvatar> {
         ? _poseAssetFor(profile)
         : profile.asset;
     final headOnly = widget.headOnly;
-    // 이미지 실측 비율: 볼트 pose 프레임 132×292(0.452), 강사 포즈 280×560(0.50).
+    // 이미지 실측 비율: 볼트 신규 이미지 688×1522(0.452), 강사 포즈 280×560(0.50).
     // 비율 + 여유분을 더해 어떤 상황에서도 잘리지 않게 한다.
-    final ratio = profile.id == 'volt' ? 0.46 : 0.50;
+    final ratio = profile.id == 'volt' ? 0.45 : 0.50;
     final width = headOnly ? widget.size : widget.size * (ratio + 0.08);
 
     final Widget image = Image.asset(

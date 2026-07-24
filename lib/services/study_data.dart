@@ -51,6 +51,58 @@ class Question {
   String get difficultyLabel =>
       difficulty == 1 ? '하' : (difficulty == 3 ? '상' : '중');
 
+  // ─────────── 📊 기출빈도 상세 분석 (freqScore 0~100 기반) ───────────
+  /// 5단계 빈출 등급: 매우높음(초빈출)/높음/보통/낮음/희귀.
+  /// freqScore는 "반복출제 + 토픽 빈도"를 합산한 점수(0~100)다.
+  String get freqGrade {
+    final s = freqScore;
+    if (s >= 80) return '초빈출';
+    if (s >= 60) return '매우 자주';
+    if (s >= 40) return '자주';
+    if (s >= 20) return '가끔';
+    return '드물게';
+  }
+
+  /// 최근 10년(≈10회차) 기준 예상 출제 횟수 — freqScore를 회차수로 환산.
+  /// 예: score 80 → 최근 10회 중 약 8회 출제(변형 포함).
+  int get estimatedAppearances {
+    final n = (freqScore / 10).round();
+    return n < 1 ? 1 : (n > 10 ? 10 : n);
+  }
+
+  /// 이 유형이 재출제될 때의 변형 방식 설명(핵심 후킹 포인트).
+  /// 무료/프리미엄 공통으로 "왜 이 문제를 꼭 외워야 하는지" 동기부여.
+  String get reissuePattern {
+    final s = freqScore;
+    if (s >= 80) {
+      return '거의 매 회차 반복 출제되는 핵심 유형입니다. '
+          '숫자·보기 순서·단위만 바꿔 재출제되는 경우가 많아, '
+          '풀이 과정과 정답 근거를 통째로 암기하면 실전에서 즉답 가능합니다.';
+    }
+    if (s >= 60) {
+      return '여러 회차에 걸쳐 자주 나오는 유형입니다. '
+          '지문의 조건(수치·상황)을 바꿔 변형 출제되므로, '
+          '공식과 함정 포인트를 함께 익혀두세요.';
+    }
+    if (s >= 40) {
+      return '주기적으로 출제되는 유형입니다. 유사 개념 문제와 묶어 학습하면 효율적입니다.';
+    }
+    if (s >= 20) {
+      return '가끔 출제되는 유형입니다. 핵심 개념 위주로 가볍게 정리하세요.';
+    }
+    return '출제 빈도는 낮지만, 개념 이해 차원에서 한 번 짚고 넘어가면 좋습니다.';
+  }
+
+  /// 빈출 등급별 대표 색상(Hex, UI 사용).
+  int get freqColorValue {
+    final s = freqScore;
+    if (s >= 80) return 0xFFDC2626; // red-600
+    if (s >= 60) return 0xFFEA580C; // orange-600
+    if (s >= 40) return 0xFFD97706; // amber-600
+    if (s >= 20) return 0xFF65A30D; // lime-600
+    return 0xFF6B7280; // gray-500
+  }
+
   /// 문제 고유 ID (오답노트·북마크·진척 추적용)
   ///
   /// ⚠️ 종목(track) 접두어를 포함한다. 향후 자격증 10종으로 확장하거나
@@ -1245,8 +1297,12 @@ class StudyData {
       final list = jsonDecode(raw) as List;
       return list.map((e) => fromJson(e as Map<String, dynamic>)).toList();
     } catch (e) {
+      // [P3-A] 이 실패는 다수 종목에서 정상적으로 예상되는 경로다(예:
+      // subject_summary.json이 없는 종목은 loadSubjectSummaries()가
+      // theory_slides.json에서 자동 병합하는 폴백을 이미 갖고 있다).
+      // 폴백이 없는 진짜 결함과 구분되도록 로그 톤을 낮춘다.
       if (kDebugMode) {
-        debugPrint('$path 로드 실패: $e');
+        debugPrint('$path 없음(폴백 사용): $e');
       }
       return <T>[];
     }

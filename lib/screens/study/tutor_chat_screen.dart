@@ -8,6 +8,7 @@ import '../../services/tutor_speech_service.dart';
 import '../../services/voice_service.dart';
 import '../../widgets/drawing_pad.dart';
 import '../../widgets/tutor_avatar.dart';
+import '../../widgets/premium_gate.dart';
 
 /// AI 튜터 채팅 — Cerebras gpt-oss-120b 기반 "생각하는 튜터".
 /// 답변 전에 모델이 단계별 추론(thinking)을 수행하고,
@@ -285,21 +286,6 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
     }
 
     FocusScope.of(context).unfocus();
-    // 🧪 테스트 기간 종료 시 AI 호출 차단
-    if (!CerebrasService.isTestPeriod) {
-      setState(() {
-        _msgs.add(_Msg('user', msg));
-        _msgs.add(
-          _Msg(
-            'assistant',
-            'AI 튜터 테스트 기간이 종료되었어요. 학습 메뉴의 이론 검색에서 로컬 강의·공식·암기법을 바로 찾아보세요.',
-          ),
-        );
-        _controller.clear();
-      });
-      _scrollToBottom();
-      return;
-    }
     final hasKey = await CerebrasService.instance.hasKey();
     if (!mounted) return;
     if (!hasKey) {
@@ -308,7 +294,8 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
         _msgs.add(
           _Msg(
             'assistant',
-            'AI 튜터를 사용할 수 없어요. 학습 메뉴의 이론 검색에서 로컬 강의·공식·암기법을 바로 찾아보세요.',
+            'AI 튜터를 사용하려면 API 키가 필요해요. 설정 → "AI 튜터 API 키"에서 무료 Cerebras 키를 등록해주세요. '
+                '지금은 학습 메뉴의 이론 검색에서 로컬 강의·공식·암기법을 바로 찾아볼 수 있어요.',
           ),
         );
         _controller.clear();
@@ -352,6 +339,16 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
           pitch: _persona.speechPitch,
         );
       }
+    } on PremiumRequiredException catch (e) {
+      // 💎 무료 하루 한도 초과 → 페이월로 유도.
+      if (!mounted) return;
+      setState(() {
+        _msgs.add(_Msg('assistant', '💎 ${e.message}'));
+        _loading = false;
+      });
+      _scrollToBottom();
+      openPremiumPaywall(context, hook: e.message);
+      return;
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -611,37 +608,46 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        // 🧪 테스트 기간 안내 — 키는 자동 설정되므로 상태만 표시
-        if (CerebrasService.isTestPeriod)
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.teal.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
-            ),
-            child: Text(
-              '✅ AI 튜터 자동 활성화 · 테스트 기간 ~${CerebrasService.testPeriodEndLabel}\n별도 설정 없이 바로 질문하세요!',
-              style: const TextStyle(
-                fontSize: 12.5,
-                height: 1.5,
-                fontWeight: FontWeight.w700,
-                color: Colors.teal,
+        // AI 튜터 상태 안내 — 내 API 키 등록 여부에 따라 표시
+        FutureBuilder<bool>(
+          future: CerebrasService.instance.hasUserKey(),
+          builder: (context, snap) {
+            final hasKey = snap.data ?? false;
+            if (hasKey) {
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.teal.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: Colors.teal.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: const Text(
+                  '✅ AI 튜터 사용 준비 완료 · 내 API 키 등록됨\n무엇이든 편하게 질문하세요!',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    height: 1.5,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.teal,
+                  ),
+                ),
+              );
+            }
+            return Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHighest.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(14),
               ),
-            ),
-          )
-        else
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerHighest.withValues(alpha: 0.6),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Text(
-              'ℹ️ AI 튜터 테스트 기간이 종료되었어요.\n학습 메뉴의 이론 검색에서 로컬 강의·공식·암기법을 이용해주세요.',
-              style: TextStyle(fontSize: 12.5, height: 1.5),
-            ),
-          ),
+              child: const Text(
+                'ℹ️ AI 튜터를 사용하려면 설정 → "AI 튜터 API 키"에서 무료 Cerebras 키를 등록하세요.\n'
+                '등록 전에도 학습 메뉴의 이론 검색에서 로컬 강의·공식·암기법을 이용할 수 있어요.',
+                style: TextStyle(fontSize: 12.5, height: 1.5),
+              ),
+            );
+          },
+        ),
         const SizedBox(height: 22),
         Text(
           '추천 질문',

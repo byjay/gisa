@@ -1,5 +1,5 @@
 name: cert_study_tracker
-description: "전기/소방 자격증 기출문제 학습과 시험 일정 관리를 한 곳에서."
+description: "Gisaclub - 전기/소방 자격증 기출문제 학습과 시험 일정 관리를 한 곳에서."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -122,6 +122,9 @@ flutter:
     - assets/theory/hazmat_industrial/
     - assets/tutor/
     - assets/icons/app_icon.png
+    - assets/brand/logo_main.png
+    - assets/brand/logo_square.png
+    - assets/brand/logo_square_512.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

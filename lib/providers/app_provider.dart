@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/models.dart';
@@ -9,6 +11,7 @@ import '../services/qnet_schedule_service.dart';
 import '../services/schedule_alerts.dart';
 import '../services/exam_registration.dart';
 import '../services/notification_service.dart';
+import '../services/tutor_persona.dart' show kTutorPersonas;
 
 class AppProvider extends ChangeNotifier {
   late Box _examBox;
@@ -37,7 +40,12 @@ class AppProvider extends ChangeNotifier {
   bool examInProgress = false; // 🔒 실전모드 진행 중 여부(런타임 전용, 저장 안 함)
 
   // 관리자 기본 정책. 잠금 해제 여부는 저장하지 않고 설정값만 사용자별로 보관한다.
-  static const String initialAdminPassword = '1234';
+  // [P2-B/S3] 평문 상수 비교 대신 SHA-256 해시를 비교한다. 이 앱의 위협
+  // 모델(로컬 기능 잠금, 원격 공격 대상 아님)에서는 평문 비교도 즉각적인
+  // 위험은 아니지만, 소스에 평문 비밀번호가 노출되는 것 자체를 없앤다.
+  // 원문은 '1234' — sha256('1234')의 16진 다이제스트.
+  static const String _initialAdminPasswordHash =
+      '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
   static const Map<String, bool> defaultFeatureVisibility = {
     'theory': true,
     'practice': true,
@@ -54,11 +62,21 @@ class AppProvider extends ChangeNotifier {
   int cbtQuestionsPerSubject = 20;
 
   // Timer state
+  // ⏱ [P0-A/B1] 경과 시간은 틱 카운트(elapsedSeconds++)가 아니라 시작 시각과
+  // 벽시계를 비교해 매 틱 재계산한다. Timer.periodic은 UI 갱신
+  // (notifyListeners) 트리거일 뿐, 경과 시간의 진실 원천이 아니다.
+  // 백그라운드 진입, 화면 꺼짐, 웹 탭 스로틀링으로 틱이 누락/지연되어도
+  // 실제 경과 시간이 정확히 기록되도록 하기 위함.
   bool timerRunning = false;
   DateTime? timerStart;
   int elapsedSeconds = 0;
   Timer? _ticker;
   String? timerExamId;
+
+  /// 테스트에서 시계를 주입할 수 있도록 함수로 분리(fake clock 허용).
+  @visibleForTesting
+  set debugNow(DateTime Function() fn) => _now = fn;
+  DateTime Function() _now = DateTime.now;
 
   Future<void> init() async {
     await Hive.initFlutter();
@@ -87,9 +105,13 @@ class AppProvider extends ChangeNotifier {
             .map((e) => WrongNote.fromMap(Map<dynamic, dynamic>.from(e)))
             .toList()
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    // [P0-B/B9] 백업 복원 등으로 유입된 손상 레코드(date 필드 누락/타입 불일치)가
+    // 있어도 비안전 캐스트로 앱이 부팅 크래시하지 않도록 안전 캐스트로 전환.
     quizResults =
         _quizBox.values.map((e) => Map<String, dynamic>.from(e)).toList()..sort(
-          (a, b) => (b['date'] as String).compareTo(a['date'] as String),
+          (a, b) => ((b['date'] as String?) ?? '').compareTo(
+            (a['date'] as String?) ?? '',
+          ),
         );
     dailyGoalMinutes = (_settingsBox.get('dailyGoal') as int?) ?? 120;
     weeklyGoalMinutes = (_settingsBox.get('weeklyGoal') as int?) ?? 600;
@@ -257,9 +279,12 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// [P0-A/B2] 허용 튜터 목록은 이 함수 안에 별도로 하드코딩하지 않고
+  /// kTutorPersonas(단일 진실 원천, tutor_persona.dart)에서 파생한다.
+  /// 과거 하드코딩 셋 {'soyeon','harin','jiyoon'}에 기본 튜터 'volt'가
+  /// 빠져 있어, 다른 튜터로 바꾼 뒤 기본 튜터로 돌아올 수 없는 버그가 있었다.
   Future<void> setSelectedTutor(String id) async {
-    const available = {'soyeon', 'harin', 'jiyoon'};
-    if (!available.contains(id)) return;
+    if (!kTutorPersonas.any((t) => t.id == id)) return;
     selectedTutorId = id;
     await _settingsBox.put('selectedTutor', id);
     notifyListeners();
@@ -312,7 +337,9 @@ class AppProvider extends ChangeNotifier {
   }
 
   // ===== 관리자 정책 설정 =====
-  bool verifyAdminPassword(String value) => value == initialAdminPassword;
+  bool verifyAdminPassword(String value) =>
+      sha256.convert(utf8.encode(value)).toString() ==
+      _initialAdminPasswordHash;
 
   bool isFeatureEnabled(String feature) => featureVisibility[feature] ?? true;
 
@@ -432,21 +459,33 @@ class AppProvider extends ChangeNotifier {
   // ===== Timer =====
   void startTimer(String? examId) {
     timerRunning = true;
-    timerStart = DateTime.now();
+    timerStart = _now();
     timerExamId = examId;
     elapsedSeconds = 0;
     _ticker?.cancel();
+    // 틱은 오직 UI 재빌드 트리거. 실제 경과 시간은 시작 시각과 현재
+    // 벽시계의 차이로 매번 재계산한다(_liveElapsedSeconds) — B1 수정.
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
-      elapsedSeconds++;
+      elapsedSeconds = _liveElapsedSeconds;
       notifyListeners();
     });
     notifyListeners();
+  }
+
+  /// 타이머 시작 시각 기준 실제 경과 시간(초). timerStart가 없으면
+  /// 마지막으로 계산된 elapsedSeconds를 그대로 반환한다.
+  int get _liveElapsedSeconds {
+    if (timerStart == null) return elapsedSeconds;
+    return _now().difference(timerStart!).inSeconds;
   }
 
   Future<int> stopTimer() async {
     _ticker?.cancel();
     _ticker = null;
     timerRunning = false;
+    // 정지 시점에도 벽시계로 다시 계산해 마지막 틱 이후의 오차(최대 1s)까지
+    // 반영한다.
+    elapsedSeconds = _liveElapsedSeconds;
     final minutes = (elapsedSeconds / 60).ceil();
     if (minutes > 0) {
       await addSession(
@@ -546,8 +585,11 @@ class AppProvider extends ChangeNotifier {
       return false;
     }
     shieldCount++;
-    await _settingsBox.put('shieldCount', shieldCount);
-    await _settingsBox.put('shieldLastEarnDay', today);
+    // [P2-A/B5] 동일한 반쪼가리 방지 — 두 값을 하나의 putAll로 묶는다.
+    await _settingsBox.putAll({
+      'shieldCount': shieldCount,
+      'shieldLastEarnDay': today,
+    });
     notifyListeners();
     return true;
   }
@@ -565,8 +607,11 @@ class AppProvider extends ChangeNotifier {
     if (!_countsForStreak(dayBefore)) return;
     used.add(yKey);
     shieldCount--;
-    _settingsBox.put('shieldUsedDates', used);
-    _settingsBox.put('shieldCount', shieldCount);
+    // [P2-A/B5] 두 값을 별도 put으로 나열하면 첫 쓰기만 반영되고 두 번째가
+    // 실패(또는 프로세스 종료)할 경우 "사용 날짜는 기록됐지만 개수는 그대로"인
+    // 상태가 남아 방패가 공짜로 소모 면제되는 결함이 있었다. putAll로 두
+    // 값을 하나의 쓰기 오퍼레이션으로 묶어 반쪼가리 상태 발생 확률을 없앤다.
+    _settingsBox.putAll({'shieldUsedDates': used, 'shieldCount': shieldCount});
     shieldJustConsumed = true; // UI에서 1회성 안내용
   }
 
@@ -677,10 +722,12 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// 오늘 푼 문제 수 (퀴즈 결과 기준)
+  // [P0-B/B9] date 필드가 없는/타입이 다른 레코드가 섞여도 크래시하지 않도록
+  // 안전 캐스트로 전환. 해당 레코드는 자연스럽게 필터에서 제외된다.
   int get todayQuizSolved {
     final today = DateTime.now().toIso8601String().substring(0, 10);
     return quizResults
-        .where((r) => (r['date'] as String).startsWith(today))
+        .where((r) => ((r['date'] as String?) ?? '').startsWith(today))
         .fold<int>(0, (s, r) => s + ((r['total'] as int?) ?? 0));
   }
 
@@ -688,7 +735,7 @@ class AppProvider extends ChangeNotifier {
   int get todayQuizCorrect {
     final today = DateTime.now().toIso8601String().substring(0, 10);
     return quizResults
-        .where((r) => (r['date'] as String).startsWith(today))
+        .where((r) => ((r['date'] as String?) ?? '').startsWith(today))
         .fold<int>(0, (s, r) => s + ((r['correct'] as int?) ?? 0));
   }
 
@@ -772,6 +819,12 @@ class AppProvider extends ChangeNotifier {
   String? scheduleError;
   DateTime? scheduleFetchedAt;
 
+  /// [P1-A/R2] 요청 세대 토큰 — 사용자가 종목을 빠르게 전환하면 여러
+  /// refreshSchedule 호출이 동시에 진행 중일 수 있다. 늦게 도착한 이전
+  /// 요청의 응답이 최신 화면 상태를 덮어쓰지 않도록, 응답을 반영하기
+  /// 직전에 자신이 여전히 최신 세대인지 확인한다.
+  int _scheduleGen = 0;
+
   /// 종목 전환 후 일정 새로고침.
   Future<void> selectCatalog(String id, {bool refresh = true}) async {
     _catalogId = id;
@@ -788,7 +841,13 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// 실시간 시험일정 크롤링 후 알림 재생성.
+  ///
+  /// [P1-A/R2] 세대 토큰(gen)으로 경합 응답을 방지한다: 이 호출이 시작될 때
+  /// 세대를 증가시키고, await 이후 자신이 여전히 최신 세대일 때만 결과를
+  /// 반영한다. 그렇지 않으면(사용자가 그 사이 다른 종목으로 전환해 더 최신
+  /// 요청이 시작됨) 이 응답은 조용히 폐기한다.
   Future<void> refreshSchedule({bool force = false}) async {
+    final gen = ++_scheduleGen;
     final item = catalogItem;
     loadingSchedule = true;
     scheduleError = null;
@@ -796,6 +855,7 @@ class AppProvider extends ChangeNotifier {
 
     if (!item.isQnet || item.jmCd == null) {
       // 학교 교과 등 크롤링 미지원 종목
+      if (gen != _scheduleGen) return;
       qnetRounds = [];
       alerts = [];
       loadingSchedule = false;
@@ -811,6 +871,7 @@ class AppProvider extends ChangeNotifier {
         catalogId: item.id,
         forceRefresh: force,
       );
+      if (gen != _scheduleGen) return; // 더 최신 요청이 이미 진행 중 — 폐기
       qnetRounds = rounds
         ..sort((a, b) {
           final ad = a.anchorDate;
@@ -828,10 +889,13 @@ class AppProvider extends ChangeNotifier {
         unawaited(NotificationService.instance.scheduleExamAlerts(alerts));
       }
     } catch (e) {
+      if (gen != _scheduleGen) return;
       scheduleError = '네트워크 오류로 일정을 불러오지 못했어요.';
     } finally {
-      loadingSchedule = false;
-      notifyListeners();
+      if (gen == _scheduleGen) {
+        loadingSchedule = false;
+        notifyListeners();
+      }
     }
   }
 

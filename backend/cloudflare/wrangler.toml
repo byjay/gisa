@@ -1,0 +1,32 @@
+name = "gisaclub-api"
+main = "src/index.js"
+compatibility_date = "2024-09-01"
+# 프로덕션 라우트(도메인 연결 후 활성화)
+# routes = [ { pattern = "api.gisaclub.com/*", zone_name = "gisaclub.com" } ]
+
+# D1 (SQL 데이터베이스)
+[[d1_databases]]
+binding = "DB"
+database_name = "gisaclub-db"
+database_id = "REPLACE_WITH_D1_ID"
+migrations_dir = "migrations"
+
+# R2 (콘텐츠 스토리지 — 문제/해설/이미지)
+[[r2_buckets]]
+binding = "CONTENT"
+bucket_name = "gisaclub-content"
+
+# KV (세션/레이트리밋 캐시)
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "REPLACE_WITH_KV_ID"
+
+# 비밀값은 `wrangler secret put`으로 주입:
+#   JWT_SIGNING_KEY, CEREBRAS_API_KEY, GOOGLE_PLAY_SA_JSON
+[vars]
+FREE_QUESTION_RATIO = "0.10"
+FREE_AI_DAILY_LIMIT = "5"
+FREE_AI_MAX_TOKENS = "400"
+PREMIUM_AI_MAX_TOKENS = "2048"
+AI_MODEL = "gpt-oss-120b"
+AI_ENDPOINT = "https://api.cerebras.ai/v1/chat/completions"

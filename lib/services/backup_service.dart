@@ -111,23 +111,43 @@ class BackupService {
       return const OperationResult.fail('백업 파일에 데이터가 없어요.');
     }
 
-    try {
-      int restoredBoxes = 0;
-      for (final name in _boxNames) {
-        final boxData = boxesRaw[name];
-        if (boxData is! Map) continue;
-        final box = await Hive.openBox(name);
+    // [P2-A/B6] box.clear() 후 put 도중 예외가 나면 그 박스가 반파 상태로
+    // 남는 문제를 막기 위해, 각 박스를 건드리기 직전에 원본 내용을
+    // 스냅샷해 두고 실패 시 그 박스만 스냅샷으로 되돌린다. 이미 정상 복원된
+    // 앞선 박스는 그대로 유지한다(전체 백업 자체가 이미 검증된 하나의
+    // 스냅샷이므로, 박스 단위 원자성이면 데이터 훼손 방지 목적을 충족한다).
+    int restoredBoxes = 0;
+    for (final name in _boxNames) {
+      final boxData = boxesRaw[name];
+      if (boxData is! Map) continue;
+      final box = await Hive.openBox(name);
+      final snapshot = Map<dynamic, dynamic>.from(box.toMap());
+      try {
         await box.clear();
         for (final entry in boxData.entries) {
           await box.put(entry.key, entry.value);
         }
         restoredBoxes++;
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('BackupService.importAll: "$name" 박스 복원 실패, 롤백: $e');
+        }
+        try {
+          await box.clear();
+          await box.putAll(snapshot);
+        } catch (rollbackError) {
+          if (kDebugMode) {
+            debugPrint(
+              'BackupService.importAll: "$name" 박스 롤백도 실패: $rollbackError',
+            );
+          }
+        }
+        return OperationResult.fail(
+          '복원 중 오류가 발생해 "$name" 데이터를 원래 상태로 되돌렸어요. 백업 파일을 확인한 뒤 다시 시도해주세요: $e',
+        );
       }
-      return OperationResult.ok(restoredBoxes);
-    } catch (e) {
-      if (kDebugMode) debugPrint('BackupService.importAll 실패: $e');
-      return OperationResult.fail('복원 중 오류가 발생했어요. 앱을 다시 시작한 뒤 재시도해주세요: $e');
     }
+    return OperationResult.ok(restoredBoxes);
   }
 
   /// 백업 파일의 요약 정보(생성일·문항수 등)만 미리 확인 — 복원 전 사용자 확인용.

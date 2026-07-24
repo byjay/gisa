@@ -9,6 +9,7 @@ import '../../services/study_data.dart';
 import '../../services/progress_service.dart';
 import '../../services/pass_prediction.dart';
 import '../../services/quiz_policy.dart';
+import '../../services/quiz_grader.dart';
 import '../../services/tutor_speech_service.dart';
 import '../../widgets/drawing_pad.dart';
 import '../../widgets/lesson_view.dart';
@@ -18,6 +19,8 @@ import '../../widgets/level_up_dialog.dart';
 import 'result_certificate_screen.dart';
 import '../../widgets/persistent_nav.dart';
 import '../../widgets/tutor_coach.dart';
+import '../../services/entitlement_service.dart';
+import '../../widgets/premium_gate.dart';
 
 /// 문제풀이 화면: 실전(examMode)/연습 모드, 문제 내 암기법·이론 연동, 채점
 class QuizPlayScreen extends StatefulWidget {
@@ -56,7 +59,36 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   int _totalSec = 0;
   bool _timeOver = false;
 
+  // [P1-B/B7] dispose에서는 BuildContext(특히 context.read)를 사용하지 않는다.
+  // initState에서 AppProvider 참조를 필드로 캡처해 dispose에서 안전하게
+  // 사용한다. try-catch로 예외를 은닉하지 않고, 실전모드 플래그 해제가
+  // 항상 결정적으로 수행되도록 한다.
+  late AppProvider _app;
+
   Question get _q => widget.questions[_idx];
+
+  // ─────────── 💎 무료 10% 게이트 ───────────
+  /// 무료 사용자가 접근 가능한 문항 수(전체의 10%, 최소 1).
+  int get _allowedCount =>
+      EntitlementService.instance.allowedQuestionCount(widget.questions.length);
+
+  /// [target] 인덱스(0-based)로 이동하려 할 때, 무료 한도를 넘으면 페이월을
+  /// 띄우고 이동을 막는다. 반환값 true = 이동 허용, false = 잠김.
+  bool _guardNavigate(int target) {
+    final ent = EntitlementService.instance;
+    if (!ent.isQuestionLocked(target, widget.questions.length)) return true;
+    // 잠긴 문항 — 결제 유도.
+    HapticFeedback.mediumImpact();
+    final allowed = _allowedCount;
+    openPremiumPaywall(
+      context,
+      hook: '무료로는 전체 ${widget.questions.length}문항 중 '
+          '$allowed문항(10%)만 풀 수 있어요.\n'
+          '프리미엄으로 업그레이드하면 남은 ${widget.questions.length - allowed}문항과 '
+          '전 회차 기출을 100% 무제한으로 풀 수 있습니다.',
+    );
+    return false;
+  }
 
   /// 보기가 이미지 안에만 있는 문제인지 — 이 경우 이미지가 본문이므로 항상 표시.
   /// 보기가 텍스트로 완전하면 이미지(같은 지문·보기 포함)는 숨겨 중복을 막는다.
@@ -292,6 +324,9 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   @override
   void initState() {
     super.initState();
+    // [P1-B/B7] dispose에서 안전하게 쓰기 위해 AppProvider 참조를 여기서
+    // 캡처한다. initState 시점의 context는 항상 유효하다.
+    _app = context.read<AppProvider>();
     _syncBookmark();
     _syncHistory();
     // 🔒 Q65: 실전모드 진행 중에는 AI 튜터를 통한 정답 유출 우회를 막기 위해
@@ -301,11 +336,10 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     if (widget.examMode) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        final app = context.read<AppProvider>();
-        app.setExamInProgress(true);
-        if (!app.timerRunning) {
+        _app.setExamInProgress(true);
+        if (!_app.timerRunning) {
           _startedGlobalTimer = true;
-          app.startTimer(null);
+          _app.startTimer(null);
         }
       });
     }
@@ -332,17 +366,18 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   @override
   void dispose() {
     _timer?.cancel();
-    // 🔒 Q65: 실전모드 종료 시 AI 튜터 접근 제한 플래그 해제
+    // 🔒 Q65: 실전모드 종료 시 AI 튜터 접근 제한 플래그 해제.
+    // [P1-B/B7] context.read 대신 initState에서 캡처한 _app 필드를 사용하므로
+    // "context가 트리에서 분리됨" 문제가 원천적으로 발생하지 않는다.
+    // 따라서 예외를 은닉하는 try-catch도 제거한다 — 이 경로가 실패할 이유가
+    // 없으므로 실패한다면 숨기지 않고 드러나야 한다.
     if (widget.examMode) {
-      try {
-        final app = context.read<AppProvider>();
-        app.setExamInProgress(false);
-        // ⏱ 자동 시작했던 전역 타이머 정지 — 경과 시간은 학습 세션으로 저장된다.
-        if (_startedGlobalTimer && app.timerRunning) {
-          app.stopTimer();
-        }
-      } catch (_) {
-        // context가 이미 트리에서 분리된 경우 무시(다음 진입 시 재설정됨)
+      _app.setExamInProgress(false);
+      // ⏱ 자동 시작했던 전역 타이머 정지 — 경과 시간은 학습 세션으로 저장된다.
+      // stopTimer()는 Future지만 dispose는 동기 함수이므로 결과를
+      // await할 수 없다 — fire-and-forget으로 세션 저장을 트리거한다.
+      if (_startedGlobalTimer && _app.timerRunning) {
+        unawaited(_app.stopTimer());
       }
     }
     super.dispose();
@@ -443,15 +478,20 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     final scheme = Theme.of(ctx).colorScheme;
     final isCurrent = i == _idx;
     final isAnswered = _picked.containsKey(i);
+    final locked = EntitlementService.instance
+        .isQuestionLocked(i, widget.questions.length);
     return InkWell(
       onTap: () {
         Navigator.of(ctx).pop();
+        // 💎 잠긴 문항 탭 → 페이월.
+        if (!_guardNavigate(i)) return;
         setState(() {
           _idx = i;
           _showAnswer = false;
           _easyMode = true;
         });
         _syncBookmark();
+        _syncHistory();
       },
       borderRadius: BorderRadius.circular(9),
       child: Stack(
@@ -462,22 +502,28 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
             height: 36,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: isAnswered
-                  ? scheme.primary
-                  : scheme.surfaceContainerHighest,
+              color: locked
+                  ? scheme.surfaceContainerHighest.withValues(alpha: 0.45)
+                  : isAnswered
+                      ? scheme.primary
+                      : scheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(9),
               border: isCurrent
                   ? Border.all(color: AppTheme.accent, width: 2.5)
                   : null,
             ),
-            child: Text(
-              '${i + 1}',
-              style: TextStyle(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w700,
-                color: isAnswered ? scheme.onPrimary : scheme.onSurfaceVariant,
-              ),
-            ),
+            child: locked
+                ? const Icon(Icons.lock, size: 13, color: Color(0xFFB45309))
+                : Text(
+                    '${i + 1}',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: isAnswered
+                          ? scheme.onPrimary
+                          : scheme.onSurfaceVariant,
+                    ),
+                  ),
           ),
           if (isBookmarked)
             const Positioned(
@@ -603,6 +649,18 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // 💎 무료 미리보기 한도 안내 칩(프리미엄은 자동 숨김).
+                      if (!widget.examMode)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 6),
+                            child: FreeLimitChip(
+                              allowed: _allowedCount,
+                              total: widget.questions.length,
+                            ),
+                          ),
+                        ),
                       // 다시 만난 문제라면 이전 결과와 복습 단계를 안내한다.
                       if (_history != null) _repeatBanner(_history!),
                       Wrap(
@@ -618,6 +676,8 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                         ],
                       ),
                       if (_kecRiskLevel > 0) _kecWarningBanner(),
+                      // 📊 기출빈도 상세 — 얼마나 자주, 어떻게 변형 출제되는지.
+                      if (_q.freqScore >= 20) _freqDetailPanel(),
                       const SizedBox(height: 12),
                       // 🖼 글·그림 중복 방지 렌더링:
                       // ① 보기가 이미지 안에만 있는 문제 → 이미지가 본문(필수 표시)
@@ -733,6 +793,114 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
       backgroundColor: color.withValues(alpha: 0.08),
       visualDensity: VisualDensity.compact,
       padding: EdgeInsets.zero,
+    );
+  }
+
+  /// 📊 기출빈도 상세 패널 — "얼마나 자주 / 어떻게 변형 재출제되는지"를
+  /// 시각적으로 상세히 보여준다(사용자 요청: 기출빈도 더 자세히).
+  Widget _freqDetailPanel() {
+    final color = Color(_q.freqColorValue);
+    final score = _q.freqScore.round();
+    final appears = _q.estimatedAppearances;
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.all(14),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withValues(alpha: 0.10),
+            color.withValues(alpha: 0.03),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.insights_rounded, size: 18, color: color),
+              const SizedBox(width: 6),
+              Text(
+                '기출빈도 분석',
+                style: TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w900,
+                  color: color,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '${_q.freqGrade} · $score점',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          // 출제빈도 게이지
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: (score / 100).clamp(0.0, 1.0),
+              minHeight: 8,
+              backgroundColor: color.withValues(alpha: 0.12),
+              valueColor: AlwaysStoppedAnimation(color),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Icon(Icons.replay_rounded, size: 15, color: color),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  '최근 10회차 중 약 $appears회 출제(변형 포함)',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('🔄 ', style: TextStyle(fontSize: 13)),
+              Expanded(
+                child: Text(
+                  _q.reissuePattern,
+                  style: TextStyle(
+                    fontSize: 12,
+                    height: 1.45,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(
+                          alpha: 0.75,
+                        ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -1134,7 +1302,10 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   }
 
   Widget _bottomBar() {
-    final isLast = _idx == widget.questions.length - 1;
+    // 무료 사용자는 허용 문항의 마지막이 곧 "채점" 지점이 된다.
+    final effectiveLastIdx = _allowedCount - 1;
+    final isLast = _idx == widget.questions.length - 1 ||
+        _idx == effectiveLastIdx;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
       child: Row(
@@ -1171,6 +1342,8 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
               if (isLast) {
                 _requestFinish();
               } else {
+                // 💎 무료 10% 게이트: 다음 문항이 잠겨 있으면 페이월로.
+                if (!_guardNavigate(_idx + 1)) return;
                 setState(() {
                   _idx++;
                   _showAnswer = false;
@@ -1311,7 +1484,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
       '문제: ${q.question}\n\n상세 설명(선택):\n',
     );
     final uri = Uri.parse(
-      'mailto:certstudytracker@gmail.com?subject=$subject&body=$body',
+      'mailto:admin@secms.tech?subject=$subject&body=$body',
     );
     try {
       final ok = await launchUrl(uri);
@@ -1356,22 +1529,16 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     if (_finished) return;
     _finished = true;
     _timer?.cancel();
-    var correct = 0;
-    final subjectTotal = <String, int>{};
-    final subjectCorrect = <String, int>{};
-    final wrongList = <Question>[];
-    for (var i = 0; i < widget.questions.length; i++) {
-      final q = widget.questions[i];
-      subjectTotal[q.subject] = (subjectTotal[q.subject] ?? 0) + 1;
-      if (_picked[i] == q.answer) {
-        correct++;
-        subjectCorrect[q.subject] = (subjectCorrect[q.subject] ?? 0) + 1;
-      } else {
-        wrongList.add(q);
-      }
-    }
-    final total = widget.questions.length;
-    final pct = total == 0 ? 0 : (correct * 100 / total).round();
+
+    // [P1-B/T10] 채점 계산은 순수 함수 QuizGrader.grade로 추출했다.
+    // 이 화면은 결과를 받아 저장·연출만 담당한다 — 채점 로직은
+    // 위젯 없이 test/quiz_grader_test.dart에서 단위 테스트된다.
+    final grade = QuizGrader.grade(widget.questions, _picked);
+    final total = grade.total;
+    final correct = grade.correct;
+    final pct = grade.percent;
+    final subjectTotal = grade.subjectTotal;
+    final subjectCorrect = grade.subjectCorrect;
 
     // 학습 이력 저장 (AppProvider)
     final appProv = context.read<AppProvider>();
@@ -1383,12 +1550,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
         correct: correct,
         subjectTotal: subjectTotal,
         subjectCorrect: subjectCorrect,
-        wrongQuestions: wrongList
-            .map(
-              (q) =>
-                  '[${q.subject}] ${q.examLabel} ${q.no}번: ${q.question.length > 60 ? q.question.substring(0, 60) : q.question}',
-            )
-            .toList(),
+        wrongQuestions: grade.wrongSummaries(),
       );
     } catch (_) {
       _finished = false;

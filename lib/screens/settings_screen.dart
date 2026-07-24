@@ -42,6 +42,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           vertical: 14,
         ),
         children: [
+          _brandHeader(context),
+          const SizedBox(height: 20),
           _sectionTitle(cs, '계정'),
           const SizedBox(height: 8),
           _accountCard(context),
@@ -170,7 +172,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => showLicensePage(
                     context: context,
-                    applicationName: '볼트쌤',
+                    applicationName: 'Gisaclub',
                     applicationVersion: '1.0.0',
                   ),
                 ),
@@ -462,7 +464,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               color: AppTheme.accent,
             ),
             title: const Text('의견 보내기 · 오류 신고'),
-            subtitle: const Text('certstudytracker@gmail.com'),
+            subtitle: const Text('admin@secms.tech'),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => _sendFeedback(context),
           ),
@@ -493,9 +495,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _shareApp(BuildContext context) async {
     const text =
-        '⚡ 전기기사·소방 공부는 볼트쌤 하나로 끝!\n'
+        '⚡ 전기기사·소방 공부는 Gisaclub 하나로 끝!\n'
         '기출 3,700+문제 · 볼트쌤 튜터 · 암기법 · 합격 예측까지 무료.\n'
-        '볼트쌤 — Google Play에서 검색!';
+        'Gisaclub — Google Play에서 검색!';
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -513,14 +515,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _sendFeedback(BuildContext context) async {
     final uri = Uri.parse(
-      'mailto:certstudytracker@gmail.com?subject=${Uri.encodeComponent('[Cert Study Tracker] 의견/오류 신고')}',
+      'mailto:admin@secms.tech?subject=${Uri.encodeComponent('[Gisaclub] 의견/오류 신고')}',
     );
     try {
       final ok = await launchUrl(uri);
       if (!ok && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('certstudytracker@gmail.com 으로 보내주세요 📧'),
+            content: Text('admin@secms.tech 으로 보내주세요 📧'),
           ),
         );
       }
@@ -528,7 +530,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('certstudytracker@gmail.com 으로 보내주세요 📧'),
+            content: Text('admin@secms.tech 으로 보내주세요 📧'),
           ),
         );
       }
@@ -554,20 +556,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         child: Column(
           children: [
-            const ListTile(
-              leading: Icon(Icons.auto_awesome_rounded, color: Colors.teal),
-              title: Text(
-                'AI 튜터',
-                style: TextStyle(fontWeight: FontWeight.w800),
-              ),
-              subtitle: Text(
-                '✅ 자동 활성화 · 별도 설정 없이 바로 사용 가능',
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.teal,
-                ),
-              ),
+            FutureBuilder<bool>(
+              future: CerebrasService.instance.hasUserKey(),
+              builder: (context, snap) {
+                final hasKey = snap.data ?? false;
+                return ListTile(
+                  leading: Icon(
+                    hasKey
+                        ? Icons.check_circle_rounded
+                        : Icons.auto_awesome_rounded,
+                    color: Colors.teal,
+                  ),
+                  title: const Text(
+                    'AI 튜터 API 키',
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  subtitle: Text(
+                    hasKey
+                        ? '✅ 내 API 키가 등록되어 AI 튜터를 사용할 수 있어요'
+                        : '내 Cerebras API 키를 등록하면 AI 튜터가 켜져요',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: hasKey ? Colors.teal : cs.onSurface,
+                    ),
+                  ),
+                  trailing: TextButton(
+                    onPressed: () => _openApiKeyDialog(context),
+                    child: Text(hasKey ? '변경' : '등록'),
+                  ),
+                );
+              },
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -575,22 +594,222 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
-                  vertical: 8,
+                  vertical: 10,
                 ),
                 decoration: BoxDecoration(
                   color: cs.surface.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Text(
-                  '🧪 테스트 기간(~${CerebrasService.testPeriodEndLabel}) 동안 AI 튜터가 자동으로 켜져 있어요.\n'
-                  '기간이 끝나면 AI 기능이 자동으로 잠기고, 로컬 강의·공식·암기법 검색은 계속 사용할 수 있어요.',
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    height: 1.5,
-                    color: cs.onSurface.withValues(alpha: 0.6),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'AI 튜터는 무료 Cerebras API 키로 작동해요. 키는 이 기기에만 '
+                      '안전하게 저장되며 외부로 전송되지 않습니다.',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        height: 1.5,
+                        color: cs.onSurface.withValues(alpha: 0.65),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    InkWell(
+                      onTap: () => _launchUrlSafe(
+                        context,
+                        'https://cloud.cerebras.ai',
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.open_in_new_rounded,
+                            size: 14,
+                            color: cs.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '무료 API 키 발급받기 (cloud.cerebras.ai)',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: cs.primary,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _launchUrlSafe(BuildContext context, String url) async {
+    try {
+      final ok = await launchUrl(
+        Uri.parse(url),
+        mode: LaunchMode.externalApplication,
+      );
+      if (!ok && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('링크를 열 수 없어요: $url')),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('링크를 열 수 없어요: $url')),
+        );
+      }
+    }
+  }
+
+  /// AI 튜터 API 키 입력·저장·삭제 다이얼로그.
+  Future<void> _openApiKeyDialog(BuildContext context) async {
+    final controller = TextEditingController();
+    // 기존 키가 있으면 마스킹된 형태로 안내(원본은 표시하지 않음)
+    final existing = await CerebrasService.instance.hasUserKey();
+    if (!context.mounted) return;
+
+    bool obscure = true;
+    bool saving = false;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('AI 튜터 API 키'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (existing)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    '이미 키가 등록되어 있어요. 새 키를 입력하면 교체됩니다.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ),
+              TextField(
+                controller: controller,
+                obscureText: obscure,
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: 'Cerebras API 키 (예: csk-...)',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      obscure
+                          ? Icons.visibility_rounded
+                          : Icons.visibility_off_rounded,
+                    ),
+                    onPressed: () =>
+                        setDialogState(() => obscure = !obscure),
                   ),
                 ),
               ),
+              const SizedBox(height: 8),
+              Text(
+                'cloud.cerebras.ai 에서 무료로 발급받을 수 있어요.',
+                style: TextStyle(
+                  fontSize: 11.5,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            if (existing)
+              TextButton(
+                onPressed: saving
+                    ? null
+                    : () async {
+                        await CerebrasService.instance.setApiKey('');
+                        if (dialogContext.mounted) {
+                          Navigator.pop(dialogContext);
+                        }
+                        if (mounted) {
+                          setState(() {});
+                          ScaffoldMessenger.of(this.context).showSnackBar(
+                            const SnackBar(
+                              content: Text('API 키를 삭제했어요'),
+                            ),
+                          );
+                        }
+                      },
+                child: const Text(
+                  '삭제',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            TextButton(
+              onPressed: saving
+                  ? null
+                  : () => Navigator.pop(dialogContext),
+              child: const Text('취소'),
+            ),
+            FilledButton(
+              onPressed: saving
+                  ? null
+                  : () async {
+                      final key = controller.text.trim();
+                      if (key.isEmpty) {
+                        ScaffoldMessenger.of(dialogContext).showSnackBar(
+                          const SnackBar(content: Text('키를 입력해주세요')),
+                        );
+                        return;
+                      }
+                      setDialogState(() => saving = true);
+                      // 저장 + 유효성 간단 검증(실호출)
+                      await CerebrasService.instance.setApiKey(key);
+                      final valid =
+                          await CerebrasService.instance.validateKey();
+                      if (!valid) {
+                        await CerebrasService.instance.setApiKey('');
+                        if (dialogContext.mounted) {
+                          setDialogState(() => saving = false);
+                          ScaffoldMessenger.of(dialogContext).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                '키가 올바르지 않거나 연결에 실패했어요. 다시 확인해주세요.',
+                              ),
+                            ),
+                          );
+                        }
+                        return;
+                      }
+                      if (dialogContext.mounted) {
+                        Navigator.pop(dialogContext);
+                      }
+                      if (mounted) {
+                        setState(() {});
+                        ScaffoldMessenger.of(this.context).showSnackBar(
+                          const SnackBar(
+                            content: Text('✅ API 키가 등록되어 AI 튜터를 사용할 수 있어요'),
+                          ),
+                        );
+                      }
+                    },
+              child: saving
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('저장'),
             ),
           ],
         ),
@@ -609,6 +828,68 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     ),
   );
+
+  /// 🏷️ Gisaclub 브랜드 헤더 — 로고 + 워드마크 + 태그라인
+  Widget _brandHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF4F46E5), Color(0xFF6366F1)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4F46E5).withValues(alpha: 0.32),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Image.asset(
+              'assets/brand/logo_square_512.png',
+              width: 56,
+              height: 56,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Text(
+                  'Gisaclub',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                SizedBox(height: 3),
+                Text(
+                  '전기·소방 기사 합격 올인원 학습',
+                  style: TextStyle(
+                    color: Color(0xFFE0E7FF),
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _accountCard(BuildContext context) {
     final auth = context.watch<AuthService>();
@@ -870,7 +1151,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         final bytes = picked.files.single.bytes;
         if (bytes == null) {
           messenger.showSnackBar(
-            const SnackBar(content: Text('파일을 읽을 수 없어요.')),
+            const SnackBar(content: Text('파일을 읽�을 읽을 수 없어요.')),
           );
           return;
         }
