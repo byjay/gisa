@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'providers/app_provider.dart';
 import 'services/auth_service.dart';
 import 'services/backup_service.dart';
+import 'services/crash_logger.dart';
 import 'services/entitlement_service.dart';
 import 'services/notification_service.dart';
 import 'theme/app_theme.dart';
@@ -18,7 +19,18 @@ import 'screens/timer_screen.dart';
 import 'widgets/persistent_nav.dart';
 
 Future<void> main() async {
+  // Q40: 앱 전역을 가드 존으로 감싸 처리되지 않은 비동기 오류를 로컬에 기록한다.
+  runZonedGuarded(_bootstrap, (error, stack) {
+    unawaited(
+      CrashLogger.instance.record(error.toString(), stack: stack.toString()),
+    );
+  });
+}
+
+Future<void> _bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Q40: 글로벌 에러 훅(FlutterError/PlatformDispatcher) 등록 — 최우선 초기화
+  await CrashLogger.instance.init();
   await initializeDateFormatting('ko');
   final provider = AppProvider();
   await provider.init();

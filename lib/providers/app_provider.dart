@@ -11,6 +11,7 @@ import '../services/qnet_schedule_service.dart';
 import '../services/schedule_alerts.dart';
 import '../services/exam_registration.dart';
 import '../services/notification_service.dart';
+import '../services/secure_box_service.dart';
 import '../services/tutor_persona.dart' show kTutorPersonas;
 
 class AppProvider extends ChangeNotifier {
@@ -80,11 +81,13 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> init() async {
     await Hive.initFlutter();
-    _examBox = await Hive.openBox('exams');
-    _sessionBox = await Hive.openBox('sessions');
-    _noteBox = await Hive.openBox('wrongNotes');
-    _settingsBox = await Hive.openBox('settings');
-    _quizBox = await Hive.openBox('quizResults');
+    // Q22 로컬 암호화: 민감 데이터(세션/오답노트/시험기록)는 AES 암호화 박스로 연다.
+    await SecureBoxService.instance.init();
+    _examBox = await Hive.openBox('exams'); // 정적 시험 데이터(비민감) → 평문
+    _sessionBox = await SecureBoxService.instance.openSecureBox('sessions');
+    _noteBox = await SecureBoxService.instance.openSecureBox('wrongNotes');
+    _settingsBox = await Hive.openBox('settings'); // 설정(비민감) → 평문 유지
+    _quizBox = await SecureBoxService.instance.openSecureBox('quizResults');
     await ExamRegistrationStore.instance.init();
     _load();
   }

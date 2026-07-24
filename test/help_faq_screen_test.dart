@@ -18,7 +18,7 @@ void main() {
 
     testWidgets('질문을 탭하면 답변이 펼쳐진다', (tester) async {
       await pump(tester);
-      const q = '볼트쌤은 어떤 앱인가요?';
+      const q = 'Gisaclub은 어떤 앱인가요?';
       expect(find.text(q), findsOneWidget);
       // 펼치기 전에는 답변 본문이 보이지 않는다
       expect(find.textContaining('올인원 학습 앱'), findsNothing);

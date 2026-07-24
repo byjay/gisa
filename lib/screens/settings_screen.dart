@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart' show Share, XFile;
@@ -13,6 +14,8 @@ import 'help_faq_screen.dart';
 import '../services/auth_service.dart';
 import '../services/backup_service.dart';
 import '../services/cerebras_service.dart';
+import '../services/crash_logger.dart';
+import '../services/secure_box_service.dart';
 import '../services/notification_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/tutor_avatar.dart';
@@ -104,6 +107,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _sectionTitle(cs, '데이터 백업 · 복원'),
           const SizedBox(height: 8),
           _backupCard(context),
+          const SizedBox(height: 20),
+          _sectionTitle(cs, '진단 · 오류 로그'),
+          const SizedBox(height: 8),
+          _diagnosticsCard(context),
           const SizedBox(height: 20),
           _sectionTitle(cs, '응원하기'),
           const SizedBox(height: 8),
@@ -521,17 +528,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final ok = await launchUrl(uri);
       if (!ok && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('admin@secms.tech 으로 보내주세요 📧'),
-          ),
+          const SnackBar(content: Text('admin@secms.tech 으로 보내주세요 📧')),
         );
       }
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('admin@secms.tech 으로 보내주세요 📧'),
-          ),
+          const SnackBar(content: Text('admin@secms.tech 으로 보내주세요 📧')),
         );
       }
     }
@@ -614,10 +617,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const SizedBox(height: 8),
                     InkWell(
-                      onTap: () => _launchUrlSafe(
-                        context,
-                        'https://cloud.cerebras.ai',
-                      ),
+                      onTap: () =>
+                          _launchUrlSafe(context, 'https://cloud.cerebras.ai'),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -656,15 +657,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
         mode: LaunchMode.externalApplication,
       );
       if (!ok && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('링크를 열 수 없어요: $url')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('링크를 열 수 없어요: $url')));
       }
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('링크를 열 수 없어요: $url')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('링크를 열 수 없어요: $url')));
       }
     }
   }
@@ -714,8 +715,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ? Icons.visibility_rounded
                           : Icons.visibility_off_rounded,
                     ),
-                    onPressed: () =>
-                        setDialogState(() => obscure = !obscure),
+                    onPressed: () => setDialogState(() => obscure = !obscure),
                   ),
                 ),
               ),
@@ -744,21 +744,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         if (mounted) {
                           setState(() {});
                           ScaffoldMessenger.of(this.context).showSnackBar(
-                            const SnackBar(
-                              content: Text('API 키를 삭제했어요'),
-                            ),
+                            const SnackBar(content: Text('API 키를 삭제했어요')),
                           );
                         }
                       },
-                child: const Text(
-                  '삭제',
-                  style: TextStyle(color: Colors.red),
-                ),
+                child: const Text('삭제', style: TextStyle(color: Colors.red)),
               ),
             TextButton(
-              onPressed: saving
-                  ? null
-                  : () => Navigator.pop(dialogContext),
+              onPressed: saving ? null : () => Navigator.pop(dialogContext),
               child: const Text('취소'),
             ),
             FilledButton(
@@ -775,8 +768,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       setDialogState(() => saving = true);
                       // 저장 + 유효성 간단 검증(실호출)
                       await CerebrasService.instance.setApiKey(key);
-                      final valid =
-                          await CerebrasService.instance.validateKey();
+                      final valid = await CerebrasService.instance
+                          .validateKey();
                       if (!valid) {
                         await CerebrasService.instance.setApiKey('');
                         if (dialogContext.mounted) {
@@ -1100,6 +1093,151 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  // ── 🩺 진단 · 오류 로그 카드 (Q40 크래시 리포팅) ─────────────
+  Widget _diagnosticsCard(BuildContext context) {
+    final encrypted = SecureBoxService.instance.isEncrypted;
+    return Card(
+      child: Column(
+        children: [
+          ListTile(
+            leading: const Icon(
+              Icons.security_rounded,
+              color: AppTheme.primary,
+            ),
+            title: const Text('데이터 보호'),
+            subtitle: Text(
+              encrypted ? '학습기록·오답노트가 기기에서 암호화되어 저장돼요' : '로컬 저장(웹 미리보기 모드)',
+            ),
+            trailing: Icon(
+              encrypted ? Icons.lock_rounded : Icons.lock_open_rounded,
+              color: encrypted ? Colors.green : Colors.grey,
+            ),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(
+              Icons.bug_report_rounded,
+              color: AppTheme.accent,
+            ),
+            title: const Text('오류 로그 보기'),
+            subtitle: const Text('앱에서 발생한 최근 오류를 확인·전달할 수 있어요'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _openCrashLogs(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openCrashLogs(BuildContext context) async {
+    final logs = await CrashLogger.instance.getAll();
+    if (!context.mounted) return;
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.7,
+          maxChildSize: 0.92,
+          builder: (ctx, scroll) {
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.bug_report_rounded),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '오류 로그 (${logs.length}건)',
+                          style: Theme.of(ctx).textTheme.titleMedium,
+                        ),
+                      ),
+                      if (logs.isNotEmpty)
+                        IconButton(
+                          tooltip: '복사',
+                          icon: const Icon(Icons.copy_rounded),
+                          onPressed: () async {
+                            final text = await CrashLogger.instance
+                                .exportText();
+                            await Clipboard.setData(ClipboardData(text: text));
+                            if (ctx.mounted) {
+                              ScaffoldMessenger.of(ctx).showSnackBar(
+                                const SnackBar(content: Text('오류 로그를 복사했어요')),
+                              );
+                            }
+                          },
+                        ),
+                      if (logs.isNotEmpty)
+                        IconButton(
+                          tooltip: '전체 삭제',
+                          icon: const Icon(Icons.delete_outline_rounded),
+                          onPressed: () async {
+                            await CrashLogger.instance.clear();
+                            if (ctx.mounted) Navigator.pop(ctx);
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: logs.isEmpty
+                      ? const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32),
+                            child: Text(
+                              '🎉 기록된 오류가 없어요.\n앱이 안정적으로 동작 중입니다.',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        )
+                      : ListView.separated(
+                          controller: scroll,
+                          padding: const EdgeInsets.all(12),
+                          itemCount: logs.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 8),
+                          itemBuilder: (_, i) {
+                            final r = logs[i];
+                            return Card(
+                              margin: EdgeInsets.zero,
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      r.time.toString().split('.').first,
+                                      style: Theme.of(ctx).textTheme.labelSmall
+                                          ?.copyWith(color: Colors.grey),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      r.message,
+                                      style: const TextStyle(
+                                        fontFamily: 'monospace',
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 

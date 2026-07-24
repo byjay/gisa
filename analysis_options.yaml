@@ -9,6 +9,13 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  exclude:
+    # Q37: integration_test package is added on-demand (see pubspec note),
+    # so this file references a package not declared as a dependency.
+    # Excluded from static analysis to keep the build clean.
+    - integration_test/**
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`
