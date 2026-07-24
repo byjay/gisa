@@ -5,7 +5,7 @@ import { getEntitlement } from './entitlement.js';
 import { listQuestions, getQuestion, gradeQuiz } from './content.js';
 import { aiChat } from './ai.js';
 import { verifyPurchase } from './billing.js';
-import { adminLogin, requireAdmin, adminListUsers, adminSetUserPlan, adminStats, getVersionManifest, adminSetVersionManifest } from './admin.js';
+import { issueAppToken, verifyAppTokenEndpoint, requireAdmin, adminListUsers, adminSetUserPlan, adminStats, getVersionManifest, adminSetVersionManifest } from './admin.js';
 
 const json = (data, status = 200, extra = {}) =>
   new Response(JSON.stringify(data), {
@@ -43,14 +43,20 @@ export default {
         return json(await getVersionManifest(env));
       }
 
-      // ── 관리자 로그인(공개) — 성공 시 관리자 토큰 발급
-      if (pathname === '/v1/admin/login' && method === 'POST') {
-        return json(await adminLogin(env, await request.json()));
+      // ── 폰 앱 토큰 검증(Access 불필요, 앱 토큰 자체 검증) — 앱이 무제한 모드 켤 때 호출
+      //    반드시 /v1/admin/* 일반 처리보다 먼저 둔다(앱 토큰 경로).
+      if (pathname === '/v1/admin/verify' && method === 'GET') {
+        return json(await verifyAppTokenEndpoint(request, env));
       }
 
-      // ── 관리자 전용 라우트(관리자 토큰 필요)
+      // ── 폰앱용 토큰 발급(대시보드가 호출, Cloudflare Access JWT 필요)
+      if (pathname === '/v1/admin/issue-app-token' && (method === 'POST' || method === 'GET')) {
+        return json(await issueAppToken(request, env));
+      }
+
+      // ── 관리자 전용 라우트(Access JWT[대시보드] 또는 앱 토큰[폰] 필요)
       if (pathname.startsWith('/v1/admin/')) {
-        const admin = await requireAdmin(request, env); // 실패 시 throw 403
+        await requireAdmin(request, env); // 실패 시 throw 403
         if (pathname === '/v1/admin/users' && method === 'GET') {
           const page = parseInt(url.searchParams.get('page') || '1', 10);
           return json(await adminListUsers(env, page));

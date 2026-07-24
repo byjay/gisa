@@ -28,38 +28,54 @@ class SuperAdminScreen extends StatefulWidget {
 }
 
 class _SuperAdminScreenState extends State<SuperAdminScreen> {
-  bool _loading = false;
-  String? _error;
+  final _tokenCtrl = TextEditingController();
 
-  Future<void> _login() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    final result = await AdminService.instance.loginWithGoogle();
+  @override
+  void dispose() {
+    _tokenCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _registerToken() async {
+    final admin = AdminService.instance;
+    final token = _tokenCtrl.text.trim();
+    if (token.isEmpty) {
+      setState(() {});
+      return;
+    }
+    final result = await admin.registerToken(token);
     if (!mounted) return;
-    setState(() {
-      _loading = false;
-      switch (result) {
-        case AdminLoginResult.notAdmin:
-          _error = '이 구글 계정은 관리자로 등록되어 있지 않습니다.';
-          break;
-        case AdminLoginResult.cancelled:
-          _error = null; // 사용자 취소는 오류 표시하지 않음
-          break;
-        case AdminLoginResult.error:
-          _error = '구글 로그인 중 오류가 발생했습니다. 설정을 확인하세요.';
-          break;
-        case AdminLoginResult.success:
-          _error = null;
-          break;
-      }
-    });
-    if (result == AdminLoginResult.success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('🛡️ 관리자 모드가 활성화되었습니다. 모든 기능이 무제한입니다.')),
-      );
+    switch (result) {
+      case AdminAuthResult.success:
+        _tokenCtrl.clear();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('🛡️ 관리자 모드가 활성화되었습니다. 모든 기능이 무제한입니다.')),
+        );
+        break;
+      case AdminAuthResult.invalidToken:
+        _showError('토큰이 유효하지 않거나 만료되었습니다. admin.gisa.club에서 새 토큰을 발급받으세요.');
+        break;
+      case AdminAuthResult.notConfigured:
+        _showError('서버 주소(GISACLUB_API_BASE)가 설정되지 않았습니다. 배포 빌드에서만 사용 가능합니다.');
+        break;
+      case AdminAuthResult.network:
+        _showError('서버에 연결할 수 없습니다. 네트워크 상태를 확인하세요.');
+        break;
+    }
+  }
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: Colors.red.shade700),
+    );
+  }
+
+  Future<void> _pasteToken() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    if (data?.text != null && data!.text!.trim().isNotEmpty) {
+      _tokenCtrl.text = data.text!.trim();
+      setState(() {});
     }
   }
 
@@ -85,14 +101,15 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
     );
   }
 
-  // ─────────────── 잠금(로그인) 화면 ───────────────
+  // ─────────────── 잠금(토큰 등록) 화면 ───────────────
   Widget _lockScreen(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final admin = context.watch<AdminService>();
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
+          constraints: const BoxConstraints(maxWidth: 460),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -104,59 +121,101 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
                       .textTheme
                       .headlineSmall
                       ?.copyWith(fontWeight: FontWeight.w800)),
-              const SizedBox(height: 8),
-              const Text(
-                '관리자 Google 계정으로 로그인해야 운영 기능(사용자·콘텐츠·구독·업데이트 관리)이 열리고,\n'
-                '모든 학습 기능이 무제한으로 해금됩니다.\n\n'
-                '일반 사용자는 로그인 없이 앱을 그대로 사용합니다.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, height: 1.5),
+              const SizedBox(height: 12),
+              // 안내: Access 게이트 방식 설명
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: cs.primaryContainer.withValues(alpha: 0.35),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.verified_user_rounded,
+                            size: 18, color: cs.primary),
+                        const SizedBox(width: 6),
+                        Text('토큰 발급 방법',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: cs.primary)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      '① 브라우저에서 admin.gisa.club 접속\n'
+                      '② Google 계정으로 로그인 (Cloudflare Access가 지정된\n'
+                      '   운영자 이메일만 통과시킵니다)\n'
+                      '③ 대시보드에서 "앱 토큰 발급" → 토큰 복사\n'
+                      '④ 아래에 붙여넣고 등록',
+                      style: TextStyle(fontSize: 12.5, height: 1.55),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 24),
-              if (_error != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: cs.errorContainer.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.error_outline_rounded,
-                          color: cs.error, size: 20),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(_error!,
-                            style: TextStyle(color: cs.error, fontSize: 12.5)),
-                      ),
-                    ],
+              const SizedBox(height: 20),
+              TextField(
+                controller: _tokenCtrl,
+                maxLines: 3,
+                minLines: 1,
+                decoration: InputDecoration(
+                  labelText: '관리자 토큰',
+                  hintText: 'admin.gisa.club 에서 발급받은 토큰 붙여넣기',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    tooltip: '붙여넣기',
+                    icon: const Icon(Icons.content_paste_rounded),
+                    onPressed: _pasteToken,
                   ),
                 ),
-                const SizedBox(height: 16),
-              ],
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
-                  onPressed: _loading ? null : _login,
-                  icon: _loading
+                  onPressed: (admin.isVerifying || _tokenCtrl.text.trim().isEmpty)
+                      ? null
+                      : _registerToken,
+                  icon: admin.isVerifying
                       ? const SizedBox(
                           width: 18,
                           height: 18,
                           child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Icon(Icons.g_mobiledata_rounded, size: 28),
-                  label: const Text('Google 계정으로 로그인'),
+                      : const Icon(Icons.lock_open_rounded),
+                  label: Text(admin.isVerifying ? '서버 검증 중…' : '관리자 토큰 등록'),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
+              if (!admin.isConfigured)
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: cs.errorContainer.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '⚠️ 서버 주소가 설정되지 않은 빌드입니다. 배포 빌드\n'
+                    '(--dart-define=GISACLUB_API_BASE=https://api.gisa.club)\n'
+                    '에서만 관리자 토큰을 검증할 수 있습니다.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 11.5, color: cs.error),
+                  ),
+                ),
+              const SizedBox(height: 12),
               Text(
-                '🔒 관리자 Google 계정은 휴대폰 2단계 인증으로 보호됩니다.\n'
-                '등록된 관리자 이메일이 아니면 접근이 거부됩니다.',
+                '🔒 인증·판정은 Cloudflare Access + 서버가 수행합니다.\n'
+                '앱 안에는 비밀번호·이메일 판정 로직이 없습니다.\n'
+                '일반 사용자는 이 화면과 무관하게 앱을 그대로 사용합니다.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontSize: 11.5,
+                    fontSize: 11,
+                    height: 1.5,
                     color: cs.onSurface.withValues(alpha: 0.55)),
               ),
             ],
@@ -480,33 +539,27 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
         children: [
           ListTile(
             leading: const Icon(Icons.verified_user_rounded),
-            title: const Text('로그인된 관리자 계정'),
+            title: const Text('검증된 관리자 계정'),
             subtitle: Text(admin.email.isEmpty ? '(정보 없음)' : admin.email),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.dns_rounded),
+            title: const Text('서버 주소'),
+            subtitle: Text(admin.apiBase.isEmpty ? '(미설정)' : admin.apiBase),
           ),
           const Divider(height: 1),
           const ListTile(
             leading: Icon(Icons.security_rounded),
-            title: Text('보안 방식'),
+            title: Text('보안 방식 — Cloudflare Access(Zero Trust)'),
             subtitle: Text(
-              'PIN·하드코딩 비밀번호를 쓰지 않습니다. 관리자 Google 계정 로그인 +\n'
-              '이메일 일치로만 진입하며, 앱에는 이메일 평문이 아닌 SHA-256 해시만\n'
-              '내장됩니다. 관리자 이메일 교체 시 --dart-define=GISACLUB_ADMIN_EMAIL_HASH.',
+              '앱 안에는 PIN·비밀번호·이메일 판정 로직이 전혀 없습니다.\n'
+              'admin.gisa.club 앞단에서 Cloudflare Access가 Google 로그인을 걸고\n'
+              '지정된 운영자 이메일만 통과시킨 뒤 앱 토큰을 발급합니다. 앱은 이 토큰을\n'
+              '서버(/v1/admin/verify)로 재검증받아야만 무제한 모드가 열립니다.\n'
+              '(변조·디컴파일로 우회 불가 — 판정 권한이 항상 서버에 있음)',
             ),
             isThreeLine: true,
-          ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.copy_rounded),
-            title: const Text('관리자 이메일 해시 계산 방법 복사'),
-            subtitle: const Text('관리자 계정을 바꿀 때 새 해시를 만드는 방법'),
-            onTap: () {
-              const guide =
-                  'AdminService.emailHashOf("new-admin@gmail.com")  // 소문자·trim 후 SHA-256';
-              Clipboard.setData(const ClipboardData(text: guide));
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('해시 생성 방법을 클립보드에 복사했습니다.')),
-              );
-            },
           ),
         ],
       ),

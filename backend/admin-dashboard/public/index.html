@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Gisaclub 운영자 대시보드</title>
+  <style>
+    :root {
+      --bg: #0f1226; --card: #1a1f3d; --line: #2b3160;
+      --fg: #e8ebff; --muted: #9aa2d0; --primary: #6c7cff; --ok: #35d07f; --warn: #ffb020; --err: #ff5470;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      background: var(--bg); color: var(--fg); line-height: 1.5; }
+    header { padding: 20px 24px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; }
+    header .logo { width: 36px; height: 36px; border-radius: 9px;
+      background: linear-gradient(135deg, #6c7cff, #a06cff); display: grid; place-items: center; font-size: 20px; }
+    header h1 { font-size: 18px; margin: 0; font-weight: 800; }
+    header .who { margin-left: auto; font-size: 13px; color: var(--muted); }
+    main { max-width: 960px; margin: 0 auto; padding: 24px; display: grid; gap: 18px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }
+    .card h2 { font-size: 15px; margin: 0 0 14px; display: flex; align-items: center; gap: 8px; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .stat { flex: 1 1 140px; background: #12162e; border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+    .stat .n { font-size: 26px; font-weight: 800; }
+    .stat .l { font-size: 12px; color: var(--muted); }
+    button { background: var(--primary); color: #fff; border: 0; border-radius: 9px; padding: 10px 16px;
+      font-size: 14px; font-weight: 700; cursor: pointer; }
+    button.ghost { background: transparent; border: 1px solid var(--line); color: var(--fg); }
+    button:disabled { opacity: .5; cursor: default; }
+    input, select { background: #12162e; border: 1px solid var(--line); color: var(--fg);
+      border-radius: 8px; padding: 9px 11px; font-size: 14px; }
+    .token { width: 100%; word-break: break-all; background: #12162e; border: 1px dashed var(--primary);
+      border-radius: 10px; padding: 14px; font-family: ui-monospace, monospace; font-size: 12.5px; margin-top: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 600; }
+    .muted { color: var(--muted); font-size: 12.5px; }
+    .pill { padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .pill.premium { background: rgba(53,208,127,.18); color: var(--ok); }
+    .pill.free { background: rgba(154,162,208,.18); color: var(--muted); }
+    .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #000; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 13px; opacity: 0; transition: .3s; }
+    .toast.show { opacity: 1; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+    label { font-size: 12.5px; color: var(--muted); display: block; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">⚡</div>
+    <h1>Gisaclub 운영자 대시보드</h1>
+    <div class="who" id="who">…</div>
+  </header>
+
+  <main>
+    <!-- 앱 토큰 발급 -->
+    <section class="card">
+      <h2>📱 폰 앱 무제한 모드 토큰</h2>
+      <p class="muted">아래 토큰을 복사해 폰 앱 <b>설정 → 슈퍼 관리자 모드</b>에 붙여넣으면,
+        운영자 폰에서 모든 콘텐츠·AI가 무제한으로 해금됩니다. (유효기간 30일)</p>
+      <div class="row" style="margin-top:12px">
+        <button id="issueBtn" onclick="issueToken()">앱 토큰 발급</button>
+        <button class="ghost" id="copyBtn" onclick="copyToken()" disabled>토큰 복사</button>
+      </div>
+      <div class="token" id="tokenBox" style="display:none"></div>
+    </section>
+
+    <!-- 통계 -->
+    <section class="card">
+      <h2>📊 운영 통계</h2>
+      <div class="row" id="stats">
+        <div class="stat"><div class="n" id="stTotal">–</div><div class="l">전체 사용자</div></div>
+        <div class="stat"><div class="n" id="stPremium">–</div><div class="l">프리미엄</div></div>
+        <div class="stat"><div class="n" id="stFree">–</div><div class="l">무료</div></div>
+      </div>
+      <div style="margin-top:12px"><button class="ghost" onclick="loadStats()">새로고침</button></div>
+    </section>
+
+    <!-- 앱 버전 매니페스트 -->
+    <section class="card">
+      <h2>🚀 앱 버전 관리 (원버튼 자동업데이트)</h2>
+      <p class="muted">새 빌드를 배포한 뒤 여기에 버전 정보를 기록하면, 사용자 앱들이 "업데이트" 버튼을 표시합니다.</p>
+      <div class="grid2" style="margin-top:12px">
+        <div><label>최신 버전(semver)</label><input id="vVersion" value="1.1.0" /></div>
+        <div><label>최신 빌드(int)</label><input id="vBuild" type="number" value="2" /></div>
+        <div><label>최소 지원 빌드</label><input id="vMin" type="number" value="1" /></div>
+        <div><label>강제 업데이트</label>
+          <select id="vForce"><option value="false">아니오</option><option value="true">예</option></select></div>
+        <div><label>스토어 URL</label><input id="vStore" value="https://play.google.com/store/apps/details?id=com.certstudytracker.study" /></div>
+        <div><label>APK URL(직접 배포용)</label><input id="vApk" placeholder="https://cdn.gisa.club/app/gisaclub.apk" /></div>
+      </div>
+      <div><label style="margin-top:8px">릴리스 노트</label><input id="vNotes" style="width:100%" placeholder="이번 업데이트 내용" /></div>
+      <div class="row" style="margin-top:12px">
+        <button onclick="saveVersion()">버전 매니페스트 저장</button>
+        <button class="ghost" onclick="loadVersion()">현재값 불러오기</button>
+      </div>
+    </section>
+
+    <!-- 사용자 등급 관리 -->
+    <section class="card">
+      <h2>👥 사용자 구독 관리</h2>
+      <div class="grid2" style="margin-bottom:12px">
+        <div><label>사용자 ID</label><input id="uId" placeholder="user id" /></div>
+        <div><label>등급</label>
+          <select id="uPlan"><option value="premium">premium</option><option value="free">free</option></select></div>
+      </div>
+      <div class="row"><button onclick="setPlan()">등급 강제 설정</button>
+        <button class="ghost" onclick="loadUsers()">사용자 목록 불러오기</button></div>
+      <div style="overflow:auto; margin-top:12px">
+        <table id="usersTbl"><thead><tr><th>ID</th><th>이메일</th><th>등급</th><th>만료</th></tr></thead>
+          <tbody><tr><td colspan="4" class="muted">목록을 불러오세요</td></tr></tbody></table>
+      </div>
+    </section>
+
+    <p class="muted" style="text-align:center">
+      🔒 이 페이지는 Cloudflare Access(Zero Trust)로 보호됩니다.
+      지정된 운영자 Google 계정만 접근할 수 있으며, 앱 안에는 인증 로직이 없습니다.
+    </p>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

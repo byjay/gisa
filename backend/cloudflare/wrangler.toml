@@ -2,7 +2,7 @@ name = "gisaclub-api"
 main = "src/index.js"
 compatibility_date = "2024-09-01"
 # 프로덕션 라우트(도메인 연결 후 활성화)
-# routes = [ { pattern = "api.gisaclub.com/*", zone_name = "gisaclub.com" } ]
+# routes = [ { pattern = "api.gisa.club/*", zone_name = "gisa.club" } ]
 
 # D1 (SQL 데이터베이스)
 [[d1_databases]]
@@ -21,8 +21,14 @@ bucket_name = "gisaclub-content"
 binding = "SESSIONS"
 id = "REPLACE_WITH_KV_ID"
 
+# KV (앱 설정 — 버전 매니페스트 app_version_manifest 저장)
+[[kv_namespaces]]
+binding = "SETTINGS"
+id = "REPLACE_WITH_SETTINGS_KV_ID"
+
 # 비밀값은 `wrangler secret put`으로 주입:
 #   JWT_SIGNING_KEY, CEREBRAS_API_KEY, GOOGLE_PLAY_SA_JSON
+#   ADMIN_TOKEN_SECRET  ← 앱 관리자 토큰 HMAC 서명 키(R57)
 [vars]
 FREE_QUESTION_RATIO = "0.10"
 FREE_AI_DAILY_LIMIT = "5"
@@ -30,3 +36,11 @@ FREE_AI_MAX_TOKENS = "400"
 PREMIUM_AI_MAX_TOKENS = "2048"
 AI_MODEL = "gpt-oss-120b"
 AI_ENDPOINT = "https://api.cerebras.ai/v1/chat/completions"
+
+# ── Cloudflare Access(Zero Trust) 관리자 인증 설정(R57) ──
+# ACCESS_TEAM_DOMAIN: Zero Trust 팀 도메인 (예: <team>.cloudflareaccess.com)
+# ACCESS_AUD: admin.gisa.club Access Application의 Application Audience(AUD) 태그
+# ADMIN_ALLOWED_EMAILS: 허용 운영자 이메일(쉼표구분, 이중방어)
+ACCESS_TEAM_DOMAIN = "REPLACE_WITH_TEAM.cloudflareaccess.com"
+ACCESS_AUD = "REPLACE_WITH_ACCESS_APPLICATION_AUD"
+ADMIN_ALLOWED_EMAILS = "designssir@gmail.com"

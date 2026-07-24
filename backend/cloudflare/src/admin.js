@@ -1,16 +1,26 @@
-// Gisaclub Admin API — 슈퍼 관리자(운영자) 전용 엔드포인트
+// Gisaclub Admin API — 슈퍼 관리자(운영자) 전용 엔드포인트 (R57: Cloudflare Access 기반)
 //
-// [보안 원칙]
-//  - 관리자 인증은 서버가 최종 판정한다. 앱의 로컬 관리자 오버라이드는
-//    "운영자 본인 기기의 편의 기능"일 뿐, 서버 자원(관리자 크레딧, 타 사용자
-//    데이터)에 접근하려면 반드시 서버 발급 관리자 토큰이 필요하다.
-//  - 관리자 비밀번호는 환경변수(secret)로만 보관하고, 해시 비교한다.
-//    설정:  wrangler secret put ADMIN_PASSWORD_SHA256
-//           wrangler secret put ADMIN_TOKEN_SECRET
+// [보안 아키텍처 — 2계층]
+//  (A) 관리자 대시보드(admin.gisa.club)는 Cloudflare Access(Zero Trust) 뒤에 있다.
+//      Access가 Google 로그인을 걸고, 지정된 운영자 이메일만 통과시킨다.
+//      통과한 요청에는 Cloudflare가 `Cf-Access-Jwt-Assertion` 헤더(서명 JWT)를 실어준다.
+//      → Worker는 이 JWT를 Cloudflare의 공개키(JWKS)로 검증하고, aud/email을 확인한다.
+//      → 즉 "누가 관리자인가"의 판정은 앱이 아니라 Cloudflare + 서버가 한다.
+//
+//  (B) 폰 앱 무제한 모드: 대시보드에서 `/v1/admin/issue-app-token`을 호출하면
+//      Worker가 **짧은 수명의 앱 토큰**(HMAC 서명, email+exp 포함)을 발급한다.
+//      운영자는 이 토큰을 폰 앱에 등록하고, 앱은 `/v1/admin/verify`로 재검증받는다.
+//      앱 토큰은 서버가 서명·검증하므로 변조 불가.
+//
+// [필요 환경변수 / 시크릿]
+//   vars:    ACCESS_TEAM_DOMAIN   예: gisaclub.cloudflareaccess.com
+//            ACCESS_AUD           Access Application의 Application Audience(AUD) 태그
+//            ADMIN_ALLOWED_EMAILS 쉼표구분 허용 이메일(선택, 이중방어). 예: designssir@gmail.com
+//   secret:  ADMIN_TOKEN_SECRET   앱 토큰 HMAC 서명 키 (wrangler secret put ADMIN_TOKEN_SECRET)
 //
 // [D1 스키마 가정]
-//  users(id TEXT PK, email TEXT, plan TEXT, expiry TEXT, created_at TEXT)
-//  KV: SETTINGS 네임스페이스에 'app_version_manifest' 키로 version.json 저장
+//   users(id TEXT PK, email TEXT, plan TEXT, expiry TEXT, created_at TEXT)
+//   KV: SETTINGS 네임스페이스에 'app_version_manifest' 키로 version.json 저장
 
 const err = (code, message, status) => {
   const e = new Error(message);
@@ -19,46 +29,193 @@ const err = (code, message, status) => {
   return e;
 };
 
-async function sha256Hex(text) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+// ─────────────────────────────────────────────────────────────
+// base64url 유틸
+// ─────────────────────────────────────────────────────────────
+function b64urlDecodeToBytes(s) {
+  s = s.replace(/-/g, '+').replace(/_/g, '/');
+  while (s.length % 4) s += '=';
+  const bin = atob(s);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+function b64urlDecodeToString(s) {
+  return new TextDecoder().decode(b64urlDecodeToBytes(s));
+}
+function b64urlEncodeFromString(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function bytesToB64url(bytes) {
+  let bin = '';
+  for (const b of new Uint8Array(bytes)) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-// 간단한 서명 토큰: base64(payload).hmacHex  — 실제 운영은 JWT 권장
-async function signAdminToken(env) {
-  const payload = JSON.stringify({ role: 'admin', iat: Date.now() });
-  const b64 = btoa(payload);
-  const sig = await sha256Hex(b64 + (env.ADMIN_TOKEN_SECRET || 'dev-secret'));
-  return `${b64}.${sig}`;
+// ─────────────────────────────────────────────────────────────
+// (A) Cloudflare Access JWT 검증
+//   JWKS: https://<team>.cloudflareaccess.com/cdn-cgi/access/certs
+// ─────────────────────────────────────────────────────────────
+const _jwksCache = { keys: null, ts: 0 };
+
+async function getAccessJWKS(env) {
+  const now = Date.now();
+  if (_jwksCache.keys && now - _jwksCache.ts < 3600_000) return _jwksCache.keys;
+  const team = env.ACCESS_TEAM_DOMAIN;
+  if (!team) throw err('config', 'ACCESS_TEAM_DOMAIN 미설정', 500);
+  const url = `https://${team}/cdn-cgi/access/certs`;
+  const resp = await fetch(url);
+  if (!resp.ok) throw err('config', 'Access JWKS 조회 실패', 502);
+  const data = await resp.json();
+  _jwksCache.keys = data.keys || [];
+  _jwksCache.ts = now;
+  return _jwksCache.keys;
 }
 
-async function verifyAdminToken(env, token) {
-  if (!token || !token.includes('.')) return false;
-  const [b64, sig] = token.split('.');
-  const expected = await sha256Hex(b64 + (env.ADMIN_TOKEN_SECRET || 'dev-secret'));
-  return sig === expected;
+async function importRsaKey(jwk) {
+  return crypto.subtle.importKey(
+    'jwk',
+    { kty: jwk.kty, n: jwk.n, e: jwk.e, alg: 'RS256', ext: true },
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['verify'],
+  );
 }
 
-// ── 관리자 로그인: 비밀번호 → 관리자 토큰 발급
-export async function adminLogin(env, body) {
-  const password = (body && body.password) || '';
-  if (!password) throw err('bad_request', '비밀번호가 필요합니다.', 400);
-  const hash = await sha256Hex(password);
-  const stored = env.ADMIN_PASSWORD_SHA256 || '';
-  if (!stored || hash !== stored) {
-    throw err('unauthorized', '관리자 비밀번호가 올바르지 않습니다.', 401);
+// 요청에서 Access JWT를 추출·검증하고, 성공 시 payload(claims)를 반환.
+export async function verifyAccessJwt(request, env) {
+  const token =
+    request.headers.get('Cf-Access-Jwt-Assertion') ||
+    (request.headers.get('Cookie') || '')
+      .split(';')
+      .map((c) => c.trim())
+      .find((c) => c.startsWith('CF_Authorization='))
+      ?.slice('CF_Authorization='.length);
+  if (!token) throw err('unauthorized', 'Access JWT 없음(대시보드 밖 접근)', 401);
+
+  const parts = token.split('.');
+  if (parts.length !== 3) throw err('unauthorized', 'JWT 형식 오류', 401);
+  const [h, p, s] = parts;
+  const header = JSON.parse(b64urlDecodeToString(h));
+  const payload = JSON.parse(b64urlDecodeToString(p));
+
+  // aud 검증(Access Application의 AUD 태그와 일치해야 함)
+  const aud = env.ACCESS_AUD;
+  const audOk = Array.isArray(payload.aud)
+    ? payload.aud.includes(aud)
+    : payload.aud === aud;
+  if (aud && !audOk) throw err('forbidden', 'aud 불일치', 403);
+
+  // exp 검증
+  if (payload.exp && Date.now() / 1000 > payload.exp) {
+    throw err('unauthorized', 'Access JWT 만료', 401);
   }
-  const token = await signAdminToken(env);
-  return { ok: true, token, label: '운영자' };
+
+  // 서명 검증(JWKS의 kid 매칭)
+  const jwks = await getAccessJWKS(env);
+  const jwk = jwks.find((k) => k.kid === header.kid);
+  if (!jwk) throw err('unauthorized', 'JWKS kid 미발견', 401);
+  const key = await importRsaKey(jwk);
+  const ok = await crypto.subtle.verify(
+    { name: 'RSASSA-PKCS1-v1_5' },
+    key,
+    b64urlDecodeToBytes(s),
+    new TextEncoder().encode(`${h}.${p}`),
+  );
+  if (!ok) throw err('unauthorized', 'Access JWT 서명 검증 실패', 401);
+
+  // (이중방어) 허용 이메일 화이트리스트가 설정돼 있으면 추가 확인
+  const email = (payload.email || '').toLowerCase();
+  const allow = (env.ADMIN_ALLOWED_EMAILS || '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  if (allow.length && !allow.includes(email)) {
+    throw err('forbidden', '허용되지 않은 관리자 이메일', 403);
+  }
+  return payload; // { email, sub, aud, exp, ... }
 }
 
-// ── 관리자 토큰 검증 미들웨어
-export async function requireAdmin(request, env) {
+// ─────────────────────────────────────────────────────────────
+// (B) 앱 토큰(HMAC) 발급/검증
+//   포맷: base64url(payloadJSON) + '.' + base64url(HMAC-SHA256)
+//   payload: { email, role:'admin', iat, exp }
+// ─────────────────────────────────────────────────────────────
+async function hmacKey(env) {
+  const secret = env.ADMIN_TOKEN_SECRET || 'dev-secret-change-me';
+  return crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign', 'verify'],
+  );
+}
+
+async function signAppToken(env, email, ttlSeconds = 60 * 60 * 24 * 30) {
+  const now = Math.floor(Date.now() / 1000);
+  const payload = { email, role: 'admin', iat: now, exp: now + ttlSeconds };
+  const p = b64urlEncodeFromString(JSON.stringify(payload));
+  const key = await hmacKey(env);
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(p));
+  return `${p}.${bytesToB64url(sig)}`;
+}
+
+async function verifyAppToken(env, token) {
+  if (!token || !token.includes('.')) return null;
+  const [p, s] = token.split('.');
+  const key = await hmacKey(env);
+  const ok = await crypto.subtle.verify(
+    'HMAC',
+    key,
+    b64urlDecodeToBytes(s),
+    new TextEncoder().encode(p),
+  );
+  if (!ok) return null;
+  let payload;
+  try {
+    payload = JSON.parse(b64urlDecodeToString(p));
+  } catch (_) {
+    return null;
+  }
+  if (payload.exp && Math.floor(Date.now() / 1000) > payload.exp) return null;
+  if (payload.role !== 'admin') return null;
+  return payload;
+}
+
+// ── 대시보드가 호출: Access JWT로 인증된 운영자에게 폰앱용 토큰 발급
+export async function issueAppToken(request, env) {
+  const claims = await verifyAccessJwt(request, env); // 실패 시 throw
+  const token = await signAppToken(env, claims.email || '');
+  return { ok: true, token, email: claims.email || '', expires_in_days: 30 };
+}
+
+// ── 폰 앱이 호출: 앱 토큰 검증(무제한 모드 활성화 근거)
+export async function verifyAppTokenEndpoint(request, env) {
   const auth = request.headers.get('Authorization') || '';
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
-  const ok = await verifyAdminToken(env, token);
-  if (!ok) throw err('forbidden', '관리자 권한이 필요합니다.', 403);
-  return { role: 'admin' };
+  const payload = await verifyAppToken(env, token);
+  if (!payload) throw err('forbidden', '유효하지 않은 관리자 토큰', 403);
+  return { ok: true, email: payload.email || '', role: 'admin', exp: payload.exp };
+}
+
+// ── 관리자 권한 미들웨어: Access JWT(대시보드) 또는 앱 토큰(폰) 둘 중 하나면 통과
+export async function requireAdmin(request, env) {
+  // 1) 대시보드 경로: Access JWT
+  try {
+    const claims = await verifyAccessJwt(request, env);
+    return { role: 'admin', email: claims.email || '', via: 'access' };
+  } catch (_) {
+    // 2) 폰 앱 경로: 앱 토큰
+    const auth = request.headers.get('Authorization') || '';
+    const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+    const payload = await verifyAppToken(env, token);
+    if (payload) return { role: 'admin', email: payload.email || '', via: 'app_token' };
+  }
+  throw err('forbidden', '관리자 권한이 필요합니다.', 403);
 }
 
 // ── 사용자 목록(페이지네이션)
@@ -108,7 +265,6 @@ export async function getVersionManifest(env) {
       /* fallthrough */
     }
   }
-  // 기본값(아직 설정 안 됨)
   return {
     latest_version: '1.0.0',
     latest_build: 1,
