@@ -5,6 +5,7 @@ import { getEntitlement } from './entitlement.js';
 import { listQuestions, getQuestion, gradeQuiz } from './content.js';
 import { aiChat } from './ai.js';
 import { verifyPurchase } from './billing.js';
+import { adminLogin, requireAdmin, adminListUsers, adminSetUserPlan, adminStats, getVersionManifest, adminSetVersionManifest } from './admin.js';
 
 const json = (data, status = 200, extra = {}) =>
   new Response(JSON.stringify(data), {
@@ -36,6 +37,35 @@ export default {
     try {
       // ── 헬스체크(공개)
       if (pathname === '/v1/health') return json({ ok: true });
+
+      // ── 앱 버전 매니페스트(공개) — 앱 자동 업데이트 확인용
+      if (pathname === '/v1/app/version' && method === 'GET') {
+        return json(await getVersionManifest(env));
+      }
+
+      // ── 관리자 로그인(공개) — 성공 시 관리자 토큰 발급
+      if (pathname === '/v1/admin/login' && method === 'POST') {
+        return json(await adminLogin(env, await request.json()));
+      }
+
+      // ── 관리자 전용 라우트(관리자 토큰 필요)
+      if (pathname.startsWith('/v1/admin/')) {
+        const admin = await requireAdmin(request, env); // 실패 시 throw 403
+        if (pathname === '/v1/admin/users' && method === 'GET') {
+          const page = parseInt(url.searchParams.get('page') || '1', 10);
+          return json(await adminListUsers(env, page));
+        }
+        if (pathname === '/v1/admin/user/plan' && method === 'POST') {
+          return json(await adminSetUserPlan(env, await request.json()));
+        }
+        if (pathname === '/v1/admin/stats' && method === 'GET') {
+          return json(await adminStats(env));
+        }
+        if (pathname === '/v1/admin/version' && method === 'POST') {
+          return json(await adminSetVersionManifest(env, await request.json()));
+        }
+        return json({ error: 'not_found' }, 404);
+      }
 
       // ── 인증 필요 라우트
       const session = await requireSession(request, env); // 실패 시 throw 401

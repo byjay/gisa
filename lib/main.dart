@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'providers/app_provider.dart';
+import 'services/admin_service.dart';
+import 'services/app_update_service.dart';
 import 'services/auth_service.dart';
 import 'services/backup_service.dart';
 import 'services/crash_logger.dart';
@@ -38,8 +40,12 @@ Future<void> _bootstrap() async {
   unawaited(provider.initSchedule());
   // 인증(구글 로그인 준비) 서비스 초기화
   await AuthService.instance.init();
+  // 🛡️ 슈퍼 관리자 세션 복원 — Entitlement보다 먼저(오버라이드 기준값)
+  await AdminService.instance.init();
   // 🔐 구독/권한(Entitlement) 서비스 초기화 — 무료/유료 게이트의 기준
   await EntitlementService.instance.init();
+  // 🔄 앱 업데이트 서비스 초기화(백그라운드로 최신 버전 확인)
+  unawaited(AppUpdateService.instance.init());
   // 🔔 로컬 알림 서비스 초기화 (시험 D-day, 학습 리마인드) — 백그라운드로 준비
   unawaited(NotificationService.instance.init());
   // 💾 Q80: 7일 이상 경과 시 자동 백업 파일 생성(백그라운드, 실패해도 앱 구동에 영향 없음)
@@ -49,7 +55,9 @@ Future<void> _bootstrap() async {
       providers: [
         ChangeNotifierProvider.value(value: provider),
         ChangeNotifierProvider.value(value: AuthService.instance),
+        ChangeNotifierProvider.value(value: AdminService.instance),
         ChangeNotifierProvider.value(value: EntitlementService.instance),
+        ChangeNotifierProvider.value(value: AppUpdateService.instance),
       ],
       child: const CertStudyApp(),
     ),

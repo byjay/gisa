@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'admin_service.dart';
+
 /// 구독 등급.
 enum PlanTier {
   /// 무료 — 기출문제 10% · AI 선생님 기능 30% 제한.
@@ -65,12 +67,20 @@ class EntitlementService extends ChangeNotifier {
   PlanTier get plan => _plan;
 
   /// 프리미엄(유료) 활성 여부. 만료일이 지났으면 자동으로 free 취급.
+  ///
+  /// 🛡️ 관리자 오버라이드: 관리자 세션이 활성이면 결제 여부와 무관하게
+  /// 항상 프리미엄으로 취급한다(전 콘텐츠·AI 무제한). 운영자가 앱을
+  /// 검수·시연·고객지원할 때 모든 기능에 즉시 접근하도록 하기 위함이다.
   bool get isPremium {
+    if (AdminService.instance.isAdmin) return true;
     if (_plan != PlanTier.premium) return false;
     final exp = _expiry;
     if (exp != null && DateTime.now().isAfter(exp)) return false;
     return true;
   }
+
+  /// 관리자(운영자) 오버라이드로 프리미엄이 된 것인지 여부(배지 표시용).
+  bool get isAdminOverride => AdminService.instance.isAdmin;
 
   bool get isFree => !isPremium;
   DateTime? get expiry => _expiry;
@@ -127,6 +137,13 @@ class EntitlementService extends ChangeNotifier {
     } catch (_) {}
     notifyListeners();
   }
+
+  /// 🛡️ 관리자(운영자) 전용: 구독 상태를 로컬에서 강제 설정(시연/테스트용).
+  /// ⚠️ 실제 결제 검증은 서버가 하므로, 이 값은 서버 콘텐츠 접근을 보장하지 않는다.
+  /// (관리자 오버라이드로 이미 전 기능이 열려 있으므로, 이 메서드는 무료/유료
+  ///  UI 흐름을 관리자 화면에서 재현·검수할 때 사용한다.)
+  Future<void> adminSetPlan(PlanTier tier, {DateTime? expiry}) =>
+      debugSetPlan(tier, expiry: expiry);
 
   /// 개발/데모용: 구독 상태를 로컬에서 강제 설정(서버 없이 UI 흐름 확인).
   /// ⚠️ 실제 결제 검증은 서버가 하므로, 이 값은 콘텐츠 접근을 보장하지 않는다.

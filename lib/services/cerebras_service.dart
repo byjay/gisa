@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'study_data.dart';
 import 'entitlement_service.dart';
+import 'admin_service.dart';
 
 /// 튜터 응답 — 생각(추론) 과정 + 최종 답변
 class TutorReply {
@@ -45,6 +46,11 @@ class CerebrasService {
   );
   static const _developmentAiEnabled = bool.fromEnvironment('ENABLE_DEV_AI');
 
+  /// 🛡️ 관리자(운영자) 전용 키 — 빌드시 --dart-define=CEREBRAS_ADMIN_KEY 로 주입.
+  /// 관리자 세션이 활성이면 사용자 BYOK 키가 없어도 이 키로 AI가 무제한 동작한다.
+  /// (앱 소스에는 저장하지 않으며, 운영자 배포판에만 주입한다.)
+  static const _adminKey = String.fromEnvironment('CEREBRAS_ADMIN_KEY');
+
   /// 사용자가 설정에서 직접 입력한 API 키를 저장하는 로컬 키 이름.
   static const _prefsKeyUserApiKey = 'cerebras_user_api_key';
 
@@ -78,8 +84,14 @@ class CerebrasService {
   }
 
   /// 실제 사용할 API 키를 반환한다.
-  /// 우선순위: (1) 사용자가 설정에서 입력·저장한 키 → (2) 디버그 개발 키.
+  /// 우선순위:
+  ///   (0) 🛡️ 관리자 세션 활성 + 관리자 키 주입됨 → 관리자 키(무제한 오버라이드)
+  ///   (1) 사용자가 설정에서 입력·저장한 키(BYOK)
+  ///   (2) 디버그 개발 키
   Future<String> getApiKey() async {
+    if (AdminService.instance.isAdmin && _adminKey.isNotEmpty) {
+      return _adminKey;
+    }
     final userKey = await _loadUserKey();
     if (userKey.isNotEmpty) return userKey;
     if (_devAiActuallyEnabled) {

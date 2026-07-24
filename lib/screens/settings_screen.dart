@@ -17,9 +17,10 @@ import '../services/cerebras_service.dart';
 import '../services/crash_logger.dart';
 import '../services/secure_box_service.dart';
 import '../services/notification_service.dart';
+import '../services/app_update_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/tutor_avatar.dart';
-import 'admin_settings_screen.dart';
+import 'super_admin_screen.dart';
 
 /// 설정 화면 — 계정(구글 로그인 준비), 테마, 목표 등.
 class SettingsScreen extends StatefulWidget {
@@ -54,12 +55,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _sectionTitle(cs, '관리자'),
           const SizedBox(height: 8),
           Card(
-            child: ListTile(
-              leading: const Icon(Icons.admin_panel_settings_rounded),
-              title: const Text('관리자 모드'),
-              subtitle: const Text('과목·기능·CBT·타이머 운영 설정'),
-              trailing: const Icon(Icons.lock_outline_rounded),
-              onTap: () => _openAdminMode(context),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.admin_panel_settings_rounded),
+                  title: const Text('슈퍼 관리자 모드'),
+                  subtitle: const Text(
+                      '사용자·콘텐츠·구독·AI·업데이트 운영 (인증 시 전 기능 무제한 해금)'),
+                  trailing: const Icon(Icons.lock_outline_rounded),
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const SuperAdminScreen())),
+                ),
+                const Divider(height: 1),
+                _updateTile(context),
+              ],
             ),
           ),
           const SizedBox(height: 20),
@@ -191,65 +200,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Future<void> _openAdminMode(BuildContext context) async {
-    final controller = TextEditingController();
-    String? errorText;
-    final unlocked = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('관리자 인증'),
-          content: TextField(
-            controller: controller,
-            obscureText: true,
-            autofocus: true,
-            keyboardType: TextInputType.number,
-            maxLength: 8,
-            decoration: InputDecoration(
-              labelText: '관리자 비밀번호',
-              errorText: errorText,
-              counterText: '',
-            ),
-            onSubmitted: (_) {
-              final ok = context.read<AppProvider>().verifyAdminPassword(
-                controller.text.trim(),
-              );
-              if (ok) {
-                Navigator.pop(dialogContext, true);
-              } else {
-                setDialogState(() => errorText = '비밀번호가 올바르지 않습니다.');
-              }
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('취소'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final ok = context.read<AppProvider>().verifyAdminPassword(
-                  controller.text.trim(),
-                );
-                if (ok) {
-                  Navigator.pop(dialogContext, true);
-                } else {
-                  setDialogState(() => errorText = '비밀번호가 올바르지 않습니다.');
-                }
-              },
-              child: const Text('확인'),
-            ),
-          ],
-        ),
+  /// 🔄 앱 업데이트 확인/실행 타일 (설정 관리자 카드에 포함).
+  Widget _updateTile(BuildContext context) {
+    final update = context.watch<AppUpdateService>();
+    return ListTile(
+      leading: Icon(
+        update.updateAvailable
+            ? Icons.system_update_rounded
+            : Icons.verified_rounded,
+        color: update.updateAvailable
+            ? Theme.of(context).colorScheme.primary
+            : Colors.green,
       ),
+      title: Text(update.updateAvailable
+          ? '새 버전 ${update.latestVersion} 사용 가능'
+          : '앱 버전 v${AppUpdateService.currentVersion}'),
+      subtitle: Text(update.updateAvailable
+          ? '탭하여 업데이트'
+          : (update.checked ? '최신 버전입니다' : '업데이트 확인 중...')),
+      trailing: update.updateAvailable
+          ? const Icon(Icons.download_rounded)
+          : IconButton(
+              icon: const Icon(Icons.refresh_rounded),
+              onPressed: () => update.checkForUpdate(),
+            ),
+      onTap: update.updateAvailable
+          ? () async {
+              final ok = await update.performUpdate();
+              if (context.mounted && !ok) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('업데이트 링크를 열 수 없습니다.')),
+                );
+              }
+            }
+          : () => update.checkForUpdate(),
     );
-    controller.dispose();
-    if (unlocked == true && context.mounted) {
-      await Navigator.push<void>(
-        context,
-        MaterialPageRoute(builder: (_) => const AdminSettingsScreen()),
-      );
-    }
   }
 
   /// 테마 팔레트 선택 — 10종 색상 칩
