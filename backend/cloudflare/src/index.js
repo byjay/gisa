@@ -6,6 +6,7 @@ import { listQuestions, getQuestion, gradeQuiz } from './content.js';
 import { aiChat } from './ai.js';
 import { verifyPurchase } from './billing.js';
 import { getProgress, putProgress } from './progress.js';
+import { handleGetConfig, handlePutConfig } from './appconfig.js';
 import { issueAppToken, verifyAppTokenEndpoint, requireAdmin, adminListUsers, adminSetUserPlan, adminStats, getVersionManifest, adminSetVersionManifest } from './admin.js';
 
 const json = (data, status = 200, extra = {}) =>
@@ -44,6 +45,12 @@ export default {
         return json(await getVersionManifest(env));
       }
 
+      // ── 원격 앱 설정(공개 GET) — 학습앱이 시작 시 pull → 관리자 설정 자동 반영
+      //    (권한/구독/점수 판정값은 포함하지 않음. 기능 플래그/공지/최소버전/활성트랙만.)
+      if (pathname === '/v1/app/config' && method === 'GET') {
+        return json(await handleGetConfig(env));
+      }
+
       // ── 폰 앱 토큰 검증(Access 불필요, 앱 토큰 자체 검증) — 앱이 무제한 모드 켤 때 호출
       //    반드시 /v1/admin/* 일반 처리보다 먼저 둔다(앱 토큰 경로).
       if (pathname === '/v1/admin/verify' && method === 'GET') {
@@ -72,6 +79,13 @@ export default {
           return json(await adminSetVersionManifest(env, await request.json()));
         }
         return json({ error: 'not_found' }, 404);
+      }
+
+      // ── 원격 앱 설정 배포(관리자 전용) — 관리자 콘솔의 "배포" 버튼이 호출.
+      //    /v1/admin/* 접두사가 아니므로 여기서 명시적으로 requireAdmin 게이트를 건다.
+      if (pathname === '/v1/app/config' && (method === 'PUT' || method === 'POST')) {
+        await requireAdmin(request, env); // 실패 시 throw 403
+        return json(await handlePutConfig(env, await request.json()));
       }
 
       // ── 인증 필요 라우트

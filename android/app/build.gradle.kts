@@ -65,6 +65,23 @@ android {
             )
         }
     }
+
+    // R59: 학습앱(user)과 관리자앱(admin)을 하나의 코드베이스에서 분리 빌드.
+    //   - user  : 기본 학습앱(applicationId 유지)
+    //   - admin : 관리자 콘솔 앱(.admin 접미사 → 한 기기에 둘 다 설치 가능)
+    // 관리자 APK 빌드: flutter build apk --release --flavor admin -t lib/main_admin.dart
+    flavorDimensions += "app"
+    productFlavors {
+        create("user") {
+            dimension = "app"
+            // applicationId 유지(com.certstudytracker.study)
+        }
+        create("admin") {
+            dimension = "app"
+            applicationIdSuffix = ".admin"
+            resValue("string", "app_name", "Gisaclub 관리자")
+        }
+    }
 }
 
 flutter {

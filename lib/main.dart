@@ -10,6 +10,7 @@ import 'services/backup_service.dart';
 import 'services/crash_logger.dart';
 import 'services/entitlement_service.dart';
 import 'services/notification_service.dart';
+import 'services/remote_config_service.dart';
 import 'theme/app_theme.dart';
 import 'screens/exams_screen.dart';
 import 'screens/home_screen.dart';
@@ -44,6 +45,9 @@ Future<void> _bootstrap() async {
   await AdminService.instance.init();
   // 🔐 구독/권한(Entitlement) 서비스 초기화 — 무료/유료 게이트의 기준
   await EntitlementService.instance.init();
+  // 📡 원격 앱 설정(Remote Config) 초기화 — 관리자가 배포한 설정을 자동 반영.
+  //    캐시 먼저 적용 → 온라인이면 백그라운드로 서버 최신값 pull(오프라인 관용).
+  await RemoteConfigService.instance.init();
   // 🔄 앱 업데이트 서비스 초기화(백그라운드로 최신 버전 확인)
   unawaited(AppUpdateService.instance.init());
   // 🔔 로컬 알림 서비스 초기화 (시험 D-day, 학습 리마인드) — 백그라운드로 준비
@@ -58,6 +62,7 @@ Future<void> _bootstrap() async {
         ChangeNotifierProvider.value(value: AdminService.instance),
         ChangeNotifierProvider.value(value: EntitlementService.instance),
         ChangeNotifierProvider.value(value: AppUpdateService.instance),
+        ChangeNotifierProvider.value(value: RemoteConfigService.instance),
       ],
       child: const CertStudyApp(),
     ),
