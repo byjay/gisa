@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
+import 'app_config.dart';
+
 /// 🔄 Gisaclub 앱 자동 업데이트 서비스.
 ///
 /// [동작 개요]
@@ -19,7 +21,7 @@ import 'package:url_launcher/url_launcher.dart';
 ///   "latest_version": "1.1.0",
 ///   "latest_build": 3,
 ///   "min_supported_build": 1,          // 이 미만이면 강제 업데이트
-///   "apk_url": "https://cdn.gisaclub.com/releases/gisaclub-1.1.0.apk",
+///   "apk_url": "https://WORKER.workers.dev/app/gisaclub-1.1.0.apk",
 ///   "store_url": "https://play.google.com/store/apps/details?id=com.certstudytracker.study",
 ///   "release_notes": "AI 튜터 속도 개선, 신규 종목 추가",
 ///   "force": false
@@ -37,11 +39,9 @@ class AppUpdateService extends ChangeNotifier {
   static const String currentVersion = '1.0.0';
   static const int currentBuild = 1;
 
-  /// version.json 위치. 배포 시 --dart-define 으로 교체 가능.
-  static const String _versionManifestUrl = String.fromEnvironment(
-    'GISACLUB_UPDATE_MANIFEST',
-    defaultValue: 'https://cdn.gisaclub.com/app/version.json',
-  );
+  /// version.json 위치 — AppConfig(중앙 관리)에서 해석.
+  /// 명시 지정이 없으면 API 베이스의 `/v1/app/version`을 사용한다(도메인 비종속).
+  String get _versionManifestUrl => AppConfig.resolveUpdateManifestUrl();
 
   bool _checked = false;
   bool _updateAvailable = false;

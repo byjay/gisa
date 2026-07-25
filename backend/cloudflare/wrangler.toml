@@ -1,7 +1,11 @@
 name = "gisaclub-api"
 main = "src/index.js"
 compatibility_date = "2024-09-01"
-# 프로덕션 라우트(도메인 연결 후 활성화)
+# 배포 시 Worker는 기본으로 https://gisaclub-api.<your-subdomain>.workers.dev 에서 서비스된다.
+# 커스텀 도메인을 구매하기 전까지는 이 workers.dev 주소를 그대로 사용한다(도메인 비종속 · R58).
+# 앱/대시보드에는 이 주소를 하드코딩하지 않고 API_BASE_URL / GISACLUB_CONFIG.apiBase 로만 주입한다.
+#
+# [커스텀 도메인 구매 후에만] 아래 route 주석을 해제하고 값을 채운다:
 # routes = [ { pattern = "api.gisa.club/*", zone_name = "gisa.club" } ]
 
 # D1 (SQL 데이터베이스)
@@ -37,9 +41,10 @@ PREMIUM_AI_MAX_TOKENS = "2048"
 AI_MODEL = "gpt-oss-120b"
 AI_ENDPOINT = "https://api.cerebras.ai/v1/chat/completions"
 
-# ── Cloudflare Access(Zero Trust) 관리자 인증 설정(R57) ──
+# ── Cloudflare Access(Zero Trust) 관리자 인증 설정(R57/R58) ──
 # ACCESS_TEAM_DOMAIN: Zero Trust 팀 도메인 (예: <team>.cloudflareaccess.com)
-# ACCESS_AUD: admin.gisa.club Access Application의 Application Audience(AUD) 태그
+# ACCESS_AUD: 관리자 대시보드(Pages, 기본 *.pages.dev) Access Application의
+#             Application Audience(AUD) 태그
 # ADMIN_ALLOWED_EMAILS: 허용 운영자 이메일(쉼표구분, 이중방어)
 ACCESS_TEAM_DOMAIN = "REPLACE_WITH_TEAM.cloudflareaccess.com"
 ACCESS_AUD = "REPLACE_WITH_ACCESS_APPLICATION_AUD"

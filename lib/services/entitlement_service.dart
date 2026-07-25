@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'admin_service.dart';
+import 'app_config.dart';
 
 /// 구독 등급.
 enum PlanTier {
@@ -48,22 +49,28 @@ class EntitlementService extends ChangeNotifier {
   static const int kPremiumAiMaxTokens = 2048;
 
   // ─────────────── 로컬 저장 키 ───────────────
-  static const _kPlan = 'ent_plan_tier';
-  static const _kExpiry = 'ent_expiry_iso';
+  // ⚠️ 데이터 저장 정책(R58): 등급/구독 상태는 서버(D1)가 단일 진실 소스이며
+  //    **앱에 영구 저장하지 않는다.** 아래 키 중 등급/만료 관련 키는 더 이상
+  //    사용하지 않는다(레거시 정리용으로만 참조). AI 사용 카운트만 로컬에 둔다
+  //    (무료 게이트의 하루 사용량 — 서버 미배포 상태의 UX 보조, 서버 배포 후
+  //    서버 카운트로 대체 예정).
+  static const _kLegacyPlan = 'ent_plan_tier'; // 제거 대상(마이그레이션에서 삭제)
+  static const _kLegacyExpiry = 'ent_expiry_iso'; // 제거 대상
   static const _kAiUsedDate = 'ent_ai_used_date';
   static const _kAiUsedCount = 'ent_ai_used_count';
 
-  /// 서버(Cloudflare Worker) 엔드포인트. 실제 배포 시 --dart-define로 주입.
-  static const _entitlementApiBase = String.fromEnvironment(
-    'GISACLUB_API_BASE',
-    defaultValue: 'https://api.gisaclub.com',
-  );
+  /// 서버(Cloudflare Worker) 엔드포인트 — AppConfig(중앙 관리)에서 가져온다.
+  String get _entitlementApiBase => AppConfig.apiBaseUrl;
 
   PlanTier _plan = PlanTier.free;
   DateTime? _expiry;
   bool _initialized = false;
+  bool _serverConfirmed = false;
 
   bool get isInitialized => _initialized;
+
+  /// 서버로부터 등급을 확인받았는지 여부(false면 아직 free 가정 = 미확인).
+  bool get isServerConfirmed => _serverConfirmed;
   PlanTier get plan => _plan;
 
   /// 프리미엄(유료) 활성 여부. 만료일이 지났으면 자동으로 free 취급.
@@ -86,83 +93,74 @@ class EntitlementService extends ChangeNotifier {
   DateTime? get expiry => _expiry;
 
   Future<void> init() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final planStr = prefs.getString(_kPlan);
-      _plan = planStr == 'premium' ? PlanTier.premium : PlanTier.free;
-      final expStr = prefs.getString(_kExpiry);
-      _expiry = expStr != null ? DateTime.tryParse(expStr) : null;
-    } catch (_) {
-      _plan = PlanTier.free;
-      _expiry = null;
-    }
+    // 🔐 데이터 저장 정책(R58): 등급/만료는 로컬에서 절대 복원하지 않는다.
+    //    앱 시작 시 항상 free(최소권한)에서 출발하고, 서버 응답으로만 승격된다.
+    //    → 오프라인이거나 서버 미배포 상태면 무료로 동작(안전 기본값).
+    _plan = PlanTier.free;
+    _expiry = null;
+    _serverConfirmed = false;
+    // 레거시(과거 빌드가 로컬 저장한 등급/만료) 정리.
+    unawaited(_purgeLegacyPlanCache());
     _initialized = true;
     notifyListeners();
-    // 서버 상태 동기화는 백그라운드로(앱 시작 지연 방지).
+    // 서버 상태 동기화는 백그라운드로(앱 시작 지연 방지). 토큰이 있어야 조회.
     unawaited(refreshFromServer());
   }
 
-  /// 🔐 서버(Cloudflare)에서 구독 상태를 재확인한다.
-  /// 서버가 최종 진실원이며, 로컬 캐시는 이 값으로 갱신된다.
+  /// 과거 빌드가 로컬에 저장했던 등급/만료 캐시를 삭제한다(정책 준수 마이그레이션).
+  Future<void> _purgeLegacyPlanCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_kLegacyPlan);
+      await prefs.remove(_kLegacyExpiry);
+    } catch (_) {}
+  }
+
+  /// 🔐 서버(Cloudflare)에서 구독 상태를 조회한다 — **유일한 진실 소스**.
+  /// - 성공: 서버가 알려준 등급을 메모리에만 반영(로컬 영구저장 안 함).
+  /// - 실패/미배포/미로그인: free(최소권한) 유지. 로컬 캐시로 승격하지 않는다.
   Future<void> refreshFromServer({String? authToken}) async {
-    if (authToken == null || authToken.isEmpty) return; // 로그인 전이면 스킵
+    final token = authToken ?? AdminService.instance.serverToken;
+    if (_entitlementApiBase.isEmpty) return; // 서버 미설정 → free 유지
+    if (token == null || token.isEmpty) return; // 미로그인 → free 유지
     try {
       final res = await http.get(
         Uri.parse('$_entitlementApiBase/v1/entitlement'),
-        headers: {'Authorization': 'Bearer $authToken'},
+        headers: {'Authorization': 'Bearer $token'},
       ).timeout(const Duration(seconds: 15));
       if (res.statusCode != 200) return;
       final body = jsonDecode(res.body) as Map<String, dynamic>;
       final tier = (body['tier'] as String?) ?? 'free';
       final expiryStr = body['expiry'] as String?;
-      await _applyServerState(tier, expiryStr);
+      _applyServerState(tier, expiryStr);
     } catch (e) {
       if (kDebugMode) debugPrint('entitlement refresh 실패: $e');
-      // 실패 시 로컬 캐시 유지(오프라인 사용성). 유료 콘텐츠는 어차피
-      // 서버 접근 시 재검증되므로 보안상 문제 없음.
+      // 실패 시에도 로컬로 승격하지 않는다(정책: 판정은 서버 응답만 신뢰).
     }
   }
 
-  Future<void> _applyServerState(String tier, String? expiryIso) async {
+  /// 서버 응답만으로 메모리 상태를 갱신(로컬 영구저장 없음).
+  void _applyServerState(String tier, String? expiryIso) {
     _plan = tier == 'premium' ? PlanTier.premium : PlanTier.free;
     _expiry = expiryIso != null ? DateTime.tryParse(expiryIso) : null;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_kPlan, tier == 'premium' ? 'premium' : 'free');
-      if (_expiry != null) {
-        await prefs.setString(_kExpiry, _expiry!.toIso8601String());
-      } else {
-        await prefs.remove(_kExpiry);
-      }
-    } catch (_) {}
+    _serverConfirmed = true;
     notifyListeners();
   }
 
-  /// 🛡️ 관리자(운영자) 전용: 구독 상태를 로컬에서 강제 설정(시연/테스트용).
-  /// ⚠️ 실제 결제 검증은 서버가 하므로, 이 값은 서버 콘텐츠 접근을 보장하지 않는다.
-  /// (관리자 오버라이드로 이미 전 기능이 열려 있으므로, 이 메서드는 무료/유료
-  ///  UI 흐름을 관리자 화면에서 재현·검수할 때 사용한다.)
-  Future<void> adminSetPlan(PlanTier tier, {DateTime? expiry}) =>
-      debugSetPlan(tier, expiry: expiry);
+  /// 🛡️ 관리자(운영자) 전용: 대시보드에서 무료/유료 UI 흐름을 검수할 때
+  /// **메모리에서만** 등급을 토글한다(로컬/서버에 쓰지 않음). 앱 재시작 시 소멸.
+  /// 실제 결제·권한은 항상 서버가 판정한다.
+  Future<void> adminSetPlan(PlanTier tier, {DateTime? expiry}) async {
+    _plan = tier;
+    _expiry = expiry;
+    notifyListeners();
+  }
 
-  /// 개발/데모용: 구독 상태를 로컬에서 강제 설정(서버 없이 UI 흐름 확인).
-  /// ⚠️ 실제 결제 검증은 서버가 하므로, 이 값은 콘텐츠 접근을 보장하지 않는다.
+  /// 테스트 전용: 등급을 메모리에서만 설정(로컬 영구저장 없음).
   @visibleForTesting
   Future<void> debugSetPlan(PlanTier tier, {DateTime? expiry}) async {
     _plan = tier;
     _expiry = expiry;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(
-        _kPlan,
-        tier == PlanTier.premium ? 'premium' : 'free',
-      );
-      if (expiry != null) {
-        await prefs.setString(_kExpiry, expiry.toIso8601String());
-      } else {
-        await prefs.remove(_kExpiry);
-      }
-    } catch (_) {}
     notifyListeners();
   }
 

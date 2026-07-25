@@ -54,10 +54,10 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
         );
         break;
       case AdminAuthResult.invalidToken:
-        _showError('토큰이 유효하지 않거나 만료되었습니다. admin.gisa.club에서 새 토큰을 발급받으세요.');
+        _showError('토큰이 유효하지 않거나 만료되었습니다. 관리자 대시보드에서 새 토큰을 발급받으세요.');
         break;
       case AdminAuthResult.notConfigured:
-        _showError('서버 주소(GISACLUB_API_BASE)가 설정되지 않았습니다. 배포 빌드에서만 사용 가능합니다.');
+        _showError('서버 주소(API_BASE_URL)가 설정되지 않았습니다. 배포 빌드에서만 사용 가능합니다.');
         break;
       case AdminAuthResult.network:
         _showError('서버에 연결할 수 없습니다. 네트워크 상태를 확인하세요.');
@@ -105,6 +105,10 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
   Widget _lockScreen(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final admin = context.watch<AdminService>();
+    // 대시보드 주소는 코드에 하드코딩하지 않는다(R58). WEB_BASE_URL이 설정된
+    // 빌드에서만 실제 주소를 괄호로 덧붙여 안내한다.
+    final dashboardHint =
+        admin.dashboardUrl.isNotEmpty ? '(${admin.dashboardUrl})' : '';
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -144,13 +148,13 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      '① 브라우저에서 admin.gisa.club 접속\n'
+                    Text(
+                      '① 브라우저에서 관리자 대시보드$dashboardHint 접속\n'
                       '② Google 계정으로 로그인 (Cloudflare Access가 지정된\n'
                       '   운영자 이메일만 통과시킵니다)\n'
                       '③ 대시보드에서 "앱 토큰 발급" → 토큰 복사\n'
                       '④ 아래에 붙여넣고 등록',
-                      style: TextStyle(fontSize: 12.5, height: 1.55),
+                      style: const TextStyle(fontSize: 12.5, height: 1.55),
                     ),
                   ],
                 ),
@@ -162,7 +166,7 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
                 minLines: 1,
                 decoration: InputDecoration(
                   labelText: '관리자 토큰',
-                  hintText: 'admin.gisa.club 에서 발급받은 토큰 붙여넣기',
+                  hintText: '관리자 대시보드에서 발급받은 토큰 붙여넣기',
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     tooltip: '붙여넣기',
@@ -201,7 +205,7 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
                   ),
                   child: Text(
                     '⚠️ 서버 주소가 설정되지 않은 빌드입니다. 배포 빌드\n'
-                    '(--dart-define=GISACLUB_API_BASE=https://api.gisa.club)\n'
+                    '(--dart-define=API_BASE_URL=https://<worker>.workers.dev)\n'
                     '에서만 관리자 토큰을 검증할 수 있습니다.',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 11.5, color: cs.error),
@@ -554,9 +558,9 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
             title: Text('보안 방식 — Cloudflare Access(Zero Trust)'),
             subtitle: Text(
               '앱 안에는 PIN·비밀번호·이메일 판정 로직이 전혀 없습니다.\n'
-              'admin.gisa.club 앞단에서 Cloudflare Access가 Google 로그인을 걸고\n'
-              '지정된 운영자 이메일만 통과시킨 뒤 앱 토큰을 발급합니다. 앱은 이 토큰을\n'
-              '서버(/v1/admin/verify)로 재검증받아야만 무제한 모드가 열립니다.\n'
+              '관리자 대시보드(Pages) 앞단에서 Cloudflare Access가 Google 로그인을\n'
+              '걸고 지정된 운영자 이메일만 통과시킨 뒤 앱 토큰을 발급합니다. 앱은 이\n'
+              '토큰을 서버(/v1/admin/verify)로 재검증받아야만 무제한 모드가 열립니다.\n'
               '(변조·디컴파일로 우회 불가 — 판정 권한이 항상 서버에 있음)',
             ),
             isThreeLine: true,

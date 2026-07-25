@@ -1,15 +1,21 @@
 // Gisaclub 운영자 대시보드 프론트엔드
 //
 // [인증 흐름]
-//  이 페이지(admin.gisa.club)는 Cloudflare Access 뒤에 있으므로, 여기 도달했다는 것
-//  자체가 "지정 운영자 Google 로그인 통과"를 의미한다. 브라우저는 Access 쿠키
-//  (CF_Authorization)를 보유하며, 같은 Zero Trust로 보호되는 API 호출 시 이 쿠키가
+//  이 페이지(Pages, 기본 *.pages.dev)는 Cloudflare Access 뒤에 있으므로, 여기 도달
+//  했다는 것 자체가 "지정 운영자 Google 로그인 통과"를 의미한다. 브라우저는 Access
+//  쿠키(CF_Authorization)를 보유하며, 같은 Zero Trust로 보호되는 API 호출 시 이 쿠키가
 //  Cf-Access-Jwt-Assertion으로 백엔드에 전달된다.
 //
-// [API_BASE]
-//  Worker API 주소. admin.gisa.club 과 api.gisa.club 이 같은 Access 정책으로
-//  보호되면 credentials:'include' 로 쿠키가 전달된다.
-const API_BASE = 'https://api.gisa.club';
+// [API_BASE — 도메인 비종속(R58)]
+//  Worker API 주소를 코드에 하드코딩하지 않는다. 배포 시 함께 올리는 `config.js`가
+//  window.GISACLUB_CONFIG.apiBase 를 주입하며, 없으면 빈 문자열(=same-origin 상대경로)로
+//  폴백한다. 커스텀 도메인 전환도 config.js 값만 바꾸면 되고 이 파일은 손대지 않는다.
+//  예) window.GISACLUB_CONFIG = { apiBase: 'https://gisaclub-api.<sub>.workers.dev' };
+const API_BASE =
+  (typeof window !== 'undefined' &&
+    window.GISACLUB_CONFIG &&
+    window.GISACLUB_CONFIG.apiBase) ||
+  '';
 
 let _lastToken = '';
 

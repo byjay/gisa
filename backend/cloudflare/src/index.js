@@ -5,6 +5,7 @@ import { getEntitlement } from './entitlement.js';
 import { listQuestions, getQuestion, gradeQuiz } from './content.js';
 import { aiChat } from './ai.js';
 import { verifyPurchase } from './billing.js';
+import { getProgress, putProgress } from './progress.js';
 import { issueAppToken, verifyAppTokenEndpoint, requireAdmin, adminListUsers, adminSetUserPlan, adminStats, getVersionManifest, adminSetVersionManifest } from './admin.js';
 
 const json = (data, status = 200, extra = {}) =>
@@ -106,6 +107,14 @@ export default {
       // 결제 영수증 검증
       if (pathname === '/v1/billing/verify' && method === 'POST') {
         return json(await verifyPurchase(env, session.userId, await request.json()));
+      }
+
+      // 학습 진도·점수 (SSOT) — pull/push. 서버가 최종 병합·판정.
+      if (pathname === '/v1/progress' && method === 'GET') {
+        return json(await getProgress(env, session.userId));
+      }
+      if (pathname === '/v1/progress' && method === 'POST') {
+        return json(await putProgress(env, session.userId, await request.json()));
       }
 
       return json({ error: 'not_found' }, 404);

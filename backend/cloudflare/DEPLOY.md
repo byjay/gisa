@@ -87,8 +87,14 @@ wrangler deploy
 빌드 시 API 베이스를 주입:
 
 ```bash
-flutter build apk --release --dart-define=GISACLUB_API_BASE=https://gisaclub-api.<account>.workers.dev
+flutter build apk --release \
+  --dart-define=API_BASE_URL=https://gisaclub-api.<account>.workers.dev \
+  --dart-define=WEB_BASE_URL=https://gisaclub-admin.pages.dev
 ```
+
+> **도메인 비종속(R58)**: URL은 코드가 아니라 dart-define로만 주입한다.
+> 커스텀 도메인 구매 후에는 값만 교체(`https://api.gisa.club` 등). 상세는
+> `lib/services/app_config.dart` 및 `docs/CLOUDFLARE_ACCESS_SETUP.md` §7 참고.
 
 이후 콘텐츠 로딩을 로컬 assets → `RemoteContentApi` 로 전환하면
 APK에서 정답/해설 데이터를 제거할 수 있다(APK 크기도 대폭 감소).
@@ -103,6 +109,9 @@ APK에서 정답/해설 데이터를 제거할 수 있다(APK 크기도 대폭 �
 | 문제 본문(지문/보기) | R2 `content/` | 열람 시 스트리밍(무료=10%만) |
 | **정답 + 해설** | D1 `answers_private` | **채점 API 응답에서만** 반환 |
 | 무료/유료 권한 | D1 `entitlements` | 서버 판정, 위변조 불가 |
+| 학습 진도/점수 | D1 `user_progress` | 서버 SSOT, 로컬은 오프라인 캐시(서버 우선 병합) |
+| 관리자 권한 판정 | Access JWT / 앱토큰 | 앱 내 판정 로직 없음(서버 전담) |
 
 핵심: 정답·해설은 **절대** 목록/본문 API로 나가지 않고,
 사용자가 답안을 제출한 뒤 `/v1/quiz/grade` 응답에서만 반환된다.
+학습 진도/점수는 `/v1/progress`(GET pull / POST push)로 동기하며 서버가 최종 병합한다.

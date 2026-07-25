@@ -1,7 +1,7 @@
 // Gisaclub Admin API — 슈퍼 관리자(운영자) 전용 엔드포인트 (R57: Cloudflare Access 기반)
 //
 // [보안 아키텍처 — 2계층]
-//  (A) 관리자 대시보드(admin.gisa.club)는 Cloudflare Access(Zero Trust) 뒤에 있다.
+//  (A) 관리자 대시보드(Pages, 기본 *.pages.dev)는 Cloudflare Access(Zero Trust) 뒤에 있다.
 //      Access가 Google 로그인을 걸고, 지정된 운영자 이메일만 통과시킨다.
 //      통과한 요청에는 Cloudflare가 `Cf-Access-Jwt-Assertion` 헤더(서명 JWT)를 실어준다.
 //      → Worker는 이 JWT를 Cloudflare의 공개키(JWKS)로 검증하고, aud/email을 확인한다.

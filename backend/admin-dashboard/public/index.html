@@ -90,7 +90,7 @@
         <div><label>강제 업데이트</label>
           <select id="vForce"><option value="false">아니오</option><option value="true">예</option></select></div>
         <div><label>스토어 URL</label><input id="vStore" value="https://play.google.com/store/apps/details?id=com.certstudytracker.study" /></div>
-        <div><label>APK URL(직접 배포용)</label><input id="vApk" placeholder="https://cdn.gisa.club/app/gisaclub.apk" /></div>
+        <div><label>APK URL(직접 배포용)</label><input id="vApk" placeholder="https://<worker-or-cdn>/app/gisaclub.apk" /></div>
       </div>
       <div><label style="margin-top:8px">릴리스 노트</label><input id="vNotes" style="width:100%" placeholder="이번 업데이트 내용" /></div>
       <div class="row" style="margin-top:12px">
@@ -123,6 +123,8 @@
 
   <div class="toast" id="toast"></div>
 
+  <!-- 배포 시 Worker API 주소 주입(도메인 비종속). 파일이 없으면 same-origin 폴백. -->
+  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

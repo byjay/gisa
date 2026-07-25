@@ -39,7 +39,7 @@
        └──────────────────────────┴────────────┴──────────┴──────────┘
 ```
 
-- **Workers**: 모든 API 진입점(`api.gisaclub.com`). 라우팅·인증·게이팅·결제검증.
+- **Workers**: 모든 API 진입점(`<worker>.workers.dev(기본) / api.gisa.club(커스텀 도메인 구매 후)`). 라우팅·인증·게이팅·결제검증.
 - **D1** (SQLite): 사용자, 구독(entitlement), AI 사용량, 결제 영수증, 콘텐츠 메타.
 - **R2** (오브젝트 스토리지): 문제/해설/이미지 원본. 앱에는 동봉하지 않음.
 - **KV**: 세션 토큰, 레이트리밋 카운터, 짧은 캐시.
@@ -134,7 +134,7 @@ wrangler deploy
 
 앱 빌드 시 서버 주소 주입:
 ```bash
-flutter build apk --release --dart-define=GISACLUB_API_BASE=https://api.gisaclub.com
+flutter build apk --release --dart-define=API_BASE_URL=https://gisaclub-api.<sub>.workers.dev
 ```
 
 ---

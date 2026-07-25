@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import 'app_config.dart';
 import 'entitlement_service.dart';
 
 /// 🔐 서버(Cloudflare) 콘텐츠 API 클라이언트.
@@ -17,10 +18,7 @@ class RemoteContentApi {
   RemoteContentApi._();
   static final RemoteContentApi instance = RemoteContentApi._();
 
-  static const _base = String.fromEnvironment(
-    'GISACLUB_API_BASE',
-    defaultValue: 'https://api.gisaclub.com',
-  );
+  String get _base => AppConfig.apiBaseUrl;
 
   /// 현재 세션 토큰(로그인 후 AuthService가 주입). 없으면 게스트.
   String? _authToken;

@@ -2,7 +2,7 @@
   "latest_version": "1.1.0",
   "latest_build": 3,
   "min_supported_build": 1,
-  "apk_url": "https://cdn.gisaclub.com/releases/gisaclub-1.1.0.apk",
+  "apk_url": "https://gisaclub-api.<sub>.workers.dev/app/gisaclub-1.1.0.apk",
   "store_url": "https://play.google.com/store/apps/details?id=com.certstudytracker.study",
   "release_notes": "AI 튜터 응답 속도 개선, 신규 종목 2종 추가, 오답노트 UI 개선",
   "force": false

@@ -81,6 +81,12 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> init() async {
     await Hive.initFlutter();
+    // ── 데이터 저장 정책(SSOT · R58) — docs/DATA_STORAGE_POLICY.md §4 ──
+    // 아래 박스(세션/오답노트/퀴즈결과)는 "학습 진도·점수"의 **오프라인 write-through
+    // 캐시**다. 서버(Cloudflare D1/KV)가 최종 SSOT이며, 서버 배포 후에는
+    // ProgressSyncService 가 push/pull로 병합한다(충돌 시 서버 우선).
+    // 이 로컬 값은 절대 권한·구독·관리자 **판정 근거로 쓰지 않는다**
+    // (그 판정은 EntitlementService/AdminService 가 서버 응답으로만 수행).
     // Q22 로컬 암호화: 민감 데이터(세션/오답노트/시험기록)는 AES 암호화 박스로 연다.
     await SecureBoxService.instance.init();
     _examBox = await Hive.openBox('exams'); // 정적 시험 데이터(비민감) → 평문
