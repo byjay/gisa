@@ -1,0 +1,21 @@
+# 이 라운드에서 "만들었다"고 선언한 산출물 목록.
+#
+# ## 왜 이 파일이 필요한가 (실측된 사고)
+# R86 소실을 나는 사용자가 물어봐서야 알았다. 라운드를 시작할 때
+# "내가 믿는 상태 = 실제 디스크 상태" 를 검증하는 절차가 없었기 때문이다.
+# C1(측정 후 주장)을 파일 내용에는 적용했는데 환경 자체에는 적용하지 않았다.
+#
+# 규칙:
+#  - 산출물을 만들면 여기에 경로를 추가한다.
+#  - tool/audit/survival_check.sh 가 매 라운드 시작 시 존재를 실측한다.
+#  - 없는데 있다고 믿는 상태를 즉시 잡아낸다.
+#  - 이 목록에서 줄을 지워서 통과시키는 것은 완화이며 금지한다.
+
+tool/audit/survival_check.sh
+tool/audit/expected_artifacts.txt
+docs/handoff/RECOVERY_LEDGER.md
+lib/services/tutor_behavior.dart
+lib/services/tutor_persona.dart
+lib/widgets/tutor_avatar.dart
+lib/widgets/tutor_coach.dart
+test/tutor_behavior_test.dart
