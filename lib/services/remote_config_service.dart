@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'ads_config.dart';
 import 'app_config.dart';
 
 /// 📡 원격 앱 설정(Remote Config) 수신기 — 학습앱 측.
@@ -105,6 +106,7 @@ class RemoteAppConfig {
     required this.notice,
     required this.update,
     required this.activeTracks,
+    required this.ads,
   });
 
   final int version;
@@ -114,6 +116,10 @@ class RemoteAppConfig {
   final RemoteUpdateGate update;
   final List<String> activeTracks;
 
+  /// R60 — AdMob 설정. 관리자 콘솔에서 바꾸면 학습앱이 다음 실행 때 반영한다.
+  /// 광고 단위 ID 를 앱에 하드코딩하지 않는 이유는 [AdsConfig] 문서 참고.
+  final AdsConfig ads;
+
   factory RemoteAppConfig.defaults() => const RemoteAppConfig(
         version: 0,
         updatedAt: 0,
@@ -121,6 +127,7 @@ class RemoteAppConfig {
         notice: RemoteNotice.empty(),
         update: RemoteUpdateGate.none(),
         activeTracks: <String>[],
+        ads: AdsConfig.defaults(),
       );
 
   factory RemoteAppConfig.fromJson(Map<String, dynamic> j) => RemoteAppConfig(
@@ -138,6 +145,9 @@ class RemoteAppConfig {
         activeTracks: ((j['activeTracks'] as List?) ?? const [])
             .map((e) => e.toString())
             .toList(),
+        ads: AdsConfig.fromJson(
+          (j['ads'] as Map?)?.cast<String, dynamic>() ?? const {},
+        ),
       );
 
   Map<String, dynamic> toJson() => {
@@ -147,6 +157,7 @@ class RemoteAppConfig {
         'notice': notice.toJson(),
         'update': update.toJson(),
         'activeTracks': activeTracks,
+        'ads': ads.toJson(),
       };
 }
 

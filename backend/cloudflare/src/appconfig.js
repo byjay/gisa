@@ -47,6 +47,21 @@ export function defaultConfig() {
     },
     // 활성 자격증 트랙(학습앱 트랙 선택 화면이 이 목록만 노출)
     activeTracks: [], // 비면 앱 내장 기본값 사용
+    // 광고(AdMob) — 관리자 앱에서만 조종한다. 학습앱에는 광고 설정 UI 가 없다.
+    // 기본값은 구글 공식 테스트 ID. 실 ID 로 출시하지 않으면 수익이 0원이 되므로
+    // tool/audit/verify_release_ready.sh 가 릴리스 전에 이를 막는다.
+    // 값/형식 정의의 원본은 lib/services/ads_config.dart 이며 여기는 그 거울이다.
+    ads: {
+      enabled: false, // 기본 꺼짐 — 관리자가 켜야 광고가 나간다
+      androidAppId: 'ca-app-pub-3940256099942544~3347511713',
+      bannerUnitId: 'ca-app-pub-3940256099942544/6300978111',
+      interstitialUnitId: 'ca-app-pub-3940256099942544/1033173712',
+      rewardedUnitId: 'ca-app-pub-3940256099942544/5224354917',
+      interstitialEveryNQuiz: 10, // 0 이면 전면광고 사용 안 함
+      showBannerOnHome: true,
+      showBannerOnQuiz: false, // 문제풀이 화면 배너는 집중을 깬다
+      removeAdsForPremium: true,
+    },
   };
 }
 
@@ -76,10 +91,10 @@ export async function putAppConfig(env, incoming) {
   return next;
 }
 
-/** 얕은-깊은 병합: 하위 오브젝트(features/notice/update)는 키 단위로 덮어쓴다. */
+/** 얕은-깊은 병합: 하위 오브젝트(features/notice/update/ads)는 키 단위로 덮어쓴다. */
 function mergeConfig(base, patch) {
   const out = { ...base };
-  for (const k of ['features', 'notice', 'update']) {
+  for (const k of ['features', 'notice', 'update', 'ads']) {
     if (patch[k] && typeof patch[k] === 'object') {
       out[k] = { ...base[k], ...patch[k] };
     }

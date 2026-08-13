@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../services/admin_service.dart';
+import '../services/ads_config.dart';
 import '../services/app_config.dart';
 import '../services/remote_config_service.dart';
 import '../theme/app_theme.dart';
@@ -36,6 +37,18 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
 
   final _tracksCtrl = TextEditingController(); // 콤마 구분
 
+  // ── 광고(AdMob) ────────────────────────────────────────────────
+  // 광고 ID 는 운영 중에 바뀌므로 원격설정으로 다룬다(ads_config.dart 주석 참조).
+  bool _adsEnabled = false;
+  final _adsAppIdCtrl = TextEditingController();
+  final _adsBannerCtrl = TextEditingController();
+  final _adsInterCtrl = TextEditingController();
+  final _adsRewardCtrl = TextEditingController();
+  int _adsEveryN = 10;
+  bool _adsHomeBanner = true;
+  bool _adsQuizBanner = false;
+  bool _adsPremiumFree = true;
+
   int _serverVersion = 0;
   int _serverUpdatedAt = 0;
   bool _loading = true;
@@ -55,6 +68,10 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
     _latestVerCtrl.dispose();
     _apkUrlCtrl.dispose();
     _tracksCtrl.dispose();
+    _adsAppIdCtrl.dispose();
+    _adsBannerCtrl.dispose();
+    _adsInterCtrl.dispose();
+    _adsRewardCtrl.dispose();
     super.dispose();
   }
 
@@ -78,6 +95,15 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
     _apkUrlCtrl.text = c.update.apkUrl;
     _forcedUpdate = c.update.forced;
     _tracksCtrl.text = c.activeTracks.join(', ');
+    _adsEnabled = c.ads.enabled;
+    _adsAppIdCtrl.text = c.ads.androidAppId;
+    _adsBannerCtrl.text = c.ads.bannerUnitId;
+    _adsInterCtrl.text = c.ads.interstitialUnitId;
+    _adsRewardCtrl.text = c.ads.rewardedUnitId;
+    _adsEveryN = c.ads.interstitialEveryNQuiz;
+    _adsHomeBanner = c.ads.showBannerOnHome;
+    _adsQuizBanner = c.ads.showBannerOnQuiz;
+    _adsPremiumFree = c.ads.removeAdsForPremium;
     _serverVersion = c.version;
     _serverUpdatedAt = c.updatedAt;
   }
@@ -110,10 +136,54 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
         forced: _forcedUpdate,
       ),
       activeTracks: tracks,
+      ads: AdsConfig(
+        enabled: _adsEnabled,
+        // 비워두면 구글 테스트 ID 로 되돌린다. 빈 문자열을 배포하면
+        // 학습앱에서 SDK 초기화가 실패해 광고가 "조용히" 안 나오기 때문이다.
+        androidAppId: _orTest(_adsAppIdCtrl.text, AdsConfig.testAppId),
+        bannerUnitId: _orTest(_adsBannerCtrl.text, AdsConfig.testBanner),
+        interstitialUnitId:
+            _orTest(_adsInterCtrl.text, AdsConfig.testInterstitial),
+        rewardedUnitId: _orTest(_adsRewardCtrl.text, AdsConfig.testRewarded),
+        interstitialEveryNQuiz: _adsEveryN,
+        showBannerOnHome: _adsHomeBanner,
+        showBannerOnQuiz: _adsQuizBanner,
+        removeAdsForPremium: _adsPremiumFree,
+      ),
     );
   }
 
+  static String _orTest(String v, String fallback) =>
+      v.trim().isEmpty ? fallback : v.trim();
+
+  /// 지금 폼에 입력된 광고 설정. 경고 표시와 배포 차단 판정이 같은 값을 본다.
+  AdsConfig get _adsFromForm => _buildFromForm().ads;
+
+  /// 배포 전 광고 설정 검증. 형식이 틀린 ID 를 배포하면 학습앱에서 광고가
+  /// 예외 없이 그냥 안 나온다(조용한 실패). 그래서 배포 자체를 막는다.
+  /// 광고가 꺼져 있으면 ID 는 쓰이지 않으므로 검사하지 않는다.
+  String? _adsValidationError() {
+    final a = _adsFromForm;
+    if (!a.enabled) return null;
+    if (!AdsConfig.isValidAppId(a.androidAppId)) {
+      return '앱 ID 형식이 틀립니다: ${a.androidAppId}\n(형식: ca-app-pub-숫자16~숫자10)';
+    }
+    const units = ['배너', '전면', '보상형'];
+    final ids = [a.bannerUnitId, a.interstitialUnitId, a.rewardedUnitId];
+    for (var i = 0; i < ids.length; i++) {
+      if (!AdsConfig.isValidUnitId(ids[i])) {
+        return '${units[i]} 단위 ID 형식이 틀립니다: ${ids[i]}\n(형식: ca-app-pub-숫자16/숫자10)';
+      }
+    }
+    return null;
+  }
+
   Future<void> _publish() async {
+    final adsErr = _adsValidationError();
+    if (adsErr != null) {
+      _snack('❌ 광고 설정 오류 — 배포 중단\n$adsErr', AppTheme.danger);
+      return;
+    }
     setState(() => _publishing = true);
     final result = await AdminConfigApi.instance.publish(_buildFromForm());
     if (!mounted) return;
@@ -389,6 +459,7 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
             ),
           ),
         ]),
+        _adsCard(),
         _sectionCard('활성 자격증 트랙', Icons.school, [
           Padding(
             padding: const EdgeInsets.all(16),
@@ -406,6 +477,181 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
       ],
     );
   }
+
+  /// 📣 광고(AdMob) 설정 카드.
+  ///
+  /// 학습앱에는 광고 설정 화면을 두지 않는다. 사용자가 광고를 끌 수 있으면
+  /// 수익 모델이 성립하지 않기 때문이다. 광고는 **관리자 앱에서만** 조종한다.
+  Widget _adsCard() {
+    final ads = _adsFromForm;
+    final err = _adsValidationError();
+    return _sectionCard('광고 (AdMob)', Icons.ads_click, [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '학습앱의 광고를 여기서 원격 제어합니다. 앱 재배포 없이 즉시 반영됩니다.',
+              style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
+            ),
+            const SizedBox(height: 8),
+            // 테스트 ID 경고 — 이 상태로 출시하면 광고는 정상으로 보이지만
+            // 수익이 0원이다. 조용한 실패이므로 눈에 띄게 경고한다.
+            if (_adsEnabled && ads.usesTestIds)
+              _banner(
+                Icons.warning_amber_rounded,
+                AppTheme.warning,
+                '구글 테스트 광고 ID 를 쓰고 있습니다.\n'
+                '이대로 출시하면 광고는 정상으로 보이지만 수익은 0원입니다.\n'
+                '개발 중에는 정상이며, 출시 전 실 ID 로 바꾸세요.',
+              ),
+            if (err != null)
+              _banner(Icons.error_outline, AppTheme.danger,
+                  'ID 형식 오류 — 이대로는 배포되지 않습니다.\n$err'),
+            if (_adsEnabled && err == null && !ads.usesTestIds)
+              _banner(Icons.verified, AppTheme.success,
+                  '실 광고 ID 형식 확인됨 — 배포 가능합니다.'),
+          ],
+        ),
+      ),
+      SwitchListTile(
+        title: const Text('광고 사용'),
+        subtitle: const Text('끄면 학습앱이 광고 SDK 를 아예 초기화하지 않습니다'),
+        value: _adsEnabled,
+        onChanged: (v) => setState(() => _adsEnabled = v),
+      ),
+      // 광고가 꺼져 있으면 아래 설정은 아무 효과가 없다. 숨기지 않고
+      // 비활성으로 보여줘야 "왜 안 먹지" 하는 혼란이 없다.
+      Opacity(
+        opacity: _adsEnabled ? 1.0 : 0.45,
+        child: IgnorePointer(
+          ignoring: !_adsEnabled,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Column(
+                  children: [
+                    _adsIdField(
+                      _adsAppIdCtrl,
+                      '앱 ID (AndroidManifest 와 동일해야 함)',
+                      AdsConfig.testAppId,
+                      isAppId: true,
+                    ),
+                    const SizedBox(height: 12),
+                    _adsIdField(_adsBannerCtrl, '배너 단위 ID',
+                        AdsConfig.testBanner),
+                    const SizedBox(height: 12),
+                    _adsIdField(_adsInterCtrl, '전면(Interstitial) 단위 ID',
+                        AdsConfig.testInterstitial),
+                    const SizedBox(height: 12),
+                    _adsIdField(_adsRewardCtrl, '보상형(Rewarded) 단위 ID',
+                        AdsConfig.testRewarded),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(_adsEveryN == 0
+                        ? '전면광고: 사용 안 함'
+                        : '전면광고 빈도: $_adsEveryN문항마다 1회'),
+                    // 하한 5. 그보다 잦으면 학습 흐름이 끊겨 이탈로 이어진다.
+                    // 0 은 "전면광고 끄기"라는 별도 의미이므로 따로 둔다.
+                    Slider(
+                      value: _adsEveryN.toDouble(),
+                      min: 0,
+                      max: 30,
+                      divisions: 30,
+                      label: _adsEveryN == 0 ? '끔' : '$_adsEveryN문항',
+                      onChanged: (v) {
+                        final n = v.round();
+                        setState(() => _adsEveryN =
+                            (n > 0 && n < 5) ? 5 : n); // 0 또는 5 이상만 허용
+                      },
+                    ),
+                    const Text(
+                      '5문항 미만은 허용하지 않습니다 — 학습 흐름이 끊겨 이탈률이 올라갑니다.',
+                      style: TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                    ),
+                  ],
+                ),
+              ),
+              SwitchListTile(
+                title: const Text('홈 화면 배너'),
+                value: _adsHomeBanner,
+                onChanged: (v) => setState(() => _adsHomeBanner = v),
+              ),
+              SwitchListTile(
+                title: const Text('문제풀이 화면 배너'),
+                subtitle: const Text('집중을 방해하므로 기본은 꺼짐입니다'),
+                value: _adsQuizBanner,
+                onChanged: (v) => setState(() => _adsQuizBanner = v),
+              ),
+              SwitchListTile(
+                title: const Text('프리미엄 사용자는 광고 제거'),
+                value: _adsPremiumFree,
+                onChanged: (v) => setState(() => _adsPremiumFree = v),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ]);
+  }
+
+  /// 광고 ID 입력칸. 입력 즉시 형식을 판정해 보여준다(배포 후에 알면 늦다).
+  Widget _adsIdField(
+    TextEditingController ctrl,
+    String label,
+    String testValue, {
+    bool isAppId = false,
+  }) {
+    final v = ctrl.text.trim();
+    final valid = v.isEmpty ||
+        (isAppId ? AdsConfig.isValidAppId(v) : AdsConfig.isValidUnitId(v));
+    return TextField(
+      controller: ctrl,
+      onChanged: (_) => setState(() {}),
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: '비우면 테스트 ID 사용',
+        errorText: valid ? null : '형식 오류',
+        helperText: v == testValue ? '⚠ 구글 테스트 ID' : null,
+        border: const OutlineInputBorder(),
+        suffixIcon: IconButton(
+          tooltip: '테스트 ID 로 되돌리기',
+          icon: const Icon(Icons.restart_alt, size: 20),
+          onPressed: () => setState(() => ctrl.text = testValue),
+        ),
+      ),
+    );
+  }
+
+  Widget _banner(IconData icon, Color color, String text) => Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(text,
+                  style: TextStyle(fontSize: 12, color: color)),
+            ),
+          ],
+        ),
+      );
 
   Widget _versionBadge() {
     final when = _serverUpdatedAt > 0
