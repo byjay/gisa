@@ -50,6 +50,9 @@ dependencies:
   path_provider: 2.1.5
   share_plus: 10.1.4
   google_mlkit_digital_ink_recognition: 0.15.0
+  # 광고(AdMob). 실제 ID·노출정책은 관리자 콘솔의 원격설정으로 받는다
+  # (lib/services/ads_config.dart). 코드에 실 ID 를 박지 않는다.
+  google_mobile_ads: 5.3.1
 
 dev_dependencies:
   flutter_test:

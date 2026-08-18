@@ -19,3 +19,10 @@ lib/services/tutor_persona.dart
 lib/widgets/tutor_avatar.dart
 lib/widgets/tutor_coach.dart
 test/tutor_behavior_test.dart
+
+# R60 — 학습데이터 사실검증 + 출시 차단 + 광고(AdMob) 원격설정
+tool/audit/verify_learning_data.py
+tool/audit/fix_explanation_answer_mismatch.py
+tool/audit/verify_release_ready.sh
+lib/services/ads_config.dart
+test/ads_config_test.dart

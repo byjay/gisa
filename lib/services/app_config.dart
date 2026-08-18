@@ -59,6 +59,29 @@ class AppConfig {
   /// API 베이스가 설정되어 있는지(서버 기능 사용 가능 여부).
   static bool get hasApi => apiBaseUrl.isNotEmpty;
 
+  /// 🔐 이 빌드가 **관리자 전용 앱**인가 (R60).
+  ///
+  /// ## 왜 필요한가 — 실측된 문제
+  /// 학습앱 설정화면(`lib/screens/settings_screen.dart`)에 "슈퍼 관리자 모드"
+  /// 항목이 **모든 사용자에게** 그대로 보이고 있었다. 토큰이 없으면 기능은
+  /// 막히지만, 일반 학습자에게 운영 메뉴가 보이는 것 자체가 문제다.
+  ///   - 학습자는 자기와 무관한 메뉴를 보고 혼란스러워한다.
+  ///   - 운영 화면의 존재와 구조가 그대로 노출된다(공격면 확대).
+  ///
+  /// ## 판정 방식
+  /// `lib/main_admin.dart` 로 빌드할 때만 `IS_ADMIN_APP=true` 를 주입한다.
+  /// **런타임 값이 아니라 컴파일 상수**이므로, 사용자 앱에서는 관리자 화면 코드가
+  /// tree-shaking 으로 바이너리에서 아예 빠진다(런타임 스위치로는 불가능).
+  ///
+  ///   관리자 앱: flutter build apk --release --flavor admin \
+  ///                -t lib/main_admin.dart --dart-define=IS_ADMIN_APP=true
+  ///   사용자 앱: flutter build apk --release --flavor user -t lib/main.dart
+  ///              (주입하지 않으므로 false)
+  static const bool isAdminApp = bool.fromEnvironment(
+    'IS_ADMIN_APP',
+    defaultValue: false,
+  );
+
   /// 자동업데이트 매니페스트 URL을 해석한다(명시값 → API베이스 파생 → 없음).
   static String resolveUpdateManifestUrl() {
     if (updateManifestUrl.isNotEmpty) return updateManifestUrl;

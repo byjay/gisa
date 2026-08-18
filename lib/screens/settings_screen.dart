@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart' show Share, XFile;
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/app_provider.dart';
+import '../services/app_config.dart';
 import 'legal_screen.dart';
 import 'help_faq_screen.dart';
 import '../services/auth_service.dart';
@@ -52,25 +53,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 8),
           _accountCard(context),
           const SizedBox(height: 20),
-          _sectionTitle(cs, '관리자'),
-          const SizedBox(height: 8),
-          Card(
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.admin_panel_settings_rounded),
-                  title: const Text('슈퍼 관리자 모드'),
-                  subtitle: const Text(
-                      '사용자·콘텐츠·구독·AI·업데이트 운영 (인증 시 전 기능 무제한 해금)'),
-                  trailing: const Icon(Icons.lock_outline_rounded),
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => const SuperAdminScreen())),
-                ),
-                const Divider(height: 1),
-                _updateTile(context),
-              ],
+          // 🔐 R60: 운영 메뉴는 관리자 전용 앱에서만 보인다.
+          // 이전에는 이 카드가 모든 학습자에게 노출됐다. 토큰이 없으면 기능은
+          // 막히지만, 학습자에게 운영 메뉴가 보이는 것 자체가 혼란이고
+          // 운영 화면의 존재/구조를 그대로 알려주는 셈이다.
+          // AppConfig.isAdminApp 은 컴파일 상수이므로 사용자 앱 바이너리에서는
+          // 이 블록과 SuperAdminScreen 이 tree-shaking 으로 제거된다.
+          if (AppConfig.isAdminApp) ...[
+            _sectionTitle(cs, '관리자'),
+            const SizedBox(height: 8),
+            Card(
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.admin_panel_settings_rounded),
+                    title: const Text('슈퍼 관리자 모드'),
+                    subtitle: const Text(
+                        '사용자·콘텐츠·구독·AI·업데이트 운영 (인증 시 전 기능 무제한 해금)'),
+                    trailing: const Icon(Icons.lock_outline_rounded),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const SuperAdminScreen())),
+                  ),
+                ],
+              ),
             ),
-          ),
+            const SizedBox(height: 20),
+          ],
+          // 업데이트 확인은 학습자에게도 필요하다(강제 업데이트 안내 경로).
+          // 관리자 카드에 묶여 있어서 함께 사라지면 안 되므로 분리했다.
+          _sectionTitle(cs, '앱 업데이트'),
+          const SizedBox(height: 8),
+          Card(child: _updateTile(context)),
           const SizedBox(height: 20),
           // 🧪 AI 튜터 API 키 — 테스트 기간에만 노출되는 설정 카드 (잘 보이는 상단 배치)
           if (CerebrasService.isTestPeriod) ...[

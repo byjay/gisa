@@ -48,6 +48,16 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- AdMob 앱 ID.
+             이 값은 앱 바이너리에 박히므로 원격설정으로 바꿀 수 없는 유일한 광고 값이다.
+             지금은 구글 공식 테스트 앱 ID 다. 개발 중에는 이게 정상이다
+             (자기 광고를 클릭하면 AdMob 계정이 정지된다).
+             출시 전에 실 ID 로 반드시 교체해야 하며, 교체를 잊으면 광고는 정상으로
+             보이지만 수익이 0원인 '조용한 실패'가 된다. 그래서 사람 주의력에 맡기지 않고
+             tool/audit/verify_release_ready.sh ① 가 이 줄을 읽어 릴리스를 차단한다. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
         <!-- flutter_local_notifications: 재부팅 후 예약 알림 복원 -->
         <receiver android:exported="false"
             android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />

@@ -19,8 +19,14 @@ import 'theme/app_theme.dart';
 ///   flutter build apk --release \
 ///     -t lib/main_admin.dart \
 ///     --flavor admin \
+///     --dart-define=IS_ADMIN_APP=true \
 ///     --dart-define=API_BASE_URL=`https://WORKER.workers.dev` \
 ///     --dart-define=WEB_BASE_URL=`https://PAGES.pages.dev`
+///
+/// ⚠️ `IS_ADMIN_APP=true` 를 빼먹으면 관리자 앱에서도 운영 메뉴(슈퍼 관리자 모드)가
+///    사라진다. 반대로 사용자 앱 빌드에 이 값을 넣으면 학습자에게 운영 메뉴가
+///    노출된다. 둘 다 사고이므로 `tool/audit/verify_release_ready.sh` 가
+///    사용자 앱 빌드에 이 플래그가 섞여 들어가지 않는지 검사한다.
 ///
 /// [인증] 앱 내부에 관리자 비밀은 없다. 대시보드(Cloudflare Access)에서 발급받은
 ///        토큰을 등록하면 Worker가 `/v1/admin/verify`로 최종 판정한다(R57 구조 재사용).

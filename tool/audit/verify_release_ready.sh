@@ -54,7 +54,12 @@ fi
 step "② 광고 단위 ID 하드코딩 금지"
 # 단위 ID 가 소스에 박히면 운영 중 교체가 불가능하다. 원격설정으로만 받아야 한다.
 # ads_config.dart 의 테스트 상수는 예외다(기본값이자 검사 기준값이므로).
-HARD=$(grep -rn "ca-app-pub-" lib/ --include=*.dart 2>/dev/null \
+# 반드시 '실제 숫자'가 붙은 ID 만 잡는다.
+# 최초 판정은 그냥 'ca-app-pub-' 를 찾아서, 사용자에게 형식을 안내하는 한글 문구
+# ("ca-app-pub-숫자16~숫자10")까지 위반으로 잡는 오탐이 있었다. 실측으로 확인 후
+# 숫자를 요구하도록 좁혔다. 진짜 하드코딩된 ID 는 숫자가 반드시 붙으므로
+# 검사의 탐지력은 줄지 않는다(아래 사보타주로 증명).
+HARD=$(grep -rnE "ca-app-pub-[0-9]{6,}" lib/ --include=*.dart 2>/dev/null \
         | grep -v "lib/services/ads_config.dart" || true)
 if [ -z "$HARD" ]; then
   ok "ads_config.dart 외에 하드코딩된 광고 ID 없음"
@@ -82,10 +87,36 @@ fi
 
 step "⑤ 테스트"
 if timeout 900 flutter test > /tmp/ft.log 2>&1; then
-  ok "$(grep -oE '\+[0-9]+ All tests passed' /tmp/ft.log | tail -1)"
+  # 실측한 실제 출력 형태는 "+77: All tests passed!" 이다.
+  # 처음 쓴 정규식('\+[0-9]+ All tests passed')은 맞지 않아 통과 문구가 빈칸으로
+  # 출력됐다. 검사가 "빈 성공"을 찍는 건 근거 없는 통과 보고이므로 고쳤다.
+  PASSED=$(grep -oE '\+[0-9]+' /tmp/ft.log | tail -1)
+  if [ -z "$PASSED" ]; then
+    bad "테스트가 통과했다는데 통과 개수를 못 읽었다 — 검사 자체가 신뢰 불가"
+  else
+    ok "테스트 ${PASSED}개 통과"
+  fi
 else
   bad "테스트 실패"
   grep -E "^[0-9:]+ \+[0-9]+ -[0-9]+" /tmp/ft.log | tail -5 | sed 's/^/      /'
+fi
+
+step "⑥ 사용자 앱에 관리자 메뉴가 섞여 있는가"
+# 학습자에게 운영 메뉴가 보이면 안 된다. 판정 기준은 '기본값이 false 인가'다.
+# 기본값이 true 로 바뀌면 사용자 앱(플래그 미주입)에서도 운영 메뉴가 열린다.
+if grep -A3 "'IS_ADMIN_APP'" lib/services/app_config.dart \
+     | grep -q 'defaultValue: false'; then
+  ok "IS_ADMIN_APP 기본값 false — 사용자 앱에는 운영 메뉴가 컴파일되지 않는다"
+else
+  bad "IS_ADMIN_APP 기본값이 false 가 아니다 — 학습자에게 운영 메뉴가 노출된다"
+fi
+# 관리자 화면 진입점이 플래그 없이 열려 있지 않은지 확인한다.
+LEAK=$(grep -rn "SuperAdminScreen()" lib/screens/ 2>/dev/null | wc -l)
+GUARD=$(grep -c "AppConfig.isAdminApp" lib/screens/settings_screen.dart || true)
+if [ "$LEAK" -gt 0 ] && [ "$GUARD" -eq 0 ]; then
+  bad "SuperAdminScreen 진입점이 ${LEAK}곳 있는데 isAdminApp 가드가 없다"
+else
+  ok "관리자 화면 진입점은 isAdminApp 가드 안에 있다"
 fi
 
 printf '\n'
