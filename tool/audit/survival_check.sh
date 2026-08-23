@@ -42,10 +42,24 @@ step "② 원격 백업 존재 — 로컬 HEAD 가 원격에 도달했는가"
 # 여기서 '원격이 등록되어 있다'는 것은 증거가 아니다. 실제로 그 커밋이 원격에 있어야 한다.
 HEAD_SHA=$(git rev-parse HEAD 2>/dev/null)
 FOUND=""
+# 「조회 실패(인증/네트워크)」와 「조회 성공했으나 커밋이 없음」을 구분한다.
+# 구분하지 않았던 초판은 실측 사고를 냈다: ~/.git-credentials 가 0바이트로
+# 비워져 ls-remote 가 인증 실패했는데, 결과가 빈 문자열이라는 이유로
+# "어느 원격에도 없다"고 단정했다. 실제로는 푸시가 되어 있었다.
+# 즉 검사가 '모름'을 '없음'으로 보고했다 — 거짓 경보이고, 거짓 경보는
+# 반복되면 사람이 검사를 무시하게 만들어 진짜 소실을 놓치게 한다.
+REACHABLE=0
+UNREACHABLE_MSG=""
 for R in $(git remote); do
   # ls-remote 는 네트워크를 타므로 실패해도 스크립트를 죽이지 않는다.
-  REFS=$(GIT_TERMINAL_PROMPT=0 timeout 120 git ls-remote "$R" 2>/dev/null)
-  [ -z "$REFS" ] && continue
+  # 단, 실패 사유는 버리지 않고 붙잡아 둔다(위 사고의 원인).
+  REFS=$(GIT_TERMINAL_PROMPT=0 timeout 120 git ls-remote "$R" 2>/tmp/lsremote_err.txt)
+  if [ -z "$REFS" ]; then
+    UNREACHABLE_MSG="${UNREACHABLE_MSG}${R}: $(head -1 /tmp/lsremote_err.txt 2>/dev/null)
+"
+    continue
+  fi
+  REACHABLE=1
   # HEAD 자체가 원격에 있는지, 또는 원격 어느 ref 의 조상인지 확인
   while read -r sha ref; do
     [ -z "$sha" ] && continue
@@ -58,6 +72,14 @@ for R in $(git remote); do
 done
 if [ -n "$FOUND" ]; then
   ok "HEAD ${HEAD_SHA:0:8} 는 원격에 있다 → $FOUND"
+elif [ "$REACHABLE" -eq 0 ]; then
+  # 어떤 원격도 조회하지 못했다 → 백업 여부를 '알 수 없다'.
+  # 이것도 실패로 처리한다(안전 우선). 다만 원인을 정확히 말해야
+  # 사람이 헛되게 재푸시하지 않고 인증부터 복구한다.
+  bad "원격을 조회할 수 없어 백업 여부를 확인하지 못했다 (없다는 뜻이 아니다)"
+  printf '%s' "$UNREACHABLE_MSG" | sed 's/^/      /'
+  printf '      → 인증을 복구한 뒤(setup_github_environment) 다시 확인하라.\n'
+  printf '      → ~/.git-credentials 가 0바이트로 비워지는 사례가 있다: wc -c ~/.git-credentials\n'
 else
   bad "HEAD ${HEAD_SHA:0:8} 가 어느 원격에도 없다 — 샌드박스가 초기화되면 전부 소실된다. 지금 푸시하라"
 fi
