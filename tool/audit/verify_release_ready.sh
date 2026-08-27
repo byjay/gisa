@@ -72,6 +72,14 @@ step "③ 학습데이터 사실검증"
 # 정답과 해설이 어긋난 문항을 출시하면 학습자에게 직접 피해가 간다.
 if python3 tool/audit/verify_learning_data.py > /tmp/vld.log 2>&1; then
   ok "$(grep -E '^✓ 위반 0건' /tmp/vld.log | head -1)"
+  # 통과했어도 남은 해설부채를 반드시 눈에 보이게 한다.
+  # 침묵하면 "검증 통과 = 데이터 완벽" 으로 착각한다.
+  # V0~V7 이 '위반 0건' 을 낸 코퍼스에서 해설 6,243건(37.5%)이
+  # 정형문구/정답번호뿐이었다. 통과는 부채가 없다는 뜻이 아니다.
+  DEBT_LINE=$(grep -E '^     실질 해설' /tmp/vld.log | head -1)
+  [ -n "$DEBT_LINE" ] && printf '      %s\n' "$(echo "$DEBT_LINE" | sed 's/^ *//')"
+  RATCHET=$(grep -E 'V8 해설부채' /tmp/vld.log | head -1 | sed 's/^ *//')
+  [ -n "$RATCHET" ] && printf '      %s\n' "$RATCHET"
 else
   bad "학습데이터 검증 실패 — 아래 확인 후 고쳐라"
   grep -E '^  ✗|^✗' /tmp/vld.log | head -8 | sed 's/^/      /'
