@@ -26,4 +26,5 @@ tool/audit/fix_explanation_answer_mismatch.py
 tool/audit/verify_release_ready.sh
 lib/services/ads_config.dart
 test/ads_config_test.dart
+tool/audit/apply_explanations.py
 tool/audit/explanation_debt_baseline.txt
