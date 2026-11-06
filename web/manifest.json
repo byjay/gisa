@@ -1,11 +1,11 @@
 {
-    "name": "Gisaclub - 전기·소방 기사 합격 튜터",
+    "name": "Gisaclub - 자격증 온라인 학습",
     "short_name": "Gisaclub",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#4F46E5",
     "theme_color": "#4F46E5",
-    "description": "전기/소방 자격증 기출문제 학습과 시험 일정 관리를 한 곳에서.",
+    "description": "자격증별 기출문제와 학습 콘텐츠를 제공하는 온라인 학습 서비스.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

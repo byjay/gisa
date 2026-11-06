@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:http/http.dart' as http;
+import 'remote_content_api.dart';
 
 /// 📅 Q-Net 회차 시험일정 (한 행 = 1 회차)
 ///
@@ -90,19 +89,9 @@ class QnetScheduleService {
   QnetScheduleService._();
   static final QnetScheduleService instance = QnetScheduleService._();
 
-  static const _base = 'https://www.q-net.or.kr/crf005.do';
-
-  /// 웹에서 CORS를 우회하기 위한 공개 프록시(폴백). 순서대로 시도.
-  /// proxy.cors.sh 가 Q-Net(데이터센터 IP 차단 회피)에 가장 안정적.
-  static const _corsProxies = [
-    'https://proxy.cors.sh/',
-    'https://api.allorigins.win/raw?url=',
-    'https://cors.eu.org/',
-  ];
-
   final Map<String, List<QnetExamRound>> _cache = {};
 
-  /// 번들된 오프라인 일정(asset) 캐시. catalogId -> rounds.
+  /// 서버 카탈로그 캐시. catalogId -> rounds.
   Map<String, List<QnetExamRound>>? _bundled;
   DateTime? bundledFetchedAt;
 
@@ -110,59 +99,60 @@ class QnetScheduleService {
   ///
   /// 우선순위:
   ///  1) 메모리 캐시 (forceRefresh=false 일 때)
-  ///  2) 실시간 크롤링 (네이티브=직접, 웹=CORS 프록시)
-  ///  3) 번들된 asset JSON (브라우저에서 프록시가 막혀도 항상 표시)
+  ///  2) 서버 R2의 자격증별 일정 카탈로그
   ///
-  /// [catalogId] 를 주면 실시간 실패 시 해당 id 로 asset 폴백을 찾는다.
+  /// [catalogId] 를 주면 서버 일정 카탈로그에서 해당 종목 일정을 선택한다.
   Future<List<QnetExamRound>> fetchSchedule(
     String jmCd, {
     String seriesCd = '03',
     String? catalogId,
     bool forceRefresh = false,
   }) async {
+    final sessionGeneration = RemoteContentApi.instance.sessionGeneration;
     if (!forceRefresh && _cache.containsKey(jmCd)) {
       return _cache[jmCd]!;
     }
-    final url = Uri.parse(
-      '$_base'
-      '?id=crf00503s02&gSite=Q&gId='
-      '&jmCd=$jmCd&jmInfoDivCcd=B0&seriesCd=$seriesCd',
-    );
-
-    final html = await _fetchWithFallback(url.toString());
-    if (html != null) {
-      final rounds = _parseScheduleTable(html);
+    if (forceRefresh) _bundled = null;
+    if (catalogId != null) {
+      final rounds = await _loadBundled(catalogId);
+      if (sessionGeneration != RemoteContentApi.instance.sessionGeneration) {
+        return const [];
+      }
       if (rounds.isNotEmpty) {
         _cache[jmCd] = rounds;
         return rounds;
-      }
-    }
-
-    // 실시간 실패 → 번들 asset 폴백 (항상 무언가 표시하기 위함)
-    if (catalogId != null) {
-      final offline = await _loadBundled(catalogId);
-      if (offline.isNotEmpty) {
-        _cache[jmCd] = offline;
-        return offline;
       }
     }
     // 마지막으로 이전 캐시라도 반환
     return _cache[jmCd] ?? const [];
   }
 
-  /// 번들된 오프라인 일정에서 catalogId 회차 목록 로드.
+  /// 서버에 보관한 일정에서 catalogId 회차 목록을 로드한다.
   Future<List<QnetExamRound>> _loadBundled(String catalogId) async {
     try {
-      _bundled ??= await _parseBundle();
+      final sessionGeneration = RemoteContentApi.instance.sessionGeneration;
+      final bundled = _bundled ?? await _parseBundle();
+      if (sessionGeneration != RemoteContentApi.instance.sessionGeneration) {
+        return const [];
+      }
+      _bundled = bundled;
       return _bundled?[catalogId] ?? const [];
     } catch (_) {
       return const [];
     }
   }
 
-  /// assets/data/qnet_schedule.json 파싱.
+  /// 서버의 qnet_schedule.json 파싱.
   Future<Map<String, List<QnetExamRound>>> _parseBundle() async {
-    final raw = await rootBundle.loadString('assets/data/qnet_schedule.json');
+    final sessionGeneration = RemoteContentApi.instance.sessionGeneration;
+    final raw = await RemoteContentApi.instance.getStudyFile(
+      group: 'qnet',
+      track: 'qnet',
+      filename: 'qnet_schedule.json',
+    );
+    if (sessionGeneration != RemoteContentApi.instance.sessionGeneration) {
+      return const {};
+    }
     final json = jsonDecode(raw) as Map<String, dynamic>;
     bundledFetchedAt = DateTime.tryParse((json['fetchedAt'] as String?) ?? '');
     final schedules = (json['schedules'] as Map<String, dynamic>?) ?? {};
@@ -203,54 +193,6 @@ class QnetScheduleService {
     final e = _dateFromJson(v['e']);
     if (s == null) return null;
     return DateRange(s, e ?? s);
-  }
-
-  /// 직접 요청 → 실패 시 CORS 프록시 순차 시도.
-  Future<String?> _fetchWithFallback(String url) async {
-    // 1) 직접 요청 (모바일/네이티브는 CORS 없음)
-    final direct = await _tryGet(url);
-    if (direct != null && direct.contains('시험일정')) return direct;
-
-    // 2) 웹 CORS 폴백
-    if (kIsWeb || direct == null) {
-      for (final proxy in _corsProxies) {
-        // ?url= 형태 프록시는 인코딩, path 뒤에 붙이는 프록시는 원본 URL 사용
-        final proxied = proxy.endsWith('=')
-            ? proxy + Uri.encodeComponent(url)
-            : proxy + url;
-        final res = await _tryGet(proxied);
-        if (res != null && res.contains('시험일정')) return res;
-      }
-    }
-    return direct;
-  }
-
-  Future<String?> _tryGet(String url) async {
-    try {
-      final res = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'User-Agent':
-                  'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36',
-              'Accept': 'text/html,application/xhtml+xml',
-              // proxy.cors.sh 브라우저 요청용 데모 키(공개)
-              'x-cors-api-key': 'temp_qnet_cert_tracker',
-            },
-          )
-          .timeout(const Duration(seconds: 12));
-      if (res.statusCode == 200) {
-        // Q-Net은 UTF-8. 프록시가 이미 문자열을 주지만 안전하게 디코딩.
-        try {
-          return utf8.decode(res.bodyBytes);
-        } catch (_) {
-          return res.body;
-        }
-      }
-    } catch (_) {
-      // 무시하고 폴백으로 넘어감
-    }
-    return null;
   }
 
   /// [P3-A/T5] 테스트 전용 공개 진입점. private 파서/연도검증 로직을
@@ -360,5 +302,9 @@ class QnetScheduleService {
     return out;
   }
 
-  void clearCache() => _cache.clear();
+  void clearCache() {
+    _cache.clear();
+    _bundled = null;
+    bundledFetchedAt = null;
+  }
 }

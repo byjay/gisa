@@ -31,7 +31,7 @@ dependencies:
   provider: 6.1.5+1
   hive: 2.2.3
   hive_flutter: 1.1.0
-  shared_preferences: 2.5.3
+  shared_preferences: ^2.5.4
   http: 1.5.0
   intl: ^0.19.0
   flutter:
@@ -45,7 +45,7 @@ dependencies:
   speech_to_text: 7.4.0
   flutter_local_notifications: 18.0.1
   timezone: 0.9.4
-  crypto: 3.0.6
+  crypto: ^3.0.7
   file_picker: 8.1.6
   path_provider: 2.1.5
   share_plus: 10.1.4
@@ -53,6 +53,9 @@ dependencies:
   # 광고(AdMob). 실제 ID·노출정책은 관리자 콘솔의 원격설정으로 받는다
   # (lib/services/ads_config.dart). 코드에 실 ID 를 박지 않는다.
   google_mobile_ads: 5.3.1
+  google_sign_in: ^7.2.0
+  flutter_secure_storage: ^9.2.4
+  kakao_flutter_sdk_user: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -96,42 +99,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/data/qnet_schedule.json
-    - assets/data/common/
-    - assets/data/electrician/
-    - assets/data/electrician/images/
-    - assets/data/elec_construction/
-    - assets/data/elec_construction/images/
-    - assets/data/fire_electric/
-    - assets/data/fire_electric/images/
-    - assets/data/fire_mechanical/
-    - assets/data/fire_mechanical/images/
-    - assets/data/info_processing/
-    - assets/data/info_processing/images/
-    - assets/data/industrial_safety/
-    - assets/data/industrial_safety/images/
-    - assets/data/architecture/
-    - assets/data/architecture/images/
-    - assets/data/construction_safety/
-    - assets/data/construction_safety/images/
-    - assets/data/elec_industrial/
-    - assets/data/elec_industrial/images/
-    - assets/data/hazmat_industrial/
-    - assets/data/hazmat_industrial/images/
-    - assets/theory/electrician/
-    - assets/theory/elec_construction/
-    - assets/theory/fire_electric/
-    - assets/theory/fire_mechanical/
-    - assets/theory/info_processing/
-    - assets/theory/industrial_safety/
-    - assets/theory/architecture/
-    - assets/theory/construction_safety/
-    - assets/theory/elec_industrial/
-    - assets/theory/hazmat_industrial/
     - assets/tutor/
-    - assets/icons/app_icon.png
-    - assets/brand/logo_main.png
-    - assets/brand/logo_square.png
     - assets/brand/logo_square_512.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -145,21 +113,9 @@ flutter:
   fonts:
     - family: Pretendard
       fonts:
-        - asset: assets/fonts/Pretendard-Thin.otf
-          weight: 100
-        - asset: assets/fonts/Pretendard-ExtraLight.otf
-          weight: 200
-        - asset: assets/fonts/Pretendard-Light.otf
-          weight: 300
         - asset: assets/fonts/Pretendard-Regular.otf
           weight: 400
         - asset: assets/fonts/Pretendard-Medium.otf
           weight: 500
-        - asset: assets/fonts/Pretendard-SemiBold.otf
-          weight: 600
         - asset: assets/fonts/Pretendard-Bold.otf
           weight: 700
-        - asset: assets/fonts/Pretendard-ExtraBold.otf
-          weight: 800
-        - asset: assets/fonts/Pretendard-Black.otf
-          weight: 900

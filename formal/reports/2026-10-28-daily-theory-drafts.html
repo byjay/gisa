@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>기사클럽 일일 이론 초안 자동화 검증 보고서</title>
+  <style>
+    :root { color-scheme: light; font: 16px/1.65 system-ui, sans-serif; color: #17212b; background: #f2f5f8; }
+    body { max-width: 1000px; margin: 0 auto; padding: 32px 18px 64px; }
+    header, section { background: #fff; border: 1px solid #d7dfe7; border-radius: 14px; padding: 22px; margin: 16px 0; }
+    h1, h2 { line-height: 1.25; } h1 { margin: 0 0 8px; font-size: 1.8rem; }
+    h2 { margin-top: 0; font-size: 1.2rem; }
+    .status { display: inline-block; padding: 3px 10px; border-radius: 99px; color: #713900; background: #fff0d2; font-weight: 700; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+    .metric { padding: 14px; border-radius: 10px; background: #f1f6fa; }
+    .metric strong { display: block; font-size: 1.25rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 9px; border-bottom: 1px solid #e3e8ee; text-align: left; vertical-align: top; }
+    th { background: #f6f8fa; }
+    code { overflow-wrap: anywhere; background: #f2f4f6; padding: 1px 4px; border-radius: 4px; }
+    .pending { color: #873d00; font-weight: 650; }
+    @media (max-width: 620px) { body { padding: 12px 8px 36px; } header, section { padding: 15px; } table { font-size: .9rem; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>기사클럽 일일 이론 초안 자동화</h1>
+    <p>기준일 2026-10-28 · 구현 저장소 <code>E:\gisaclub</code></p>
+    <p><span class="status">로컬 검증 완료 · 운영 배포 미실행</span></p>
+    <p>매일 한국시간 08:00에 서로 다른 자격증 과목 3개를 골라 비공개 검토 초안을 만듭니다. 외부 블로그에 자동 로그인하거나 공개 게시하지 않습니다.</p>
+  </header>
+  <section>
+    <h2>검증 요약</h2>
+    <div class="grid">
+      <div class="metric"><strong>25 / 25</strong>Worker 테스트 통과</div>
+      <div class="metric"><strong>9,261</strong>TLA+ 정상 모델 상태</div>
+      <div class="metric"><strong>0</strong>APK 내 study/theory 경로</div>
+      <div class="metric"><strong>42 / 42</strong>CodeB 검토 빌드 페이지</div>
+    </div>
+    <p>중요 불변식: 날짜·슬롯당 최대 한 초안, 오래된 생성 응답의 결과 덮어쓰기 차단, 검토 전 자동 공개 금지. 의도적 공개 결함 모델은 반례를 검출했고 검토 도달성 sanity 모델도 반례를 검출했습니다.</p>
+  </section>
+  <section>
+    <h2>서비스 흐름</h2>
+    <ol>
+      <li><code>backend/cloudflare/wrangler.toml:29-30</code> — Cron <code>0 23 * * *</code> (23:00 UTC = 다음 날 08:00 KST).</li>
+      <li><code>backend/cloudflare/src/index.js:290-294</code> — Worker scheduled handler.</li>
+      <li><code>backend/cloudflare/src/blog-drafts.js:28-64,94-104</code> — KST 날짜·세 과목 선택, 자격증/과목명만 프롬프트에 포함.</li>
+      <li><code>backend/cloudflare/migrations/0003_blog_drafts.sql:2-22</code> — 비공개 D1 큐와 날짜/슬롯 unique 제약.</li>
+      <li><code>backend/cloudflare/src/index.js:176-191</code> — 관리자 인증 뒤 목록/검토만 허용. 승인 응답은 <code>published:false</code>.</li>
+    </ol>
+    <p>문제은행, 정답, 해설, 이론 원문은 생성 입력에 포함하지 않습니다. AI 결과는 JSON 필드·길이와 제한된 HTML 태그를 검사한 뒤 검토 상태로 저장합니다.</p>
+  </section>
+  <section>
+    <h2>시험 결과</h2>
+    <table>
+      <thead><tr><th>검사</th><th>결과</th><th>범위</th></tr></thead>
+      <tbody>
+        <tr><td>Worker tests</td><td>25/25 PASS</td><td>모의 D1, provider, admin/session boundary</td></tr>
+        <tr><td>D1 migration</td><td>16 columns, slot unique PASS</td><td>SQLite 메모리; 원격 DB 미적용</td></tr>
+        <tr><td>Wrangler dry-run</td><td>65.86 KiB (gzip 16.12 KiB)</td><td>바인딩/번들 검사; 업로드·배포 없음</td></tr>
+        <tr><td>TLC normal</td><td>9,261 distinct, depth 13, queue empty</td><td>2 worker × 3 slot finite model</td></tr>
+        <tr><td>TLC bug toggle</td><td>NoPublicPost counterexample at depth 4</td><td>의도적으로 추가한 자동 공개 전이</td></tr>
+        <tr><td>TLC sanity</td><td>NoReviewReached counterexample at depth 3</td><td>검토 도달성 설정</td></tr>
+        <tr><td>REA APK inventory</td><td>627 nodes / 687 occurrences / 0 integrity contradictions</td><td>정적 archive; 앱 실행 분석 아님</td></tr>
+        <tr><td>CodeB product preview</td><td>42 pages / 42 sitemap URLs</td><td><code>#problem</code>에 승인된 Android 캡처 2개와 설명 포함</td></tr>
+      </tbody>
+    </table>
+  </section>
+  <section>
+    <h2>출시 차단 사항</h2>
+    <ul>
+      <li class="pending">`CEREBRAS_API_KEY` 실제 비밀 환경 변수와 원격 D1/R2 상태는 확인하지 않았습니다.</li>
+      <li class="pending">Google OAuth 및 Cloudflare Access에 placeholder가 남아 있어 Worker 전체 배포 게이트를 통과하지 않습니다.</li>
+      <li class="pending">신규 API는 모의 Worker 테스트만 했습니다. 전체 endpoint 운영 E2E와 인증 발급·전송·검증·갱신·만료 수명주기는 미검증입니다.</li>
+      <li class="pending">원격 D1 migration, Cloudflare 배포, CodeB/SEASTAR 외부 공개를 실행하지 않았습니다.</li>
+    </ul>
+    <p>코드 롤백 기준 커밋: <code>c22faadbdaed9a040a11e582d36a05a301f51e45</code>. 이전 Worker 배포 ID: <code>0746602b-4893-491b-9def-2dea06c50e75</code>.</p>
+  </section>
+  <section>
+    <h2>재현 자료</h2>
+    <p>전체 증거, 로그, 모델 범위 및 API 인벤토리: <code>formal/daily-theory-drafts/</code>, <code>docs/verification/daily-theory-drafts.md</code>. 이 보고서는 실운영 활성화나 수익·검색 노출을 보증하지 않습니다.</p>
+  </section>
+</body>
+</html>

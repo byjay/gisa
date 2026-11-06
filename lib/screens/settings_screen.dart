@@ -225,12 +225,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ? Theme.of(context).colorScheme.primary
             : Colors.green,
       ),
-      title: Text(update.updateAvailable
-          ? '새 버전 ${update.latestVersion} 사용 가능'
-          : '앱 버전 v${AppUpdateService.currentVersion}'),
-      subtitle: Text(update.updateAvailable
-          ? '탭하여 업데이트'
-          : (update.checked ? '최신 버전입니다' : '업데이트 확인 중...')),
+      title: Text(
+        update.updateAvailable
+            ? '새 버전 ${update.latestVersion} 사용 가능'
+            : '앱 버전 v${AppUpdateService.currentVersion}',
+      ),
+      subtitle: Text(
+        update.updateAvailable
+            ? '탭하여 업데이트'
+            : (update.checked ? '최신 버전입니다' : '업데이트 확인 중...'),
+      ),
       trailing: update.updateAvailable
           ? const Icon(Icons.download_rounded)
           : IconButton(
@@ -908,7 +912,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               subtitle: Text(
                 user.email.isNotEmpty
                     ? user.email
-                    : (user.provider == 'google' ? '구글 계정' : '로컬 프로필'),
+                    : switch (user.provider) {
+                        'google' => 'Google 계정',
+                        'kakao' => '카카오 계정',
+                        _ => '로컬 프로필',
+                      },
               ),
             ),
             const Divider(height: 1),

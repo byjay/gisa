@@ -6,6 +6,9 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'secure_box_service.dart';
+import 'user_data_scope.dart';
+
 /// 백업/복원 결과 계약 — 성공/실패를 명시적으로 표현한다 (P0-3 오류 은닉 방지).
 class OperationResult<T> {
   final bool success;
@@ -26,8 +29,8 @@ class BackupService {
   BackupService._();
   static final BackupService instance = BackupService._();
 
-  /// 백업에 포함할 Hive 박스 이름 전량 (app_provider.dart §3 인벤토리 기준)
-  static const List<String> _boxNames = [
+  /// User-owned Hive boxes. Names are resolved once per export/import operation.
+  static const List<String> _baseBoxNames = [
     'exams',
     'sessions',
     'wrongNotes',
@@ -37,9 +40,17 @@ class BackupService {
     'flashcardSrs',
     'scoreHistory',
     'slideProgress',
-    'auth',
     'exam_registrations',
+    'progressSyncMeta',
   ];
+  static const Set<String> _secureBoxBaseNames = {
+    'sessions',
+    'wrongNotes',
+    'quizResults',
+    'progressSyncMeta',
+  };
+  static List<String> get _boxNames =>
+      _baseBoxNames.map(UserDataScope.boxName).toList(growable: false);
 
   static const int schemaVersion = 1;
   static const String appVersion = '1.0.0';
@@ -48,8 +59,9 @@ class BackupService {
   Future<OperationResult<String>> exportAll() async {
     try {
       final boxes = <String, Map<String, dynamic>>{};
-      for (final name in _boxNames) {
-        final box = await Hive.openBox(name);
+      final boxNames = _boxNames;
+      for (final name in boxNames) {
+        final box = await _openBox(name);
         final map = <String, dynamic>{};
         for (final key in box.keys) {
           final v = box.get(key);
@@ -110,6 +122,12 @@ class BackupService {
     if (boxesRaw is! Map) {
       return const OperationResult.fail('백업 파일에 데이터가 없어요.');
     }
+    final boxNames = _boxNames;
+    if (!_matchesCurrentOwner(boxesRaw.keys.whereType<String>(), boxNames)) {
+      return const OperationResult.fail(
+        '다른 계정 또는 게스트 공간의 백업입니다. 백업을 만든 계정으로 로그인한 뒤 복원해 주세요.',
+      );
+    }
 
     // [P2-A/B6] box.clear() 후 put 도중 예외가 나면 그 박스가 반파 상태로
     // 남는 문제를 막기 위해, 각 박스를 건드리기 직전에 원본 내용을
@@ -117,10 +135,10 @@ class BackupService {
     // 앞선 박스는 그대로 유지한다(전체 백업 자체가 이미 검증된 하나의
     // 스냅샷이므로, 박스 단위 원자성이면 데이터 훼손 방지 목적을 충족한다).
     int restoredBoxes = 0;
-    for (final name in _boxNames) {
+    for (final name in boxNames) {
       final boxData = boxesRaw[name];
       if (boxData is! Map) continue;
-      final box = await Hive.openBox(name);
+      final box = await _openBox(name);
       final snapshot = Map<dynamic, dynamic>.from(box.toMap());
       try {
         await box.clear();
@@ -156,8 +174,8 @@ class BackupService {
       final wrapped = jsonDecode(rawJson) as Map<String, dynamic>;
       final payload = wrapped['payload'] as Map<String, dynamic>;
       final boxes = payload['boxes'] as Map<String, dynamic>;
-      final quizCount = (boxes['quizResults'] as Map?)?.length ?? 0;
-      final noteCount = (boxes['wrongNotes'] as Map?)?.length ?? 0;
+      final quizCount = _countBaseBox(boxes, 'quizResults');
+      final noteCount = _countBaseBox(boxes, 'wrongNotes');
       return OperationResult.ok(
         BackupSummary(
           createdAt:
@@ -172,6 +190,47 @@ class BackupService {
       return OperationResult.fail('백업 파일을 읽을 수 없어요: $e');
     }
   }
+
+  Future<Box> _openBox(String name) {
+    final baseName = name.split('__account_').first;
+    if (_secureBoxBaseNames.contains(baseName)) {
+      return SecureBoxService.instance.openSecureBox(name);
+    }
+    return Hive.openBox(name);
+  }
+
+  bool _matchesCurrentOwner(
+    Iterable<String> backupNames,
+    List<String> currentNames,
+  ) {
+    final fingerprints = backupNames
+        .map(_accountFingerprint)
+        .whereType<String>()
+        .toSet();
+    final currentFingerprint = _accountFingerprint(
+      currentNames.firstWhere((name) => name.startsWith('sessions')),
+    );
+    if (fingerprints.length > 1) return false;
+    final backupFingerprint = fingerprints.isEmpty ? null : fingerprints.first;
+    return backupFingerprint == currentFingerprint;
+  }
+
+  String? _accountFingerprint(String boxName) {
+    final marker = boxName.lastIndexOf('__account_');
+    return marker < 0 ? null : boxName.substring(marker + '__account_'.length);
+  }
+
+  int _countBaseBox(Map<String, dynamic> boxes, String baseName) => boxes
+      .entries
+      .where(
+        (entry) =>
+            entry.key == baseName ||
+            entry.key.startsWith('${baseName}__account_'),
+      )
+      .fold<int>(
+        0,
+        (count, entry) => count + ((entry.value as Map?)?.length ?? 0),
+      );
 
   /// Q80: 자동 백업 — 앱 문서 디렉토리에 최신 백업 파일 1개를 유지한다.
   /// (수동 내보내기 공유와는 별개로, 사용자가 인지하지 못해도 데이터 손실을 완화)

@@ -21,6 +21,17 @@
         android:label="Gisaclub"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- Kakao OAuth returns to the app through kakao<NATIVE_APP_KEY>://oauth. -->
+        <activity
+            android:name="com.kakao.sdk.flutter.auth.AuthCodeHandlerActivity"
+            android:exported="true">
+            <intent-filter android:label="flutter_web_auth">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="kakao${KAKAO_NATIVE_APP_KEY}" android:host="oauth" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".MainActivity"
             android:exported="true"

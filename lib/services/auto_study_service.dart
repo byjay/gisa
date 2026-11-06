@@ -219,7 +219,10 @@ class AutoStudyService {
   }) {
     final out = <Question>[];
     for (final question in source) {
-      if (question.options.length != 4 || question.answer < 1) continue;
+      if (question.options.length != 4 ||
+          (question.remoteQid == null && question.answer < 1)) {
+        continue;
+      }
       if (used.add(question.qid)) out.add(question);
       if (out.length >= limit) break;
     }

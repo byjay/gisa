@@ -4,7 +4,7 @@
 exams.json(실기출)에서 반복 문항·토픽 빈도를 채굴하여
 lessons/repeat_questions/theory_slides/solution_recipes/mnemonics/
 study_guide/study_plan/formula_guide/videos/exam_info_2026/silgi +
-assets/theory/<track>/NN.md 를 생성한다.
+backend/data/theory/<track>/NN.md 를 생성한다.
 """
 import json
 import os
@@ -15,7 +15,7 @@ from collections import Counter, defaultdict
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from topic_rules import TOPIC_RULES  # noqa: E402
 
-APP = '/home/user/flutter_app'
+APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # 트랙별 메타: 과목 순서(exam_track.dart와 동일), 실기 개요, 전략 노트
 META = {
@@ -268,7 +268,7 @@ def norm_q(text):
 
 
 def load_exams(track):
-    with open(f'{APP}/assets/data/{track}/exams.json', encoding='utf-8') as f:
+    with open(f'{APP}/backend/data/study/{track}/exams.json', encoding='utf-8') as f:
         return json.load(f)
 
 
@@ -388,8 +388,8 @@ def build_all(track):
     cnt = topic_stats(exams)
     repeats = mine_repeats(exams)
     rules = TOPIC_RULES.get(track, {})
-    out = f'{APP}/assets/data/{track}'
-    theory_dir = f'{APP}/assets/theory/{track}'
+    out = f'{APP}/backend/data/study/{track}'
+    theory_dir = f'{APP}/backend/data/theory/{track}'
     os.makedirs(theory_dir, exist_ok=True)
 
     rep_by_topic = defaultdict(list)
@@ -518,8 +518,8 @@ def build_plan_and_extras(track):
     """study_plan / theory_slides / exam_info / silgi / theory md 생성."""
     (meta, exams, n_exams, total_q, cnt, repeats, rules,
      rep_by_topic) = build_all(track)
-    out = f'{APP}/assets/data/{track}'
-    theory_dir = f'{APP}/assets/theory/{track}'
+    out = f'{APP}/backend/data/study/{track}'
+    theory_dir = f'{APP}/backend/data/theory/{track}'
 
     # study_plan (30일)
     subj_n = len(meta['subjects'])

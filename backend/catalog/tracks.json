@@ -1,0 +1,261 @@
+{
+  "schemaVersion": 1,
+  "tracks": [
+    {
+      "id": "electrician",
+      "name": "전기기사",
+      "shortName": "전기기사",
+      "tagline": "전자기학·전력·기기·회로·설비 5과목",
+      "emoji": "⚡",
+      "bankLabel": "10년치 기출",
+    "questionCount": 3017,
+      "topicCount": 46,
+      "repeatCount": 347,
+      "paperSize": 100,
+      "subjects": [
+        "전자기학",
+        "전력공학",
+        "전기기기",
+        "회로이론 및 제어공학",
+        "전기설비기술기준"
+      ],
+      "theoryFiles": {
+      "전자기학": "theory/electrician/01.md",
+      "전력공학": "theory/electrician/02.md",
+      "전기기기": "theory/electrician/03.md",
+      "회로이론 및 제어공학": "theory/electrician/04.md",
+      "전기설비기술기준": "theory/electrician/05.md"
+      }
+    },
+    {
+      "id": "elec_construction",
+      "name": "전기공사기사",
+      "shortName": "전기공사기사",
+      "tagline": "전기응용·공사재료 중심 5과목",
+      "emoji": "🏗️",
+      "bankLabel": "7년치 기출",
+      "questionCount": 840,
+      "topicCount": 42,
+      "repeatCount": 46,
+      "paperSize": 40,
+      "subjects": [
+        "전기응용 및 공사재료",
+        "전력공학",
+        "전기기기",
+        "회로이론 및 제어공학",
+        "전기설비기술기준"
+      ],
+      "theoryFiles": {
+      "전기응용 및 공사재료": "theory/elec_construction/01.md",
+      "전력공학": "theory/elec_construction/02.md",
+      "전기기기": "theory/elec_construction/03.md",
+      "회로이론 및 제어공학": "theory/elec_construction/04.md",
+      "전기설비기술기준": "theory/elec_construction/05.md"
+      }
+    },
+    {
+      "id": "fire_electric",
+      "name": "소방설비기사(전기)",
+      "shortName": "소방설비(전기)",
+      "tagline": "소방원론·전기일반·법규·구조 4과목",
+      "emoji": "🚒",
+      "bankLabel": "7년치 실기출 19회차",
+      "questionCount": 1444,
+      "topicCount": 21,
+      "repeatCount": 24,
+      "paperSize": 80,
+      "subjects": [
+        "소방원론",
+        "소방전기일반",
+        "소방관계법규",
+        "소방전기시설의 구조 및 원리"
+      ],
+      "theoryFiles": {
+      "소방원론": "theory/fire_electric/01.md",
+      "소방전기일반": "theory/fire_electric/02.md",
+      "소방관계법규": "theory/fire_electric/03.md",
+      "소방전기시설의 구조 및 원리": "theory/fire_electric/04.md"
+      }
+    },
+    {
+      "id": "fire_mechanical",
+      "name": "소방설비기사(기계)",
+      "shortName": "소방설비(기계)",
+      "tagline": "소방원론·유체역학·법규·기계구조 4과목",
+      "emoji": "🛠️",
+      "bankLabel": "7년치 실기출 19회차",
+      "questionCount": 1496,
+      "topicCount": 21,
+      "repeatCount": 40,
+      "paperSize": 80,
+      "subjects": [
+        "소방원론",
+        "소방유체역학",
+        "소방관계법규",
+        "소방기계시설의 구조 및 원리"
+      ],
+      "theoryFiles": {
+      "소방원론": "theory/fire_mechanical/01.md",
+      "소방유체역학": "theory/fire_mechanical/02.md",
+      "소방관계법규": "theory/fire_mechanical/03.md",
+      "소방기계시설의 구조 및 원리": "theory/fire_mechanical/04.md"
+      }
+    },
+    {
+      "id": "info_processing",
+      "name": "정보처리기사",
+      "shortName": "정보처리기사",
+      "tagline": "NCS 개편 이후(2020~) 실기출 5과목",
+      "emoji": "💻",
+      "bankLabel": "NCS 개편 후 8회차",
+      "questionCount": 789,
+      "topicCount": 20,
+      "repeatCount": 9,
+      "paperSize": 100,
+      "subjects": [
+        "소프트웨어 설계",
+        "소프트웨어 개발",
+        "데이터베이스 구축",
+        "프로그래밍 언어 활용",
+        "정보시스템 구축관리"
+      ],
+      "theoryFiles": {
+      "소프트웨어 설계": "theory/info_processing/01.md",
+      "소프트웨어 개발": "theory/info_processing/02.md",
+      "데이터베이스 구축": "theory/info_processing/03.md",
+      "프로그래밍 언어 활용": "theory/info_processing/04.md",
+      "정보시스템 구축관리": "theory/info_processing/05.md"
+      }
+    },
+    {
+      "id": "industrial_safety",
+      "name": "산업안전기사",
+      "shortName": "산업안전기사",
+      "tagline": "안전관리·인간공학·기계·전기·화학·건설 6과목",
+      "emoji": "🦺",
+      "bankLabel": "7년치 실기출 19회차",
+      "questionCount": 2252,
+      "topicCount": 28,
+      "repeatCount": 40,
+      "paperSize": 120,
+      "subjects": [
+        "안전관리론",
+        "인간공학 및 시스템안전공학",
+        "기계위험방지기술",
+        "전기위험방지기술",
+        "화학설비위험방지기술",
+        "건설안전기술"
+      ],
+      "theoryFiles": {
+      "안전관리론": "theory/industrial_safety/01.md",
+      "인간공학 및 시스템안전공학": "theory/industrial_safety/02.md",
+      "기계위험방지기술": "theory/industrial_safety/03.md",
+      "전기위험방지기술": "theory/industrial_safety/04.md",
+      "화학설비위험방지기술": "theory/industrial_safety/05.md",
+      "건설안전기술": "theory/industrial_safety/06.md"
+      }
+    },
+    {
+      "id": "architecture",
+      "name": "건축기사",
+      "shortName": "건축기사",
+      "tagline": "계획·시공·구조·설비·법규 5과목",
+      "emoji": "🏛️",
+      "bankLabel": "7년치 실기출 19회차",
+      "questionCount": 1872,
+      "topicCount": 21,
+      "repeatCount": 40,
+      "paperSize": 100,
+      "subjects": [
+        "건축계획",
+        "건축시공",
+        "건축구조",
+        "건축설비",
+        "건축법규"
+      ],
+      "theoryFiles": {
+      "건축계획": "theory/architecture/01.md",
+      "건축시공": "theory/architecture/02.md",
+      "건축구조": "theory/architecture/03.md",
+      "건축설비": "theory/architecture/04.md",
+      "건축법규": "theory/architecture/05.md"
+      }
+    },
+    {
+      "id": "construction_safety",
+      "name": "건설안전기사",
+      "shortName": "건설안전기사",
+      "tagline": "안전관리·심리·인간공학·시공·재료·안전기술 6과목",
+      "emoji": "🚧",
+      "bankLabel": "7년치 실기출 18회차",
+      "questionCount": 2145,
+      "topicCount": 24,
+      "repeatCount": 40,
+      "paperSize": 120,
+      "subjects": [
+        "산업안전관리론",
+        "산업심리 및 교육",
+        "인간공학 및 시스템안전공학",
+        "건설시공학",
+        "건설재료학",
+        "건설안전기술"
+      ],
+      "theoryFiles": {
+      "산업안전관리론": "theory/construction_safety/01.md",
+      "산업심리 및 교육": "theory/construction_safety/02.md",
+      "인간공학 및 시스템안전공학": "theory/construction_safety/03.md",
+      "건설시공학": "theory/construction_safety/04.md",
+      "건설재료학": "theory/construction_safety/05.md",
+      "건설안전기술": "theory/construction_safety/06.md"
+      }
+    },
+    {
+      "id": "elec_industrial",
+      "name": "전기산업기사",
+      "shortName": "전기산업기사",
+      "tagline": "자기학·전력·기기·회로·설비 5과목",
+      "emoji": "🔌",
+      "bankLabel": "7년치 실기출 19회차",
+      "questionCount": 1673,
+      "topicCount": 19,
+      "repeatCount": 31,
+      "paperSize": 100,
+      "subjects": [
+        "전기자기학",
+        "전력공학",
+        "전기기기",
+        "회로이론",
+        "전기설비기술기준"
+      ],
+      "theoryFiles": {
+      "전기자기학": "theory/elec_industrial/01.md",
+      "전력공학": "theory/elec_industrial/02.md",
+      "전기기기": "theory/elec_industrial/03.md",
+      "회로이론": "theory/elec_industrial/04.md",
+      "전기설비기술기준": "theory/elec_industrial/05.md"
+      }
+    },
+    {
+      "id": "hazmat_industrial",
+      "name": "위험물산업기사",
+      "shortName": "위험물산업기사",
+      "tagline": "일반화학·소화방법·위험물성질 3과목",
+      "emoji": "🧪",
+      "bankLabel": "7년치 실기출 19회차",
+      "questionCount": 1125,
+      "topicCount": 11,
+      "repeatCount": 40,
+      "paperSize": 60,
+      "subjects": [
+        "일반화학",
+        "화재예방과 소화방법",
+        "위험물의 성질과 취급"
+      ],
+      "theoryFiles": {
+      "일반화학": "theory/hazmat_industrial/01.md",
+      "화재예방과 소화방법": "theory/hazmat_industrial/02.md",
+      "위험물의 성질과 취급": "theory/hazmat_industrial/03.md"
+      }
+    }
+  ]
+}

@@ -5,7 +5,7 @@
 """
 import os, json
 
-BASE = '/home/user/flutter_app/assets/data'
+BASE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'backend', 'data', 'study')
 TRACKS = [
     'electrician', 'architecture', 'construction_safety', 'elec_industrial',
     'fire_electric', 'fire_mechanical', 'industrial_safety', 'info_processing',

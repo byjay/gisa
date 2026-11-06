@@ -4,85 +4,173 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-import 'admin_service.dart';
 import 'app_config.dart';
+import 'auth_service.dart';
+import 'progress_snapshot_store.dart';
 
-/// 🔄 학습 진도·점수 서버 동기화 (SSOT 정책 · R58)
-///
-/// [정책 근거] docs/DATA_STORAGE_POLICY.md §4
-/// 이 앱의 핵심 가치는 "오프라인 학습"이므로 진도/점수는 로컬에 write-through
-/// 캐시한다. 다만 **서버(Cloudflare D1/KV)가 최종 SSOT**이며, 서버가 배포되면
-/// 이 서비스가 로컬 변경분을 push하고 서버 스냅샷을 pull하여 병합한다.
-/// **충돌 시 서버 값이 우선.**
-///
-/// [중요 — 판정 분리]
-/// 진도/점수는 권한·구독·관리자 판정과 **완전히 무관**하다. 로컬 진도로 유료 기능을
-/// 열거나 관리자로 승격하는 일은 절대 없다(그 판정은 EntitlementService/AdminService가
-/// 서버 응답으로만 수행). 이 서비스는 "사용자 소유 학습 데이터"의 백업·기기간 동기만
-/// 담당한다.
-///
-/// [안전 기본값]
-/// 서버 미설정(API_BASE_URL 없음)이면 모든 메서드는 **no-op** 이고, 앱은 로컬
-/// 캐시만으로 완전히 동작한다. `API_BASE_URL` 이 주입되고 Worker `/v1/progress`
-/// 가 구현되면 코드 수정 없이 동기화가 활성화된다.
+/// Syncs a user's local learning record with that user's authenticated Worker row.
 class ProgressSyncService {
-  ProgressSyncService._();
+  ProgressSyncService._()
+    : _client = http.Client(),
+      _tokenProvider = (() => AuthService.instance.sessionToken),
+      _ownerProvider = (() => AuthService.instance.dataOwnerId),
+      _snapshotReader = ProgressSnapshotStore.read,
+      _snapshotMerger = ProgressSnapshotStore.mergeRemote,
+      _apiBaseUrl = (() => AppConfig.apiBaseUrl);
+
+  @visibleForTesting
+  ProgressSyncService.forTesting({
+    required http.Client client,
+    required String? Function() tokenProvider,
+    required String? Function() ownerProvider,
+    required Future<Map<String, dynamic>> Function() snapshotReader,
+    required Future<void> Function(Map<String, dynamic>) snapshotMerger,
+    required String Function() apiBaseUrl,
+  }) : _client = client,
+       _tokenProvider = tokenProvider,
+       _ownerProvider = ownerProvider,
+       _snapshotReader = snapshotReader,
+       _snapshotMerger = snapshotMerger,
+       _apiBaseUrl = apiBaseUrl;
+
   static final ProgressSyncService instance = ProgressSyncService._();
 
-  bool _pushing = false;
+  final http.Client _client;
+  final String? Function() _tokenProvider;
+  final String? Function() _ownerProvider;
+  final Future<Map<String, dynamic>> Function() _snapshotReader;
+  final Future<void> Function(Map<String, dynamic>) _snapshotMerger;
+  final String Function() _apiBaseUrl;
 
-  /// 서버 동기화가 가능한 상태인지(API 베이스 + 관리자/사용자 토큰).
-  /// 현재는 인증 토큰이 있어야 사용자별 진도를 식별할 수 있다.
+  Timer? _timer;
+  bool _syncing = false;
+  bool _rerunRequested = false;
+  int _generation = 0;
+  VoidCallback? onSnapshotApplied;
+
   bool get isEnabled =>
-      AppConfig.hasApi && (AdminService.instance.serverToken?.isNotEmpty ?? false);
+      _apiBaseUrl().isNotEmpty &&
+      (_tokenProvider()?.isNotEmpty ?? false) &&
+      (_ownerProvider()?.isNotEmpty ?? false);
 
-  String get _base => AppConfig.apiBaseUrl;
-  String? get _token => AdminService.instance.serverToken;
-
-  /// ⬇️ 서버 진도 스냅샷 조회(pull). 서버가 SSOT이므로 반환 맵을 로컬에 병합한다.
-  /// 서버 미설정/미인증/오류 시 **null**(호출측은 로컬 캐시를 그대로 유지).
-  Future<Map<String, dynamic>?> pull() async {
-    if (!isEnabled) return null;
-    try {
-      final resp = await http
-          .get(
-            Uri.parse('$_base/v1/progress'),
-            headers: {'Authorization': 'Bearer $_token'},
-          )
-          .timeout(const Duration(seconds: 12));
-      if (resp.statusCode == 200) {
-        final data = jsonDecode(resp.body);
-        if (data is Map<String, dynamic>) return data;
-      }
-      return null;
-    } catch (e) {
-      if (kDebugMode) debugPrint('progress pull 실패(로컬 유지): $e');
-      return null;
+  /// Debounces rapid local writes while preserving a second pass if one arrives
+  /// during a network round trip.
+  void scheduleSync() {
+    if (!isEnabled) return;
+    if (_syncing) {
+      _rerunRequested = true;
+      return;
     }
+    _timer?.cancel();
+    _timer = Timer(const Duration(milliseconds: 700), () {
+      unawaited(syncNow());
+    });
   }
 
-  /// ⬆️ 로컬 변경분 반영(push). 서버가 최종 병합·판정한다.
-  /// 서버 미설정/미인증이면 no-op(true 아님, false 반환).
-  Future<bool> push(Map<String, dynamic> snapshot) async {
-    if (!isEnabled || _pushing) return false;
-    _pushing = true;
-    try {
-      final resp = await http
-          .post(
-            Uri.parse('$_base/v1/progress'),
-            headers: {
-              'Authorization': 'Bearer $_token',
-              'Content-Type': 'application/json',
-            },
-            body: jsonEncode(snapshot),
-          )
-          .timeout(const Duration(seconds: 12));
-      return resp.statusCode == 200;
-    } catch (e) {
-      if (kDebugMode) debugPrint('progress push 실패(로컬 유지): $e');
+  /// Invalidates any response started under the previous account/session.
+  void activateUser() {
+    _generation++;
+    _timer?.cancel();
+    _timer = null;
+    _rerunRequested = true;
+    scheduleSync();
+  }
+
+  @visibleForTesting
+  void resetForTesting() {
+    _timer?.cancel();
+    _timer = null;
+    _generation++;
+    _syncing = false;
+    _rerunRequested = false;
+  }
+
+  Future<bool> syncNow() async {
+    if (!isEnabled) return false;
+    if (_syncing) {
+      _rerunRequested = true;
       return false;
+    }
+
+    _syncing = true;
+    var success = true;
+    try {
+      do {
+        _rerunRequested = false;
+        final generation = _generation;
+        final ownerId = _ownerProvider();
+        final token = _tokenProvider();
+        final baseUrl = _apiBaseUrl().replaceFirst(RegExp(r'/+$'), '');
+        if (ownerId == null ||
+            token == null ||
+            token.isEmpty ||
+            baseUrl.isEmpty) {
+          return false;
+        }
+
+        try {
+          final getResponse = await _client
+              .get(
+                Uri.parse('$baseUrl/v1/progress'),
+                headers: {'Authorization': 'Bearer $token'},
+              )
+              .timeout(const Duration(seconds: 12));
+          if (!_isCurrent(generation, ownerId, token)) continue;
+          if (getResponse.statusCode != 200) return false;
+
+          final pulled = _decodeSnapshot(getResponse.body);
+          if (pulled == null) return false;
+          await _snapshotMerger(pulled);
+          if (!_isCurrent(generation, ownerId, token)) continue;
+          onSnapshotApplied?.call();
+
+          final local = await _snapshotReader();
+          if (!_isCurrent(generation, ownerId, token)) continue;
+          final postResponse = await _client
+              .post(
+                Uri.parse('$baseUrl/v1/progress'),
+                headers: {
+                  'Authorization': 'Bearer $token',
+                  'Content-Type': 'application/json',
+                },
+                body: jsonEncode(local),
+              )
+              .timeout(const Duration(seconds: 12));
+          if (!_isCurrent(generation, ownerId, token)) continue;
+          if (postResponse.statusCode != 200) return false;
+
+          final pushed = _decodeSnapshot(postResponse.body);
+          if (pushed == null) return false;
+          await _snapshotMerger(pushed);
+          if (!_isCurrent(generation, ownerId, token)) continue;
+          onSnapshotApplied?.call();
+        } catch (error) {
+          if (kDebugMode) {
+            debugPrint('progress sync failed; local records kept: $error');
+          }
+          success = false;
+          break;
+        }
+      } while (_rerunRequested);
     } finally {
-      _pushing = false;
+      _syncing = false;
+      if (_rerunRequested && isEnabled) scheduleSync();
+    }
+    return success;
+  }
+
+  Map<String, dynamic>? _decodeSnapshot(String body) {
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is! Map || decoded['snapshot'] is! Map) return null;
+      return Map<String, dynamic>.from(decoded['snapshot'] as Map);
+    } on FormatException {
+      return null;
     }
   }
+
+  bool _isCurrent(int generation, String ownerId, String token) =>
+      generation == _generation &&
+      ownerId == _ownerProvider() &&
+      token == _tokenProvider();
 }

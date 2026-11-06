@@ -8,10 +8,13 @@ export async function getEntitlement(env, userId) {
     .first();
 
   let tier = row?.tier || 'free';
-  const expiry = row?.expiry || null;
+  const expiryMs = row?.expiry ? Number(row.expiry) : null;
+  const expiry = expiryMs && Number.isFinite(expiryMs)
+    ? new Date(expiryMs).toISOString()
+    : null;
 
   // 만료 지난 premium은 free로 강등.
-  if (tier === 'premium' && expiry && Date.now() > expiry) {
+  if (tier === 'premium' && expiryMs && Date.now() > expiryMs) {
     tier = 'free';
   }
   return { tier, expiry };

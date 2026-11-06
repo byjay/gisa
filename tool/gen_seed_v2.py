@@ -3,7 +3,7 @@
 
 전략:
 - 전기공사기사: 공통 4과목(전력공학·전기기기·회로이론 및 제어공학·전기설비기술기준)은
-  전기기사 실제 기출(assets/data/electrician/exams.json)에서 재활용.
+  전기기사 실제 기출(backend/data/study/electrician/exams.json)에서 재활용.
   '전기응용 및 공사재료'는 bank_elec_app.py 실제 문항 뱅크 사용.
 - 소방설비기사(전기): bank_fire.py 4과목 실제 문항 뱅크 사용.
 - repeat_questions.json 도 뱅크 고빈출 문항으로 실제화.

@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'progress_sync_service.dart';
 import 'study_data.dart';
+import 'user_data_scope.dart';
 
 /// 문제 단위 학습 진척 추적 서비스 (상위 자격증 앱 수준)
 /// - 문제별 정답/오답 횟수, 마지막 결과, 북마크
@@ -11,12 +13,37 @@ class ProgressService {
   static final ProgressService instance = ProgressService._();
 
   Box? _box; // qid -> {wrong, correct, last, bookmarked, updatedAt}
+  String? _boxName;
   bool _ready = false;
 
   Future<void> _ensure() async {
-    if (_ready) return;
-    _box = await Hive.openBox('questionProgress');
+    final name = UserDataScope.boxName('questionProgress');
+    if (_ready && _boxName == name) return;
+    final generation = UserDataScope.generation;
+    final box = await Hive.openBox(name);
+    if (generation != UserDataScope.generation ||
+        name != UserDataScope.boxName('questionProgress')) {
+      return _ensure();
+    }
+    _box = box;
+    _boxName = name;
     _ready = true;
+  }
+
+  Future<void> activateUser(String? ownerId) async {
+    UserDataScope.activate(ownerId);
+    _ready = false;
+    await _ensure();
+  }
+
+  int _nextUpdatedAt(Map<String, dynamic> record) {
+    final raw = record['updatedAt'];
+    final previous = raw is num
+        ? raw.toInt()
+        : raw is String
+        ? (int.tryParse(raw) ?? DateTime.tryParse(raw)?.millisecondsSinceEpoch ?? 0)
+        : 0;
+    return max(DateTime.now().millisecondsSinceEpoch, previous + 1);
   }
 
   Map<String, dynamic> _rec(String qid) {
@@ -55,8 +82,9 @@ class ProgressService {
     r['nextDue'] = DateTime.now()
         .add(Duration(days: _srsIntervalDays[box]))
         .toIso8601String();
-    r['updatedAt'] = DateTime.now().toIso8601String();
+    r['updatedAt'] = _nextUpdatedAt(r);
     await _box!.put(q.qid, r);
+    ProgressSyncService.instance.scheduleSync();
   }
 
   /// 시각적 반복 암기 전용: 카드를 1회 "봤다"고 기록(정답 여부 없이 노출만).
@@ -71,8 +99,9 @@ class ProgressService {
     r['reps'] = (r['reps'] as int? ?? 0) + 1;
     if (subject.isNotEmpty) r['subject'] = subject;
     if (topic.isNotEmpty) r['topic'] = topic;
-    r['updatedAt'] = DateTime.now().toIso8601String();
+    r['updatedAt'] = _nextUpdatedAt(r);
     await _box!.put(qid, r);
+    ProgressSyncService.instance.scheduleSync();
   }
 
   /// 특정 문제의 반복 노출 횟수(reps) — 10회 반복 목표 진행도.
@@ -132,8 +161,9 @@ class ProgressService {
     r['lastReason'] = reason;
     r['subject'] = q.subject;
     r['topic'] = q.topic;
-    r['updatedAt'] = DateTime.now().toIso8601String();
+    r['updatedAt'] = _nextUpdatedAt(r);
     await _box!.put(q.qid, r);
+    ProgressSyncService.instance.scheduleSync();
   }
 
   /// 오답 원인별 전체 집계 — {원인: 횟수} (약점 진단·집중 방안용)
@@ -263,8 +293,9 @@ class ProgressService {
     r['bookmarked'] = now;
     r['subject'] = q.subject;
     r['topic'] = q.topic;
-    r['updatedAt'] = DateTime.now().toIso8601String();
+    r['updatedAt'] = _nextUpdatedAt(r);
     await _box!.put(q.qid, r);
+    ProgressSyncService.instance.scheduleSync();
     return now;
   }
 

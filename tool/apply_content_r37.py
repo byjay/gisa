@@ -9,7 +9,7 @@ import json, sys
 sys.path.insert(0, 'tool')
 from content_elec_r37 import ELEC
 
-PATH = 'assets/data/electrician/lessons.json'
+PATH = 'backend/data/study/electrician/lessons.json'
 
 def main():
     data = json.load(open(PATH, encoding='utf-8'))

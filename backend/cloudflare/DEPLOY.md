@@ -27,25 +27,32 @@ wrangler d1 create gisaclub-db
 # R2 버킷 (문제 본문 저장)
 wrangler r2 bucket create gisaclub-content
 
-# KV (세션/레이트리밋)
+# KV (로그아웃 세션 폐기 목록)
 wrangler kv:namespace create SESSIONS
-wrangler kv:namespace create RATELIMIT
-# → 출력된 id 를 wrangler.toml [[kv_namespaces]] 에 기입
+# KV (앱 버전 매니페스트)
+wrangler kv:namespace create SETTINGS
+# → 두 namespace의 id를 wrangler.toml에 각각 기입
 ```
 
 ## 2. 스키마 마이그레이션
 
 ```bash
-wrangler d1 execute gisaclub-db --file=migrations/0001_init.sql
+wrangler d1 migrations apply gisaclub-db --remote
 ```
 
 ## 3. 콘텐츠 분리 산출물 생성
 
 ```bash
 cd ../scripts
-python3 split_content_for_r2.py --data-dir ../../assets/data --out ./out
-# 결과: out/d1_seed.sql (meta + answers_private) , out/r2/content/**/*.json (본문, 정답 없음)
+python3 split_content_for_r2.py --data-dir ../data/study --out ./out
+# 결과: out/d1_seed.sql, out/r2/{catalog,content,study,theory,images}/ 전체 서버 콘텐츠
+
+# 원본과 catalog·문항·qid·정답 분리·정적 복사본·R2 전체 목록을 확인한다.
+# 불일치가 있으면 배포 단계로 넘어가지 않는다.
+python3 verify_r2_bundle.py --data-dir ../data/study --bundle ./out --catalog ../catalog/tracks.json --migrations ../cloudflare/migrations
 ```
+
+`backend/catalog/tracks.json`은 자격증 표시명·과목·이론 경로·콘텐츠 수를 보유한다. 로그인 앱은 Worker `GET /v1/tracks`로 이 카탈로그를 가져오며, APK에는 카탈로그 자료를 넣지 않는다.
 
 **검증(정답 유출 없음)**:
 ```bash
@@ -57,22 +64,28 @@ grep -rl '"answer"' out/r2/content/   # 아무것도 안 나와야 정상 (본�
 ```bash
 cd ../cloudflare
 # meta + 정답/해설 → D1
-wrangler d1 execute gisaclub-db --file=../scripts/out/d1_seed.sql
+wrangler d1 execute gisaclub-db --remote --file=../scripts/out/d1_seed.sql
 
-# 문제 본문 → R2 (정답 없는 파일만 업로드됨)
-find ../scripts/out/r2/content -name '*.json' | while read f; do
-  key=${f#../scripts/out/r2/}
-  wrangler r2 object put gisaclub-content/$key --file="$f"
+# 문제 본문·학습 자료·이론·이미지 전체 → R2
+find ../scripts/out/r2 -type f -print0 | while IFS= read -r -d '' f; do
+  key="${f#../scripts/out/r2/}"
+  wrangler r2 object put "gisaclub-content/$key" --remote --file="$f"
 done
 ```
 
 ## 5. 시크릿 설정
 
 ```bash
-wrangler secret put JWT_SECRET            # 세션 서명 키
-wrangler secret put CEREBRAS_API_KEY      # AI 프록시(무료 티어 서버 대납용, 선택)
-wrangler secret put GOOGLE_PLAY_KEY       # 인앱결제 영수증 검증(서비스 계정 JSON)
+wrangler secret put JWT_SIGNING_KEY       # 최소 32바이트 무작위 키
+wrangler secret put ADMIN_TOKEN_SECRET    # 최소 32바이트 무작위 키
+wrangler secret put CEREBRAS_API_KEY      # AI 프록시(선택)
 ```
+
+`GOOGLE_OAUTH_CLIENT_ID`는 Google Cloud의 Web OAuth client ID를 `[vars]`에 설정한다.
+`GOOGLE_OAUTH_ANDROID_CLIENT_IDS`에는 토큰 `azp` 검증에 사용할 Android OAuth client ID를
+쉼표로 구분해 설정한다. Android OAuth client에는 앱 패키지명과 실제 릴리스 서명
+인증서 SHA-1을 등록한다. 서버는 웹 `aud`와 등록된 Android `azp`를 모두 검증한다.
+Google Play 결제 검증은 아직 구현 전이며, `/v1/billing/verify`는 권한을 발급하지 않는다.
 
 ## 6. 배포
 
@@ -87,17 +100,24 @@ wrangler deploy
 빌드 시 API 베이스를 주입:
 
 ```bash
+export API_BASE_URL="https://gisaclub-api.designssir.workers.dev"
+export GOOGLE_OAUTH_CLIENT_ID="실제 Google Cloud Web OAuth client ID"
+export WEB_BASE_URL="https://gisaclub-admin.pages.dev"
+
 flutter build apk --release \
-  --dart-define=API_BASE_URL=https://gisaclub-api.<account>.workers.dev \
-  --dart-define=WEB_BASE_URL=https://gisaclub-admin.pages.dev
+  --split-per-abi \
+  --dart-define=API_BASE_URL="$API_BASE_URL" \
+  --dart-define=GOOGLE_OAUTH_CLIENT_ID="$GOOGLE_OAUTH_CLIENT_ID" \
+  --dart-define=WEB_BASE_URL="$WEB_BASE_URL"
 ```
 
 > **도메인 비종속(R58)**: URL은 코드가 아니라 dart-define로만 주입한다.
 > 커스텀 도메인 구매 후에는 값만 교체(`https://api.gisa.club` 등). 상세는
 > `lib/services/app_config.dart` 및 `docs/CLOUDFLARE_ACCESS_SETUP.md` §7 참고.
 
-이후 콘텐츠 로딩을 로컬 assets → `RemoteContentApi` 로 전환하면
-APK에서 정답/해설 데이터를 제거할 수 있다(APK 크기도 대폭 감소).
+앱은 Google ID token을 `/v1/auth/google`로 보내 서버 세션을 받고,
+문제 본문·학습 JSON·이론·이미지를 인증된 API로 요청한다.
+학습 원본은 `backend/data/study`와 `backend/data/theory`에 보관하며 Flutter APK 자산 디렉터리와 분리한다.
 
 ---
 

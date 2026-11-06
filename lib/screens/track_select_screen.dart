@@ -5,13 +5,27 @@ import '../services/exam_track.dart';
 import '../theme/app_theme.dart';
 import '../widgets/tutor_avatar.dart';
 
-/// 시험 종목 선택 — 앱 진입 시 큰 버튼 3개로 시험을 고른다.
-class TrackSelectScreen extends StatelessWidget {
+/// 시험 종목 선택 — 검색과 종목별 색상 카드로 자격증을 고른다.
+class TrackSelectScreen extends StatefulWidget {
   const TrackSelectScreen({super.key});
+
+  @override
+  State<TrackSelectScreen> createState() => _TrackSelectScreenState();
+}
+
+class _TrackSelectScreenState extends State<TrackSelectScreen> {
+  String _query = '';
 
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
+    final query = _query.trim().toLowerCase();
+    final tracks = kExamTracks.where((track) {
+      if (query.isEmpty) return true;
+      return '${track.name} ${track.tagline} ${track.subjects.join(' ')}'
+          .toLowerCase()
+          .contains(query);
+    }).toList();
     return Scaffold(
       body: SafeArea(
         child: LayoutBuilder(
@@ -57,6 +71,28 @@ class TrackSelectScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 14),
+                TextField(
+                  textInputAction: TextInputAction.search,
+                  onChanged: (value) => setState(() => _query = value),
+                  decoration: InputDecoration(
+                    hintText: '자격증 또는 과목 검색',
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    suffixIcon: _query.isEmpty
+                        ? null
+                        : IconButton(
+                            tooltip: '검색어 지우기',
+                            onPressed: () => setState(() => _query = ''),
+                            icon: const Icon(Icons.close_rounded),
+                          ),
+                    filled: true,
+                    fillColor: dark ? const Color(0xFF202536) : Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
@@ -93,10 +129,38 @@ class TrackSelectScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 14),
-                for (final t in kExamTracks) ...[
-                  _TrackButton(track: t),
-                  const SizedBox(height: 14),
-                ],
+                if (tracks.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 36),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.search_off_rounded,
+                          size: 42,
+                          color: dark ? Colors.white54 : AppTheme.textMuted,
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          '검색 결과가 없어요',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: dark ? Colors.white : AppTheme.textStrong,
+                          ),
+                        ),
+                        Text(
+                          '자격증 이름이나 과목을 다시 확인해 주세요.',
+                          style: TextStyle(
+                            color: dark ? Colors.white60 : AppTheme.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  for (final t in tracks) ...[
+                    _TrackButton(track: t),
+                    const SizedBox(height: 14),
+                  ],
                 const SizedBox(height: 8),
                 Center(
                   child: Text(
@@ -114,7 +178,7 @@ class TrackSelectScreen extends StatelessWidget {
               child: wide
                   ? Center(
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 680),
+                        constraints: const BoxConstraints(maxWidth: 720),
                         child: content,
                       ),
                     )

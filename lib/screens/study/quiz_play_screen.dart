@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import '../../providers/app_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../services/study_data.dart';
+import '../../services/app_config.dart';
+import '../../services/remote_content_api.dart';
 import '../../services/progress_service.dart';
 import '../../services/pass_prediction.dart';
 import '../../services/quiz_policy.dart';
@@ -44,6 +46,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   final Map<int, int> _picked = {};
   final Set<int> _recorded = {}; // 진척도 중복 기록 방지
   bool _showAnswer = false;
+  bool _gradingAnswer = false;
   bool _bookmarked = false;
   // 🖼 글·그림 중복 방지: 보기가 텍스트로 완전한 문제는 이미지를 접어두고
   // 버튼으로만 펼친다(이미지에 같은 지문·보기가 또 들어있어 중복되므로).
@@ -82,7 +85,8 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     final allowed = _allowedCount;
     openPremiumPaywall(
       context,
-      hook: '무료로는 전체 ${widget.questions.length}문항 중 '
+      hook:
+          '무료로는 전체 ${widget.questions.length}문항 중 '
           '$allowed문항(10%)만 풀 수 있어요.\n'
           '프리미엄으로 업그레이드하면 남은 ${widget.questions.length - allowed}문항과 '
           '전 회차 기출을 100% 무제한으로 풀 수 있습니다.',
@@ -478,8 +482,10 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     final scheme = Theme.of(ctx).colorScheme;
     final isCurrent = i == _idx;
     final isAnswered = _picked.containsKey(i);
-    final locked = EntitlementService.instance
-        .isQuestionLocked(i, widget.questions.length);
+    final locked = EntitlementService.instance.isQuestionLocked(
+      i,
+      widget.questions.length,
+    );
     return InkWell(
       onTap: () {
         Navigator.of(ctx).pop();
@@ -505,8 +511,8 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
               color: locked
                   ? scheme.surfaceContainerHighest.withValues(alpha: 0.45)
                   : isAnswered
-                      ? scheme.primary
-                      : scheme.surfaceContainerHighest,
+                  ? scheme.primary
+                  : scheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(9),
               border: isCurrent
                   ? Border.all(color: AppTheme.accent, width: 2.5)
@@ -690,7 +696,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                           height: 1.5,
                         ),
                       ),
-                      if (_q.hasImage && _q.imageAssetPath != null) ...[
+                      if (_q.hasImage && _q.remoteImagePath != null) ...[
                         const SizedBox(height: 12),
                         if (_optionsNeedImage || _showOriginalImage)
                           ClipRRect(
@@ -705,8 +711,14 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                                 ),
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Image.asset(
-                                _q.imageAssetPath!,
+                              child: Image.network(
+                                RemoteContentApi.instance
+                                    .questionImageUri(
+                                      StudyData.instance.track.id,
+                                      _q.remoteImagePath!,
+                                    )
+                                    .toString(),
+                                headers: RemoteContentApi.instance.imageHeaders,
                                 fit: BoxFit.contain,
                                 errorBuilder: (context, error, stack) =>
                                     const SizedBox.shrink(),
@@ -835,8 +847,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
               ),
               const Spacer(),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
                 decoration: BoxDecoration(
                   color: color,
                   borderRadius: BorderRadius.circular(20),
@@ -891,9 +902,9 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     height: 1.45,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(
-                          alpha: 0.75,
-                        ),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.75),
                   ),
                 ),
               ),
@@ -1223,7 +1234,8 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   }
 
   Widget _optionTile(int n, String text, int? picked, ColorScheme scheme) {
-    final reveal = _showAnswer || (!widget.examMode && picked != null);
+    final reveal =
+        _showAnswer || (!widget.examMode && picked != null && _q.answer > 0);
     Color? bg;
     Color? border;
     if (reveal) {
@@ -1247,33 +1259,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
-        onTap: () {
-          setState(() {
-            _picked[_idx] = n;
-            if (!widget.examMode) _showAnswer = true;
-          });
-          // 첫 선택만 기록해 재클릭으로 인한 진척도 왜곡을 방지한다.
-          if (_recorded.add(_idx)) {
-            final correct = n == _q.answer;
-            // 🖐️ 정답/오답에 따라 다른 촉각 피드백 — 고급스러운 손맛
-            if (!widget.examMode) {
-              if (correct) {
-                HapticFeedback.mediumImpact();
-              } else {
-                HapticFeedback.heavyImpact();
-              }
-            } else {
-              HapticFeedback.selectionClick();
-            }
-            ProgressService.instance.record(_q, correct);
-            // ❌ 반복해서 틀리는 문제 → 오답노트 강제 + 이론 들이밀기
-            if (!correct && !widget.examMode) {
-              _maybeForceWrongNote();
-            }
-          } else {
-            HapticFeedback.selectionClick();
-          }
-        },
+        onTap: _gradingAnswer ? null : () => unawaited(_pickAnswer(n)),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           child: Row(
@@ -1301,11 +1287,71 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     );
   }
 
+  Future<void> _pickAnswer(int picked) async {
+    final index = _idx;
+    final question = widget.questions[index];
+    setState(() {
+      _picked[index] = picked;
+      _showAnswer = !widget.examMode && question.answer > 0;
+    });
+
+    final needsRemoteGrade =
+        AppConfig.hasApi && question.remoteQid != null && question.answer <= 0;
+    if (needsRemoteGrade && widget.examMode) {
+      HapticFeedback.selectionClick();
+      return; // 실전 모드는 제출 시 한 번에 서버 채점한다.
+    }
+    if (needsRemoteGrade) {
+      setState(() => _gradingAnswer = true);
+      try {
+        final response = await RemoteContentApi.instance.grade([
+          {'qid': question.qid, 'picked': picked},
+        ]);
+        final items = (response['results'] as List?) ?? const [];
+        final item = items
+            .cast<Map>()
+            .where((row) => row['qid'] == question.qid)
+            .firstOrNull;
+        if (item == null) throw StateError('서버가 채점 결과를 반환하지 않았습니다.');
+        question
+          ..answer = (item['answer'] as num).toInt()
+          ..explanation = item['explanation'] as String? ?? '';
+        if (mounted && _idx == index) {
+          setState(() => _showAnswer = true);
+        }
+      } catch (error) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('서버 채점 실패: $error')));
+        }
+        return;
+      } finally {
+        if (mounted) setState(() => _gradingAnswer = false);
+      }
+    }
+
+    if (!_recorded.add(index)) {
+      HapticFeedback.selectionClick();
+      return;
+    }
+    final correct = picked == question.answer;
+    if (!widget.examMode && correct) {
+      HapticFeedback.mediumImpact();
+    } else if (!widget.examMode) {
+      HapticFeedback.heavyImpact();
+    } else {
+      HapticFeedback.selectionClick();
+    }
+    ProgressService.instance.record(question, correct);
+    if (!correct && !widget.examMode) unawaited(_maybeForceWrongNote());
+  }
+
   Widget _bottomBar() {
     // 무료 사용자는 허용 문항의 마지막이 곧 "채점" 지점이 된다.
     final effectiveLastIdx = _allowedCount - 1;
-    final isLast = _idx == widget.questions.length - 1 ||
-        _idx == effectiveLastIdx;
+    final isLast =
+        _idx == widget.questions.length - 1 || _idx == effectiveLastIdx;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
       child: Row(
@@ -1529,6 +1575,54 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     if (_finished) return;
     _finished = true;
     _timer?.cancel();
+
+    if (AppConfig.hasApi) {
+      final remoteQuestions = widget.questions
+          .where((question) => question.remoteQid != null)
+          .toList();
+      if (remoteQuestions.isNotEmpty) {
+        try {
+          final answers = <Map<String, dynamic>>[];
+          for (final question in remoteQuestions) {
+            final index = widget.questions.indexOf(question);
+            answers.add({'qid': question.qid, 'picked': _picked[index] ?? 0});
+          }
+          final response = await RemoteContentApi.instance.gradeMany(answers);
+          final byQid = <String, Map>{
+            for (final value in (response['results'] as List? ?? const []))
+              if (value is Map && value['qid'] is String)
+                value['qid'] as String: value,
+          };
+          for (final question in remoteQuestions) {
+            final result = byQid[question.qid];
+            if (result == null) throw StateError('채점 결과에서 문항이 누락되었습니다.');
+            question
+              ..answer = (result['answer'] as num).toInt()
+              ..explanation = result['explanation'] as String? ?? '';
+          }
+          if (widget.examMode) {
+            for (var i = 0; i < widget.questions.length; i++) {
+              final picked = _picked[i];
+              if (picked != null && _recorded.add(i)) {
+                ProgressService.instance.record(
+                  widget.questions[i],
+                  picked == widget.questions[i].answer,
+                );
+              }
+            }
+          }
+        } catch (error) {
+          _finished = false;
+          if (!mounted) return;
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('서버 채점을 완료하지 못했습니다: $error')));
+          return;
+        }
+      }
+    }
+
+    if (!mounted) return;
 
     // [P1-B/T10] 채점 계산은 순수 함수 QuizGrader.grade로 추출했다.
     // 이 화면은 결과를 받아 저장·연출만 담당한다 — 채점 로직은

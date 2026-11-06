@@ -27,7 +27,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   static const _goalOptions = [
     (min: 60, label: '가볍게', desc: '하루 1시간 · 직장인 추천'),
-    (min: 120, label: '표준', desc: '하루 2시간 · 3개월 완성'),
+    (min: 120, label: '표준', desc: '하루 2시간 · 꾸준한 학습'),
     (min: 240, label: '스퍼트', desc: '하루 4시간 · 시험 임박'),
   ];
 
@@ -80,9 +80,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       children: [
                         _pageShell(
                           emoji: '⚡',
-                          title: '자격증 합격,\n마법처럼 만들어 드릴게요',
-                          subtitle:
-                              '전기기사·전기공사기사·소방설비기사(전기) 지원\n기출·해설 100% · 완전 무료 · 풀기→채점→해설→오답복습 루프',
+                          title: '자격증 공부를\n작은 흐름으로 이어가요',
+                          subtitle: '종목·과목을 고르고 문제를 풀어\n채점·해설·오답 복습으로 이어가요',
                           child: _loopPreview(),
                         ),
                         _pageShell(
@@ -94,13 +93,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         _pageShell(
                           emoji: '📅',
                           title: '시험일을 알려주세요',
-                          subtitle: 'D-Day에 맞춰 매일 학습 플랜과\n합격 예측 점수를 계산해 드려요',
+                          subtitle: '시험 예정일을 등록하고\n학습 화면에서 목표 날짜를 확인해요',
                           child: _dateCard(),
                         ),
                         _pageShell(
                           emoji: '🎯',
                           title: '하루 목표를 정해주세요',
-                          subtitle: '목표를 달성하면 XP·마법 방패를 획득하고\n마법사 레벨이 올라갑니다',
+                          subtitle: '하루 학습 목표를 정하고\n홈 화면에서 진행을 확인해요',
                           child: _goalCard(),
                         ),
                       ],

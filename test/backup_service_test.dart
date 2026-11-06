@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:cert_study_tracker/services/backup_service.dart';
+import 'package:cert_study_tracker/services/secure_box_service.dart';
+import 'package:cert_study_tracker/services/user_data_scope.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
@@ -13,6 +15,7 @@ void main() {
   setUp(() async {
     tempDir = await Directory.systemTemp.createTemp('voltssam_backup_test_');
     Hive.init(tempDir.path);
+    UserDataScope.activate(null);
   });
 
   tearDown(() async {
@@ -109,5 +112,26 @@ void main() {
     expect(peekResult.data!.quizResultCount, 2);
     // 미리보기 후에도 원본 데이터는 그대로
     expect(quizBox.get('q1'), isNotNull);
+  });
+
+  test('계정 A 백업은 계정 B 저장공간에 복원되지 않는다', () async {
+    UserDataScope.activate('backup-account-a');
+    final accountABox = await SecureBoxService.instance.openSecureBox(
+      UserDataScope.boxName('quizResults'),
+    );
+    await accountABox.put('a-quiz', {'id': 'a-quiz'});
+    final exported = await BackupService.instance.exportAll();
+    expect(exported.success, isTrue);
+
+    UserDataScope.activate('backup-account-b');
+    final accountBBox = await SecureBoxService.instance.openSecureBox(
+      UserDataScope.boxName('quizResults'),
+    );
+    await accountBBox.put('b-quiz', {'id': 'b-quiz'});
+
+    final imported = await BackupService.instance.importAll(exported.data!);
+    expect(imported.success, isFalse);
+    expect(accountBBox.get('b-quiz'), isNotNull);
+    expect(accountBBox.get('a-quiz'), isNull);
   });
 }

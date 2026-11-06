@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
-import 'package:flutter/services.dart' show rootBundle;
+import 'app_config.dart';
 import 'exam_track.dart';
+import 'remote_content_api.dart';
 
 /// 현재 선택된 종목 (기본: 전기기사). StudyData.setTrack 으로 변경된다.
-ExamTrack _currentTrack = kExamTracks.first;
+ExamTrack _currentTrack = ExamTrack.pending;
 
 /// JSON 값을 문자열 리스트로 안전 변환 (top-level 헬퍼).
 List<String> _strList(dynamic v) => switch (v) {
@@ -25,12 +26,13 @@ class Question {
   final String topic;
   final String question;
   final List<String> options;
-  final int answer; // 1-based
+  int answer; // 1-based; remote mode fills it only after server grading.
   final bool hasImage;
-  final String explanation; // 문제별 해설
+  String explanation; // remote mode fills it only after server grading.
   final int difficulty; // 1=하, 2=중, 3=상
   final double freqScore; // 0~100 출제빈도 점수
-  final String? image; // 원본 PDF 크롭 이미지 상대경로 (assets/data/<track>/ 기준)
+  final String? image; // 서버 question-images 경로 상대값
+  final String? remoteQid;
   String examLabel; // 출제 회차 라벨
 
   Question({
@@ -45,6 +47,7 @@ class Question {
     this.difficulty = 2,
     this.freqScore = 0,
     this.image,
+    this.remoteQid,
     this.examLabel = '',
   });
 
@@ -108,7 +111,7 @@ class Question {
   /// ⚠️ 종목(track) 접두어를 포함한다. 향후 자격증 10종으로 확장하거나
   /// 단일 과목 앱으로 분리 판매할 때, 서로 다른 종목의 동일 회차·과목·번호
   /// 문제가 진척 데이터에서 충돌하지 않도록 한다.
-  String get qid => '${_currentTrack.id}|$examLabel|$subject|$no';
+  String get qid => remoteQid ?? '${_currentTrack.id}|$examLabel|$subject|$no';
 
   factory Question.fromJson(Map<String, dynamic> j) => Question(
     no: j['no'] as int,
@@ -124,12 +127,13 @@ class Question {
     difficulty: (j['difficulty'] as int?) ?? 2,
     freqScore: ((j['freq_score'] as num?) ?? 0).toDouble(),
     image: j['image'] as String?,
+    examLabel: (j['exam_label'] as String?) ?? '',
+    remoteQid: j['qid'] as String?,
   );
 
-  /// 문제 이미지의 전체 asset 경로 (assets/data/{트랙}/{image}).
+  /// 서버 question-images API에 전달할 상대 경로.
   /// image 필드가 없으면 null.
-  String? get imageAssetPath =>
-      image == null ? null : 'assets/data/${_currentTrack.dir}/$image';
+  String? get remoteImagePath => image;
 }
 
 class TopicFreq {
@@ -957,11 +961,44 @@ class StudyData {
   StudyData._();
   static final StudyData instance = StudyData._();
 
-  /// 현재 종목 폴더 (assets/data/[dir]/)
+  /// 현재 서버 콘텐츠 트랙 ID.
   String get _dir => _currentTrack.dir;
 
-  /// data 파일 경로 헬퍼 — 종목 폴더를 앞에 붙인다.
-  String _p(String file) => 'assets/data/$_dir/$file';
+  /// 원격 콘텐츠 파일 URI 헬퍼.
+  String _p(String file) => 'tracks/$_dir/$file';
+
+  Future<String> _loadString(String path) {
+    final parts = path.split('/');
+    if (parts.length == 3 && parts[0] == 'tracks') {
+      return RemoteContentApi.instance.getStudyFile(
+        group: 'track',
+        track: parts[1],
+        filename: parts[2],
+      );
+    }
+    if (parts.length == 2 && parts[0] == 'common') {
+      return RemoteContentApi.instance.getStudyFile(
+        group: 'common',
+        track: 'common',
+        filename: parts[1],
+      );
+    }
+    if (path == 'qnet/qnet_schedule.json') {
+      return RemoteContentApi.instance.getStudyFile(
+        group: 'qnet',
+        track: 'qnet',
+        filename: 'qnet_schedule.json',
+      );
+    }
+    if (parts.length == 3 && parts[0] == 'theory') {
+      return RemoteContentApi.instance.getStudyFile(
+        group: 'theory',
+        track: parts[1],
+        filename: parts[2],
+      );
+    }
+    throw FormatException('서버 자료 경로를 해석할 수 없습니다: $path');
+  }
 
   /// 종목 전환: 캐시를 모두 비우고 다음 로드부터 새 종목 데이터를 읽는다.
   void setTrack(ExamTrack track) {
@@ -972,7 +1009,11 @@ class StudyData {
 
   ExamTrack get track => _currentTrack;
 
+  /// 로그아웃·계정 전환 때 메모리에 남은 서버 학습 자료를 비운다.
+  void clearSessionCache() => _clearCache();
+
   void _clearCache() {
+    _cacheGeneration++;
     _exams = null;
     _mnemonics = null;
     _videos = null;
@@ -992,6 +1033,11 @@ class StudyData {
     _theorySubjectDecks.clear();
   }
 
+  int _cacheGeneration = 0;
+
+  bool _isCurrentCacheGeneration(int generation) =>
+      generation == _cacheGeneration;
+
   List<ExamPaper>? _exams;
   List<Mnemonic>? _mnemonics;
   List<VideoLink>? _videos;
@@ -1008,8 +1054,10 @@ class StudyData {
   /// 30일 학습 플랜 로드
   Future<StudyPlan?> loadPlan() async {
     if (_plan != null) return _plan;
+    final generation = _cacheGeneration;
     try {
-      final raw = await rootBundle.loadString(_p('study_plan.json'));
+      final raw = await _loadString(_p('study_plan.json'));
+      if (!_isCurrentCacheGeneration(generation)) return null;
       _plan = StudyPlan.fromJson(jsonDecode(raw) as Map<String, dynamic>);
     } catch (e) {
       if (kDebugMode) debugPrint('study_plan.json 로드 실패: $e');
@@ -1020,8 +1068,10 @@ class StudyData {
   /// 합격 공부법 가이드 로드 (딥리서치 기반)
   Future<StudyGuide?> loadStudyGuide() async {
     if (_guide != null) return _guide;
+    final generation = _cacheGeneration;
     try {
-      final raw = await rootBundle.loadString(_p('study_guide.json'));
+      final raw = await _loadString(_p('study_guide.json'));
+      if (!_isCurrentCacheGeneration(generation)) return null;
       _guide = StudyGuide.fromJson(jsonDecode(raw) as Map<String, dynamic>);
     } catch (e) {
       if (kDebugMode) debugPrint('study_guide.json 로드 실패: $e');
@@ -1032,10 +1082,13 @@ class StudyData {
   /// 30일 슬라이드 덱 로드
   Future<List<SlideDeck>> loadSlideDecks() async {
     if (_slideDecks != null) return _slideDecks!;
-    _slideDecks = await _safeLoadList(
+    final generation = _cacheGeneration;
+    final loaded = await _safeLoadList(
       _p('theory_slides.json'),
       SlideDeck.fromJson,
     );
+    if (!_isCurrentCacheGeneration(generation)) return const [];
+    _slideDecks = loaded;
     return _slideDecks!;
   }
 
@@ -1046,11 +1099,14 @@ class StudyData {
   /// 핵심요약 화면이 비어 있지 않으며, 별도 요약 파일이 추가되면 우선 사용한다.
   Future<List<SlideDeck>> loadSubjectSummaries() async {
     if (_subjectSummaries != null) return _subjectSummaries!;
+    final generation = _cacheGeneration;
     final saved = await _safeLoadList(
       _p('subject_summary.json'),
       SlideDeck.fromJson,
     );
+    if (!_isCurrentCacheGeneration(generation)) return const [];
     final theoryDecks = await loadSlideDecks();
+    if (!_isCurrentCacheGeneration(generation)) return const [];
     final completed = <SlideDeck>[];
 
     for (var index = 0; index < kSubjects.length; index++) {
@@ -1108,7 +1164,9 @@ class StudyData {
     if (_theorySubjectDecks.containsKey(cacheKey)) {
       return _theorySubjectDecks[cacheKey];
     }
+    final generation = _cacheGeneration;
     final decks = await loadSlideDecks();
+    if (!_isCurrentCacheGeneration(generation)) return null;
     final matched = decks.where((d) => d.subject == subject).toList()
       ..sort((a, b) => a.day.compareTo(b.day));
     final cards = <SlideCard>[for (final d in matched) ...d.cards];
@@ -1131,8 +1189,10 @@ class StudyData {
   /// 2026 시험정보 (일정·출제기준·전략) 로드 — raw JSON map
   Future<Map<String, dynamic>?> loadExamInfo() async {
     if (_examInfo != null) return _examInfo;
+    final generation = _cacheGeneration;
     try {
-      final raw = await rootBundle.loadString(_p('exam_info_2026.json'));
+      final raw = await _loadString(_p('exam_info_2026.json'));
+      if (!_isCurrentCacheGeneration(generation)) return null;
       _examInfo = jsonDecode(raw) as Map<String, dynamic>;
     } catch (e) {
       if (kDebugMode) debugPrint('exam_info_2026.json 로드 실패: $e');
@@ -1143,8 +1203,10 @@ class StudyData {
   /// 공식 마스터 가이드 로드
   Future<FormulaGuideData?> loadFormulaGuide() async {
     if (_formulaGuide != null) return _formulaGuide;
+    final generation = _cacheGeneration;
     try {
-      final raw = await rootBundle.loadString(_p('formula_guide.json'));
+      final raw = await _loadString(_p('formula_guide.json'));
+      if (!_isCurrentCacheGeneration(generation)) return null;
       _formulaGuide = FormulaGuideData.fromJson(
         jsonDecode(raw) as Map<String, dynamic>,
       );
@@ -1161,9 +1223,11 @@ class StudyData {
   /// 유지하고 누락 과목만 채우므로 모든 종목의 전 과목에서 실기 대비가 열린다.
   Future<SilgiData?> loadSilgi() async {
     if (_silgi != null) return _silgi;
+    final generation = _cacheGeneration;
     SilgiData? loaded;
     try {
-      final raw = await rootBundle.loadString(_p('silgi.json'));
+      final raw = await _loadString(_p('silgi.json'));
+      if (!_isCurrentCacheGeneration(generation)) return null;
       loaded = SilgiData.fromJson(jsonDecode(raw) as Map<String, dynamic>);
     } catch (e) {
       if (kDebugMode) debugPrint('silgi.json 로드 실패: $e');
@@ -1171,6 +1235,7 @@ class StudyData {
 
     final items = <SilgiItem>[...?loaded?.items];
     final lessons = await loadLessons();
+    if (!_isCurrentCacheGeneration(generation)) return null;
     for (final subject in kSubjects) {
       final alreadyCovered = items.any(
         (item) => _sameSubject(item.linkSubject, subject),
@@ -1238,17 +1303,17 @@ class StudyData {
     return _silgi;
   }
 
-  // ─── 왕초보 기초사전 (전 종목 공통, assets/data/common/) ───
+  // ─── 왕초보 기초사전 (전 종목 공통, 서버 common/) ───
   List<BasicTerm>? _basicsDict;
   List<String>? _basicsCategories;
 
   /// 왕초보 기초사전 로드 — 300+ 필수 단위·용어·기호 (종목 공통)
   Future<List<BasicTerm>> loadBasicsDict() async {
     if (_basicsDict != null) return _basicsDict!;
+    final generation = _cacheGeneration;
     try {
-      final raw = await rootBundle.loadString(
-        'assets/data/common/basics_dict.json',
-      );
+      final raw = await _loadString('common/basics_dict.json');
+      if (!_isCurrentCacheGeneration(generation)) return const [];
       final map = jsonDecode(raw) as Map<String, dynamic>;
       _basicsCategories = ((map['categories'] as List?) ?? const [])
           .map((e) => e.toString())
@@ -1270,10 +1335,10 @@ class StudyData {
   /// 모터 제어반 회로도 가이드 로드 (기호·그리기 STEP·규칙·태그표)
   Future<CircuitGuide?> loadCircuitGuide() async {
     if (_circuitGuide != null) return _circuitGuide;
+    final generation = _cacheGeneration;
     try {
-      final raw = await rootBundle.loadString(
-        'assets/data/common/circuit_guide.json',
-      );
+      final raw = await _loadString('common/circuit_guide.json');
+      if (!_isCurrentCacheGeneration(generation)) return null;
       _circuitGuide = CircuitGuide.fromJson(
         jsonDecode(raw) as Map<String, dynamic>,
       );
@@ -1292,8 +1357,10 @@ class StudyData {
     String path,
     T Function(Map<String, dynamic>) fromJson,
   ) async {
+    final generation = _cacheGeneration;
     try {
-      final raw = await rootBundle.loadString(path);
+      final raw = await _loadString(path);
+      if (!_isCurrentCacheGeneration(generation)) return <T>[];
       final list = jsonDecode(raw) as List;
       return list.map((e) => fromJson(e as Map<String, dynamic>)).toList();
     } catch (e) {
@@ -1310,6 +1377,49 @@ class StudyData {
 
   Future<List<ExamPaper>> loadExams() async {
     if (_exams != null) return _exams!;
+    final generation = _cacheGeneration;
+
+    if (AppConfig.hasApi) {
+      final loadingTrack = _currentTrack;
+      final api = RemoteContentApi.instance;
+      final index = await api.listExams(loadingTrack.id);
+      if (!_isCurrentCacheGeneration(generation)) return const [];
+      final remotePapers = <ExamPaper>[];
+      for (var offset = 0; offset < index.length; offset += 4) {
+        final end = offset + 4 < index.length ? offset + 4 : index.length;
+        final batch = await Future.wait(
+          index.sublist(offset, end).map((entry) async {
+            final id = entry['id'] as String? ?? '';
+            final label = entry['label'] as String? ?? id;
+            final paper = await api.getExamPaper(loadingTrack.id, id);
+            final questions = paper.items
+                .map((json) {
+                  final question = Question.fromJson(json);
+                  question.examLabel = label;
+                  return question;
+                })
+                .where((question) => question.options.length == 4)
+                .toList();
+            return ExamPaper(
+              id: id,
+              label: label,
+              year: (entry['year'] as num?)?.toInt() ?? 0,
+              session: entry['session']?.toString() ?? '',
+              questions: questions,
+            );
+          }),
+        );
+        if (!_isCurrentCacheGeneration(generation)) return const [];
+        remotePapers.addAll(batch);
+      }
+      if (!_isCurrentCacheGeneration(generation)) return const [];
+      remotePapers.sort((a, b) {
+        final year = b.year.compareTo(a.year);
+        return year != 0 ? year : b.session.compareTo(a.session);
+      });
+      if (_currentTrack.id == loadingTrack.id) _exams = remotePapers;
+      return remotePapers;
+    }
 
     // 종목을 빠르게 바꾸면 이전 종목의 비동기 로드가 늦게 끝날 수 있다.
     // 로드 시작 시점의 경로를 고정하고, 현재 종목과 같을 때만 캐시에 반영한다.
@@ -1320,6 +1430,7 @@ class StudyData {
         final c = b.year.compareTo(a.year);
         return c != 0 ? c : b.session.compareTo(a.session);
       });
+    if (!_isCurrentCacheGeneration(generation)) return const [];
     if (_currentTrack.id == loadingTrackId) {
       _exams = loaded;
     }
@@ -1332,7 +1443,7 @@ class StudyData {
     var n = 0;
     for (final e in exams) {
       for (final q in e.questions) {
-        if (q.options.length == 4 && q.answer >= 1) n++;
+        if (q.options.length == 4 && (AppConfig.hasApi || q.answer >= 1)) n++;
       }
     }
     return n;
@@ -1360,7 +1471,7 @@ class StudyData {
     final out = <Question>[];
     for (final e in papers) {
       for (final q in e.questions) {
-        if (q.options.length == 4 && q.answer >= 1) {
+        if (q.options.length == 4 && (AppConfig.hasApi || q.answer >= 1)) {
           q.examLabel = e.label;
           out.add(q);
         }
@@ -1384,10 +1495,13 @@ class StudyData {
   /// 풀이 레시피 로드 (42개 토픽 — 풀이 순서 + 공식 적용법)
   Future<List<SolutionRecipe>> loadRecipes() async {
     if (_recipes != null) return _recipes!;
-    _recipes = await _safeLoadList(
+    final generation = _cacheGeneration;
+    final loaded = await _safeLoadList(
       _p('solution_recipes.json'),
       SolutionRecipe.fromJson,
     );
+    if (!_isCurrentCacheGeneration(generation)) return const [];
+    _recipes = loaded;
     _recipeByTopic = {for (final r in _recipes!) r.topic: r};
     return _recipes!;
   }
@@ -1397,20 +1511,28 @@ class StudyData {
 
   Future<List<Mnemonic>> loadMnemonics() async {
     if (_mnemonics != null) return _mnemonics!;
-    _mnemonics = await _safeLoadList(_p('mnemonics.json'), Mnemonic.fromJson);
+    final generation = _cacheGeneration;
+    final loaded = await _safeLoadList(_p('mnemonics.json'), Mnemonic.fromJson);
+    if (!_isCurrentCacheGeneration(generation)) return const [];
+    _mnemonics = loaded;
     return _mnemonics!;
   }
 
   Future<List<VideoLink>> loadVideos() async {
     if (_videos != null) return _videos!;
-    _videos = await _safeLoadList(_p('videos.json'), VideoLink.fromJson);
+    final generation = _cacheGeneration;
+    final loaded = await _safeLoadList(_p('videos.json'), VideoLink.fromJson);
+    if (!_isCurrentCacheGeneration(generation)) return const [];
+    _videos = loaded;
     return _videos!;
   }
 
   Future<Map<String, List<TopicFreq>>> loadTopicFreq() async {
     if (_topicFreq != null) return _topicFreq!;
+    final generation = _cacheGeneration;
     try {
-      final raw = await rootBundle.loadString(_p('topic_freq.json'));
+      final raw = await _loadString(_p('topic_freq.json'));
+      if (!_isCurrentCacheGeneration(generation)) return const {};
       final map = jsonDecode(raw) as Map<String, dynamic>;
       _topicFreq = map.map(
         (k, v) => MapEntry(
@@ -1421,6 +1543,7 @@ class StudyData {
         ),
       );
     } catch (_) {
+      if (!_isCurrentCacheGeneration(generation)) return const {};
       _topicFreq = {};
     }
     return _topicFreq!;
@@ -1428,10 +1551,14 @@ class StudyData {
 
   Future<String> loadTheory(String subject) async {
     if (_theoryCache.containsKey(subject)) return _theoryCache[subject]!;
+    final generation = _cacheGeneration;
     final path = kTheoryFiles[subject];
     if (path == null) return '# 자료 없음';
     try {
-      final raw = await rootBundle.loadString(path);
+      final raw = await _loadString(path);
+      if (!_isCurrentCacheGeneration(generation)) {
+        return '# 자료를 불러올 수 없습니다';
+      }
       _theoryCache[subject] = raw;
       return raw;
     } catch (_) {
@@ -1445,7 +1572,9 @@ class StudyData {
     final out = <Question>[];
     for (final e in exams) {
       for (final q in e.questions) {
-        if (q.subject == subject && q.options.length == 4 && q.answer >= 1) {
+        if (q.subject == subject &&
+            q.options.length == 4 &&
+            (AppConfig.hasApi || q.answer >= 1)) {
           q.examLabel = e.label;
           out.add(q);
         }
@@ -1460,7 +1589,9 @@ class StudyData {
     final out = <Question>[];
     for (final e in exams) {
       for (final q in e.questions) {
-        if (q.topic == topic && q.options.length == 4 && q.answer >= 1) {
+        if (q.topic == topic &&
+            q.options.length == 4 &&
+            (AppConfig.hasApi || q.answer >= 1)) {
           q.examLabel = e.label;
           out.add(q);
         }
@@ -1496,7 +1627,10 @@ class StudyData {
   /// 1:1 강의 노트 로드
   Future<List<Lesson>> loadLessons() async {
     if (_lessons != null) return _lessons!;
-    _lessons = await _safeLoadList(_p('lessons.json'), Lesson.fromJson);
+    final generation = _cacheGeneration;
+    final loaded = await _safeLoadList(_p('lessons.json'), Lesson.fromJson);
+    if (!_isCurrentCacheGeneration(generation)) return const [];
+    _lessons = loaded;
     return _lessons!;
   }
 
@@ -1525,16 +1659,19 @@ class StudyData {
   /// 원본 분석에서 빠진 과목은 출제빈도 상위 기출을 핵심기출 카드로 보완한다.
   Future<List<RepeatCluster>> loadRepeats() async {
     if (_repeats != null) return _repeats!;
+    final generation = _cacheGeneration;
     final loaded = await _safeLoadList(
       _p('repeat_questions.json'),
       RepeatCluster.fromJson,
     );
+    if (!_isCurrentCacheGeneration(generation)) return const [];
     final completed = <RepeatCluster>[...loaded];
     for (final subject in kSubjects) {
       if (completed.any((item) => _sameSubject(item.subject, subject))) {
         continue;
       }
       final questions = await questionsByFrequency(subject);
+      if (!_isCurrentCacheGeneration(generation)) return const [];
       for (final question in questions.take(5)) {
         final answerText =
             question.answer > 0 && question.answer <= question.options.length
@@ -1556,6 +1693,7 @@ class StudyData {
         );
       }
     }
+    if (!_isCurrentCacheGeneration(generation)) return const [];
     completed.sort((a, b) => b.count.compareTo(a.count));
     _repeats = completed;
     return _repeats!;

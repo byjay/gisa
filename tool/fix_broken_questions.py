@@ -14,7 +14,7 @@ import glob
 sys.path.insert(0, os.path.dirname(__file__))
 from pdf_exam_parser import parse_exam_pdf  # noqa: E402
 
-BASE = '/home/user/flutter_app/assets/data'
+BASE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'backend', 'data', 'study')
 DATE_RE = re.compile(r'(\d{8})')
 
 

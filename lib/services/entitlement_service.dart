@@ -124,10 +124,12 @@ class EntitlementService extends ChangeNotifier {
     if (_entitlementApiBase.isEmpty) return; // 서버 미설정 → free 유지
     if (token == null || token.isEmpty) return; // 미로그인 → free 유지
     try {
-      final res = await http.get(
-        Uri.parse('$_entitlementApiBase/v1/entitlement'),
-        headers: {'Authorization': 'Bearer $token'},
-      ).timeout(const Duration(seconds: 15));
+      final res = await http
+          .get(
+            Uri.parse('$_entitlementApiBase/v1/entitlement'),
+            headers: {'Authorization': 'Bearer $token'},
+          )
+          .timeout(const Duration(seconds: 15));
       if (res.statusCode != 200) return;
       final body = jsonDecode(res.body) as Map<String, dynamic>;
       final tier = (body['tier'] as String?) ?? 'free';
@@ -169,6 +171,8 @@ class EntitlementService extends ChangeNotifier {
   int allowedQuestionCount(int total) {
     if (isPremium) return total;
     if (total <= 0) return 0;
+    // API 모드의 문항 목록은 서버가 이미 무료 허용 범위로 잘라 반환한다.
+    if (AppConfig.hasApi) return total;
     // 최소 1문항은 맛보기로 보장, 최대 10%.
     final n = (total * kFreeQuestionRatio).floor();
     return n < 1 ? 1 : n;

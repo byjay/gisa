@@ -1,4 +1,6 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'progress_sync_service.dart';
+import 'user_data_scope.dart';
 
 /// 🃏 암기법 플래시카드 간격반복(SRS) 서비스.
 /// "안다/모른다" 두 버튼으로 학습 — 아는 카드는 멀리 미루고, 모르는 카드는
@@ -8,14 +10,30 @@ class FlashcardSrs {
   static final FlashcardSrs instance = FlashcardSrs._();
 
   Box? _box; // cardKey -> {box, nextDue, seen, known}
+  String? _boxName;
   bool _ready = false;
 
   static const List<int> _intervalDays = [0, 1, 2, 4, 8, 16]; // box 0~5
 
   Future<void> _ensure() async {
-    if (_ready) return;
-    _box = await Hive.openBox('flashcardSrs');
+    final name = UserDataScope.boxName('flashcardSrs');
+    if (_ready && _boxName == name) return;
+    final generation = UserDataScope.generation;
+    final box = await Hive.openBox(name);
+    if (generation != UserDataScope.generation ||
+        name != UserDataScope.boxName('flashcardSrs')) {
+      return _ensure();
+    }
+    _box = box;
+    _boxName = name;
     _ready = true;
+  }
+
+  Future<void> activateUser() async {
+    _box = null;
+    _boxName = null;
+    _ready = false;
+    await _ensure();
   }
 
   Map<String, dynamic> _rec(String key) {
@@ -26,7 +44,14 @@ class FlashcardSrs {
 
   /// "안다" → 박스 +1(간격 늘어남) / "모른다" → 박스 0(내일 다시)
   Future<void> mark(String key, bool known) async {
+    final generation = UserDataScope.generation;
+    final boxName = UserDataScope.boxName('flashcardSrs');
     await _ensure();
+    if (generation != UserDataScope.generation ||
+        boxName != UserDataScope.boxName('flashcardSrs') ||
+        _boxName != boxName) {
+      return;
+    }
     final r = _rec(key);
     r['seen'] = (r['seen'] as int? ?? 0) + 1;
     if (known) r['known'] = (r['known'] as int? ?? 0) + 1;
@@ -37,7 +62,9 @@ class FlashcardSrs {
     r['nextDue'] = DateTime.now()
         .add(Duration(days: _intervalDays[box]))
         .toIso8601String();
+    r['updatedAt'] = DateTime.now().millisecondsSinceEpoch;
     await _box!.put(key, r);
+    ProgressSyncService.instance.scheduleSync();
   }
 
   Future<int> boxOf(String key) async {

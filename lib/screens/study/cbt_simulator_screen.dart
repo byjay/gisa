@@ -3,6 +3,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../../services/cbt_grade_summary.dart';
+import '../../services/remote_content_api.dart';
 import '../../services/study_data.dart';
 import '../../widgets/drawing_pad.dart';
 import '../../widgets/tutor_avatar.dart';
@@ -32,7 +34,9 @@ class _CbtSimulatorScreenState extends State<CbtSimulatorScreen> {
   late Duration _remain;
   Timer? _timer;
   bool _finished = false;
+  bool _isSubmitting = false;
   bool _showNav = false;
+  CbtGradeSummary? _grade;
 
   List<Question> get _qs => widget.questions;
   Question get _q => _qs[_idx];
@@ -41,15 +45,23 @@ class _CbtSimulatorScreenState extends State<CbtSimulatorScreen> {
   void initState() {
     super.initState();
     _remain = widget.timeLimit;
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!mounted) return;
+      if (!mounted || _isSubmitting || _finished) return;
+      var submit = false;
       setState(() {
-        _remain -= const Duration(seconds: 1);
-        if (_remain.inSeconds <= 0) {
+        if (_remain.inSeconds <= 1) {
           _remain = Duration.zero;
-          _submit(auto: true);
+          submit = true;
+        } else {
+          _remain -= const Duration(seconds: 1);
         }
       });
+      if (submit) unawaited(_submit(auto: true));
     });
   }
 
@@ -66,31 +78,50 @@ class _CbtSimulatorScreenState extends State<CbtSimulatorScreen> {
     return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
   }
 
-  void _submit({bool auto = false}) {
-    if (_finished) return;
+  Future<void> _submit({bool auto = false}) async {
+    if (_finished || _isSubmitting || _qs.isEmpty) return;
     _timer?.cancel();
-    setState(() => _finished = true);
+    setState(() => _isSubmitting = true);
+
+    late final CbtGradeSummary summary;
+    try {
+      final answers = <Map<String, dynamic>>[
+        for (var i = 0; i < _qs.length; i++)
+          {'qid': _qs[i].remoteQid!, 'picked': _picked[i] ?? 0},
+      ];
+      final response = await RemoteContentApi.instance.gradeMany(answers);
+      summary = CbtGradeSummary.fromResponse(
+        questions: _qs,
+        picked: _picked,
+        response: response,
+      );
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      if (_remain.inSeconds > 0) _startTimer();
+      final message = error is RemoteContentException
+          ? error.message
+          : '채점 서버에 연결하지 못했어요. 답안은 유지했으니 다시 제출해 주세요.';
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+      return;
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _isSubmitting = false;
+      _finished = true;
+      _grade = summary;
+    });
 
     // 과목별 채점 (과락 40점 미만·평균 60점 이상 합격)
-    final bySubject = <String, List<int>>{}; // subject → [정답수, 문항수]
-    for (var i = 0; i < _qs.length; i++) {
-      final q = _qs[i];
-      final e = bySubject.putIfAbsent(q.subject, () => [0, 0]);
-      e[1]++;
-      if (_picked[i] == q.answer) e[0]++;
-    }
-    final scores = <String, double>{};
-    bySubject.forEach((s, v) => scores[s] = v[1] == 0 ? 0 : v[0] / v[1] * 100);
-    final avg = scores.values.isEmpty
-        ? 0.0
-        : scores.values.reduce((a, b) => a + b) / scores.length;
-    final failSubjects = scores.entries
-        .where((e) => e.value < 40)
-        .map((e) => e.key)
-        .toList();
+    final scores = summary.subjectScores;
+    final avg = summary.average;
+    final failSubjects = summary.failedSubjects;
     final pass = avg >= 60 && failSubjects.isEmpty;
 
-    showDialog(
+    await showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
@@ -324,33 +355,41 @@ class _CbtSimulatorScreenState extends State<CbtSimulatorScreen> {
             ),
             if (!_finished)
               TextButton(
-                onPressed: () => showDialog(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text('답안을 제출할까요?'),
-                    content: Text(
-                      '응답 ${_picked.length} / ${_qs.length}문항\n'
-                      '${_picked.length < _qs.length ? '⚠️ 미응답 ${_qs.length - _picked.length}문항은 오답 처리됩니다.' : '모든 문항에 응답했습니다.'}',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('취소'),
+                onPressed: _isSubmitting
+                    ? null
+                    : () => showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('답안을 제출할까요?'),
+                          content: Text(
+                            '응답 ${_picked.length} / ${_qs.length}문항\n'
+                            '${_picked.length < _qs.length ? '⚠️ 미응답 ${_qs.length - _picked.length}문항은 오답 처리됩니다.' : '모든 문항에 응답했습니다.'}',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: const Text('취소'),
+                            ),
+                            FilledButton(
+                              onPressed: () {
+                                Navigator.pop(ctx);
+                                _submit();
+                              },
+                              child: const Text('제출'),
+                            ),
+                          ],
+                        ),
                       ),
-                      FilledButton(
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                          _submit();
-                        },
-                        child: const Text('제출'),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text(
+                        '제출',
+                        style: TextStyle(fontWeight: FontWeight.w900),
                       ),
-                    ],
-                  ),
-                ),
-                child: const Text(
-                  '제출',
-                  style: TextStyle(fontWeight: FontWeight.w900),
-                ),
               ),
           ],
         ),
@@ -410,7 +449,8 @@ class _CbtSimulatorScreenState extends State<CbtSimulatorScreen> {
               itemCount: _qs.length,
               itemBuilder: (_, i) {
                 final answered = _picked.containsKey(i);
-                final wrong = _finished && _picked[i] != _qs[i].answer;
+                final wrong =
+                    _finished && _grade?.resultFor(_qs[i])?['correct'] != true;
                 final current = i == _idx;
                 return InkWell(
                   onTap: () => setState(() {
@@ -469,6 +509,9 @@ class _CbtSimulatorScreenState extends State<CbtSimulatorScreen> {
   // ── 문제 영역 ──
   Widget _questionArea(ColorScheme cs) {
     final picked = _picked[_idx];
+    final result = _grade?.resultFor(_q);
+    final correctAnswer = (result?['answer'] as num?)?.toInt();
+    final explanation = result?['explanation'] as String? ?? '';
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
       child: Column(
@@ -504,7 +547,7 @@ class _CbtSimulatorScreenState extends State<CbtSimulatorScreen> {
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: InkWell(
-                onTap: _finished
+                onTap: _finished || _isSubmitting
                     ? null
                     : () => setState(() {
                         if (_picked[_idx] == i) {
@@ -557,13 +600,13 @@ class _CbtSimulatorScreenState extends State<CbtSimulatorScreen> {
                           style: const TextStyle(fontSize: 14.5, height: 1.4),
                         ),
                       ),
-                      if (_finished && i == _q.answer)
+                      if (_finished && i == correctAnswer)
                         const Icon(
                           Icons.check_circle_rounded,
                           color: Colors.green,
                           size: 20,
                         ),
-                      if (_finished && picked == i && i != _q.answer)
+                      if (_finished && picked == i && i != correctAnswer)
                         const Icon(
                           Icons.cancel_rounded,
                           color: Colors.red,
@@ -575,7 +618,7 @@ class _CbtSimulatorScreenState extends State<CbtSimulatorScreen> {
               ),
             ),
           // 리뷰 모드: 해설 표시
-          if (_finished && _q.explanation.isNotEmpty) ...[
+          if (_finished && explanation.isNotEmpty) ...[
             const SizedBox(height: 8),
             Container(
               width: double.infinity,
@@ -585,7 +628,7 @@ class _CbtSimulatorScreenState extends State<CbtSimulatorScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                _q.explanation,
+                explanation,
                 style: const TextStyle(fontSize: 13, height: 1.5),
               ),
             ),
@@ -598,7 +641,9 @@ class _CbtSimulatorScreenState extends State<CbtSimulatorScreen> {
 
   Color _optionColor(int i, int? picked, ColorScheme cs) {
     if (_finished) {
-      if (i == _q.answer) return Colors.green.withValues(alpha: 0.1);
+      if (i == _grade?.resultFor(_q)?['answer']) {
+        return Colors.green.withValues(alpha: 0.1);
+      }
       if (picked == i) return Colors.red.withValues(alpha: 0.08);
     }
     return picked == i
@@ -619,7 +664,9 @@ class _CbtSimulatorScreenState extends State<CbtSimulatorScreen> {
           children: [
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: _idx > 0 ? () => setState(() => _idx--) : null,
+                onPressed: _idx > 0 && !_isSubmitting
+                    ? () => setState(() => _idx--)
+                    : null,
                 icon: const Icon(Icons.chevron_left_rounded),
                 label: const Text('이전'),
               ),
@@ -629,8 +676,8 @@ class _CbtSimulatorScreenState extends State<CbtSimulatorScreen> {
               flex: 2,
               child: FilledButton.icon(
                 onPressed: _idx < _qs.length - 1
-                    ? () => setState(() => _idx++)
-                    : (_finished ? null : () => _submit()),
+                    ? (_isSubmitting ? null : () => setState(() => _idx++))
+                    : (_finished || _isSubmitting ? null : () => _submit()),
                 icon: Icon(
                   _idx < _qs.length - 1
                       ? Icons.chevron_right_rounded

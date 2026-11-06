@@ -1,4 +1,6 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'progress_sync_service.dart';
+import 'user_data_scope.dart';
 
 /// 📈 합격 예측 점수 히스토리 — "내가 나아지고 있다"는 증거를 남기는 서비스.
 /// 하루 1개 스냅샷(날짜키)으로 저장 → 트렌드 그래프 + D-Day 역산에 사용.
@@ -7,12 +9,28 @@ class ScoreHistory {
   static final ScoreHistory instance = ScoreHistory._();
 
   Box? _box;
+  String? _boxName;
   bool _ready = false;
 
   Future<void> _ensure() async {
-    if (_ready) return;
-    _box = await Hive.openBox('scoreHistory');
+    final name = UserDataScope.boxName('scoreHistory');
+    if (_ready && _boxName == name) return;
+    final generation = UserDataScope.generation;
+    final box = await Hive.openBox(name);
+    if (generation != UserDataScope.generation ||
+        name != UserDataScope.boxName('scoreHistory')) {
+      return _ensure();
+    }
+    _box = box;
+    _boxName = name;
     _ready = true;
+  }
+
+  Future<void> activateUser() async {
+    _box = null;
+    _boxName = null;
+    _ready = false;
+    await _ensure();
   }
 
   String _key(DateTime d) =>
@@ -20,12 +38,29 @@ class ScoreHistory {
 
   /// 오늘자 예측 점수 스냅샷 기록 (하루 1개, 마지막 값으로 갱신)
   Future<void> record(double overall, int totalAttempts) async {
+    if (!overall.isFinite ||
+        overall < 0 ||
+        overall > 100 ||
+        totalAttempts < 0) {
+      return;
+    }
+    final generation = UserDataScope.generation;
+    final boxName = UserDataScope.boxName('scoreHistory');
     await _ensure();
-    await _box!.put(_key(DateTime.now()), {
-      'score': overall,
+    if (generation != UserDataScope.generation ||
+        boxName != UserDataScope.boxName('scoreHistory') ||
+        _boxName != boxName) {
+      return;
+    }
+    final now = DateTime.now();
+    final scoreMilli = (overall * 1000).round();
+    await _box!.put(_key(now), {
+      'scoreMilli': scoreMilli,
       'attempts': totalAttempts,
-      'ts': DateTime.now().toIso8601String(),
+      'ts': now.toIso8601String(),
+      'updatedAt': now.millisecondsSinceEpoch,
     });
+    ProgressSyncService.instance.scheduleSync();
   }
 
   /// 최근 N일 히스토리 (날짜 오름차순), 데이터 없는 날은 생략
@@ -38,7 +73,11 @@ class ScoreHistory {
       final raw = _box!.get(_key(d));
       if (raw != null) {
         final m = Map<String, dynamic>.from(raw);
-        out.add((d, (m['score'] as num).toDouble(), m['attempts'] as int));
+        final scoreMilli = m['scoreMilli'];
+        final score = scoreMilli is int
+            ? scoreMilli / 1000
+            : (m['score'] as num).toDouble();
+        out.add((d, score, m['attempts'] as int));
       }
     }
     return out;

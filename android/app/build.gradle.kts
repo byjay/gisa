@@ -15,6 +15,13 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+val kakaoProperties = Properties()
+val kakaoPropertiesFile = rootProject.file("kakao.properties")
+if (kakaoPropertiesFile.exists()) {
+    kakaoProperties.load(FileInputStream(kakaoPropertiesFile))
+}
+val kakaoNativeAppKey = kakaoProperties.getProperty("nativeAppKey", "")
+
 android {
     namespace = "com.certstudytracker.study"
     compileSdk = flutter.compileSdkVersion
@@ -40,6 +47,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoNativeAppKey
     }
 
     signingConfigs {

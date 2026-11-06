@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -5,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
 import 'app_config.dart';
+import 'service_control_service.dart';
 
 /// 🔄 Gisaclub 앱 자동 업데이트 서비스.
 ///
@@ -31,8 +33,18 @@ import 'app_config.dart';
 ///  - 네트워크 실패·잘못된 JSON은 조용히 무시(앱 사용에 영향 없음).
 ///  - 버전 비교는 (build 정수) 우선, 없으면 semver 문자열 비교.
 class AppUpdateService extends ChangeNotifier {
-  AppUpdateService._();
-  static final AppUpdateService instance = AppUpdateService._();
+  AppUpdateService({ServiceControlService? serviceControl, http.Client? client})
+    : _serviceControl = serviceControl ?? ServiceControlService.instance,
+      _client = client ?? http.Client(),
+      _ownsClient = client == null {
+    _serviceControl.addListener(_serviceStateChanged);
+  }
+
+  static final AppUpdateService instance = AppUpdateService();
+
+  final ServiceControlService _serviceControl;
+  final http.Client _client;
+  final bool _ownsClient;
 
   /// 현재 앱 버전/빌드 — pubspec.yaml 의 version 과 일치시킨다.
   /// (package_info_plus 미도입 환경이므로 상수로 관리; 릴리스마다 갱신)
@@ -58,6 +70,14 @@ class AppUpdateService extends ChangeNotifier {
   String get latestVersion => _latestVersion;
   String get releaseNotes => _releaseNotes;
 
+  void _serviceStateChanged() {
+    if (!_serviceControl.isEnabled) {
+      _clearUpdateState();
+    } else {
+      unawaited(checkForUpdate());
+    }
+  }
+
   /// 앱 시작 시 백그라운드 확인.
   Future<void> init() async {
     await checkForUpdate();
@@ -65,10 +85,20 @@ class AppUpdateService extends ChangeNotifier {
 
   /// 🔍 최신 버전 확인. 성공 시 상태 갱신 후 notify.
   Future<void> checkForUpdate() async {
+    if (!_serviceControl.isEnabled) {
+      _clearUpdateState();
+      return;
+    }
+    final serviceGeneration = _serviceControl.generation;
     try {
-      final res = await http
+      final res = await _client
           .get(Uri.parse(_versionManifestUrl))
           .timeout(const Duration(seconds: 12));
+      if (!_serviceControl.isEnabled ||
+          serviceGeneration != _serviceControl.generation) {
+        _clearUpdateState();
+        return;
+      }
       if (res.statusCode != 200) {
         _checked = true;
         notifyListeners();
@@ -84,11 +114,15 @@ class AppUpdateService extends ChangeNotifier {
       final explicitForce = body['force'] == true;
 
       _updateAvailable = _isNewer(_latestVersion, _latestBuild);
-      _forceUpdate =
-          explicitForce || (minBuild > 0 && currentBuild < minBuild);
+      _forceUpdate = explicitForce || (minBuild > 0 && currentBuild < minBuild);
       _checked = true;
       notifyListeners();
     } catch (e) {
+      if (!_serviceControl.isEnabled ||
+          serviceGeneration != _serviceControl.generation) {
+        _clearUpdateState();
+        return;
+      }
       if (kDebugMode) debugPrint('업데이트 확인 실패: $e');
       _checked = true;
       notifyListeners();
@@ -99,16 +133,37 @@ class AppUpdateService extends ChangeNotifier {
   /// 우선순위: 스토어 URL(정식 배포) → APK 직접 다운로드 URL.
   /// 성공하면 true.
   Future<bool> performUpdate() async {
+    if (!_serviceControl.isEnabled) return false;
     final target = _storeUrl.isNotEmpty ? _storeUrl : _apkUrl;
     if (target.isEmpty) return false;
     final uri = Uri.tryParse(target);
     if (uri == null) return false;
     try {
+      if (!_serviceControl.isEnabled) return false;
       return await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
       if (kDebugMode) debugPrint('업데이트 실행 실패: $e');
       return false;
     }
+  }
+
+  void _clearUpdateState() {
+    _checked = false;
+    _updateAvailable = false;
+    _forceUpdate = false;
+    _latestVersion = '';
+    _latestBuild = 0;
+    _apkUrl = '';
+    _storeUrl = '';
+    _releaseNotes = '';
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _serviceControl.removeListener(_serviceStateChanged);
+    if (_ownsClient && !identical(this, instance)) _client.close();
+    super.dispose();
   }
 
   bool _isNewer(String version, int build) {

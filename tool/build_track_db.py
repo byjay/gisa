@@ -17,7 +17,7 @@ from expl_parser import extract_explanations  # noqa: E402
 from topic_rules import classify_topic, difficulty_raw  # noqa: E402
 
 EXTRACT = '/home/user/comcbt_extract'
-OUT_BASE = 'assets/data'
+OUT_BASE = 'backend/data/study'
 
 # 트랙 정의: 폴더(우선순위순), 문항수, 파일명 매칭 키워드
 TRACKS = {

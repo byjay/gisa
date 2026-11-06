@@ -10,9 +10,9 @@
 ### 1-1. 종목(Track) 단위 데이터 격리
 - 모든 학습 데이터는 `ExamTrack` (lib/services/exam_track.dart) 단위로 로드된다.
 - 각 종목은 고유 `id` + assets 폴더 `dir` 를 갖는다.
-  - 문제은행: `assets/data/<dir>/exams.json`
-  - 실기: `assets/data/<dir>/silgi.json`
-  - 이론: `assets/theory/<dir>/NN.md`
+  - 문제은행: `backend/data/study/<dir>/exams.json` (빌드 APK에 포함하지 않음)
+  - 실기: `backend/data/study/<dir>/silgi.json` (빌드 APK에 포함하지 않음)
+  - 이론: `backend/data/theory/<dir>/NN.md` (빌드 APK에 포함하지 않음)
 - `StudyData.setTrack()` 로 런타임에 종목을 바꾸면 해당 폴더만 로드한다.
 - **새 자격증 추가 = kExamTracks 에 항목 1개 + assets 폴더 1개.** 코드 수정 최소화.
 
@@ -44,13 +44,13 @@
 
 ### 단계 B. assets 폴더 생성
 ```
-assets/data/<new_track_id>/
+backend/data/study/<new_track_id>/
   ├── exams.json          # 필수 — 문제은행
   ├── silgi.json          # 선택 — 실기
   ├── repeat_questions.json
   ├── mnemonics.json
   └── ...
-assets/theory/<new_track_id>/
+backend/data/theory/<new_track_id>/
   ├── 01.md ... NN.md
 ```
 
@@ -58,7 +58,7 @@ assets/theory/<new_track_id>/
 `lib/services/exam_track.dart` 의 `kExamTracks` 리스트에 `ExamTrack(...)` 1개 추가.
 - id, name, dir, subjects, theoryFiles, questionCount 등 채우기.
 - pubspec.yaml 의 assets 경로가 폴더를 포함하는지 확인
-  (`assets/data/` 처럼 상위 폴더로 등록되어 있으면 자동 포함).
+  (`backend/data/study/` 아래로 저장하고 R2 업로드 manifest에 등록).
 
 ### 단계 D. 검증
 ```

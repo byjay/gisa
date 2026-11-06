@@ -12,6 +12,13 @@ import '../services/schedule_alerts.dart';
 import '../services/exam_registration.dart';
 import '../services/notification_service.dart';
 import '../services/secure_box_service.dart';
+import '../services/user_data_scope.dart';
+import '../services/progress_service.dart';
+import '../services/progress_sync_service.dart';
+import '../services/progress_snapshot_store.dart';
+import '../services/slide_progress.dart';
+import '../services/flashcard_srs.dart';
+import '../services/score_history.dart';
 import '../services/tutor_persona.dart' show kTutorPersonas;
 
 class AppProvider extends ChangeNotifier {
@@ -73,14 +80,17 @@ class AppProvider extends ChangeNotifier {
   int elapsedSeconds = 0;
   Timer? _ticker;
   String? timerExamId;
+  bool _initialized = false;
+  bool _scopeReady = false;
 
   /// 테스트에서 시계를 주입할 수 있도록 함수로 분리(fake clock 허용).
   @visibleForTesting
   set debugNow(DateTime Function() fn) => _now = fn;
   DateTime Function() _now = DateTime.now;
 
-  Future<void> init() async {
-    await Hive.initFlutter();
+  Future<void> init({bool initializeHive = true, String? ownerId}) async {
+    if (initializeHive) await Hive.initFlutter();
+    UserDataScope.activate(ownerId);
     // ── 데이터 저장 정책(SSOT · R58) — docs/DATA_STORAGE_POLICY.md §4 ──
     // 아래 박스(세션/오답노트/퀴즈결과)는 "학습 진도·점수"의 **오프라인 write-through
     // 캐시**다. 서버(Cloudflare D1/KV)가 최종 SSOT이며, 서버 배포 후에는
@@ -89,16 +99,143 @@ class AppProvider extends ChangeNotifier {
     // (그 판정은 EntitlementService/AdminService 가 서버 응답으로만 수행).
     // Q22 로컬 암호화: 민감 데이터(세션/오답노트/시험기록)는 AES 암호화 박스로 연다.
     await SecureBoxService.instance.init();
-    _examBox = await Hive.openBox('exams'); // 정적 시험 데이터(비민감) → 평문
-    _sessionBox = await SecureBoxService.instance.openSecureBox('sessions');
-    _noteBox = await SecureBoxService.instance.openSecureBox('wrongNotes');
-    _settingsBox = await Hive.openBox('settings'); // 설정(비민감) → 평문 유지
-    _quizBox = await SecureBoxService.instance.openSecureBox('quizResults');
-    await ExamRegistrationStore.instance.init();
+    final generation = UserDataScope.generation;
+    await _openScopedBoxes(ownerId, generation);
+    if (generation != UserDataScope.generation ||
+        ownerId != UserDataScope.ownerId) {
+      return;
+    }
+    await ProgressService.instance.activateUser(ownerId);
+    if (generation != UserDataScope.generation ||
+        ownerId != UserDataScope.ownerId) {
+      return;
+    }
+    await SlideProgress.instance.activateUser();
+    if (generation != UserDataScope.generation ||
+        ownerId != UserDataScope.ownerId) {
+      return;
+    }
+    await FlashcardSrs.instance.activateUser();
+    await ScoreHistory.instance.activateUser();
+    if (generation != UserDataScope.generation ||
+        ownerId != UserDataScope.ownerId) {
+      return;
+    }
+    _load();
+    _initialized = true;
+    _scopeReady = true;
+    ProgressSyncService.instance.onSnapshotApplied = _load;
+    ProgressSyncService.instance.activateUser();
+  }
+
+  /// AuthService calls this before notifying the UI about account/session changes.
+  Future<void> activateUser(String? ownerId) async {
+    final changed = UserDataScope.activate(ownerId);
+    ProgressSyncService.instance.activateUser();
+    if (!changed || !_initialized) return;
+    _scopeReady = false;
+
+    // Clear every account-owned value before the first await.
+    _clearScopedView();
+
+    final generation = UserDataScope.generation;
+    await _openScopedBoxes(ownerId, generation);
+    if (generation != UserDataScope.generation ||
+        ownerId != UserDataScope.ownerId) {
+      return;
+    }
+    await ProgressService.instance.activateUser(ownerId);
+    if (generation != UserDataScope.generation ||
+        ownerId != UserDataScope.ownerId) {
+      return;
+    }
+    await SlideProgress.instance.activateUser();
+    if (generation != UserDataScope.generation ||
+        ownerId != UserDataScope.ownerId) {
+      return;
+    }
+    await FlashcardSrs.instance.activateUser();
+    await ScoreHistory.instance.activateUser();
+    if (generation != UserDataScope.generation ||
+        ownerId != UserDataScope.ownerId) {
+      return;
+    }
+    _scopeReady = true;
     _load();
   }
 
+  void _clearScopedView() {
+    exams = [];
+    sessions = [];
+    notes = [];
+    quizResults = [];
+    dailyGoalMinutes = 120;
+    weeklyGoalMinutes = 600;
+    darkMode = false;
+    themePaletteId = 'indigo';
+    selectedTutorId = 'volt';
+    notificationsEnabled = true;
+    dailyReminderEnabled = true;
+    dailyReminderHour = 9;
+    reduceMotion = false;
+    textScaleFactor = 1.0;
+    lastAutoBackupAt = null;
+    featureVisibility = Map<String, bool>.from(defaultFeatureVisibility);
+    hiddenSubjectsByTrack = {};
+    autoExamTimerEnabled = true;
+    cbtTimeLimitMinutes = 150;
+    cbtQuestionsPerSubject = 20;
+    shieldCount = 0;
+    onboarded = false;
+    selectedTrackId = null;
+    examInProgress = false;
+    _ticker?.cancel();
+    _ticker = null;
+    timerRunning = false;
+    timerStart = null;
+    timerExamId = null;
+    elapsedSeconds = 0;
+    _catalogId = kQnetCatalog.first.id;
+    qnetRounds = [];
+    alerts = [];
+    loadingSchedule = false;
+    scheduleError = null;
+    scheduleFetchedAt = null;
+    _scheduleGen++;
+    notifyListeners();
+  }
+
+  Future<void> _openScopedBoxes(String? ownerId, int generation) async {
+    final examName = UserDataScope.boxNameForOwner('exams', ownerId);
+    final sessionName = UserDataScope.boxNameForOwner('sessions', ownerId);
+    final notesName = UserDataScope.boxNameForOwner('wrongNotes', ownerId);
+    final settingsName = UserDataScope.boxNameForOwner('settings', ownerId);
+    final quizName = UserDataScope.boxNameForOwner('quizResults', ownerId);
+
+    final exams = await Hive.openBox(examName);
+    final sessions = await SecureBoxService.instance.openSecureBox(sessionName);
+    final notes = await SecureBoxService.instance.openSecureBox(notesName);
+    final settings = await Hive.openBox(settingsName);
+    final quizzes = await SecureBoxService.instance.openSecureBox(quizName);
+    if (generation != UserDataScope.generation ||
+        ownerId != UserDataScope.ownerId) {
+      return;
+    }
+    await ExamRegistrationStore.instance.init(ownerId: ownerId);
+    if (generation != UserDataScope.generation ||
+        ownerId != UserDataScope.ownerId) {
+      return;
+    }
+
+    _examBox = exams;
+    _sessionBox = sessions;
+    _noteBox = notes;
+    _settingsBox = settings;
+    _quizBox = quizzes;
+  }
+
   void _load() {
+    if (_initialized && !_scopeReady) return;
     exams =
         _examBox.values
             .map((e) => Exam.fromMap(Map<dynamic, dynamic>.from(e)))
@@ -162,25 +299,25 @@ class AppProvider extends ChangeNotifier {
     shieldCount = (_settingsBox.get('shieldCount') as int?) ?? 0;
     onboarded = (_settingsBox.get('onboarded_v1') as bool?) ?? false;
     selectedTrackId = _settingsBox.get('selectedTrack') as String?;
-    if (selectedTrackId != null) {
-      StudyData.instance.setTrack(trackById(selectedTrackId!));
-    }
     _autoConsumeShield();
     notifyListeners();
   }
 
   // ===== Exams =====
   Future<void> addExam(Exam exam) async {
+    if (!_scopeReady) return;
     await _examBox.put(exam.id, exam.toMap());
     _load();
   }
 
   Future<void> updateExam(Exam exam) async {
+    if (!_scopeReady) return;
     await _examBox.put(exam.id, exam.toMap());
     _load();
   }
 
   Future<void> deleteExam(String id) async {
+    if (!_scopeReady) return;
     await _examBox.delete(id);
     // cascade delete sessions and notes
     final sids = sessions
@@ -188,8 +325,10 @@ class AppProvider extends ChangeNotifier {
         .map((s) => s.id)
         .toList();
     for (final sid in sids) {
+      await ProgressSnapshotStore.markDeleted('sessions', sid);
       await _sessionBox.delete(sid);
     }
+    if (sids.isNotEmpty) ProgressSyncService.instance.scheduleSync();
     final nids = notes.where((n) => n.examId == id).map((n) => n.id).toList();
     for (final nid in nids) {
       await _noteBox.delete(nid);
@@ -208,27 +347,37 @@ class AppProvider extends ChangeNotifier {
 
   // ===== Sessions =====
   Future<void> addSession(StudySession s) async {
-    await _sessionBox.put(s.id, s.toMap());
+    if (!_scopeReady) return;
+    final value = s.toMap()
+      ..['updatedAt'] = DateTime.now().millisecondsSinceEpoch;
+    await _sessionBox.put(s.id, value);
     _load();
+    ProgressSyncService.instance.scheduleSync();
   }
 
   Future<void> deleteSession(String id) async {
+    if (!_scopeReady) return;
+    await ProgressSnapshotStore.markDeleted('sessions', id);
     await _sessionBox.delete(id);
     _load();
+    ProgressSyncService.instance.scheduleSync();
   }
 
   // ===== Wrong Notes =====
   Future<void> addNote(WrongNote n) async {
+    if (!_scopeReady) return;
     await _noteBox.put(n.id, n.toMap());
     _load();
   }
 
   Future<void> updateNote(WrongNote n) async {
+    if (!_scopeReady) return;
     await _noteBox.put(n.id, n.toMap());
     _load();
   }
 
   Future<void> deleteNote(String id) async {
+    if (!_scopeReady) return;
     await _noteBox.delete(id);
     _load();
   }
@@ -242,6 +391,7 @@ class AppProvider extends ChangeNotifier {
     Map<String, int> subjectTotal = const {},
     Map<String, int> subjectCorrect = const {},
   }) async {
+    if (!_scopeReady) return;
     final now = DateTime.now();
     final id = now.microsecondsSinceEpoch.toString();
     await _quizBox.put(id, {
@@ -250,6 +400,7 @@ class AppProvider extends ChangeNotifier {
       'total': total,
       'correct': correct,
       'date': now.toIso8601String(),
+      'updatedAt': now.millisecondsSinceEpoch,
       // 과목별 정답/문항 수 (약점 진단용)
       'subjectTotal': Map<String, int>.from(subjectTotal),
       'subjectCorrect': Map<String, int>.from(subjectCorrect),
@@ -268,21 +419,27 @@ class AppProvider extends ChangeNotifier {
       });
     }
     _load();
+    ProgressSyncService.instance.scheduleSync();
   }
 
   Future<void> deleteQuizResult(String id) async {
+    if (!_scopeReady) return;
+    await ProgressSnapshotStore.markDeleted('quizResults', id);
     await _quizBox.delete(id);
     _load();
+    ProgressSyncService.instance.scheduleSync();
   }
 
   // ===== Theme =====
   Future<void> toggleDarkMode() async {
+    if (!_scopeReady) return;
     darkMode = !darkMode;
     await _settingsBox.put('darkMode', darkMode);
     notifyListeners();
   }
 
   Future<void> setThemePalette(String id) async {
+    if (!_scopeReady) return;
     themePaletteId = id;
     await _settingsBox.put('themePalette', id);
     notifyListeners();
@@ -293,6 +450,7 @@ class AppProvider extends ChangeNotifier {
   /// 과거 하드코딩 셋 {'soyeon','harin','jiyoon'}에 기본 튜터 'volt'가
   /// 빠져 있어, 다른 튜터로 바꾼 뒤 기본 튜터로 돌아올 수 없는 버그가 있었다.
   Future<void> setSelectedTutor(String id) async {
+    if (!_scopeReady) return;
     if (!kTutorPersonas.any((t) => t.id == id)) return;
     selectedTutorId = id;
     await _settingsBox.put('selectedTutor', id);
@@ -301,6 +459,7 @@ class AppProvider extends ChangeNotifier {
 
   // ===== 🔔 알림 설정 =====
   Future<void> setNotificationsEnabled(bool v) async {
+    if (!_scopeReady) return;
     notificationsEnabled = v;
     await _settingsBox.put('notificationsEnabled', v);
     if (v) {
@@ -317,6 +476,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> setDailyReminderEnabled(bool v) async {
+    if (!_scopeReady) return;
     dailyReminderEnabled = v;
     await _settingsBox.put('dailyReminderEnabled', v);
     if (v && notificationsEnabled) {
@@ -330,6 +490,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> setDailyReminderHour(int hour) async {
+    if (!_scopeReady) return;
     dailyReminderHour = hour;
     await _settingsBox.put('dailyReminderHour', hour);
     if (dailyReminderEnabled && notificationsEnabled) {
@@ -363,6 +524,7 @@ class AppProvider extends ChangeNotifier {
       !(hiddenSubjectsByTrack[trackId]?.contains(subject) ?? false);
 
   Future<void> setFeatureEnabled(String feature, bool enabled) async {
+    if (!_scopeReady) return;
     featureVisibility[feature] = enabled;
     await _settingsBox.put(
       'adminFeatureVisibility',
@@ -376,6 +538,7 @@ class AppProvider extends ChangeNotifier {
     String subject,
     bool enabled,
   ) async {
+    if (!_scopeReady) return false;
     final hidden = hiddenSubjectsByTrack.putIfAbsent(
       track.id,
       () => <String>{},
@@ -393,6 +556,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> _saveHiddenSubjects() async {
+    if (!_scopeReady) return;
     await _settingsBox.put('adminHiddenSubjects', {
       for (final entry in hiddenSubjectsByTrack.entries)
         entry.key: entry.value.toList(),
@@ -400,18 +564,21 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> setAutoExamTimerEnabled(bool enabled) async {
+    if (!_scopeReady) return;
     autoExamTimerEnabled = enabled;
     await _settingsBox.put('adminAutoExamTimer', enabled);
     notifyListeners();
   }
 
   Future<void> setCbtTimeLimitMinutes(int minutes) async {
+    if (!_scopeReady) return;
     cbtTimeLimitMinutes = minutes.clamp(10, 300);
     await _settingsBox.put('adminCbtTimeLimitMinutes', cbtTimeLimitMinutes);
     notifyListeners();
   }
 
   Future<void> setCbtQuestionsPerSubject(int count) async {
+    if (!_scopeReady) return;
     cbtQuestionsPerSubject = count.clamp(1, 40);
     await _settingsBox.put(
       'adminCbtQuestionsPerSubject',
@@ -421,6 +588,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> resetAdminSettings() async {
+    if (!_scopeReady) return;
     featureVisibility = Map<String, bool>.from(defaultFeatureVisibility);
     hiddenSubjectsByTrack = {};
     autoExamTimerEnabled = true;
@@ -438,12 +606,14 @@ class AppProvider extends ChangeNotifier {
 
   // ===== ♿ 접근성 설정 =====
   Future<void> setReduceMotion(bool v) async {
+    if (!_scopeReady) return;
     reduceMotion = v;
     await _settingsBox.put('reduceMotion', v);
     notifyListeners();
   }
 
   Future<void> setTextScaleFactor(double v) async {
+    if (!_scopeReady) return;
     textScaleFactor = v.clamp(0.8, 1.6);
     await _settingsBox.put('textScaleFactor', textScaleFactor);
     notifyListeners();
@@ -451,6 +621,7 @@ class AppProvider extends ChangeNotifier {
 
   // ===== 💾 자동 백업 시각 기록 =====
   Future<void> markAutoBackupNow() async {
+    if (!_scopeReady) return;
     lastAutoBackupAt = DateTime.now().toIso8601String();
     await _settingsBox.put('lastAutoBackupAt', lastAutoBackupAt);
     notifyListeners();
@@ -458,6 +629,7 @@ class AppProvider extends ChangeNotifier {
 
   // ===== Goals =====
   Future<void> setGoals({required int daily, required int weekly}) async {
+    if (!_scopeReady) return;
     dailyGoalMinutes = daily;
     weeklyGoalMinutes = weekly;
     await _settingsBox.put('dailyGoal', daily);
@@ -495,6 +667,13 @@ class AppProvider extends ChangeNotifier {
     // 정지 시점에도 벽시계로 다시 계산해 마지막 틱 이후의 오차(최대 1s)까지
     // 반영한다.
     elapsedSeconds = _liveElapsedSeconds;
+    if (!_scopeReady) {
+      final elapsed = elapsedSeconds;
+      elapsedSeconds = 0;
+      timerExamId = null;
+      notifyListeners();
+      return elapsed;
+    }
     final minutes = (elapsedSeconds / 60).ceil();
     if (minutes > 0) {
       await addSession(
@@ -588,6 +767,7 @@ class AppProvider extends ChangeNotifier {
 
   /// 미션 올클리어 시 방패 1개 지급 (하루 1회, 최대 2개). 지급되면 true.
   Future<bool> maybeEarnShield() async {
+    if (!_scopeReady) return false;
     if (!todayMissionsAllDone || shieldCount >= maxShields) return false;
     final today = _dayKey(DateTime.now());
     if ((_settingsBox.get('shieldLastEarnDay') as String?) == today) {
@@ -631,6 +811,7 @@ class AppProvider extends ChangeNotifier {
   bool onboarded = false;
 
   Future<void> completeOnboarding() async {
+    if (!_scopeReady) return;
     onboarded = true;
     await _settingsBox.put('onboarded_v1', true);
     notifyListeners();
@@ -641,10 +822,14 @@ class AppProvider extends ChangeNotifier {
   String? selectedTrackId;
 
   ExamTrack? get selectedTrack =>
-      selectedTrackId == null ? null : trackById(selectedTrackId!);
+      selectedTrackId == null ||
+          !kExamTracks.any((track) => track.id == selectedTrackId)
+      ? null
+      : trackById(selectedTrackId!);
 
   /// 종목 선택/전환: StudyData 캐시를 리셋하고 화면을 갱신한다.
   Future<void> selectTrack(String trackId) async {
+    if (!_scopeReady) return;
     selectedTrackId = trackId;
     StudyData.instance.setTrack(trackById(trackId));
     await _settingsBox.put('selectedTrack', trackId);
@@ -653,6 +838,7 @@ class AppProvider extends ChangeNotifier {
 
   /// 종목 선택 화면으로 되돌리기(다른 시험 고르기).
   Future<void> clearTrack() async {
+    if (!_scopeReady) return;
     selectedTrackId = null;
     await _settingsBox.delete('selectedTrack');
     notifyListeners();
@@ -836,6 +1022,7 @@ class AppProvider extends ChangeNotifier {
 
   /// 종목 전환 후 일정 새로고침.
   Future<void> selectCatalog(String id, {bool refresh = true}) async {
+    if (!_scopeReady) return;
     _catalogId = id;
     await _settingsBox.put('catalogId', id);
     notifyListeners();
@@ -844,6 +1031,7 @@ class AppProvider extends ChangeNotifier {
 
   /// 저장된 카탈로그 선택 복원 + 최초 일정 로드.
   Future<void> initSchedule() async {
+    if (!_scopeReady) return;
     _catalogId =
         (_settingsBox.get('catalogId') as String?) ?? kQnetCatalog.first.id;
     await refreshSchedule();
@@ -910,23 +1098,26 @@ class AppProvider extends ChangeNotifier {
 
   // ===== 🎯 응시 등록 / 가답안 =====
   List<ExamRegistration> get registrations =>
-      ExamRegistrationStore.instance.all();
+      _scopeReady ? ExamRegistrationStore.instance.all() : const [];
 
   ExamRegistration? registrationFor(
     String jmCd,
     String roundLabel,
     ExamPhase phase,
   ) {
+    if (!_scopeReady) return null;
     final id = ExamRegistration.makeId(jmCd, roundLabel, phase);
     return ExamRegistrationStore.instance.byId(id);
   }
 
   Future<void> saveRegistration(ExamRegistration reg) async {
+    if (!_scopeReady) return;
     await ExamRegistrationStore.instance.save(reg);
     notifyListeners();
   }
 
   Future<void> deleteRegistration(String id) async {
+    if (!_scopeReady) return;
     await ExamRegistrationStore.instance.delete(id);
     notifyListeners();
   }

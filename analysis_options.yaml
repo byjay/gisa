@@ -11,6 +11,9 @@ include: package:flutter_lints/flutter.yaml
 
 analyzer:
   exclude:
+    # The archived reference checkout is intentionally preserved under OLD/.
+    # Keep the active project analysis scoped to its source tree.
+    - OLD/**
     # Q37: integration_test package is added on-demand (see pubspec note),
     # so this file references a package not declared as a dependency.
     # Excluded from static analysis to keep the build clean.

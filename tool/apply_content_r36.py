@@ -87,7 +87,7 @@ ELEC_BASIC = {
 
 def main():
     # 1) fire_electric
-    path = 'assets/data/fire_electric/lessons.json'
+    path = 'backend/data/study/fire_electric/lessons.json'
     data = json.load(open(path))
     replaced = 0
     for i, l in enumerate(data):
@@ -99,7 +99,7 @@ def main():
     print(f'fire_electric: {replaced}/{len(data)} replaced')
 
     # 2) electrician: R36 필드 파생 + 기초설명 저술
-    epath = 'assets/data/electrician/lessons.json'
+    epath = 'backend/data/study/electrician/lessons.json'
     elec = json.load(open(epath))
     for i, l in enumerate(elec):
         l = derive_fields(l)
@@ -112,7 +112,7 @@ def main():
     print(f'electrician: {len(elec)} derived, {basics} with basic_explain')
 
     # 3) elec_construction: EC 5개 + 전기기사 매칭 복사
-    cpath = 'assets/data/elec_construction/lessons.json'
+    cpath = 'backend/data/study/elec_construction/lessons.json'
     ec = json.load(open(cpath))
     emap = {(l['subject'], l['topic']): l for l in elec}
     n_ec, n_copy = 0, 0
@@ -132,7 +132,7 @@ def main():
     print(f'elec_construction: {n_ec} EC-authored, {n_copy} copied from electrician, total {len(ec)}')
 
     # 검증
-    for p in ['assets/data/fire_electric/lessons.json', 'assets/data/electrician/lessons.json', 'assets/data/elec_construction/lessons.json']:
+    for p in ['backend/data/study/fire_electric/lessons.json', 'backend/data/study/electrician/lessons.json', 'backend/data/study/elec_construction/lessons.json']:
         d = json.load(open(p))
         bad_desc = sum(1 for l in d for f in l.get('formulas',[]) if 'desc' in f)
         n_must = sum(1 for l in d if l.get('must'))

@@ -18,8 +18,7 @@
 //            ADMIN_ALLOWED_EMAILS 쉼표구분 허용 이메일(선택, 이중방어). 예: designssir@gmail.com
 //   secret:  ADMIN_TOKEN_SECRET   앱 토큰 HMAC 서명 키 (wrangler secret put ADMIN_TOKEN_SECRET)
 //
-// [D1 스키마 가정]
-//   users(id TEXT PK, email TEXT, plan TEXT, expiry TEXT, created_at TEXT)
+// D1 스키마: users + entitlements (migrations/0001_init.sql)
 //   KV: SETTINGS 네임스페이스에 'app_version_manifest' 키로 version.json 저장
 
 const err = (code, message, status) => {
@@ -145,7 +144,10 @@ export async function verifyAccessJwt(request, env) {
 //   payload: { email, role:'admin', iat, exp }
 // ─────────────────────────────────────────────────────────────
 async function hmacKey(env) {
-  const secret = env.ADMIN_TOKEN_SECRET || 'dev-secret-change-me';
+  const secret = env.ADMIN_TOKEN_SECRET;
+  if (!secret || new TextEncoder().encode(secret).byteLength < 32) {
+    throw err('admin_secret_not_configured', '관리자 서명 키가 설정되지 않았습니다.', 503);
+  }
   return crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(secret),
@@ -221,32 +223,55 @@ export async function requireAdmin(request, env) {
 // ── 사용자 목록(페이지네이션)
 export async function adminListUsers(env, page = 1) {
   const pageSize = 50;
-  const offset = (page - 1) * pageSize;
+  const safePage = Number.isInteger(page) && page > 0 ? Math.min(page, 100000) : 1;
+  const offset = (safePage - 1) * pageSize;
   const { results } = await env.DB.prepare(
-    'SELECT id, email, plan, expiry, created_at FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?'
+    `SELECT u.id, u.email, COALESCE(e.tier, 'free') AS plan,
+            CASE WHEN e.expiry IS NULL THEN NULL
+                 ELSE strftime('%Y-%m-%dT%H:%M:%fZ', e.expiry / 1000, 'unixepoch') END AS expiry,
+            u.created_at
+     FROM users u LEFT JOIN entitlements e ON e.user_id = u.id
+     ORDER BY u.created_at DESC LIMIT ? OFFSET ?`
   )
     .bind(pageSize, offset)
     .all();
-  const total = await env.DB.prepare('SELECT COUNT(*) AS c FROM users').first('c');
-  return { page, pageSize, total, users: results || [] };
+  const count = await env.DB.prepare('SELECT COUNT(*) AS c FROM users').first();
+  return { page: safePage, pageSize, total: Number(count?.c || 0), users: results || [] };
 }
 
 // ── 특정 사용자 구독 등급 강제 설정(운영/CS용)
 export async function adminSetUserPlan(env, body) {
   const { userId, plan, expiry } = body || {};
-  if (!userId || !plan) throw err('bad_request', 'userId, plan 필수', 400);
-  await env.DB.prepare('UPDATE users SET plan = ?, expiry = ? WHERE id = ?')
-    .bind(plan, expiry || null, userId)
+  if (typeof userId !== 'string' || !userId || !['free', 'premium'].includes(plan)) {
+    throw err('bad_request', '유효한 userId와 free 또는 premium plan이 필요합니다.', 400);
+  }
+  const expiryAt = plan === 'premium' && expiry ? Date.parse(expiry) : null;
+  if (expiryAt !== null && !Number.isFinite(expiryAt)) {
+    throw err('bad_expiry', '만료일 형식이 올바르지 않습니다.', 400);
+  }
+  const user = await env.DB.prepare('SELECT id FROM users WHERE id=?').bind(userId).first();
+  if (!user) throw err('not_found', '사용자를 찾을 수 없습니다.', 404);
+  const now = Date.now();
+  await env.DB.prepare(
+    `INSERT INTO entitlements (user_id, tier, expiry, source, updated_at)
+     VALUES (?, ?, ?, 'manual', ?)
+     ON CONFLICT(user_id) DO UPDATE SET
+       tier=excluded.tier, expiry=excluded.expiry, source='manual', updated_at=excluded.updated_at`
+  )
+    .bind(userId, plan, expiryAt, now)
     .run();
-  return { ok: true, userId, plan, expiry: expiry || null };
+  return { ok: true, userId, plan, expiry: expiryAt ? new Date(expiryAt).toISOString() : null };
 }
 
 // ── 운영 통계 요약
 export async function adminStats(env) {
-  const totalUsers = await env.DB.prepare('SELECT COUNT(*) AS c FROM users').first('c');
-  const premiumUsers = await env.DB.prepare(
-    "SELECT COUNT(*) AS c FROM users WHERE plan = 'premium'"
-  ).first('c');
+  const totalRow = await env.DB.prepare('SELECT COUNT(*) AS c FROM users').first();
+  const premiumRow = await env.DB.prepare(
+    `SELECT COUNT(*) AS c FROM entitlements
+     WHERE tier='premium' AND (expiry IS NULL OR expiry > ?)`
+  ).bind(Date.now()).first();
+  const totalUsers = Number(totalRow?.c || 0);
+  const premiumUsers = Number(premiumRow?.c || 0);
   return {
     totalUsers: totalUsers || 0,
     premiumUsers: premiumUsers || 0,

@@ -48,11 +48,15 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/kakao.properties
 
 # APK 배포용 임시 서빙 디렉터리(포트 8899) - git 추적 제외, curl 다운로드 전용
 /releases/
 
 # Cloudflare split 산출물(79MB D1 seed + R2 body) - 배포 시 재생성, git 추적 제외
 /backend/scripts/out/
+/backend/data/
 /backend/cloudflare/.wrangler/
 /backend/cloudflare/node_modules/
+/.wrangler/
+/OLD/

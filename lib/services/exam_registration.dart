@@ -1,4 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'progress_snapshot_store.dart';
+import 'progress_sync_service.dart';
+import 'user_data_scope.dart';
 
 /// 🎯 응시 상태 — 특정 회차에 대한 사용자의 응시 계획/결과.
 enum ExamPhase { written, practical }
@@ -57,6 +60,7 @@ class ExamRegistration {
   int? scoredCorrect; // 맞힌 문항
   int? subjectFails; // 과락 과목 수 (필기 40점 미만 과목)
   DateTime? scoredAt;
+  int updatedAt;
 
   ExamRegistration({
     required this.id,
@@ -70,6 +74,7 @@ class ExamRegistration {
     this.scoredCorrect,
     this.subjectFails,
     this.scoredAt,
+    this.updatedAt = 0,
   });
 
   /// 가답안 점수(100점 환산). 채점 안 했으면 null.
@@ -103,6 +108,7 @@ class ExamRegistration {
     'scoredCorrect': scoredCorrect,
     'subjectFails': subjectFails,
     'scoredAt': scoredAt?.toIso8601String(),
+    'updatedAt': updatedAt,
   };
 
   factory ExamRegistration.fromMap(Map<dynamic, dynamic> m) => ExamRegistration(
@@ -119,6 +125,7 @@ class ExamRegistration {
     scoredAt: (m['scoredAt'] as String?) != null
         ? DateTime.tryParse(m['scoredAt'] as String)
         : null,
+    updatedAt: (m['updatedAt'] as num?)?.toInt() ?? 0,
   );
 }
 
@@ -129,9 +136,19 @@ class ExamRegistrationStore {
 
   static const _boxName = 'exam_registrations';
   Box? _box;
+  String? _activeBoxName;
 
-  Future<void> init() async {
-    _box = await Hive.openBox(_boxName);
+  Future<void> init({String? ownerId}) async {
+    final activeOwner = ownerId ?? UserDataScope.ownerId;
+    final generation = UserDataScope.generation;
+    final name = UserDataScope.boxNameForOwner(_boxName, activeOwner);
+    final box = await Hive.openBox(name);
+    if (generation != UserDataScope.generation ||
+        activeOwner != UserDataScope.ownerId) {
+      return;
+    }
+    _box = box;
+    _activeBoxName = name;
   }
 
   List<ExamRegistration> all() {
@@ -149,10 +166,35 @@ class ExamRegistrationStore {
   }
 
   Future<void> save(ExamRegistration reg) async {
-    await _box?.put(reg.id, reg.toMap());
+    final box = _box;
+    final boxName = _activeBoxName;
+    if (box == null ||
+        boxName == null ||
+        boxName != UserDataScope.boxName(_boxName)) {
+      return;
+    }
+    final updatedAt = await ProgressSnapshotStore.registrationSaveTimestamp(
+      reg.id,
+      DateTime.now().millisecondsSinceEpoch,
+    );
+    if (updatedAt == null || boxName != UserDataScope.boxName(_boxName)) {
+      return;
+    }
+    reg.updatedAt = updatedAt;
+    await box.put(reg.id, reg.toMap());
+    ProgressSyncService.instance.scheduleSync();
   }
 
   Future<void> delete(String id) async {
-    await _box?.delete(id);
+    final box = _box;
+    final boxName = _activeBoxName;
+    if (box == null ||
+        boxName == null ||
+        boxName != UserDataScope.boxName(_boxName)) {
+      return;
+    }
+    await ProgressSnapshotStore.markDeleted('registrations', id);
+    await box.delete(id);
+    ProgressSyncService.instance.scheduleSync();
   }
 }

@@ -1,20 +1,19 @@
 /// 🌐 Gisaclub 전역 설정 — 모든 서버 URL을 한 곳에서 관리한다.
 ///
-/// [도메인 비종속 원칙]
-/// 커스텀 도메인(gisa.club 등)을 아직 구매하지 않았으므로, 기본값은 Cloudflare가
-/// 무료로 제공하는 `*.workers.dev` / `*.pages.dev` 주소를 사용한다.
-/// URL을 코드 곳곳에 하드코딩하지 않고 **여기 한 곳 + 빌드시 --dart-define**으로만
-/// 주입한다. 나중에 커스텀 도메인을 붙이면 이 파일이나 dart-define 값만 바꾸면 되고,
-/// 애플리케이션 로직은 전혀 수정할 필요가 없다.
+/// [서비스 주소]
+/// 웹 클라이언트는 Pages 커스텀 도메인(`gisaclub.codeb.app`)에서 제공할 계획이며,
+/// 학습 API는 별도 Worker 주소를 빌드 시 `API_BASE_URL`로 주입한다.
+/// URL을 코드 곳곳에 하드코딩하지 않고 빌드 시 `--dart-define`으로 주입한다.
 ///
 /// [주입 예시 — 실제 배포]
 ///   flutter build apk --release \
 ///     --dart-define=API_BASE_URL=`https://gisaclub-api.<sub>.workers.dev` \
-///     --dart-define=WEB_BASE_URL=https://gisaclub-admin.pages.dev
+///     --dart-define=WEB_BASE_URL=https://gisaclub.codeb.app
 ///
-///   커스텀 도메인 구매 후에는 값만 교체:
-///     --dart-define=API_BASE_URL=https://api.gisa.club \
-///     --dart-define=WEB_BASE_URL=https://admin.gisa.club
+///   Android 빌드에서는 Google OAuth client ID도 지정한다:
+///     --dart-define=API_BASE_URL=https://gisaclub-api.designssir.workers.dev \
+///     --dart-define=GOOGLE_OAUTH_CLIENT_ID=GoogleWebClientID \
+///     --dart-define=WEB_BASE_URL=https://gisaclub.codeb.app
 class AppConfig {
   AppConfig._();
 
@@ -40,6 +39,24 @@ class AppConfig {
     'WEB_BASE_URL',
     defaultValue: '',
   );
+
+  /// Google Cloud OAuth Web client ID used as Google Sign-In serverClientId.
+  static const String googleOAuthClientId = String.fromEnvironment(
+    'GOOGLE_OAUTH_CLIENT_ID',
+    defaultValue: '',
+  );
+
+  /// Public Kakao platform keys. They are build inputs, never server secrets.
+  static const String kakaoNativeAppKey = String.fromEnvironment(
+    'KAKAO_NATIVE_APP_KEY',
+    defaultValue: '',
+  );
+  static const String kakaoJavaScriptAppKey = String.fromEnvironment(
+    'KAKAO_JAVASCRIPT_APP_KEY',
+    defaultValue: '',
+  );
+  static bool get hasKakaoNativeAppKey => kakaoNativeAppKey.isNotEmpty;
+  static bool get hasKakaoJavaScriptAppKey => kakaoJavaScriptAppKey.isNotEmpty;
 
   /// 앱 자동 업데이트 매니페스트 URL.
   /// 별도 지정이 없으면 API 베이스의 `/v1/app/version`을 사용한다(도메인 비종속).

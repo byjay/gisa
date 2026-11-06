@@ -34,9 +34,9 @@ NEW_ITEMS = {
 }
 
 FILES = [
-    'assets/data/electrician/exam_info_2026.json',
-    'assets/data/elec_construction/exam_info_2026.json',
-    'assets/data/fire_electric/exam_info_2026.json',
+    'backend/data/study/electrician/exam_info_2026.json',
+    'backend/data/study/elec_construction/exam_info_2026.json',
+    'backend/data/study/fire_electric/exam_info_2026.json',
 ]
 
 new_traps = [

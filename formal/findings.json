@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "concern": "user-progress-sync",
+  "workflow": "W1",
+  "generated_at": "2026-10-29T02:37:51Z",
+  "summary": "TLC explored the two-client, one-slide-counter, one-registration model through depth 11 (729 generated / 132 distinct states) with invariants holding; explicit registration restore and both defect toggles were reachable in their bounded checks.",
+  "scope": {
+    "modeled": [
+      "Two devices merge monotone slide counters in the range 0..2.",
+      "A registration delete tombstone at version 1 blocks stale version 0 and allows explicit re-add version 2.",
+      "The Worker and Flutter merge paths use deterministic timestamp and tombstone decisions."
+    ],
+    "abstracted": [
+      "Question progress payloads, OAuth tokens, and D1 row state are represented by bounded values.",
+      "Timestamps are small logical versions 0..2; writes and network operations are abstracted as TLC actions."
+    ],
+    "out_of_scope": [
+      "Clock skew, real Cloudflare D1/Worker deployment, OAuth refresh and expiry, device network loss, and production multi-device E2E.",
+      "Every possible record, page key, and payload size."
+    ],
+    "assumptions": [
+      "A deliberate re-add has an updatedAt greater than the latest known deletedAt.",
+      "Worker request ownership comes from a verified session user ID, not the request body."
+    ]
+  },
+  "properties": [
+    {
+      "name": "SlideProgressNeverRegresses",
+      "kind": "invariant",
+      "statement": "serverSeen = highWater",
+      "meaning": "Merging a stale device cannot lower the maximum seen slide count.",
+      "source": "formal/user-progress-sync/SafeCollections.tla",
+      "frozen": true,
+      "result": "holds",
+      "tool": "TLC 2026.10.28.014557",
+      "bounds": "Clients={c1,c2}; local/server slide count=0..2; depth=11",
+      "evidence": "formal/user-progress-sync/evidence/safe-collections/tlc-final-normal-coverage/tlc.log"
+    },
+    {
+      "name": "RegistrationTombstoneWins",
+      "kind": "invariant",
+      "statement": "registrationDeletedAt > 0 => (~serverRegistration \/ serverRegistrationAt > registrationDeletedAt)",
+      "meaning": "A deleted registration remains absent unless a strictly newer explicit save restores it.",
+      "source": "formal/user-progress-sync/SafeCollections.tla",
+      "frozen": true,
+      "result": "holds",
+      "tool": "TLC 2026.10.28.014557",
+      "bounds": "Clients={c1,c2}; one registration; local/server/delete versions=0..2; depth=11",
+      "evidence": "formal/user-progress-sync/evidence/safe-collections/tlc-final-normal-coverage/tlc.log"
+    },
+    {
+      "name": "RegistrationRestoreReachable",
+      "kind": "bounded-check",
+      "statement": "NoRegistrationRestoreReached is intentionally violated when serverRegistrationAt = 2.",
+      "meaning": "The model can reach a saved registration whose version is newer than the delete tombstone.",
+      "source": "formal/user-progress-sync/MC_safe_restore_sanity.cfg",
+      "frozen": false,
+      "result": "violated",
+      "tool": "TLC 2026.10.28.014557",
+      "bounds": "Clients={c1,c2}; one registration; versions=0..2; depth=9",
+      "evidence": "formal/user-progress-sync/evidence/safe-collections/tlc-final-v3-restore-sanity/tlc.log"
+    },
+    {
+      "name": "SlideMutationDetected",
+      "kind": "bounded-check",
+      "statement": "With FixEnabled=FALSE, SlideProgressNeverRegresses is violated.",
+      "meaning": "The slide monotonicity property is sensitive to removing the max merge guard.",
+      "source": "formal/user-progress-sync/MC_safe_bug.cfg",
+      "frozen": false,
+      "result": "violated",
+      "tool": "TLC 2026.10.28.014557",
+      "bounds": "Clients={c1,c2}; slide count=0..2; depth=8; 323 generated / 119 distinct",
+      "evidence": "formal/user-progress-sync/evidence/safe-collections/tlc-final-v3-slide-mutation/tlc.log"
+    },
+    {
+      "name": "RegistrationMutationDetected",
+      "kind": "bounded-check",
+      "statement": "With FixEnabled=FALSE, RegistrationTombstoneWins is violated.",
+      "meaning": "The tombstone property detects stale-device resurrection when the version guard is removed.",
+      "source": "formal/user-progress-sync/MC_safe_tombstone_bug.cfg",
+      "frozen": false,
+      "result": "violated",
+      "tool": "TLC 2026.10.28.014557",
+      "bounds": "Clients={c1,c2}; one registration; versions=0..2; depth=7; 228 generated / 89 distinct",
+      "evidence": "formal/user-progress-sync/evidence/safe-collections/tlc-final-v3-tombstone-mutation/tlc.log"
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "title": "A deleted exam registration could not be re-added on another sync",
+      "severity": "medium",
+      "status": "fixed",
+      "property": "A newer explicit registration save supersedes its older delete tombstone; stale saves do not.",
+      "story": "The registration ID is stable for a qualification, round, and phase. The original tombstone was a permanent set entry, so a user could delete a registration and later save the same ID, but the next merge always deleted it again.",
+      "reproduction": {
+        "test": "test/user_data_scope_test.dart::re-adding a deleted registration creates a newer sync version; backend/cloudflare/tests/progress.test.js::registration can be re-added only with an update newer than its delete",
+        "result_before_fix": "fails",
+        "result_after_fix": "passes"
+      },
+      "fix": {
+        "summary": "Store registration tombstones as integer deletion timestamps; choose the save timestamp strictly after the tombstone; merge only records with updatedAt > deletedAt and then clear that tombstone.",
+        "diff": "lib/services/progress_snapshot_store.dart:95-147,149-273,429-492; lib/services/exam_registration.dart:168-200; backend/cloudflare/src/progress.js:69-100,251-285,378-401",
+        "model_recheck": "passes",
+        "mutation_check": "fails-as-expected"
+      },
+      "evidence": [
+        "formal/user-progress-sync/evidence/safe-collections/registration-restore-worker-red.log",
+        "formal/user-progress-sync/evidence/safe-collections/registration-restore-flutter-red.log",
+        "formal/user-progress-sync/evidence/safe-collections/registration-restore-worker-green.log",
+        "formal/user-progress-sync/evidence/safe-collections/registration-restore-flutter-green.log",
+        "formal/user-progress-sync/evidence/safe-collections/tlc-final-v3-tombstone-mutation/tlc.log",
+        "formal/user-progress-sync/evidence/safe-collections/tlc-final-v3-restore-sanity/tlc.log"
+      ]
+    }
+  ],
+  "trust_base": {
+    "tla": {
+      "tool_version": "TLC2 2026.10.28.014557; proof-skills tlc.sh",
+      "states_generated": 729,
+      "distinct_states": 132,
+      "depth": 11,
+      "sanity_checks": [
+        "SlideProgressNeverRegresses mutation returns the intended invariant counterexample.",
+        "RegistrationTombstoneWins mutation returns the intended invariant counterexample.",
+        "NoProgressReached is violated when progress is reachable.",
+        "NoRegistrationRestoreReached is violated when explicit restore is reachable.",
+        "Normal coverage log contains Learn, MergeProgress, DeleteRegistration, RestoreRegistration, and PushRegistration."
+      ]
+    }
+  },
+  "rerun": [
+    "cd E:\\gisaclub; flutter test --no-pub --reporter compact",
+    "cd E:\\gisaclub; dart analyze lib",
+    "cd E:\\gisaclub\\backend\\cloudflare; node --test",
+    "cd E:\\gisaclub\\backend\\cloudflare; npx wrangler deploy --dry-run",
+    "python E:\\gisaclub\\formal\\user-progress-sync\\verify_safe_progress_math.py",
+    "Use the exact TLC commands listed in formal/user-progress-sync/SCOPE.md."
+  ],
+  "next_steps": [
+    "Configure OAuth and Cloudflare Access environment values, apply the D1 migration, and run authenticated API E2E before any deployment review.",
+    "Validate real-device clock behavior, two-device synchronization, session refresh/expiry, and APK/Play release checks.",
+    "Keep wrong-note question/answer/explanation/memo content out of progress snapshots."
+  ]
+}

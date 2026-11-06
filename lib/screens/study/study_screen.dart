@@ -508,10 +508,16 @@ class _StudyScreenState extends State<StudyScreen>
       }
       final e = exams.first;
       qs = e.questions
-          .where((q) => q.options.length == 4 && q.answer >= 1)
+          .where((q) => q.options.length == 4 && q.remoteQid != null)
           .toList();
       for (final q in qs) {
         q.examLabel = e.label;
+      }
+      if (qs.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('이 회차에서 응시할 수 있는 문항을 찾지 못했어요.')),
+        );
+        return;
       }
     } else {
       // 전체 문제은행에서 과목별 20문항 무작위 추출
@@ -519,7 +525,7 @@ class _StudyScreenState extends State<StudyScreen>
       final bySubject = <String, List<Question>>{};
       for (final e in exams) {
         for (final q in e.questions) {
-          if (q.options.length != 4 || q.answer < 1) continue;
+          if (q.options.length != 4 || q.remoteQid == null) continue;
           q.examLabel = e.label;
           (bySubject[q.subject] ??= []).add(q);
         }
@@ -1196,8 +1202,14 @@ class _StudyScreenState extends State<StudyScreen>
 
   void _startExam(ExamPaper e) {
     final qs = e.questions
-        .where((q) => q.options.length == 4 && q.answer >= 1)
+        .where((q) => q.options.length == 4 && q.remoteQid != null)
         .toList();
+    if (qs.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('이 회차에서 응시할 수 있는 문항을 찾지 못했어요.')),
+      );
+      return;
+    }
     for (final q in qs) {
       q.examLabel = e.label;
     }
