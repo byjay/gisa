@@ -22,15 +22,13 @@ void main() {
   setUp(() async {
     tempDir = await Directory.systemTemp.createTemp('voltssam_provider_test_');
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(pathProviderChannel, (
-          MethodCall call,
-        ) async {
-      if (call.method == 'getApplicationDocumentsDirectory' ||
-          call.method == 'getApplicationSupportDirectory') {
-        return tempDir.path;
-      }
-      return null;
-    });
+        .setMockMethodCallHandler(pathProviderChannel, (MethodCall call) async {
+          if (call.method == 'getApplicationDocumentsDirectory' ||
+              call.method == 'getApplicationSupportDirectory') {
+            return tempDir.path;
+          }
+          return null;
+        });
   });
 
   tearDown(() async {
@@ -110,12 +108,7 @@ void main() {
     test('오늘 학습을 기록하면 streak은 1이다', () async {
       final provider = await buildProvider();
       await provider.addSession(
-        StudySession(
-          id: 't1',
-          examId: '',
-          date: DateTime.now(),
-          minutes: 10,
-        ),
+        StudySession(id: 't1', examId: '', date: DateTime.now(), minutes: 10),
       );
       expect(provider.streak, 1);
     });

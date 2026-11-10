@@ -63,8 +63,6 @@ function isControlPlane(pathname, method) {
     || (pathname === '/v1/admin/verify' && method === 'GET')
     || (pathname === '/v1/admin/issue-app-token' && ['GET', 'POST'].includes(method))
     || (pathname === '/v1/admin/service-control' && ['GET', 'PUT'].includes(method))
-    || (pathname === '/v1/admin/blog-drafts' && method === 'GET')
-    || (/^\/v1\/admin\/blog-drafts\/[A-Za-z0-9_-]{1,80}\/review$/.test(pathname) && method === 'POST')
     || (pathname === '/v1/auth/logout' && method === 'POST');
 }
 
@@ -311,7 +309,16 @@ export default {
     }
   },
   async scheduled(controller, env, ctx) {
-    const task = generateDailyDrafts(env, controller.scheduledTime);
+    const isServiceEnabled = async () => {
+      try {
+        return (await getServiceState(env)).enabled;
+      } catch (_) {
+        return false;
+      }
+    };
+    if (!(await isServiceEnabled())) return;
+
+    const task = generateDailyDrafts(env, controller.scheduledTime, isServiceEnabled);
     if (ctx?.waitUntil) ctx.waitUntil(task);
     return await task;
   },

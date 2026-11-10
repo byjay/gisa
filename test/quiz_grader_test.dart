@@ -5,19 +5,16 @@ import 'package:flutter_test/flutter_test.dart';
 /// [P1-B/T10] QuizGrader — quiz_play_screen._finish()에서 추출한 순수
 /// 채점 함수의 회귀 테스트. 위젯 없이 채점 정확성만 검증한다.
 void main() {
-  Question q({
-    required int no,
-    required String subject,
-    int answer = 1,
-  }) => Question(
-    no: no,
-    subject: subject,
-    topic: 't',
-    question: '문제 $no',
-    options: const ['1', '2', '3', '4'],
-    answer: answer,
-    hasImage: false,
-  );
+  Question q({required int no, required String subject, int answer = 1}) =>
+      Question(
+        no: no,
+        subject: subject,
+        topic: 't',
+        question: '문제 $no',
+        options: const ['1', '2', '3', '4'],
+        answer: answer,
+        hasImage: false,
+      );
 
   group('QuizGrader.grade', () {
     test('빈 문항 목록이면 total=0, percent=0으로 안전하게 처리된다', () {

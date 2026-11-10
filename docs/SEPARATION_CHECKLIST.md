@@ -316,6 +316,15 @@
 
 **현재 판정:** 앱 설치 패키지의 학습 자료 분리는 확인했고 로컬 D1/R2 번들을 최신 원본과 대조했다. 계정별 학습기록, 운영 인증/데이터 설정, 실제 원격 D1/R2 반영, 구매/광고와 공개 운영은 완료되지 않았다. CODEB 로컬 검토 build는 운영 공개를 뜻하지 않는다. SEASTAR/seastar.work/SGW는 별도 프로젝트로 이 체크리스트에서 제외한다.
 
+## 2026-11-06 — 원격 서비스 제어와 차단 경계 재검증
+
+- [x] 서비스 OFF 예외 목록을 명세대로 한정했다. 관리자 블로그 초안 조회/검토는 더 이상 control-plane 예외가 아니며, 인증 전 `503 service_disabled`를 받는다.
+- [x] 예약 초안 생성은 시작 시 서비스 상태를 확인하고, 카탈로그/D1 대기 뒤 모델 호출 직전과 모델 응답 뒤에도 상태를 재확인한다. 저장 전 검사에서 OFF/오류면 검토용 콘텐츠 최종화를 시작하지 않는다. OFF 감지 후 `failClaim`은 생성 콘텐츠 없이 실패 상태만 D1에 기록해 진행 중인 claim을 정리할 수 있다. 최종화 쓰기 시작 뒤 OFF면 취소되지 않을 수 있고, OFF 동안 초안 API는 계속 차단된다. 이 경계는 `MC_boundary.cfg` 반례로 문서화했다.
+- [x] 수정 전 회귀 재현 5건(예약 상태 무시 3개 경로, OFF 중 초안 저장, 관리자 초안 API 403 우회)을 기록하고, 수정 뒤 Worker 전체 44/44 통과.
+- [x] TLA+ bounded safety: TLC 2026.11.03.180953, 정상 탐색의 마지막 실행은 1,345 generated / 336 distinct / depth 12; `TypeOK`와 7개 action property 통과. 버그 토글 `ScheduledStartGuard`, 보호 응답 sanity `SanityNeverAccepted`, 이미 시작된 검토용 콘텐츠 최종화 경계 `NoReviewFinalizeAfterShutdown`에서 각각 예상 반례 확인. 실패 상태 전용 `failClaim` 업데이트는 generated content가 없는 별도 `blocking` phase로 모델링했다. 상태 범위·코드 대응은 `formal/remote-service-control/`에 보관.
+- [x] Flutter 전체 119/119, `dart analyze lib` 이슈 없음, R2 verifier tests 11/11 및 현 번들 검증 PASS (10 tracks, 193 exams, 16,653 questions, 3,609 R2 objects).
+- [ ] 원격 Worker/D1 배포, 실제 Cron/OAuth/Access/refresh·만료 E2E, Play Billing 검증은 아직 미실행/미구현. 로컬 테스트와 TLC 결과는 운영 배포 증명이 아니다.
+
 ## 2026-10-29 — 사용자별 학습기록 격리·동기화 최신 검증
 
 ### 로컬 구현 및 검증
@@ -438,7 +447,44 @@
 - [x] upstream 변경과 로컬 변경이 겹치는 10개 경로를 식별했다. 관리자 flavor/AdMob/Remote Config와 로컬 Kakao/서비스제어/원격콘텐츠 변경의 통합은 별도 파일별 검토가 필요하다.
 - [x] 기존 데이터 대조 기록의 설명 차이: 전기공사 14건, 전기산업 22건. 학습자료 본문은 열람/기록하지 않음.
 - [ ] 데이터 정정의 권위 있는 원본과 서버 자료 갱신 방법 결정 전까지 `assets/data` 삭제/이동을 원격에 적용하지 않는다.
-- [ ] 관리자 진입 UI는 현재 일반 설정 화면에서 노출된다(`lib/screens/settings_screen.dart:55-69`); 관리자 flavor 경계와 서버 인증을 병합 후 재검증한다. 이번 검토는 권한 우회 여부를 시험하지 않았다.
+- [x] 관리자 진입 UI 노출 문제는 2026-11-06 최신 대조에서 해결된 상태로 확인했다: `lib/screens/settings_screen.dart:60-63`이 `AppConfig.isAdminApp` 조건으로 메뉴를 제한한다. 이전 항목은 당시 관찰 기록이다. 관리자 flavor 동작은 debug 산출물 생성으로 확인했지만 서버 권한 우회는 시험하지 않았다.
 - [ ] Kakao native key는 `android/app/kakao.properties`가 없고 Gradle/Dart 기본값이 빈 문자열이다. 공개 앱키 입력 경로와 누락 시 release 차단을 정한 뒤 로그인 설정/콜백을 검증한다.
 - [ ] 11/2 debug APK와 11/4 집중 테스트 기록은 기존 로컬 상태 기준이다. R62 병합본 전체 분석·테스트·빌드는 미실행.
 - [ ] 이번 점검은 읽기 전용으로 종료: 커밋·푸시·배포 미수행. 구체적인 병합 결과와 데이터 보존 검증 전에는 완료/출시 판정하지 않는다.
+
+### 2026-11-06 17:25 KST — 최신 로컬 구현/검증 상태
+
+- [x] 설정 화면의 관리자 진입은 `lib/screens/settings_screen.dart:60-63`에서 `AppConfig.isAdminApp`일 때만 표시. `lib/services/app_config.dart:97-100`의 기본값은 `false`; 관리자 APK 빌드에는 `--dart-define=IS_ADMIN_APP=true`가 필요하다. UI 격리 확인이며 서버 권한 검증과는 별개다.
+- [x] 사용자/관리자 debug APK 각각 생성: `app-user-debug.apk` SHA-256 `62B2245D0119D072E40890A7A21CB386AD00B6732BE6A8A91D0E5A8089619CC0`, `app-admin-debug.apk` SHA-256 `B3A67E758E88E1CE42838F144FD5B4A9CAB10A58DAC9A9EC29A4205865518A2F`.
+- [x] APK archive path-name scan: `study/question/exam/assets/data` 패턴 파일 경로 0개. 사용자는 215,592,502 bytes debug APK이며 내부 미압축 합계 294,879,563 bytes; debug kernel 74,807,232 bytes 및 3 ABI native libraries 142,549,416 bytes가 큰 비중이다. 경로 이름 검사만으로 데이터 비포함을 증명하지 않으므로 REA/semantic inspection 및 release AAB 측정은 남아 있다.
+- [x] Flutter 테스트 119/119, Dart 분석(`lib test`) 이슈 없음, Worker Node 테스트 42/42, format 검사 clean, `git diff --check` 통과. Wrangler dry-run만 성공; 라이브 배포 확인 아님.
+- [ ] 마켓 릴리스는 미완료: 두 APK 모두 debug이고 release 서명/AAB·스토어 구매/복원·운영 OAuth/실 API E2E를 검증하지 않았다.
+- [ ] Kakao 설정 파일 없음 및 key 기본값 공란. Worker의 Google OAuth/Cloudflare Access 값은 placeholder이므로 운영 인증 미완료.
+- [ ] REA APK 역분석은 `REA_JADX_MCP_JAR` 누락으로 실행되지 않았다. 현재 APK hash는 파일 동일성 증거일 뿐 바이너리/Manifest 안전 검토 증거가 아니다.
+- [ ] 현재 브랜치 `codex/gisaclub-r62-push`, HEAD `88fe28b`, 추적 변경 24개(이 체크리스트 수정 포함); `HANDOFF.md`는 미추적 파일이다. 이번 실행에서 원격 푸시나 배포는 하지 않았다. 기존 R62 데이터 차이와 원본 권한 판단은 계속 대기.
+
+### 2026-11-10 11:58 KST — 최종 TLA 모델/증거 정합성 재점검
+
+- [x] 11/6 18:06 KST에 추가된 `blocking`/`FinishBlockedStatus` 모델이 그보다 이른 정상 TLC 로그에 포함되지 않았던 증거 경로 불일치를 확인하고 현재 최종 model을 다시 체크했다.
+- [x] 정상 `MC.cfg`: exit 0; `TypeOK` + 7 action properties 통과; 1,345 generated / 336 distinct / depth 12; `-coverage 1`.
+- [x] 의도적 음성/도달성 구성: mutation `MC_bug.cfg` exit 13 (ScheduledStartGuard 반례); `MC_sanity.cfg` exit 12 (healthy protected response 도달); `MC_boundary.cfg` exit 12 (이미 시작된 콘텐츠 최종화의 취소 불가 경계); `MC_blockedstatus.cfg` exit 12 (ControlUnavailable 이후 SkipProvider가 status-only blocking phase에 도달). 각 TLC 로그는 `formal/remote-service-control/evidence/tlc-final-*/`에 저장했다. 네 trace Markdown은 Windows cp949 인코딩 문제를 우회해 UTF-8로 다시 생성했고 모두 비어 있지 않다.
+- [x] `findings.json`가 최종 정상/action-property 로그와 각 최종 반례 로그를 참조하도록 갱신, `MC_blockedstatus` 예상 반례/재현 구성 추가. JSON Schema 2020-12 검증 통과. 대응검사 25 pointers / 3 files / 0 broken. 로컬 HTML 보고서도 최신 모델 검사 시각·경로와 일치시켰다.
+- [x] 코드 테스트/빌드 로그와 소스 시각 대조: Worker 소스 17:32 KST 뒤 `green-tests.log` 17:39에 44/44; Flutter 소스 17:20와 17:22 user/admin debug APK 뒤 119/119 test 및 Dart 분석 clean 기록. R2 fixture 11/11/bundle PASS. 해당 제품 파일은 이번 검토 이후 변경 시각이 없으므로 테스트/빌드를 재실행하지 않았다.
+- [ ] 모델은 한 요청/한 예약 슬롯, revision 0..2, DO 선형성 가정의 bounded safety다. 실제 DO/D1·다중 지역·제공자 호출 취소/영구 제거를 보증하지 않는다. TLA 통과를 운영 안전성 절대 보장으로 해석하지 않는다.
+- [ ] 릴리스·운영 게이트는 그대로: Kakao/Google OAuth·Access placeholder 및 자격증명, 실제 OAuth/refresh/expiry E2E, release 서명/AAB·Play Billing, 원격 D1/R2·Worker 배포 미완료. 이번 실행은 로컬 formal evidence와 문서만 갱신했고 계정/설정/로그인/배포/푸시를 변경하지 않았다.
+- [x] 예약 초안 OFF 경계 리뷰 후속: `backend/cloudflare/tests/service-control.test.js:115`의 `/v1/auth/google` 사례를 실제 핸들러 메서드(`POST`, `backend/cloudflare/src/index.js:156`)로 정정했다. `cd backend/cloudflare; node --test tests/service-control.test.js` — 9/9 통과. 전체 Worker/Flutter/APK 빌드는 이 후속 변경에서 다시 실행하지 않았다.
+
+### 2026-11-10 16:08 KST — 로컬 Release 후보 빌드 및 출고 게이트
+
+- [x] 사용자 범위 확인: 로컬 AAB/APK 후보까지만 생성한다. Play Console 업로드·제출, Cloudflare 운영 배포, 운영 계정/설정 변경 없음.
+- [x] AAB `build/app/outputs/bundle/userRelease/app-user-release.aab`, 88,090,929 bytes, SHA-256 `6ABC3A6654C358BCCFADB996CA8342D8DA6B0A1DB77A81E6068221222B52AF3A`; arm64 APK `build/app/outputs/flutter-apk/app-user-release.apk`, 71,740,347 bytes, SHA-256 `553494CCE5EBC58BEA9CD38DB350FA5EF35DC32DA62E589C4D78B575A6A6E6A4`. `jarsigner`와 `apksigner` 서명검증 통과; 두 산출물 모두 로컬 keystore 인증서와 일치한다. Play 업로드 인증서와의 일치는 확인하지 않았다.
+- [x] APK 메타데이터: `com.certstudytracker.study`, `versionName=1.0.0`, `versionCode=1`, minSdk 24 / targetSdk 36. 스토어 기존 versionCode와 설치·업데이트 경로는 확인되지 않았다.
+- [x] 두 APK/AAB 아카이브 경로명에서 학습 데이터로 보이는 경로 0개. 경로명 검사만으로 비문자열 페이로드/실행 동작까지 증명하지 않는다.
+- [x] `tool/audit/verify_learning_data.py`에 `LEARNING_DATA_DIR` 지원과 기존 `assets/data` 기본값 호환을 추가하고, `tool/audit/test_verify_learning_data.py`에 override/default 테스트 2개를 추가했다. 출시 점검은 분리된 `backend/data/study`를 자동 선택하고 Python UTF-8 출력을 고정한다. unittest 2/2, py_compile, diff 검증 통과.
+- [x] 실제 로컬 분리 데이터 10 트랙/16,653문항의 V0–V7 위반 0건, 해설↔정답 대조 16,653/16,653. V8 실질 해설 10,432/16,653 (62.6%), 기존 해설부채 기준선 6,221건 유지. 원문 문항은 출력·기록하지 않았다.
+- [x] 전체 `tool/audit/verify_release_ready.sh` 실행에서 데이터 검사, Dart 분석, Flutter 테스트 119/119, 사용자 앱 관리자 메뉴 분리 검사는 통과했다. 출시 차단은 단 하나: `android/app/src/main/AndroidManifest.xml:71`의 Google 공식 AdMob 테스트 앱 ID. 그러므로 현재 서명 산출물을 출고 승인으로 간주하지 않는다.
+- [ ] Android 빌드 당시 `API_BASE_URL`, Google OAuth client ID 및 Kakao native/JavaScript 키 Dart define은 설정되지 않았다. 앱은 운영 백엔드/로그인을 검증하지 않은 로컬 서명 후보다. Cloudflare dry-run(88.21 KiB, gzip 22.21 KiB)은 통과했으나 `wrangler.toml`의 Google OAuth/Access 값은 placeholder이며 실제 배포는 하지 않았다.
+- [ ] 게이트 1 환경 일치 FAIL. 게이트 2 전체 API 엔드포인트 목록·검증 범위 미완료. 게이트 3 OAuth 발급→전송→검증→갱신→만료 E2E 미검증. 게이트 4 프론트↔백 전체 필드 계약 미검증. 게이트 5 롤백 소스 후보 `gisa/backup-r59@3e1a2ad666b9334998efc872de6985e9764c7103` 확인; 운영 배포 ID는 없음.
+- [ ] Play Billing은 `backend/cloudflare/src/billing.js:13`에서 503을 반환하는 미구현 상태다. Play listing/Data Safety·개인정보·광고 실설정·구매/복원·실기기 QA도 미완료. 스토어 등록 준비 완료/상용 출시로 판정하지 않는다.
+- [x] 이전 중복 Gradle 시도에서 JVM native-memory mmap 부족(1.5 GB) 오류 로그가 생성됐으나 해당 임시 파일을 제거했다. 성공한 AAB/APK 해시와 서명은 별도 재확인했다.
+- [ ] 이 체크포인트의 라이브 운영 배포·스토어 업로드/제출은 하지 않았다. 로컬 후보의 재빌드·설치 QA 또는 운영 자격증명 기반 인증 검증은 별도 승인/환경 준비 후 수행한다.

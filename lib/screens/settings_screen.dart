@@ -69,10 +69,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     leading: const Icon(Icons.admin_panel_settings_rounded),
                     title: const Text('슈퍼 관리자 모드'),
                     subtitle: const Text(
-                        '사용자·콘텐츠·구독·AI·업데이트 운영 (인증 시 전 기능 무제한 해금)'),
+                      '사용자·콘텐츠·구독·AI·업데이트 운영 (인증 시 전 기능 무제한 해금)',
+                    ),
                     trailing: const Icon(Icons.lock_outline_rounded),
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => const SuperAdminScreen())),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const SuperAdminScreen(),
+                      ),
+                    ),
                   ),
                 ],
               ),

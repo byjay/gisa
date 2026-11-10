@@ -619,9 +619,7 @@ class _TutorChatScreenState extends State<TutorChatScreen> {
                 decoration: BoxDecoration(
                   color: Colors.teal.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: Colors.teal.withValues(alpha: 0.3),
-                  ),
+                  border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
                 ),
                 child: const Text(
                   '✅ AI 튜터 사용 준비 완료 · 내 API 키 등록됨\n무엇이든 편하게 질문하세요!',

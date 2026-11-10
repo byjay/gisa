@@ -35,19 +35,20 @@ class AdsConfig {
   /// 이 값이 릴리스에 남아있으면 실제 수익이 발생하지 않으므로 검사로 막는다.
   static const String testAppId = 'ca-app-pub-3940256099942544~3347511713';
   static const String testBanner = 'ca-app-pub-3940256099942544/6300978111';
-  static const String testInterstitial = 'ca-app-pub-3940256099942544/1033173712';
+  static const String testInterstitial =
+      'ca-app-pub-3940256099942544/1033173712';
   static const String testRewarded = 'ca-app-pub-3940256099942544/5224354917';
 
   const AdsConfig.defaults()
-      : enabled = false, // 기본 꺼짐 — 관리자가 켜야 광고가 나간다
-        androidAppId = testAppId,
-        bannerUnitId = testBanner,
-        interstitialUnitId = testInterstitial,
-        rewardedUnitId = testRewarded,
-        interstitialEveryNQuiz = 10,
-        showBannerOnHome = true,
-        showBannerOnQuiz = false,
-        removeAdsForPremium = true;
+    : enabled = false, // 기본 꺼짐 — 관리자가 켜야 광고가 나간다
+      androidAppId = testAppId,
+      bannerUnitId = testBanner,
+      interstitialUnitId = testInterstitial,
+      rewardedUnitId = testRewarded,
+      interstitialEveryNQuiz = 10,
+      showBannerOnHome = true,
+      showBannerOnQuiz = false,
+      removeAdsForPremium = true;
 
   /// 광고 전체 on/off. 꺼져 있으면 SDK 초기화도 하지 않는다.
   final bool enabled;
@@ -74,30 +75,30 @@ class AdsConfig {
       rewardedUnitId == testRewarded;
 
   factory AdsConfig.fromJson(Map<String, dynamic> j) => AdsConfig(
-        enabled: j['enabled'] as bool? ?? false,
-        androidAppId: (j['androidAppId'] as String?) ?? testAppId,
-        bannerUnitId: (j['bannerUnitId'] as String?) ?? testBanner,
-        interstitialUnitId:
-            (j['interstitialUnitId'] as String?) ?? testInterstitial,
-        rewardedUnitId: (j['rewardedUnitId'] as String?) ?? testRewarded,
-        interstitialEveryNQuiz:
-            (j['interstitialEveryNQuiz'] as num?)?.toInt() ?? 10,
-        showBannerOnHome: j['showBannerOnHome'] as bool? ?? true,
-        showBannerOnQuiz: j['showBannerOnQuiz'] as bool? ?? false,
-        removeAdsForPremium: j['removeAdsForPremium'] as bool? ?? true,
-      );
+    enabled: j['enabled'] as bool? ?? false,
+    androidAppId: (j['androidAppId'] as String?) ?? testAppId,
+    bannerUnitId: (j['bannerUnitId'] as String?) ?? testBanner,
+    interstitialUnitId:
+        (j['interstitialUnitId'] as String?) ?? testInterstitial,
+    rewardedUnitId: (j['rewardedUnitId'] as String?) ?? testRewarded,
+    interstitialEveryNQuiz:
+        (j['interstitialEveryNQuiz'] as num?)?.toInt() ?? 10,
+    showBannerOnHome: j['showBannerOnHome'] as bool? ?? true,
+    showBannerOnQuiz: j['showBannerOnQuiz'] as bool? ?? false,
+    removeAdsForPremium: j['removeAdsForPremium'] as bool? ?? true,
+  );
 
   Map<String, dynamic> toJson() => {
-        'enabled': enabled,
-        'androidAppId': androidAppId,
-        'bannerUnitId': bannerUnitId,
-        'interstitialUnitId': interstitialUnitId,
-        'rewardedUnitId': rewardedUnitId,
-        'interstitialEveryNQuiz': interstitialEveryNQuiz,
-        'showBannerOnHome': showBannerOnHome,
-        'showBannerOnQuiz': showBannerOnQuiz,
-        'removeAdsForPremium': removeAdsForPremium,
-      };
+    'enabled': enabled,
+    'androidAppId': androidAppId,
+    'bannerUnitId': bannerUnitId,
+    'interstitialUnitId': interstitialUnitId,
+    'rewardedUnitId': rewardedUnitId,
+    'interstitialEveryNQuiz': interstitialEveryNQuiz,
+    'showBannerOnHome': showBannerOnHome,
+    'showBannerOnQuiz': showBannerOnQuiz,
+    'removeAdsForPremium': removeAdsForPremium,
+  };
 
   AdsConfig copyWith({
     bool? enabled,
@@ -109,19 +110,18 @@ class AdsConfig {
     bool? showBannerOnHome,
     bool? showBannerOnQuiz,
     bool? removeAdsForPremium,
-  }) =>
-      AdsConfig(
-        enabled: enabled ?? this.enabled,
-        androidAppId: androidAppId ?? this.androidAppId,
-        bannerUnitId: bannerUnitId ?? this.bannerUnitId,
-        interstitialUnitId: interstitialUnitId ?? this.interstitialUnitId,
-        rewardedUnitId: rewardedUnitId ?? this.rewardedUnitId,
-        interstitialEveryNQuiz:
-            interstitialEveryNQuiz ?? this.interstitialEveryNQuiz,
-        showBannerOnHome: showBannerOnHome ?? this.showBannerOnHome,
-        showBannerOnQuiz: showBannerOnQuiz ?? this.showBannerOnQuiz,
-        removeAdsForPremium: removeAdsForPremium ?? this.removeAdsForPremium,
-      );
+  }) => AdsConfig(
+    enabled: enabled ?? this.enabled,
+    androidAppId: androidAppId ?? this.androidAppId,
+    bannerUnitId: bannerUnitId ?? this.bannerUnitId,
+    interstitialUnitId: interstitialUnitId ?? this.interstitialUnitId,
+    rewardedUnitId: rewardedUnitId ?? this.rewardedUnitId,
+    interstitialEveryNQuiz:
+        interstitialEveryNQuiz ?? this.interstitialEveryNQuiz,
+    showBannerOnHome: showBannerOnHome ?? this.showBannerOnHome,
+    showBannerOnQuiz: showBannerOnQuiz ?? this.showBannerOnQuiz,
+    removeAdsForPremium: removeAdsForPremium ?? this.removeAdsForPremium,
+  );
 
   /// 광고 단위 ID 형식 검사. 잘못된 ID 를 배포하면 광고가 조용히 안 나온다.
   /// 앱ID 는 `~`, 단위ID 는 `/` 구분자를 쓴다(구글 규격).

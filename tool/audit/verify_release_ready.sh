@@ -70,7 +70,16 @@ fi
 
 step "③ 학습데이터 사실검증"
 # 정답과 해설이 어긋난 문항을 출시하면 학습자에게 직접 피해가 간다.
-if python3 tool/audit/verify_learning_data.py > /tmp/vld.log 2>&1; then
+DATA_DIR="${LEARNING_DATA_DIR:-}"
+if [ -z "$DATA_DIR" ]; then
+  if [ -d backend/data/study ]; then
+    DATA_DIR='backend/data/study'
+  else
+    DATA_DIR='assets/data'
+  fi
+fi
+if PYTHONIOENCODING=utf-8 LEARNING_DATA_DIR="$DATA_DIR" \
+    python3 tool/audit/verify_learning_data.py > /tmp/vld.log 2>&1; then
   ok "$(grep -E '^✓ 위반 0건' /tmp/vld.log | head -1)"
   # 통과했어도 남은 해설부채를 반드시 눈에 보이게 한다.
   # 침묵하면 "검증 통과 = 데이터 완벽" 으로 착각한다.

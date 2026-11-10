@@ -1,0 +1,281 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "concern": "remote-service-control",
+  "workflow": "W2",
+  "generated_at": "2026-11-10T02:56:52Z",
+  "summary": "One confirmed service-off gate bypass was reproduced and fixed. TypeOK and seven safety action-properties hold across 336 distinct bounded states (depth 12). Separate negative controls show the original gate bypass, healthy protected-response reachability, and the completion window for already-started review-content finalization.",
+  "scope": {
+    "modeled": [
+      "One protected Worker request and one scheduled draft slot.",
+      "Enabled/disabled control state, control-store availability, admin authorization and revision values 0..2.",
+      "Protected request start/response acceptance, scheduled start, provider call start, post-provider check, review-content finalization start/completion, and failure-status bookkeeping after shutdown is observed."
+    ],
+    "abstracted": [
+      "All protected routes share one gate; only the explicit health/status/admin-control/logout allowlist is exempt.",
+      "The Durable Object returns a linearizable valid snapshot or an error.",
+      "Three parallel draft slots are represented by one; provider output and D1 row data are opaque. `failClaim` status-only writes are represented by a `blocking` phase; review-content finalization may complete after shutdown if it started before shutdown."
+    ],
+    "out_of_scope": [
+      "Cloudflare production deployment, real OAuth/Access tokens, D1 isolation behavior and external-provider internals.",
+      "Cancellation of an AI request or review-content finalization already started. A finalization that completes after shutdown may leave a private row which can remain after re-enable.",
+      "Liveness/eventual completion and all possible revision counts."
+    ],
+    "assumptions": [
+      "Durable Object state reads/writes are linearizable within one control object.",
+      "Modeled actions follow actual asynchronous boundaries: the post-provider check starts or skips content finalization, an in-flight finalization completes in a separate action, and blocked-claim status bookkeeping contains no provider content.",
+      "A provider operation already started cannot be cancelled; if shutdown is observed before content finalization starts, its output is discarded. A finalization already started cannot be cancelled. `failClaim` may record failure status without generated content while OFF."
+    ]
+  },
+  "properties": [
+    {
+      "name": "TypeOK",
+      "kind": "invariant",
+      "statement": "Each control, request, scheduler, and revision variable remains in its declared finite domain.",
+      "meaning": "The model state is well-typed throughout every interleaving.",
+      "source": "formal/remote-service-control/tla/ServiceControl.tla",
+      "frozen": false,
+      "result": "holds",
+      "tool": "TLC 2026.11.03.180953 (rev 309e489)",
+      "bounds": "UseServiceGate=true; MaxRevision=2; one request, one scheduled slot, one admin.",
+      "evidence": "evidence/tlc-final-normal/tlc.log"
+    },
+    {
+      "name": "ProtectedStartGuard",
+      "kind": "action-property",
+      "statement": "A protected request starts only while the service is enabled and the control state is available.",
+      "meaning": "Disabled or unreadable service state blocks protected routes before the handler/auth path.",
+      "source": "docs/superpowers/specs/2026-10-28-remote-service-control.md:19,43",
+      "frozen": true,
+      "result": "holds",
+      "tool": "TLC 2026.11.03.180953 (rev 309e489)",
+      "bounds": "UseServiceGate=true; MaxRevision=2.",
+      "evidence": "evidence/tlc-final-normal/tlc.log"
+    },
+    {
+      "name": "ProtectedFinishGuard",
+      "kind": "action-property",
+      "statement": "A protected response is accepted only if service state is still enabled and available at completion.",
+      "meaning": "An in-flight handler that completes during shutdown returns the service-disabled/unavailable response instead.",
+      "source": "docs/superpowers/specs/2026-10-28-remote-service-control.md:19,43",
+      "frozen": true,
+      "result": "holds",
+      "tool": "TLC 2026.11.03.180953 (rev 309e489)",
+      "bounds": "UseServiceGate=true; MaxRevision=2.",
+      "evidence": "evidence/tlc-final-normal/tlc.log"
+    },
+    {
+      "name": "ScheduledStartGuard",
+      "kind": "action-property",
+      "statement": "A scheduled generation starts only while service state is enabled and available.",
+      "meaning": "Cron does not start draft-generation work while the service is off or its control state cannot be read.",
+      "source": "docs/superpowers/specs/2026-10-28-remote-service-control.md:19,43",
+      "frozen": true,
+      "result": "holds",
+      "tool": "TLC 2026.11.03.180953 (rev 309e489)",
+      "bounds": "UseServiceGate=true; MaxRevision=2.",
+      "evidence": "evidence/tlc-final-normal/tlc.log"
+    },
+    {
+      "name": "ProviderStartGuard",
+      "kind": "action-property",
+      "statement": "A provider call starts only while service state is enabled and available.",
+      "meaning": "Shutdown during catalog or D1 awaits prevents a later AI-provider request from starting.",
+      "source": "docs/superpowers/specs/2026-10-28-remote-service-control.md:19,43",
+      "frozen": true,
+      "result": "holds",
+      "tool": "TLC 2026.11.03.180953 (rev 309e489)",
+      "bounds": "UseServiceGate=true; MaxRevision=2.",
+      "evidence": "evidence/tlc-final-normal/tlc.log"
+    },
+    {
+      "name": "ProviderPersistStartGuard",
+      "kind": "action-property",
+      "statement": "The D1 finalize write starts only while service state is enabled and available after the provider response.",
+      "meaning": "If shutdown is observed at the post-provider check, the D1 write is skipped; an already-started D1 write is handled separately as an in-flight side effect.",
+      "source": "backend/cloudflare/src/blog-drafts.js:193-197",
+      "frozen": true,
+      "result": "holds",
+      "tool": "TLC 2026.11.03.180953 (rev 309e489)",
+      "bounds": "UseServiceGate=true; MaxRevision=2.",
+      "evidence": "evidence/tlc-final-normal/tlc.log"
+    },
+    {
+      "name": "BlockedStatusWriteGuard",
+      "kind": "action-property",
+      "statement": "The service-control-blocked failure status is recorded only after shutdown or control-store unavailability is observed.",
+      "meaning": "The blocked-claim status update is bookkeeping only and contains no generated title, excerpt, or body.",
+      "source": "backend/cloudflare/src/blog-drafts.js:166-171,188-195",
+      "frozen": true,
+      "result": "holds",
+      "tool": "TLC 2026.11.03.180953 (rev 309e489)",
+      "bounds": "UseServiceGate=true; MaxRevision=2.",
+      "evidence": "evidence/tlc-final-normal/tlc.log"
+    },
+    {
+      "name": "AdminToggleGuard",
+      "kind": "action-property",
+      "statement": "A service-state change requires an authenticated administrator and an available control store.",
+      "meaning": "The kill switch cannot be changed by an unauthenticated caller or while DO state is unavailable.",
+      "source": "docs/superpowers/specs/2026-10-28-remote-service-control.md:43-46",
+      "frozen": true,
+      "result": "holds",
+      "tool": "TLC 2026.11.03.180953 (rev 309e489)",
+      "bounds": "UseServiceGate=true; MaxRevision=2.",
+      "evidence": "evidence/tlc-final-normal/tlc.log"
+    },
+    {
+      "name": "ScheduledStartGuard (mutated gate)",
+      "kind": "action-property",
+      "statement": "The fixed route/scheduler gate is disabled (`UseServiceGate=false`) and must be detected.",
+      "meaning": "A deliberately ungated scheduler can start while control state is unavailable.",
+      "source": "formal/remote-service-control/tla/MC_bug.cfg",
+      "frozen": false,
+      "result": "violated",
+      "tool": "TLC 2026.11.03.180953 (rev 309e489)",
+      "bounds": "UseServiceGate=false; MaxRevision=2.",
+      "evidence": "evidence/tlc-final-bug/tlc.log"
+    },
+    {
+      "name": "SanityNeverAccepted",
+      "kind": "invariant",
+      "statement": "Sanity-only false property: no protected request is ever accepted.",
+      "meaning": "The healthy request path is reachable; this invariant must fail to rule out vacuous passing.",
+      "source": "formal/remote-service-control/tla/MC_sanity.cfg",
+      "frozen": false,
+      "result": "violated",
+      "tool": "TLC 2026.11.03.180953 (rev 309e489)",
+      "bounds": "UseServiceGate=true; MaxRevision=2.",
+      "evidence": "evidence/tlc-final-sanity/tlc.log"
+    },
+    {
+      "name": "NoReviewFinalizeAfterShutdown (known async boundary)",
+      "kind": "bounded-check",
+      "statement": "A review-content finalization that started while enabled cannot finish after shutdown.",
+      "meaning": "Intentionally false limitation check: an already-started content finalization can finish after shutdown; while OFF, protected draft routes remain gated. No guarantee is made that the private row is absent after re-enable. `failClaim` status-only bookkeeping is separately modeled and contains no generated content.",
+      "source": "formal/remote-service-control/tla/MC_boundary.cfg",
+      "frozen": false,
+      "result": "violated",
+      "tool": "TLC 2026.11.03.180953 (rev 309e489)",
+      "bounds": "UseServiceGate=true; MaxRevision=2.",
+      "evidence": "evidence/tlc-final-boundary/tlc.log"
+    },
+    {
+      "name": "BlockedStatusReachabilitySanity",
+      "kind": "bounded-check",
+      "statement": "NoBlockedStatusReached == scheduleState # \"blocking\"",
+      "meaning": "Intentional invariant counterexample: after the control store becomes unavailable during scheduler loading, SkipProvider reaches the blocking phase. This confirms the status-only failure path is reachable; it is not a product safety defect.",
+      "source": "backend/cloudflare/src/blog-drafts.js:188-190",
+      "frozen": false,
+      "result": "violated",
+      "tool": "TLC 2026.11.03.180953 (rev 309e489)",
+      "bounds": "UseServiceGate=true; MaxRevision=2.",
+      "evidence": "evidence/tlc-final-blockedstatus/tlc.log"
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "title": "Service-off bypass through blog drafts and scheduled AI",
+      "severity": "medium",
+      "status": "fixed",
+      "property": "ScheduledStartGuard / ProviderStartGuard / ProviderPersistStartGuard / BlockedStatusWriteGuard",
+      "story": "The original route allowlist exempted admin blog-draft list/review calls, so disabled service reached admin authentication and returned 403 instead of service_disabled. The Cron handler never read the global control state, allowing draft generation while disabled or while the state store failed. Shutdown during catalog loading, provider execution, or before review-content finalization starts is now rechecked. If OFF occurs after finalization starts, that private write may still complete; `failClaim` may record status-only bookkeeping without generated content.",
+      "trace": [
+        {
+          "step": 1,
+          "actor": "TLC",
+          "action": "Init (enabled=true, controlAvailable=true)",
+          "code": "formal/remote-service-control/tla/ServiceControl.tla:14",
+          "changed": {
+            "serviceEnabled": "TRUE",
+            "controlAvailable": "TRUE",
+            "scheduleState": "idle"
+          },
+          "violation": false
+        },
+        {
+          "step": 2,
+          "actor": "Control store",
+          "action": "ControlUnavailable",
+          "code": "backend/cloudflare/src/index.js:36-43",
+          "changed": {
+            "controlAvailable": "FALSE"
+          },
+          "violation": false
+        },
+        {
+          "step": 3,
+          "actor": "Cron (mutation mode)",
+          "action": "StartScheduled despite unavailable control state",
+          "code": "backend/cloudflare/src/index.js:311-323",
+          "changed": {
+            "scheduleState": "loading"
+          },
+          "violation": true
+        }
+      ],
+      "reproduction": {
+        "test": "backend/cloudflare/tests/blog-drafts.test.js::daily scheduler skips generation while the global service is disabled; backend/cloudflare/tests/service-control.test.js::disabled mode blocks protected routes before session authentication",
+        "result_before_fix": "fails",
+        "result_after_fix": "passes"
+      },
+      "fix": {
+        "summary": "Removed blog-draft APIs from the control-plane exception allowlist; the scheduled handler now fails closed on disabled/unavailable DO state; generation rechecks before provider calls and review-content finalization.",
+        "diff": "`isControlPlane` now matches only the spec allowlist. `scheduled` passes a fail-closed state checker to `generateDailyDrafts`; each slot checks it before claim/provider and after provider response. OFF status is recorded without generated content; once review-content finalization starts, it is not cancelled if shutdown happens during that write.",
+        "model_recheck": "passes",
+        "mutation_check": "fails-as-expected"
+      },
+      "evidence": [
+        "evidence/red-tests.log",
+        "evidence/green-tests.log",
+        "evidence/tlc-async-boundary-normal/tlc.log",
+        "evidence/tlc-async-boundary-bug/tlc.log",
+        "evidence/tlc-async-boundary-bug/cex.json",
+        "evidence/tlc-async-boundary-sanity/tlc.log",
+        "evidence/tlc-async-boundary-sanity/cex.json",
+        "evidence/tlc-async-boundary-window/tlc.log",
+        "evidence/tlc-async-boundary-window/cex.json",
+        "evidence/trace-parser-encoding.log",
+        "evidence/tlc-final-normal/tlc.log",
+        "evidence/tlc-final-bug/cex.json",
+        "evidence/tlc-final-bug/trace.md",
+        "evidence/tlc-final-sanity/cex.json",
+        "evidence/tlc-final-sanity/trace.md",
+        "evidence/tlc-final-boundary/cex.json",
+        "evidence/tlc-final-boundary/trace.md",
+        "evidence/tlc-final-blockedstatus/cex.json",
+        "evidence/tlc-final-blockedstatus/trace.md"
+      ]
+    }
+  ],
+  "trust_base": {
+    "tla": {
+      "tool_version": "TLC 2026.11.03.180953 (rev 309e489), Java 23.0.1",
+      "states_generated": 1345,
+      "distinct_states": 336,
+      "depth": 12,
+      "sanity_checks": [
+        "MC_sanity.cfg intentionally violates SanityNeverAccepted; a protected request acceptance is reachable.",
+        "MC_bug.cfg with UseServiceGate=false intentionally violates ScheduledStartGuard.",
+        "MC_boundary.cfg intentionally violates NoReviewFinalizeAfterShutdown to expose content finalization already in flight completing during shutdown.",
+        "MC.cfg -coverage 1 records positive coverage for every model action.",
+        "MC_blockedstatus.cfg intentionally violates NoBlockedStatusReached; the cex reaches the blocking phase via SkipProvider after ControlUnavailable. This is an expected reachability witness, not a bug."
+      ]
+    }
+  },
+  "rerun": [
+    "node --test backend/cloudflare/tests/service-control.test.js backend/cloudflare/tests/blog-drafts.test.js",
+    "node --test backend/cloudflare/tests",
+    "flutter test --no-pub --reporter compact",
+    "dart analyze lib",
+    "python backend/scripts/test_verify_r2_bundle.py",
+    "python backend/scripts/verify_r2_bundle.py --data-dir backend/data/study --bundle backend/scripts/out --catalog backend/catalog/tracks.json --migrations backend/cloudflare/migrations",
+    "python C:\\Users\\FREE\\.agents\\skills\\formal-verify\\scripts\\correspondence_check.py formal/remote-service-control --root .",
+    "From Git Bash at repository root, export PROOF_SKILLS_TOOLS=/c/Users/FREE/.cache/proof-skills and run tlc.sh against formal/remote-service-control/tla/ServiceControl.tla with configs MC.cfg, MC_bug.cfg, MC_sanity.cfg, MC_boundary.cfg, and MC_blockedstatus.cfg, saving each under the matching evidence/tlc-final-* directory; use -coverage 1 for MC.cfg."
+  ],
+  "next_steps": [
+    "Keep all five final-model TLC configurations (normal, mutation, request reachability, in-flight boundary, and blocked-status reachability) in the CI regression guard; the blocked-status invariant is intentionally false as a reachability witness.",
+    "Complete the separate deployment gates for OAuth/Access environment values, refresh/expiry E2E, Play Billing verification, remote D1 migration, and production Worker/R2 deployment.",
+    "Do not infer production behavior from local tests or this bounded state exploration."
+  ]
+}

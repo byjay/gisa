@@ -18,8 +18,11 @@ void main() {
     test('기본 ID 는 구글 공식 테스트 ID 이며 usesTestIds 가 이를 감지한다', () {
       const c = AdsConfig.defaults();
       expect(c.androidAppId, AdsConfig.testAppId);
-      expect(c.usesTestIds, isTrue,
-          reason: '테스트 ID 를 감지하지 못하면 그대로 출시돼 수익이 0원이 된다');
+      expect(
+        c.usesTestIds,
+        isTrue,
+        reason: '테스트 ID 를 감지하지 못하면 그대로 출시돼 수익이 0원이 된다',
+      );
     });
 
     test('문제풀이 화면 배너는 기본 꺼짐 — 집중을 깨면 이탈한다', () {
@@ -30,28 +33,40 @@ void main() {
 
   group('ID 형식 판정', () {
     test('구글 규격을 만족하는 ID 만 통과한다', () {
-      expect(AdsConfig.isValidAppId('ca-app-pub-1234567890123456~9876543210'),
-          isTrue);
-      expect(AdsConfig.isValidUnitId('ca-app-pub-1234567890123456/9876543210'),
-          isTrue);
+      expect(
+        AdsConfig.isValidAppId('ca-app-pub-1234567890123456~9876543210'),
+        isTrue,
+      );
+      expect(
+        AdsConfig.isValidUnitId('ca-app-pub-1234567890123456/9876543210'),
+        isTrue,
+      );
     });
 
     test('구분자가 바뀌면 거부한다 (앱ID 는 ~, 단위ID 는 /)', () {
       // 실무에서 가장 흔한 실수다. 콘솔에서 복사하다 서로 뒤바꿔 넣는다.
-      expect(AdsConfig.isValidAppId('ca-app-pub-1234567890123456/9876543210'),
-          isFalse);
-      expect(AdsConfig.isValidUnitId('ca-app-pub-1234567890123456~9876543210'),
-          isFalse);
+      expect(
+        AdsConfig.isValidAppId('ca-app-pub-1234567890123456/9876543210'),
+        isFalse,
+      );
+      expect(
+        AdsConfig.isValidUnitId('ca-app-pub-1234567890123456~9876543210'),
+        isFalse,
+      );
     });
 
     test('빈 값·자릿수 부족·접두사 오류를 거부한다', () {
       expect(AdsConfig.isValidUnitId(''), isFalse);
       expect(AdsConfig.isValidUnitId('ca-app-pub-123/456'), isFalse);
-      expect(AdsConfig.isValidUnitId('pub-1234567890123456/9876543210'), isFalse);
+      expect(
+        AdsConfig.isValidUnitId('pub-1234567890123456/9876543210'),
+        isFalse,
+      );
       // 앞뒤 공백이 붙은 값도 거부해야 한다(붙여넣기 사고).
       expect(
-          AdsConfig.isValidUnitId(' ca-app-pub-1234567890123456/9876543210'),
-          isFalse);
+        AdsConfig.isValidUnitId(' ca-app-pub-1234567890123456/9876543210'),
+        isFalse,
+      );
     });
 
     test('실 ID 로 바꾸면 usesTestIds 가 false 가 된다', () {

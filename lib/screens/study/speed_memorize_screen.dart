@@ -46,8 +46,8 @@ class _SpeedMemorizeScreenState extends State<SpeedMemorizeScreen> {
   }
 
   /// 💎 무료 티어: 반복문제 카드도 10%만 열람 가능(나머지는 프리미엄).
-  int get _allowedCount => EntitlementService.instance
-      .allowedQuestionCount(_rawCards.length);
+  int get _allowedCount =>
+      EntitlementService.instance.allowedQuestionCount(_rawCards.length);
 
   List<RepeatCluster> get _rawCards {
     final all = _all ?? [];
@@ -112,9 +112,7 @@ class _SpeedMemorizeScreenState extends State<SpeedMemorizeScreen> {
           if (all != null)
             IconButton(
               tooltip: _hideAnswer ? '정답 표시 모드' : '셀프테스트(정답 가리기)',
-              icon: Icon(
-                _hideAnswer ? Icons.visibility_off : Icons.visibility,
-              ),
+              icon: Icon(_hideAnswer ? Icons.visibility_off : Icons.visibility),
               onPressed: () => setState(() {
                 _hideAnswer = !_hideAnswer;
                 _revealed = false;
@@ -366,9 +364,9 @@ class _SpeedMemorizeScreenState extends State<SpeedMemorizeScreen> {
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 22),
                       decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: Colors.green.withValues(alpha: 0.4),
@@ -376,8 +374,11 @@ class _SpeedMemorizeScreenState extends State<SpeedMemorizeScreen> {
                       ),
                       child: const Column(
                         children: [
-                          Icon(Icons.touch_app_rounded,
-                              size: 26, color: Colors.green),
+                          Icon(
+                            Icons.touch_app_rounded,
+                            size: 26,
+                            color: Colors.green,
+                          ),
                           SizedBox(height: 6),
                           Text(
                             '정답을 떠올려 보세요\n(탭하면 정답 공개)',
@@ -393,42 +394,29 @@ class _SpeedMemorizeScreenState extends State<SpeedMemorizeScreen> {
                     ),
                   ),
                 ] else
-                // 문제-답 외우기: 정답을 항상 표시 (녹색 강조 + 체크)
-                for (var i = 0; i < card.options.length; i++)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 6),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 6,
-                    ),
-                    decoration: i + 1 == card.answer
-                        ? BoxDecoration(
-                            color: Colors.green.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: Colors.green.withValues(alpha: 0.55),
-                            ),
-                          )
-                        : null,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${i + 1}. ',
-                          style: TextStyle(
-                            fontWeight: i + 1 == card.answer
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                            color: i + 1 == card.answer
-                                ? Colors.green[700]
-                                : null,
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            card.options[i],
+                  // 문제-답 외우기: 정답을 항상 표시 (녹색 강조 + 체크)
+                  for (var i = 0; i < card.options.length; i++)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
+                      decoration: i + 1 == card.answer
+                          ? BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: Colors.green.withValues(alpha: 0.55),
+                              ),
+                            )
+                          : null,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${i + 1}. ',
                             style: TextStyle(
-                              height: 1.4,
                               fontWeight: i + 1 == card.answer
                                   ? FontWeight.bold
                                   : FontWeight.normal,
@@ -437,16 +425,29 @@ class _SpeedMemorizeScreenState extends State<SpeedMemorizeScreen> {
                                   : null,
                             ),
                           ),
-                        ),
-                        if (i + 1 == card.answer)
-                          Icon(
-                            Icons.check_circle,
-                            size: 18,
-                            color: Colors.green[600],
+                          Expanded(
+                            child: Text(
+                              card.options[i],
+                              style: TextStyle(
+                                height: 1.4,
+                                fontWeight: i + 1 == card.answer
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                color: i + 1 == card.answer
+                                    ? Colors.green[700]
+                                    : null,
+                              ),
+                            ),
                           ),
-                      ],
+                          if (i + 1 == card.answer)
+                            Icon(
+                              Icons.check_circle,
+                              size: 18,
+                              color: Colors.green[600],
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
               ],
             ),
           ),
@@ -620,12 +621,12 @@ class _SpeedMemorizeScreenState extends State<SpeedMemorizeScreen> {
         content: Text(
           isFree
               ? '무료로 열람 가능한 $total개 카드를 모두 확인했습니다.\n'
-                  '전체 반복문제는 $rawTotal개예요. 나머지 ${rawTotal - total}개 카드와 '
-                  '자동속독·셀프테스트를 무제한으로 쓰려면 프리미엄으로 업그레이드하세요.\n\n'
-                  'CBT 문제은행의 약 50%는 기존 기출 재출제 — 이 카드들이 합격 최단 경로입니다.'
+                    '전체 반복문제는 $rawTotal개예요. 나머지 ${rawTotal - total}개 카드와 '
+                    '자동속독·셀프테스트를 무제한으로 쓰려면 프리미엄으로 업그레이드하세요.\n\n'
+                    'CBT 문제은행의 약 50%는 기존 기출 재출제 — 이 카드들이 합격 최단 경로입니다.'
               : '$total개 반복문제 카드를 모두 확인했습니다.\n'
-                  'CBT 문제은행의 약 50%는 기존 기출 재출제입니다. '
-                  '이 카드들을 3회독 하면 실전에서 절반은 자동으로 맞힙니다.',
+                    'CBT 문제은행의 약 50%는 기존 기출 재출제입니다. '
+                    '이 카드들을 3회독 하면 실전에서 절반은 자동으로 맞힙니다.',
         ),
         actions: [
           TextButton(

@@ -12,9 +12,9 @@ import '../screens/premium_screen.dart';
 
 /// 프리미엄 페이월(구독 안내)로 이동.
 Future<void> openPremiumPaywall(BuildContext context, {String? hook}) {
-  return Navigator.of(context).push(
-    MaterialPageRoute(builder: (_) => PremiumScreen(hookMessage: hook)),
-  );
+  return Navigator.of(
+    context,
+  ).push(MaterialPageRoute(builder: (_) => PremiumScreen(hookMessage: hook)));
 }
 
 /// 🔒 잠긴 콘텐츠 위에 덮는 블러/자물쇠 오버레이 카드.
@@ -63,10 +63,7 @@ class LockedOverlay extends StatelessWidget {
                 color: const Color(0xFFF59E0B).withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
-                Icons.lock_rounded,
-                color: Color(0xFFF59E0B),
-              ),
+              child: const Icon(Icons.lock_rounded, color: Color(0xFFF59E0B)),
             ),
             const SizedBox(width: 12),
             Expanded(

@@ -12,6 +12,9 @@ void main() {
     ).readAsStringSync();
 
     expect(debugManifest, contains('android:usesCleartextTraffic="true"'));
-    expect(mainManifest, isNot(contains('android:usesCleartextTraffic="true"')));
+    expect(
+      mainManifest,
+      isNot(contains('android:usesCleartextTraffic="true"')),
+    );
   });
 }

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>원격 서비스 차단 검증 — GISACLUB</title>
+  <style>
+    :root { color-scheme: light; font: 16px/1.6 system-ui, sans-serif; color: #172033; background: #f4f6fa; }
+    body { max-width: 1020px; margin: 32px auto; padding: 0 20px 48px; }
+    h1, h2 { line-height: 1.25; }
+    h1 { margin-bottom: 4px; }
+    .meta, .muted { color: #536078; }
+    section { background: white; border: 1px solid #dce2ec; border-radius: 12px; padding: 20px 24px; margin: 18px 0; }
+    .status { display: inline-block; color: #075b36; background: #e2f5ea; border-radius: 99px; padding: 3px 12px; font-weight: 700; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border-bottom: 1px solid #e3e7ef; text-align: left; padding: 8px 10px; vertical-align: top; }
+    th { background: #f7f8fb; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    pre { overflow-x: auto; background: #f6f8fb; padding: 12px; border-radius: 8px; }
+    svg { display: block; width: 100%; height: auto; max-height: 180px; }
+    .box { fill: #edf3ff; stroke: #4b6baf; stroke-width: 2; }
+    .good { fill: #e2f5ea; stroke: #278052; }
+    .warn { fill: #fff2d9; stroke: #b5760b; }
+    .label { fill: #172033; font: 15px system-ui, sans-serif; text-anchor: middle; }
+    .arrow { stroke: #536078; stroke-width: 2; marker-end: url(#arrow); }
+    a { color: #2857a4; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>원격 서비스 차단 검증</h1>
+    <div class="meta">GISACLUB · concern: <code>remote-service-control</code> · 2026-11-10</div>
+    <p><span class="status">모델·로컬 테스트 통과</span> 프로덕션 배포 승인이나 운영 환경 검증을 뜻하지 않습니다.</p>
+  </header>
+
+  <section>
+    <h2>판정</h2>
+    <p>서비스가 꺼져 있거나 제어 상태를 읽을 수 없을 때 보호 API와 예약 AI 초안 생성이 시작되지 않도록 수정했습니다. 제공자 응답 뒤 OFF/오류가 관측되면 검토용 콘텐츠 최종화 D1 쓰기를 시작하지 않습니다. 다만 검사를 통과해 이미 시작된 최종화는 OFF 후에도 완료될 수 있습니다. 이 쓰기는 취소 불가한 in-flight 작업으로 모델링했고, OFF 중에는 초안 API로 접근할 수 없습니다. OFF 감지 시 claim 정리를 위해 `failClaim`이 generated content 없이 실패 상태만 기록할 수도 있습니다. 서비스가 다시 켜진 뒤 이미 시작된 콘텐츠 최종화 행이 남아 있지 않다는 보장은 하지 않습니다.</p>
+    <p>최종 TLA+ 모델에서 `TypeOK`와 7개 안전성 action property가 유지됐습니다(1,345개 생성 / 336개 서로 다른 상태 / 최대 깊이 12). 결함 주입, 보호 응답 도달성, in-flight 콘텐츠 최종화, 차단 claim 상태 경로 도달성 검사는 각각 의도된 반례를 확인했습니다. 마지막 항목의 반례는 정상 상태 경로 증거이지 제품 결함이 아닙니다.</p>
+    <svg viewBox="0 0 960 150" role="img" aria-label="서비스 상태 확인 후 API 또는 예약 생성 경로를 허용하거나 차단하는 흐름">
+      <defs><marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#536078"/></marker></defs>
+      <rect class="box" x="20" y="42" width="190" height="62" rx="10"/><text class="label" x="115" y="68"><tspan x="115">서비스 상태</tspan><tspan x="115" dy="21">조회</tspan></text>
+      <line class="arrow" x1="210" y1="73" x2="300" y2="73"/>
+      <rect class="good" x="305" y="15" width="210" height="55" rx="10"/><text class="label" x="410" y="48">ON · 사용 가능</text>
+      <rect class="warn" x="305" y="84" width="210" height="55" rx="10"/><text class="label" x="410" y="117">OFF · 오류</text>
+      <line class="arrow" x1="515" y1="42" x2="620" y2="42"/><line class="arrow" x1="515" y1="111" x2="620" y2="111"/>
+      <rect class="good" x="625" y="15" width="300" height="55" rx="10"/><text class="label" x="775" y="48">API / 예약 작업 진행</text>
+      <rect class="warn" x="625" y="84" width="300" height="55" rx="10"/><text class="label" x="775" y="117">차단 · 진행 중 결과 폐기</text>
+    </svg>
+  </section>
+
+  <section>
+    <h2>속성 결과</h2>
+    <table>
+      <thead><tr><th>검사</th><th>결과</th><th>확인 내용</th></tr></thead>
+      <tbody>
+        <tr><td><code>TypeOK</code></td><td>통과</td><td>모델 변수들이 선언한 유한 도메인 안에 있음</td></tr>
+        <tr><td><code>ProtectedStartGuard</code>, <code>ProtectedFinishGuard</code></td><td>통과</td><td>요청 시작 및 응답 수락 시점 모두 서비스 상태 확인</td></tr>
+        <tr><td><code>ScheduledStartGuard</code></td><td>통과</td><td>OFF 또는 제어 상태 오류에서 Cron 생성 시작 차단</td></tr>
+        <tr><td><code>ProviderStartGuard</code>, <code>ProviderPersistStartGuard</code>, <code>BlockedStatusWriteGuard</code></td><td>통과</td><td>외부 호출 전/콘텐츠 최종화 전에 재검사, OFF 시 실패 상태만 기록</td></tr>
+        <tr><td><code>AdminToggleGuard</code></td><td>통과</td><td>모델에서 관리자 인증과 상태 가용성 없이는 토글 불가</td></tr>
+        <tr><td><code>NoBlockedStatusReached</code></td><td>의도적 반례</td><td>제어 상태 오류 뒤 `SkipProvider`가 status-only 정리 단계에 도달함</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">검증기: TLC 2026.11.03.180953 (rev 309e489), Java 23.0.1. 최종 정상 실행: 1,345 생성 / 336 서로 다른 상태 / 깊이 12. 후속 action/property 모델이 포함된 재실행 로그를 `evidence/tlc-final-normal/`에 보존했습니다.</p>
+  </section>
+
+  <section>
+    <h2>발견 및 수정한 결함 F1</h2>
+    <p><strong>서비스 OFF 우회 — 수정됨.</strong> 관리자 블로그 초안 경로가 예외 허용목록에 포함되어 OFF 상태에서도 인증까지 진행했고, Cron은 전역 서비스 상태를 확인하지 않았습니다. 카탈로그 로딩 또는 생성 중 OFF로 바뀌는 경우도 고려하지 않았습니다.</p>
+    <p>예전 코드의 결함 재현 경로(의도적으로 가드를 제거한 모델):</p>
+    <pre>Init → ControlUnavailable → StartScheduled
+위반: 제어 상태를 읽지 못했는데 예약 생성이 loading으로 시작됨</pre>
+    <p>수정 후 허용목록을 명세대로 좁히고, 예약 진입·슬롯 처리·제공자 응답 뒤에 fail-closed 재검사를 추가했습니다. 회귀 테스트는 수정 전 실패, 수정 후 통과했습니다. 별도 <code>MC_boundary.cfg</code>는 콘텐츠 최종화가 시작된 뒤 OFF가 되면 이미 시작된 쓰기가 끝날 수 있음을 의도적 반례로 남깁니다. status-only <code>failClaim</code> 경로는 생성된 본문을 저장하지 않습니다.</p>
+  </section>
+
+  <section>
+    <h2>검증 범위와 재현</h2>
+    <table>
+      <thead><tr><th>검증</th><th>결과</th></tr></thead>
+      <tbody>
+        <tr><td>Cloudflare Worker 테스트</td><td>44/44</td></tr>
+        <tr><td>Flutter 테스트</td><td>119/119</td></tr>
+        <tr><td>Dart 정적 분석</td><td>문제 없음</td></tr>
+        <tr><td>R2 fixture 검사 / 전체 번들 검증</td><td>11/11 / 통과 — 10 track, 193 exam, 16,653 question</td></tr>
+        <tr><td>코드-모델 대응 검사</td><td>25 포인터, 3 소스 파일, 끊어진 참조 0</td></tr>
+        <tr><td>Android debug APK</td><td>빌드 통과 — Kotlin incremental-cache 경고 후 Gradle 완료</td></tr>
+      </tbody>
+    </table>
+    <p>단일 요청·단일 예약 슬롯, 상태 revision 0..2로 제한된 안전성 모델입니다. Durable Object는 선형화된 읽기/쓰기라고 가정합니다. 실제 OAuth/Access 만료·갱신, D1 격리 동작, Cloudflare 배포, 외부 제공자 내부, 다중 지역 실행과 진행성(liveness)은 검증 범위 밖입니다.</p>
+    <p>재현 명령과 상세 증거: <a href="../remote-service-control/findings.json">findings.json</a>, <a href="../remote-service-control/SCOPE.md">SCOPE.md</a>, <a href="../remote-service-control/CORRESPONDENCE.md">CORRESPONDENCE.md</a>, <a href="../remote-service-control/evidence/green-tests.log">green-tests.log</a>, <a href="../remote-service-control/evidence/tlc-final-normal/tlc.log">최종 정상 TLC</a>, <a href="../remote-service-control/evidence/tlc-final-blockedstatus/trace.md">차단상태 도달 trace</a>.</p>
+    <pre>node --test backend/cloudflare/tests
+flutter test --no-pub --reporter compact
+dart analyze lib
+python backend/scripts/test_verify_r2_bundle.py
+python backend/scripts/verify_r2_bundle.py --data-dir backend/data/study --bundle backend/scripts/out --catalog backend/catalog/tracks.json --migrations backend/cloudflare/migrations
+# Git Bash: repeat tlc.sh for MC.cfg, MC_bug.cfg, MC_sanity.cfg, MC_boundary.cfg, MC_blockedstatus.cfg</pre>
+  </section>
+</body>
+</html>

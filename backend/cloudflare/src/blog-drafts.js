@@ -180,11 +180,20 @@ async function finishClaim(env, id, token, draft, now) {
   return Number(result?.meta?.changes || 0) === 1;
 }
 
-async function createSlot(env, day, slot, topic, now) {
+async function createSlot(env, day, slot, topic, now, isServiceEnabled) {
+  if (!await isServiceEnabled()) return 'skipped';
   const claim = await claimSlot(env, day, slot, topic, now);
   if (!claim) return 'skipped';
   try {
+    if (!await isServiceEnabled()) {
+      await failClaim(env, claim.id, claim.token, 'service_control_blocked', Date.now());
+      return 'skipped';
+    }
     const draft = await generateDraft(env, topic);
+    if (!await isServiceEnabled()) {
+      await failClaim(env, claim.id, claim.token, 'service_control_blocked', Date.now());
+      return 'skipped';
+    }
     return await finishClaim(env, claim.id, claim.token, draft, Date.now()) ? 'created' : 'stale';
   } catch (error) {
     const safeCode = typeof error?.code === 'string' ? error.code : 'generation_failed';
@@ -193,12 +202,17 @@ async function createSlot(env, day, slot, topic, now) {
   }
 }
 
-export async function generateDailyDrafts(env, scheduledTime) {
+export async function generateDailyDrafts(env, scheduledTime, isServiceEnabled) {
   requireEnabled(env);
   const day = kstDate(scheduledTime);
+  if (typeof isServiceEnabled !== 'function' || !await isServiceEnabled()) {
+    return { day, created: 0, failed: 0, skipped: DAILY_DRAFT_LIMIT };
+  }
   const topics = selectDailyTopics(await getTrackCatalog(env), day);
   const now = Date.now();
-  const settled = await Promise.allSettled(topics.map((topic, slot) => createSlot(env, day, slot, topic, now)));
+  const settled = await Promise.allSettled(
+    topics.map((topic, slot) => createSlot(env, day, slot, topic, now, isServiceEnabled)),
+  );
   const results = settled.map((result) => result.status === 'fulfilled' ? result.value : 'failed');
   const failed = results.filter((result) => result === 'failed').length;
   const summary = {

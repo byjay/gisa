@@ -87,7 +87,9 @@ class AuthService extends ChangeNotifier {
   String? get dataOwnerId => hasApiSession ? _user?.id : null;
 
   /// AppProvider binds account-scoped Hive boxes before the login state is shown.
-  void setDataOwnerChangeHandler(Future<void> Function(String? ownerId) handler) {
+  void setDataOwnerChangeHandler(
+    Future<void> Function(String? ownerId) handler,
+  ) {
     _dataOwnerChangeHandler = handler;
   }
 

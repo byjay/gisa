@@ -38,10 +38,7 @@ class QuizGrader {
   /// [i] = 문항 인덱스, [picked] 값 = 선택한 보기(1-based). 선택하지 않은
   /// 문항은 picked에 키가 없으며 오답으로 처리한다(실전 미답 = 오답과 동일 취급,
   /// 기존 `_finish()` 동작과 동일하게 유지).
-  static QuizGradeResult grade(
-    List<Question> questions,
-    Map<int, int> picked,
-  ) {
+  static QuizGradeResult grade(List<Question> questions, Map<int, int> picked) {
     var correct = 0;
     final subjectTotal = <String, int>{};
     final subjectCorrect = <String, int>{};

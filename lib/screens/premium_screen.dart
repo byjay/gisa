@@ -113,7 +113,9 @@ class PremiumScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.4)),
+        border: Border.all(
+          color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
+        ),
       ),
       child: Row(
         children: [
@@ -193,7 +195,12 @@ class PremiumScreen extends StatelessWidget {
     );
   }
 
-  Widget _compareRow(ColorScheme cs, String label, String free, String premium) {
+  Widget _compareRow(
+    ColorScheme cs,
+    String label,
+    String free,
+    String premium,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
       child: Row(
@@ -325,9 +332,7 @@ class PremiumScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: highlight
-                ? null
-                : Border.all(color: cs.outlineVariant),
+            border: highlight ? null : Border.all(color: cs.outlineVariant),
           ),
           child: Row(
             children: [
@@ -444,8 +449,11 @@ class PremiumScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.shopping_cart_rounded,
-                size: 40, color: Color(0xFF4F46E5)),
+            const Icon(
+              Icons.shopping_cart_rounded,
+              size: 40,
+              color: Color(0xFF4F46E5),
+            ),
             const SizedBox(height: 12),
             Text(
               '$plan 결제',

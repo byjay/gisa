@@ -244,8 +244,9 @@ class CerebrasService {
       }
     }
     // 등급별로 토큰/추론 강도를 강제한다(무료는 상한선을 넘지 못한다).
-    final effectiveMaxTokens =
-        maxTokens > ent.aiMaxTokens() ? ent.aiMaxTokens() : maxTokens;
+    final effectiveMaxTokens = maxTokens > ent.aiMaxTokens()
+        ? ent.aiMaxTokens()
+        : maxTokens;
     final effectiveEffort = ent.aiReasoningEffort();
 
     late final http.Response res;
@@ -262,8 +263,7 @@ class CerebrasService {
               'messages': messages,
               'max_tokens': effectiveMaxTokens, // 무료는 짧게, 프리미엄은 길게
               'temperature': temperature,
-              'reasoning_effort':
-                  effectiveEffort, // 무료 low(축약) / 프리미엄 high(심화)
+              'reasoning_effort': effectiveEffort, // 무료 low(축약) / 프리미엄 high(심화)
             }),
           )
           .timeout(const Duration(seconds: 90));
@@ -277,9 +277,7 @@ class CerebrasService {
         break;
       case 401:
       case 403:
-        throw CerebrasException(
-          'API 키 인증에 실패했어요. 설정에서 API 키를 다시 확인해주세요.',
-        );
+        throw CerebrasException('API 키 인증에 실패했어요. 설정에서 API 키를 다시 확인해주세요.');
       case 429:
         throw CerebrasException('요청 한도 초과입니다. 잠시 후 다시 시도해주세요.');
       default:

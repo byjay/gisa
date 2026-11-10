@@ -109,8 +109,16 @@ test('public status returns the validated singleton service state', async () => 
 
 test('disabled mode blocks protected routes before session authentication', async () => {
   const control = controlNamespace(validState({ enabled: false, message: '점검 예정' }));
-  for (const path of ['/v1/app/version', '/v1/tracks', '/v1/auth/google', '/v1/admin/users']) {
-    const response = await call(path, {}, envWith(control));
+  const protectedRoutes = [
+    ['/v1/app/version', 'GET'],
+    ['/v1/tracks', 'GET'],
+    ['/v1/auth/google', 'POST'],
+    ['/v1/admin/users', 'GET'],
+    ['/v1/admin/blog-drafts', 'GET'],
+    ['/v1/admin/blog-drafts/draft-1/review', 'POST'],
+  ];
+  for (const [path, method] of protectedRoutes) {
+    const response = await call(path, { method }, envWith(control));
     assert.equal(response.status, 503, `${path} should be blocked before auth`);
     assert.deepEqual(await response.json(), { error: 'service_disabled', message: '점검 예정' });
   }

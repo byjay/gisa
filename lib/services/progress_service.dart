@@ -41,7 +41,9 @@ class ProgressService {
     final previous = raw is num
         ? raw.toInt()
         : raw is String
-        ? (int.tryParse(raw) ?? DateTime.tryParse(raw)?.millisecondsSinceEpoch ?? 0)
+        ? (int.tryParse(raw) ??
+              DateTime.tryParse(raw)?.millisecondsSinceEpoch ??
+              0)
         : 0;
     return max(DateTime.now().millisecondsSinceEpoch, previous + 1);
   }

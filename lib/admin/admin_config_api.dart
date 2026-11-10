@@ -43,7 +43,9 @@ class AdminConfigApi {
     }
     final token = AdminService.instance.serverToken;
     if (token == null || token.isEmpty) {
-      return const AdminPublishResult.failure('관리자 토큰이 없습니다. 먼저 관리자 인증을 완료하세요.');
+      return const AdminPublishResult.failure(
+        '관리자 토큰이 없습니다. 먼저 관리자 인증을 완료하세요.',
+      );
     }
     try {
       final res = await http
@@ -76,12 +78,8 @@ class AdminConfigApi {
 /// 배포 결과.
 @immutable
 class AdminPublishResult {
-  const AdminPublishResult.success(this.config)
-      : ok = true,
-        message = '배포 완료';
-  const AdminPublishResult.failure(this.message)
-      : ok = false,
-        config = null;
+  const AdminPublishResult.success(this.config) : ok = true, message = '배포 완료';
+  const AdminPublishResult.failure(this.message) : ok = false, config = null;
 
   final bool ok;
   final String message;

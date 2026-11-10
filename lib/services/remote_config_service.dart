@@ -60,7 +60,8 @@ class RemoteConfigService extends ChangeNotifier {
           .get(Uri.parse('$_base/v1/app/config'))
           .timeout(const Duration(seconds: 12));
       if (res.statusCode != 200) return false;
-      final json = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
+      final json =
+          jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
       final incoming = RemoteAppConfig.fromJson(json);
       // 버전이 같거나 낮으면(변경 없음) 굳이 알림/저장 안 함.
       final changed = incoming.version != _config.version;
@@ -121,44 +122,44 @@ class RemoteAppConfig {
   final AdsConfig ads;
 
   factory RemoteAppConfig.defaults() => const RemoteAppConfig(
-        version: 0,
-        updatedAt: 0,
-        features: RemoteFeatures.defaults(),
-        notice: RemoteNotice.empty(),
-        update: RemoteUpdateGate.none(),
-        activeTracks: <String>[],
-        ads: AdsConfig.defaults(),
-      );
+    version: 0,
+    updatedAt: 0,
+    features: RemoteFeatures.defaults(),
+    notice: RemoteNotice.empty(),
+    update: RemoteUpdateGate.none(),
+    activeTracks: <String>[],
+    ads: AdsConfig.defaults(),
+  );
 
   factory RemoteAppConfig.fromJson(Map<String, dynamic> j) => RemoteAppConfig(
-        version: (j['version'] as num?)?.toInt() ?? 0,
-        updatedAt: (j['updatedAt'] as num?)?.toInt() ?? 0,
-        features: RemoteFeatures.fromJson(
-          (j['features'] as Map?)?.cast<String, dynamic>() ?? const {},
-        ),
-        notice: RemoteNotice.fromJson(
-          (j['notice'] as Map?)?.cast<String, dynamic>() ?? const {},
-        ),
-        update: RemoteUpdateGate.fromJson(
-          (j['update'] as Map?)?.cast<String, dynamic>() ?? const {},
-        ),
-        activeTracks: ((j['activeTracks'] as List?) ?? const [])
-            .map((e) => e.toString())
-            .toList(),
-        ads: AdsConfig.fromJson(
-          (j['ads'] as Map?)?.cast<String, dynamic>() ?? const {},
-        ),
-      );
+    version: (j['version'] as num?)?.toInt() ?? 0,
+    updatedAt: (j['updatedAt'] as num?)?.toInt() ?? 0,
+    features: RemoteFeatures.fromJson(
+      (j['features'] as Map?)?.cast<String, dynamic>() ?? const {},
+    ),
+    notice: RemoteNotice.fromJson(
+      (j['notice'] as Map?)?.cast<String, dynamic>() ?? const {},
+    ),
+    update: RemoteUpdateGate.fromJson(
+      (j['update'] as Map?)?.cast<String, dynamic>() ?? const {},
+    ),
+    activeTracks: ((j['activeTracks'] as List?) ?? const [])
+        .map((e) => e.toString())
+        .toList(),
+    ads: AdsConfig.fromJson(
+      (j['ads'] as Map?)?.cast<String, dynamic>() ?? const {},
+    ),
+  );
 
   Map<String, dynamic> toJson() => {
-        'version': version,
-        'updatedAt': updatedAt,
-        'features': features.toJson(),
-        'notice': notice.toJson(),
-        'update': update.toJson(),
-        'activeTracks': activeTracks,
-        'ads': ads.toJson(),
-      };
+    'version': version,
+    'updatedAt': updatedAt,
+    'features': features.toJson(),
+    'notice': notice.toJson(),
+    'update': update.toJson(),
+    'activeTracks': activeTracks,
+    'ads': ads.toJson(),
+  };
 }
 
 @immutable
@@ -171,10 +172,10 @@ class RemoteFeatures {
   });
 
   const RemoteFeatures.defaults()
-      : aiTutorEnabled = true,
-        handwritingEnabled = true,
-        freeQuestionPercent = 10,
-        promoBannerEnabled = false;
+    : aiTutorEnabled = true,
+      handwritingEnabled = true,
+      freeQuestionPercent = 10,
+      promoBannerEnabled = false;
 
   final bool aiTutorEnabled;
   final bool handwritingEnabled;
@@ -182,31 +183,30 @@ class RemoteFeatures {
   final bool promoBannerEnabled;
 
   factory RemoteFeatures.fromJson(Map<String, dynamic> j) => RemoteFeatures(
-        aiTutorEnabled: j['aiTutorEnabled'] as bool? ?? true,
-        handwritingEnabled: j['handwritingEnabled'] as bool? ?? true,
-        freeQuestionPercent: (j['freeQuestionPercent'] as num?)?.toInt() ?? 10,
-        promoBannerEnabled: j['promoBannerEnabled'] as bool? ?? false,
-      );
+    aiTutorEnabled: j['aiTutorEnabled'] as bool? ?? true,
+    handwritingEnabled: j['handwritingEnabled'] as bool? ?? true,
+    freeQuestionPercent: (j['freeQuestionPercent'] as num?)?.toInt() ?? 10,
+    promoBannerEnabled: j['promoBannerEnabled'] as bool? ?? false,
+  );
 
   Map<String, dynamic> toJson() => {
-        'aiTutorEnabled': aiTutorEnabled,
-        'handwritingEnabled': handwritingEnabled,
-        'freeQuestionPercent': freeQuestionPercent,
-        'promoBannerEnabled': promoBannerEnabled,
-      };
+    'aiTutorEnabled': aiTutorEnabled,
+    'handwritingEnabled': handwritingEnabled,
+    'freeQuestionPercent': freeQuestionPercent,
+    'promoBannerEnabled': promoBannerEnabled,
+  };
 
   RemoteFeatures copyWith({
     bool? aiTutorEnabled,
     bool? handwritingEnabled,
     int? freeQuestionPercent,
     bool? promoBannerEnabled,
-  }) =>
-      RemoteFeatures(
-        aiTutorEnabled: aiTutorEnabled ?? this.aiTutorEnabled,
-        handwritingEnabled: handwritingEnabled ?? this.handwritingEnabled,
-        freeQuestionPercent: freeQuestionPercent ?? this.freeQuestionPercent,
-        promoBannerEnabled: promoBannerEnabled ?? this.promoBannerEnabled,
-      );
+  }) => RemoteFeatures(
+    aiTutorEnabled: aiTutorEnabled ?? this.aiTutorEnabled,
+    handwritingEnabled: handwritingEnabled ?? this.handwritingEnabled,
+    freeQuestionPercent: freeQuestionPercent ?? this.freeQuestionPercent,
+    promoBannerEnabled: promoBannerEnabled ?? this.promoBannerEnabled,
+  );
 }
 
 @immutable
@@ -217,10 +217,7 @@ class RemoteNotice {
     required this.linkUrl,
   });
 
-  const RemoteNotice.empty()
-      : text = '',
-        level = 'info',
-        linkUrl = '';
+  const RemoteNotice.empty() : text = '', level = 'info', linkUrl = '';
 
   final String text;
   final String level; // info | warn | urgent
@@ -229,16 +226,16 @@ class RemoteNotice {
   bool get isVisible => text.trim().isNotEmpty;
 
   factory RemoteNotice.fromJson(Map<String, dynamic> j) => RemoteNotice(
-        text: (j['text'] as String?) ?? '',
-        level: (j['level'] as String?) ?? 'info',
-        linkUrl: (j['linkUrl'] as String?) ?? '',
-      );
+    text: (j['text'] as String?) ?? '',
+    level: (j['level'] as String?) ?? 'info',
+    linkUrl: (j['linkUrl'] as String?) ?? '',
+  );
 
   Map<String, dynamic> toJson() => {
-        'text': text,
-        'level': level,
-        'linkUrl': linkUrl,
-      };
+    'text': text,
+    'level': level,
+    'linkUrl': linkUrl,
+  };
 
   RemoteNotice copyWith({String? text, String? level, String? linkUrl}) =>
       RemoteNotice(
@@ -259,11 +256,11 @@ class RemoteUpdateGate {
   });
 
   const RemoteUpdateGate.none()
-      : minSupportedBuild = 0,
-        latestBuild = 0,
-        latestVersion = '',
-        apkUrl = '',
-        forced = false;
+    : minSupportedBuild = 0,
+      latestBuild = 0,
+      latestVersion = '',
+      apkUrl = '',
+      forced = false;
 
   final int minSupportedBuild;
   final int latestBuild;
@@ -276,18 +273,18 @@ class RemoteUpdateGate {
       forced && minSupportedBuild > 0 && currentBuild < minSupportedBuild;
 
   factory RemoteUpdateGate.fromJson(Map<String, dynamic> j) => RemoteUpdateGate(
-        minSupportedBuild: (j['minSupportedBuild'] as num?)?.toInt() ?? 0,
-        latestBuild: (j['latestBuild'] as num?)?.toInt() ?? 0,
-        latestVersion: (j['latestVersion'] as String?) ?? '',
-        apkUrl: (j['apkUrl'] as String?) ?? '',
-        forced: j['forced'] as bool? ?? false,
-      );
+    minSupportedBuild: (j['minSupportedBuild'] as num?)?.toInt() ?? 0,
+    latestBuild: (j['latestBuild'] as num?)?.toInt() ?? 0,
+    latestVersion: (j['latestVersion'] as String?) ?? '',
+    apkUrl: (j['apkUrl'] as String?) ?? '',
+    forced: j['forced'] as bool? ?? false,
+  );
 
   Map<String, dynamic> toJson() => {
-        'minSupportedBuild': minSupportedBuild,
-        'latestBuild': latestBuild,
-        'latestVersion': latestVersion,
-        'apkUrl': apkUrl,
-        'forced': forced,
-      };
+    'minSupportedBuild': minSupportedBuild,
+    'latestBuild': latestBuild,
+    'latestVersion': latestVersion,
+    'apkUrl': apkUrl,
+    'forced': forced,
+  };
 }

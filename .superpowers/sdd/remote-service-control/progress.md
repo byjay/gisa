@@ -18,11 +18,11 @@ Use a single Durable Object rather than Workers KV: Cloudflare documents KV prop
 - [x] Read source routes, app bootstrap, update service, cache invalidation, admin auth, and project separation checklist.
 - [x] Search Warehouse/OpenFeature option; no reusable service-control module was found, no dependency added.
 - [x] Write design and two subsystem plans.
-- [ ] Implement Worker DO and route gate (parallel agent).
-- [ ] Implement Flutter client gate/admin control (parallel agent).
-- [ ] Build bounded TLA+ model, mutation counterexample, and source correspondence.
-- [ ] Review diffs, run all focused suites and app builds/analyzer as feasible.
-- [ ] Update HANDOFF and separation checklist with limits and deploy requirements.
+- [x] Implement Worker DO and route gate; disabled mode blocks all non-allowlisted HTTP paths before auth and rechecks protected responses.
+- [x] Implement Flutter client gate/admin control; status checks and local cache invalidation are covered by Flutter tests.
+- [x] Build bounded TLA+ model, mutation and reachability counterexamples, model the in-flight D1-write boundary explicitly, and record source correspondence in `formal/remote-service-control/`.
+- [x] Review diffs, run focused/full suites, Android debug build, and analyzer. A Kotlin daemon cache warning occurred but Gradle completed.
+- [x] Update HANDOFF and separation checklist with local evidence and remaining deployment requirements.
 - [ ] Continue cafe promotion request only if cafe rules explicitly permit a development-stage product post.
 
 ## Verification boundaries

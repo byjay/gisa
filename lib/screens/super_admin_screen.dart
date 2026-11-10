@@ -49,8 +49,7 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
       case AdminAuthResult.success:
         _tokenCtrl.clear();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('🛡️ 관리자 모드가 활성화되었습니다. 모든 기능이 무제한입니다.')),
+          const SnackBar(content: Text('🛡️ 관리자 모드가 활성화되었습니다. 모든 기능이 무제한입니다.')),
         );
         break;
       case AdminAuthResult.invalidToken:
@@ -107,8 +106,9 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
     final admin = context.watch<AdminService>();
     // 대시보드 주소는 코드에 하드코딩하지 않는다(R58). WEB_BASE_URL이 설정된
     // 빌드에서만 실제 주소를 괄호로 덧붙여 안내한다.
-    final dashboardHint =
-        admin.dashboardUrl.isNotEmpty ? '(${admin.dashboardUrl})' : '';
+    final dashboardHint = admin.dashboardUrl.isNotEmpty
+        ? '(${admin.dashboardUrl})'
+        : '';
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -117,14 +117,18 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.admin_panel_settings_rounded,
-                  size: 72, color: cs.primary),
+              Icon(
+                Icons.admin_panel_settings_rounded,
+                size: 72,
+                color: cs.primary,
+              ),
               const SizedBox(height: 16),
-              Text('운영자 인증',
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineSmall
-                      ?.copyWith(fontWeight: FontWeight.w800)),
+              Text(
+                '운영자 인증',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
               const SizedBox(height: 12),
               // 안내: Access 게이트 방식 설명
               Container(
@@ -138,13 +142,19 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.verified_user_rounded,
-                            size: 18, color: cs.primary),
+                        Icon(
+                          Icons.verified_user_rounded,
+                          size: 18,
+                          color: cs.primary,
+                        ),
                         const SizedBox(width: 6),
-                        Text('토큰 발급 방법',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                color: cs.primary)),
+                        Text(
+                          '토큰 발급 방법',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: cs.primary,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -180,14 +190,16 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
-                  onPressed: (admin.isVerifying || _tokenCtrl.text.trim().isEmpty)
+                  onPressed:
+                      (admin.isVerifying || _tokenCtrl.text.trim().isEmpty)
                       ? null
                       : _registerToken,
                   icon: admin.isVerifying
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2))
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : const Icon(Icons.lock_open_rounded),
                   label: Text(admin.isVerifying ? '서버 검증 중…' : '관리자 토큰 등록'),
                   style: FilledButton.styleFrom(
@@ -218,9 +230,10 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
                 '일반 사용자는 이 화면과 무관하게 앱을 그대로 사용합니다.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontSize: 11,
-                    height: 1.5,
-                    color: cs.onSurface.withValues(alpha: 0.55)),
+                  fontSize: 11,
+                  height: 1.5,
+                  color: cs.onSurface.withValues(alpha: 0.55),
+                ),
               ),
             ],
           ),
@@ -276,18 +289,22 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            const Icon(Icons.verified_user_rounded,
-                color: Colors.green, size: 32),
+            const Icon(
+              Icons.verified_user_rounded,
+              color: Colors.green,
+              size: 32,
+            ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('관리자 오버라이드 활성',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w800)),
+                  Text(
+                    '관리자 오버라이드 활성',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   const Text(
                     'AI 튜터 무제한 · 전 콘텐츠(기출·해설·심화) 잠금 해제 · 프리미엄 전 기능 활성.\n테스트 기간/무료 제한이 운영자 계정에는 적용되지 않습니다.',
@@ -309,7 +326,11 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
       ('정답률', '${app.overallAccuracy}%', Icons.check_circle_rounded),
       ('연속 학습', '${app.streak}일', Icons.local_fire_department_rounded),
       ('레벨 / XP', 'Lv.${app.level} · ${app.xp}XP', Icons.stars_rounded),
-      ('완료 시험세션', '${app.completedQuizSessions}회', Icons.assignment_turned_in_rounded),
+      (
+        '완료 시험세션',
+        '${app.completedQuizSessions}회',
+        Icons.assignment_turned_in_rounded,
+      ),
     ];
     return Card(
       child: Padding(
@@ -329,11 +350,14 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(it.$1,
-                              style: const TextStyle(fontSize: 11.5)),
-                          Text(it.$2,
-                              style: const TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w800)),
+                          Text(it.$1, style: const TextStyle(fontSize: 11.5)),
+                          Text(
+                            it.$2,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -355,16 +379,19 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
             title: const Text('종목·과목 노출 관리'),
             subtitle: const Text('이론/문제풀이/CBT/암기카드/AI튜터 기능 노출과 과목 활성화'),
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => const AdminSettingsScreen())),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const AdminSettingsScreen()),
+            ),
           ),
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.library_books_rounded),
             title: const Text('등록 종목'),
             subtitle: Text('총 ${kExamTracks.length}개 트랙 탑재'),
-            trailing: Text('${kExamTracks.length}',
-                style: const TextStyle(fontWeight: FontWeight.w800)),
+            trailing: Text(
+              '${kExamTracks.length}',
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
           ),
         ],
       ),
@@ -376,14 +403,20 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
       child: Column(
         children: [
           ListTile(
-            leading: Icon(ent.isPremium
-                ? Icons.workspace_premium_rounded
-                : Icons.person_outline_rounded),
-            title: Text('현재 등급: ${ent.isPremium ? "프리미엄" : "무료"}'
-                '${ent.isAdminOverride ? " (관리자 오버라이드)" : ""}'),
-            subtitle: Text(ent.expiry != null
-                ? '만료: ${ent.expiry!.toLocal().toString().split(" ").first}'
-                : '만료일 없음'),
+            leading: Icon(
+              ent.isPremium
+                  ? Icons.workspace_premium_rounded
+                  : Icons.person_outline_rounded,
+            ),
+            title: Text(
+              '현재 등급: ${ent.isPremium ? "프리미엄" : "무료"}'
+              '${ent.isAdminOverride ? " (관리자 오버라이드)" : ""}',
+            ),
+            subtitle: Text(
+              ent.expiry != null
+                  ? '만료: ${ent.expiry!.toLocal().toString().split(" ").first}'
+                  : '만료일 없음',
+            ),
           ),
           const Divider(height: 1),
           Padding(
@@ -395,9 +428,10 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
                     icon: const Icon(Icons.card_giftcard_rounded),
                     label: const Text('프리미엄 30일 부여'),
                     onPressed: () async {
-                      await ent.adminSetPlan(PlanTier.premium,
-                          expiry:
-                              DateTime.now().add(const Duration(days: 30)));
+                      await ent.adminSetPlan(
+                        PlanTier.premium,
+                        expiry: DateTime.now().add(const Duration(days: 30)),
+                      );
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('프리미엄 30일 부여됨(로컬 시연용)')),
@@ -443,12 +477,16 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
         builder: (context, snap) {
           final hasKey = snap.data ?? false;
           return ListTile(
-            leading: Icon(hasKey ? Icons.smart_toy_rounded : Icons.key_off_rounded,
-                color: hasKey ? Colors.green : null),
+            leading: Icon(
+              hasKey ? Icons.smart_toy_rounded : Icons.key_off_rounded,
+              color: hasKey ? Colors.green : null,
+            ),
             title: Text(hasKey ? 'AI 튜터 사용 준비 완료' : 'AI 키 미설정'),
-            subtitle: Text(hasKey
-                ? '관리자 오버라이드 또는 저장된 키로 무제한 사용 가능합니다.'
-                : '관리자 키(빌드 주입) 또는 사용자 키 설정 시 활성화됩니다.'),
+            subtitle: Text(
+              hasKey
+                  ? '관리자 오버라이드 또는 저장된 키로 무제한 사용 가능합니다.'
+                  : '관리자 키(빌드 주입) 또는 사용자 키 설정 시 활성화됩니다.',
+            ),
           );
         },
       ),
@@ -461,20 +499,26 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
       child: Column(
         children: [
           ListTile(
-            leading: Icon(update.updateAvailable
-                ? Icons.system_update_rounded
-                : Icons.verified_rounded,
-                color: update.updateAvailable ? cs.primary : Colors.green),
-            title: Text(update.updateAvailable
-                ? '새 버전 ${update.latestVersion} 사용 가능'
-                : '최신 버전입니다 (v${AppUpdateService.currentVersion})'),
-            subtitle: Text(update.updateAvailable
-                ? (update.releaseNotes.isEmpty
-                    ? '버튼 한 번으로 업데이트하세요.'
-                    : update.releaseNotes)
-                : update.checked
-                    ? '업데이트 확인 완료'
-                    : '확인 중...'),
+            leading: Icon(
+              update.updateAvailable
+                  ? Icons.system_update_rounded
+                  : Icons.verified_rounded,
+              color: update.updateAvailable ? cs.primary : Colors.green,
+            ),
+            title: Text(
+              update.updateAvailable
+                  ? '새 버전 ${update.latestVersion} 사용 가능'
+                  : '최신 버전입니다 (v${AppUpdateService.currentVersion})',
+            ),
+            subtitle: Text(
+              update.updateAvailable
+                  ? (update.releaseNotes.isEmpty
+                        ? '버튼 한 번으로 업데이트하세요.'
+                        : update.releaseNotes)
+                  : update.checked
+                  ? '업데이트 확인 완료'
+                  : '확인 중...',
+            ),
           ),
           const Divider(height: 1),
           Padding(
@@ -490,9 +534,12 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                              content: Text(update.updateAvailable
+                            content: Text(
+                              update.updateAvailable
                                   ? '새 버전이 있습니다: ${update.latestVersion}'
-                                  : '이미 최신 버전입니다.')),
+                                  : '이미 최신 버전입니다.',
+                            ),
+                          ),
                         );
                       }
                     },
@@ -509,7 +556,8 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
                             if (context.mounted && !ok) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content: Text('업데이트 링크를 열 수 없습니다.')),
+                                  content: Text('업데이트 링크를 열 수 없습니다.'),
+                                ),
                               );
                             }
                           }
@@ -588,16 +636,19 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
                   child: Row(
                     children: [
                       const Expanded(
-                        child: Text('오류 로그',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w800)),
+                        child: Text(
+                          '오류 로그',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                       ),
                       IconButton(
                         icon: const Icon(Icons.copy_all_rounded),
                         tooltip: '전체 복사',
                         onPressed: () async {
-                          final text =
-                              await CrashLogger.instance.exportText();
+                          final text = await CrashLogger.instance.exportText();
                           await Clipboard.setData(ClipboardData(text: text));
                           if (ctx.mounted) {
                             ScaffoldMessenger.of(ctx).showSnackBar(
@@ -624,18 +675,20 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
                       : ListView.separated(
                           controller: scroll,
                           itemCount: records.length,
-                          separatorBuilder: (_, __) =>
-                              const Divider(height: 1),
+                          separatorBuilder: (_, __) => const Divider(height: 1),
                           itemBuilder: (_, i) {
                             final r = records[records.length - 1 - i];
                             return ListTile(
                               dense: true,
-                              title: Text(r.message,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis),
+                              title: Text(
+                                r.message,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                               subtitle: Text(
-                                  r.time.toLocal().toString().split('.').first,
-                                  style: const TextStyle(fontSize: 11)),
+                                r.time.toLocal().toString().split('.').first,
+                                style: const TextStyle(fontSize: 11),
+                              ),
                             );
                           },
                         ),
@@ -649,11 +702,12 @@ class _SuperAdminScreenState extends State<SuperAdminScreen> {
   }
 
   Widget _sectionTitle(BuildContext context, String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 8, left: 4),
-        child: Text(text,
-            style: Theme.of(context)
-                .textTheme
-                .titleSmall
-                ?.copyWith(fontWeight: FontWeight.w800)),
-      );
+    padding: const EdgeInsets.only(bottom: 8, left: 4),
+    child: Text(
+      text,
+      style: Theme.of(
+        context,
+      ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+    ),
+  );
 }

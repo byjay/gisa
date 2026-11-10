@@ -175,6 +175,80 @@ test('daily scheduler writes at most three distinct private drafts and duplicate
   assert.ok(requests.every((body) => !JSON.stringify(body).includes('PRIVATE_THEORY_SOURCE')));
 });
 
+test('daily scheduler skips generation while the global service is disabled', async () => {
+  const { env, db, requests } = createEnv();
+  env.SERVICE_CONTROL.get = () => ({
+    fetch: async () => Response.json({
+      enabled: false,
+      message: '점검 중',
+      updatedAt: '2026-10-28T00:00:00.000Z',
+      revision: 1,
+    }),
+  });
+
+  await runScheduler(scheduledEvent(), env, {});
+
+  assert.equal(db.rows.size, 0);
+  assert.equal(requests.length, 0);
+});
+
+test('daily scheduler fails closed when the global service state is unavailable', async () => {
+  const { env, db, requests } = createEnv();
+  env.SERVICE_CONTROL.get = () => ({
+    fetch: async () => { throw new Error('service control unavailable'); },
+  });
+
+  await runScheduler(scheduledEvent(), env, {});
+
+  assert.equal(db.rows.size, 0);
+  assert.equal(requests.length, 0);
+});
+
+test('daily scheduler does not call the model if service is disabled while loading the catalog', async () => {
+  const { env, db, requests } = createEnv();
+  let enabled = true;
+  env.SERVICE_CONTROL.get = () => ({
+    fetch: async () => Response.json({
+      enabled,
+      message: enabled ? '' : '점검 중',
+      updatedAt: '2026-10-28T00:00:00.000Z',
+      revision: enabled ? 0 : 1,
+    }),
+  });
+  const getContent = env.CONTENT.get;
+  env.CONTENT.get = async (key) => {
+    const result = await getContent(key);
+    if (key === 'catalog/tracks.json') enabled = false;
+    return result;
+  };
+
+  await runScheduler(scheduledEvent(), env, {});
+
+  assert.equal(db.rows.size, 0);
+  assert.equal(requests.length, 0);
+});
+
+test('daily scheduler discards model output if service is disabled during generation', async () => {
+  let enabled = true;
+  const provider = async () => {
+    enabled = false;
+    return Response.json({ choices: [{ message: { content: JSON.stringify(draftPayload()) } }] });
+  };
+  const { env, db } = createEnv({ provider });
+  env.SERVICE_CONTROL.get = () => ({
+    fetch: async () => Response.json({
+      enabled,
+      message: enabled ? '' : '점검 중',
+      updatedAt: '2026-10-28T00:00:00.000Z',
+      revision: enabled ? 0 : 1,
+    }),
+  });
+
+  await runScheduler(scheduledEvent(), env, {});
+
+  assert.ok([...db.rows.values()].every((row) => row.status !== 'review' && row.title === null));
+});
+
 test('daily prompts contain the selected certificate and subject but no question bank or theory source', async () => {
   const { env, requests } = createEnv();
   await runScheduler(scheduledEvent(), env, {});

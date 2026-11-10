@@ -142,8 +142,10 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
         // 학습앱에서 SDK 초기화가 실패해 광고가 "조용히" 안 나오기 때문이다.
         androidAppId: _orTest(_adsAppIdCtrl.text, AdsConfig.testAppId),
         bannerUnitId: _orTest(_adsBannerCtrl.text, AdsConfig.testBanner),
-        interstitialUnitId:
-            _orTest(_adsInterCtrl.text, AdsConfig.testInterstitial),
+        interstitialUnitId: _orTest(
+          _adsInterCtrl.text,
+          AdsConfig.testInterstitial,
+        ),
         rewardedUnitId: _orTest(_adsRewardCtrl.text, AdsConfig.testRewarded),
         interstitialEveryNQuiz: _adsEveryN,
         showBannerOnHome: _adsHomeBanner,
@@ -190,17 +192,19 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
     setState(() => _publishing = false);
     if (result.ok && result.config != null) {
       _applyToForm(result.config!);
-      _snack('✅ 배포 완료 (v$_serverVersion) — 학습앱이 다음 실행 때 자동 반영됩니다.',
-          AppTheme.success);
+      _snack(
+        '✅ 배포 완료 (v$_serverVersion) — 학습앱이 다음 실행 때 자동 반영됩니다.',
+        AppTheme.success,
+      );
     } else {
       _snack('❌ ${result.message}', AppTheme.danger);
     }
   }
 
   void _snack(String msg, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: color),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: color));
   }
 
   @override
@@ -220,10 +224,10 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
       body: !AppConfig.hasApi
           ? _notConfigured()
           : !admin.isAdmin
-              ? _needAuth()
-              : _loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _form(),
+          ? _needAuth()
+          : _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _form(),
       bottomNavigationBar: (AppConfig.hasApi && admin.isAdmin && !_loading)
           ? SafeArea(
               child: Padding(
@@ -249,46 +253,46 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
   }
 
   Widget _notConfigured() => const Padding(
-        padding: EdgeInsets.all(24),
-        child: Center(
-          child: Text(
-            '서버(API_BASE_URL)가 설정되지 않았습니다.\n\n'
-            '관리자 앱을 다음처럼 빌드하세요:\n'
-            'flutter build apk --release --flavor admin \\\n'
-            '  --dart-define=API_BASE_URL=https://<worker>.workers.dev \\\n'
-            '  --dart-define=WEB_BASE_URL=https://<pages>.pages.dev',
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
+    padding: EdgeInsets.all(24),
+    child: Center(
+      child: Text(
+        '서버(API_BASE_URL)가 설정되지 않았습니다.\n\n'
+        '관리자 앱을 다음처럼 빌드하세요:\n'
+        'flutter build apk --release --flavor admin \\\n'
+        '  --dart-define=API_BASE_URL=https://<worker>.workers.dev \\\n'
+        '  --dart-define=WEB_BASE_URL=https://<pages>.pages.dev',
+        textAlign: TextAlign.center,
+      ),
+    ),
+  );
 
   Widget _needAuth() => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.lock_outline, size: 56, color: AppTheme.textMuted),
-            const SizedBox(height: 16),
-            const Text(
-              '관리자 인증이 필요합니다.',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '관리자 대시보드에서 발급받은 토큰을 등록하세요.\n'
-              '${AdminService.instance.dashboardUrl.isNotEmpty ? AdminService.instance.dashboardUrl : "(대시보드 URL 미설정)"}',
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: AppTheme.textMuted),
-            ),
-            const SizedBox(height: 20),
-            FilledButton.icon(
-              onPressed: _promptToken,
-              icon: const Icon(Icons.vpn_key),
-              label: const Text('관리자 토큰 등록'),
-            ),
-          ],
+    padding: const EdgeInsets.all(24),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.lock_outline, size: 56, color: AppTheme.textMuted),
+        const SizedBox(height: 16),
+        const Text(
+          '관리자 인증이 필요합니다.',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-      );
+        const SizedBox(height: 8),
+        Text(
+          '관리자 대시보드에서 발급받은 토큰을 등록하세요.\n'
+          '${AdminService.instance.dashboardUrl.isNotEmpty ? AdminService.instance.dashboardUrl : "(대시보드 URL 미설정)"}',
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: AppTheme.textMuted),
+        ),
+        const SizedBox(height: 20),
+        FilledButton.icon(
+          onPressed: _promptToken,
+          icon: const Icon(Icons.vpn_key),
+          label: const Text('관리자 토큰 등록'),
+        ),
+      ],
+    ),
+  );
 
   Future<void> _promptToken() async {
     final ctrl = TextEditingController();
@@ -372,8 +376,7 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
                   max: 100,
                   divisions: 20,
                   label: '$_freePercent%',
-                  onChanged: (v) =>
-                      setState(() => _freePercent = v.round()),
+                  onChanged: (v) => setState(() => _freePercent = v.round()),
                 ),
               ],
             ),
@@ -403,10 +406,11 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
                     DropdownMenuItem(value: 'info', child: Text('일반(info)')),
                     DropdownMenuItem(value: 'warn', child: Text('주의(warn)')),
                     DropdownMenuItem(
-                        value: 'urgent', child: Text('긴급(urgent)')),
+                      value: 'urgent',
+                      child: Text('긴급(urgent)'),
+                    ),
                   ],
-                  onChanged: (v) =>
-                      setState(() => _noticeLevel = v ?? 'info'),
+                  onChanged: (v) => setState(() => _noticeLevel = v ?? 'info'),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -507,11 +511,17 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
                 '개발 중에는 정상이며, 출시 전 실 ID 로 바꾸세요.',
               ),
             if (err != null)
-              _banner(Icons.error_outline, AppTheme.danger,
-                  'ID 형식 오류 — 이대로는 배포되지 않습니다.\n$err'),
+              _banner(
+                Icons.error_outline,
+                AppTheme.danger,
+                'ID 형식 오류 — 이대로는 배포되지 않습니다.\n$err',
+              ),
             if (_adsEnabled && err == null && !ads.usesTestIds)
-              _banner(Icons.verified, AppTheme.success,
-                  '실 광고 ID 형식 확인됨 — 배포 가능합니다.'),
+              _banner(
+                Icons.verified,
+                AppTheme.success,
+                '실 광고 ID 형식 확인됨 — 배포 가능합니다.',
+              ),
           ],
         ),
       ),
@@ -540,14 +550,23 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
                       isAppId: true,
                     ),
                     const SizedBox(height: 12),
-                    _adsIdField(_adsBannerCtrl, '배너 단위 ID',
-                        AdsConfig.testBanner),
+                    _adsIdField(
+                      _adsBannerCtrl,
+                      '배너 단위 ID',
+                      AdsConfig.testBanner,
+                    ),
                     const SizedBox(height: 12),
-                    _adsIdField(_adsInterCtrl, '전면(Interstitial) 단위 ID',
-                        AdsConfig.testInterstitial),
+                    _adsIdField(
+                      _adsInterCtrl,
+                      '전면(Interstitial) 단위 ID',
+                      AdsConfig.testInterstitial,
+                    ),
                     const SizedBox(height: 12),
-                    _adsIdField(_adsRewardCtrl, '보상형(Rewarded) 단위 ID',
-                        AdsConfig.testRewarded),
+                    _adsIdField(
+                      _adsRewardCtrl,
+                      '보상형(Rewarded) 단위 ID',
+                      AdsConfig.testRewarded,
+                    ),
                   ],
                 ),
               ),
@@ -556,9 +575,11 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(_adsEveryN == 0
-                        ? '전면광고: 사용 안 함'
-                        : '전면광고 빈도: $_adsEveryN문항마다 1회'),
+                    Text(
+                      _adsEveryN == 0
+                          ? '전면광고: 사용 안 함'
+                          : '전면광고 빈도: $_adsEveryN문항마다 1회',
+                    ),
                     // 하한 5. 그보다 잦으면 학습 흐름이 끊겨 이탈로 이어진다.
                     // 0 은 "전면광고 끄기"라는 별도 의미이므로 따로 둔다.
                     Slider(
@@ -569,8 +590,9 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
                       label: _adsEveryN == 0 ? '끔' : '$_adsEveryN문항',
                       onChanged: (v) {
                         final n = v.round();
-                        setState(() => _adsEveryN =
-                            (n > 0 && n < 5) ? 5 : n); // 0 또는 5 이상만 허용
+                        setState(
+                          () => _adsEveryN = (n > 0 && n < 5) ? 5 : n,
+                        ); // 0 또는 5 이상만 허용
                       },
                     ),
                     const Text(
@@ -611,7 +633,8 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
     bool isAppId = false,
   }) {
     final v = ctrl.text.trim();
-    final valid = v.isEmpty ||
+    final valid =
+        v.isEmpty ||
         (isAppId ? AdsConfig.isValidAppId(v) : AdsConfig.isValidUnitId(v));
     return TextField(
       controller: ctrl,
@@ -632,26 +655,25 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
   }
 
   Widget _banner(IconData icon, Color color, String text) => Container(
-        width: double.infinity,
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withValues(alpha: 0.4)),
+    width: double.infinity,
+    margin: const EdgeInsets.only(bottom: 8),
+    padding: const EdgeInsets.all(10),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.10),
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: color.withValues(alpha: 0.4)),
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: color, size: 18),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(text, style: TextStyle(fontSize: 12, color: color)),
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: color, size: 18),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(text,
-                  style: TextStyle(fontSize: 12, color: color)),
-            ),
-          ],
-        ),
-      );
+      ],
+    ),
+  );
 
   Widget _versionBadge() {
     final when = _serverUpdatedAt > 0
@@ -662,9 +684,11 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
       child: ListTile(
         leading: const Icon(Icons.verified, color: AppTheme.primary),
         title: Text('현재 배포 버전: v$_serverVersion'),
-        subtitle: Text(when != null
-            ? '마지막 배포: ${when.toString().substring(0, 16)}'
-            : '아직 배포된 설정이 없습니다 (기본값 사용 중)'),
+        subtitle: Text(
+          when != null
+              ? '마지막 배포: ${when.toString().substring(0, 16)}'
+              : '아직 배포된 설정이 없습니다 (기본값 사용 중)',
+        ),
       ),
     );
   }

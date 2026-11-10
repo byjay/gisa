@@ -12,10 +12,7 @@ void main() {
 
   String tableHtml(List<List<String>> rows) {
     final rowsHtml = rows
-        .map(
-          (cells) =>
-              '<tr>${cells.map((c) => '<td>$c</td>').join()}</tr>',
-        )
+        .map((cells) => '<tr>${cells.map((c) => '<td>$c</td>').join()}</tr>')
         .join();
     return '<html><body>시험일정<table>$rowsHtml</table></body></html>';
   }
@@ -42,10 +39,7 @@ void main() {
 
     test('"시험일정" 헤더나 <table>이 없으면 빈 목록을 반환한다', () {
       expect(service.parseScheduleTableForTest('<html>내용 없음</html>'), isEmpty);
-      expect(
-        service.parseScheduleTableForTest('시험일정 그런데 표는 없음'),
-        isEmpty,
-      );
+      expect(service.parseScheduleTableForTest('시험일정 그런데 표는 없음'), isEmpty);
     });
 
     test('헤더 행(<th> 포함)은 결과에서 제외된다', () {
@@ -60,20 +54,17 @@ void main() {
       expect(rounds.first.label, '1회');
     });
 
-    test(
-      '[S2] 비합리적 연도(1900, 2099)가 섞인 날짜는 폐기되어 크래시 없이 처리된다',
-      () {
-        // 위조된 날짜(연도 1900) — 실제 프록시 오염을 흉내낸다.
-        final html = tableHtml([
-          ['위조회차', '1900.01.01 ~ 1900.01.05', '2099.12.31', '', '', '', ''],
-        ]);
-        final rounds = service.parseScheduleTableForTest(html);
-        expect(rounds.length, 1);
-        // 비합리적 연도의 날짜는 모두 걸러져 null이 되어야 한다.
-        expect(rounds.first.writtenReg, isNull);
-        expect(rounds.first.writtenExam, isNull);
-      },
-    );
+    test('[S2] 비합리적 연도(1900, 2099)가 섞인 날짜는 폐기되어 크래시 없이 처리된다', () {
+      // 위조된 날짜(연도 1900) — 실제 프록시 오염을 흉내낸다.
+      final html = tableHtml([
+        ['위조회차', '1900.01.01 ~ 1900.01.05', '2099.12.31', '', '', '', ''],
+      ]);
+      final rounds = service.parseScheduleTableForTest(html);
+      expect(rounds.length, 1);
+      // 비합리적 연도의 날짜는 모두 걸러져 null이 되어야 한다.
+      expect(rounds.first.writtenReg, isNull);
+      expect(rounds.first.writtenExam, isNull);
+    });
 
     test('정상 날짜와 위조 날짜가 같은 셀에 섞이면 정상 날짜만 채택된다', () {
       final html = tableHtml([

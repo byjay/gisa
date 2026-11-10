@@ -47,9 +47,7 @@ Future<void> _bootstrap() async {
 
   runApp(
     MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: AdminService.instance),
-      ],
+      providers: [ChangeNotifierProvider.value(value: AdminService.instance)],
       child: const AdminApp(),
     ),
   );

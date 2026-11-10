@@ -250,7 +250,8 @@ class _TheorySearchScreenState extends State<TheorySearchScreen> {
     if (!mounted) return;
     if (!hasKey) {
       setState(() {
-        _aiError = 'AI 검증을 사용하려면 설정 → "AI 튜터 API 키"에서 무료 Cerebras 키를 등록하세요. '
+        _aiError =
+            'AI 검증을 사용하려면 설정 → "AI 튜터 API 키"에서 무료 Cerebras 키를 등록하세요. '
             '지금은 아래 로컬 자료 검색 결과를 이용할 수 있어요.';
       });
       return;

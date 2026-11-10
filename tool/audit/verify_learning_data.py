@@ -29,9 +29,11 @@
 """
 import json
 import glob
+import os
 import re
 import sys
 from collections import defaultdict
+from pathlib import Path
 
 # 해설 첫머리의 "✅ 정답 2번" / "정답: 3" / "[정답] 4번" 등을 인식한다.
 # 지나치게 관대한 패턴은 오탐을 만들므로, 정답을 명시한 형태만 좁게 잡는다.
@@ -59,6 +61,15 @@ def extract_answer_from_explanation(text: str):
     if m:
         return CIRCLED[m.group(1)]
     return None
+
+
+def find_exam_files():
+    """환경변수 경로 또는 기존 assets 경로에서 시험 데이터를 찾는다."""
+    data_dir = os.environ.get('LEARNING_DATA_DIR', 'assets/data')
+    return sorted(
+        Path(path).as_posix()
+        for path in glob.glob(os.path.join(data_dir, '*', 'exams.json'))
+    )
 
 
 # ── V8: 해설이 '실질 해설'인가 ───────────────────────────────────
@@ -141,9 +152,10 @@ def selfcheck_classifier() -> int:
 def main():
     if selfcheck_classifier() != 0:
         return 1
-    files = sorted(glob.glob('assets/data/*/exams.json'))
+    files = find_exam_files()
     if not files:
-        print('✗ assets/data/*/exams.json 을 찾지 못했다 — 실행 위치를 확인하라')
+        data_dir = os.environ.get('LEARNING_DATA_DIR', 'assets/data')
+        print(f'✗ {data_dir}/*/exams.json 을 찾지 못했다 — 실행 위치와 데이터 경로를 확인하라')
         return 1
 
     violations = defaultdict(list)   # 코드 -> [메시지]
@@ -154,7 +166,7 @@ def main():
     debt_per_track = defaultdict(int)
 
     for f in files:
-        track = f.split('/')[2]
+        track = Path(f).parent.name
         try:
             data = json.load(open(f, encoding='utf-8'))
         except Exception as e:
