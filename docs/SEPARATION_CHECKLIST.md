@@ -487,4 +487,5 @@
 - [ ] 게이트 1 환경 일치 FAIL. 게이트 2 전체 API 엔드포인트 목록·검증 범위 미완료. 게이트 3 OAuth 발급→전송→검증→갱신→만료 E2E 미검증. 게이트 4 프론트↔백 전체 필드 계약 미검증. 게이트 5 롤백 소스 후보 `gisa/backup-r59@3e1a2ad666b9334998efc872de6985e9764c7103` 확인; 운영 배포 ID는 없음.
 - [ ] Play Billing은 `backend/cloudflare/src/billing.js:13`에서 503을 반환하는 미구현 상태다. Play listing/Data Safety·개인정보·광고 실설정·구매/복원·실기기 QA도 미완료. 스토어 등록 준비 완료/상용 출시로 판정하지 않는다.
 - [x] 이전 중복 Gradle 시도에서 JVM native-memory mmap 부족(1.5 GB) 오류 로그가 생성됐으나 해당 임시 파일을 제거했다. 성공한 AAB/APK 해시와 서명은 별도 재확인했다.
+- [x] 사용자 승인된 코드 푸시: 커밋 `c61cf8620a7e09c2a5a856ef574de45ac1266bca`를 `gisa/backup-r59`에 non-force fast-forward로 반영하고 푸시 후 원격 HEAD 일치 확인. 로컬 전용 HANDOFF/백업/소유 자료는 제외했다.
 - [ ] 이 체크포인트의 라이브 운영 배포·스토어 업로드/제출은 하지 않았다. 로컬 후보의 재빌드·설치 QA 또는 운영 자격증명 기반 인증 검증은 별도 승인/환경 준비 후 수행한다.
